@@ -1,0 +1,275 @@
+openapi: 3.0.3
+info:
+  title: ZZEM Sprint 1 API Contract
+  description: |
+    Sprint 1 (MVP): 피드 공개/비공개, 프로필, 크레딧 페이백
+    기존 API 위에 레이어링. 기존 favorite(좋아요) API는 그대로 사용.
+  version: 1.0.0
+
+servers:
+  - url: /meme/v1
+
+paths:
+  # --- Feed Content Publish ---
+  /contents/{contentId}/publish-status:
+    put:
+      operationId: updateContentPublishStatus
+      summary: 콘텐츠 공개/비공개 전환
+      tags: [Feed]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: contentId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePublishStatusRequest"
+      responses:
+        "200":
+          description: 상태 변경 성공
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdatePublishStatusResponse"
+        "400":
+          description: 커스텀 프롬프트 콘텐츠는 공개 불가
+
+  /contents/{contentId}/publish-info:
+    get:
+      operationId: getContentPublishInfo
+      summary: 콘텐츠 공개 상태 및 페이백 정보 조회
+      tags: [Feed]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: contentId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContentPublishInfoResponse"
+
+  # --- Profile ---
+  /profiles/me:
+    get:
+      operationId: getMyProfile
+      summary: 내 프로필 조회
+      tags: [Profile]
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfileResponse"
+
+    put:
+      operationId: updateMyProfile
+      summary: 내 프로필 수정 (닉네임, 프로필 이미지)
+      tags: [Profile]
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProfileRequest"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfileResponse"
+
+  /profiles/{userId}:
+    get:
+      operationId: getUserProfile
+      summary: 타 유저 프로필 조회
+      tags: [Profile]
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema: { type: string }
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfileResponse"
+
+  /profiles/{userId}/contents:
+    get:
+      operationId: getProfileContents
+      summary: 프로필 콘텐츠 탭 조회 (게시물/비공개/좋아요)
+      tags: [Profile]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema: { type: string }
+        - name: tab
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [published, private, liked]
+        - name: cursor
+          in: query
+          required: false
+          schema: { type: string }
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfileContentsResponse"
+
+  # --- Credit Payback ---
+  /payback/config:
+    get:
+      operationId: getPaybackConfig
+      summary: 페이백 설정 조회
+      tags: [Payback]
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaybackConfigResponse"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+
+  schemas:
+    # --- Feed Publish ---
+    UpdatePublishStatusRequest:
+      type: object
+      required: [isPublished]
+      properties:
+        isPublished:
+          type: boolean
+          description: "true=공개, false=비공개"
+
+    UpdatePublishStatusResponse:
+      type: object
+      properties:
+        contentId:
+          type: string
+        isPublished:
+          type: boolean
+        updatedAt:
+          type: string
+          format: date-time
+
+    ContentPublishInfoResponse:
+      type: object
+      properties:
+        contentId:
+          type: string
+        isPublished:
+          type: boolean
+        isCustomPrompt:
+          type: boolean
+          description: 커스텀 프롬프트 여부 (true면 공개 불가)
+        totalPaybackCredits:
+          type: number
+          description: 이 콘텐츠로 받은 총 페이백 크레딧
+        regenerationCount:
+          type: integer
+          description: 이 콘텐츠가 재생성된 횟수
+
+    # --- Profile ---
+    ProfileResponse:
+      type: object
+      properties:
+        userId:
+          type: string
+        nickname:
+          type: string
+        profileImageUrl:
+          type: string
+          nullable: true
+        followerCount:
+          type: integer
+        followingCount:
+          type: integer
+        regeneratedCount:
+          type: integer
+          description: 내 공개 콘텐츠가 타 유저에 의해 재생성된 총 횟수
+        isMe:
+          type: boolean
+          description: 현재 로그인 유저의 프로필인지 여부
+
+    UpdateProfileRequest:
+      type: object
+      properties:
+        nickname:
+          type: string
+          minLength: 1
+          maxLength: 20
+        profileImageUrl:
+          type: string
+          nullable: true
+
+    ProfileContentsResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProfileContentItem"
+        nextCursor:
+          type: string
+          nullable: true
+        hasNext:
+          type: boolean
+
+    ProfileContentItem:
+      type: object
+      properties:
+        contentId:
+          type: string
+        thumbnailUrl:
+          type: string
+        mediaType:
+          type: string
+          enum: [image, video]
+        isPublished:
+          type: boolean
+        favoriteCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+
+    # --- Payback ---
+    PaybackConfigResponse:
+      type: object
+      properties:
+        paybackRatePercent:
+          type: number
+          description: 페이백 비율 (예: 1.0 = 1%)
+        creditType:
+          type: string
+          enum: [promotion]
+          description: 페이백 크레딧 타입
