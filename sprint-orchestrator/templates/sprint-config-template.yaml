@@ -1,0 +1,16 @@
+# Sprint Configuration Template
+# 복사하여 sprints/{sprint-id}/sprint-config.yaml로 사용
+
+sprint_id: "{sprint-id}"
+
+# 프로젝트별 base branch 설정
+# PR 생성 시 sprint branch가 이 브랜치를 타겟으로 머지됨
+branches:
+  backend:
+    base: "develop"          # wrtn-backend PR 타겟
+  app:
+    base: "main"             # app-core-packages PR 타겟
+
+# 미지정 프로젝트의 폴백 base branch
+defaults:
+  base: "main"
