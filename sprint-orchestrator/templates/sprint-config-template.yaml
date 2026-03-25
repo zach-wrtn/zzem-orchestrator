@@ -14,3 +14,15 @@ branches:
 # 미지정 프로젝트의 폴백 base branch
 defaults:
   base: "main"
+
+# Agent Teams 설정
+team:
+  teammates:
+    - be-engineer            # .claude/teammates/be-engineer.md
+    - fe-engineer            # .claude/teammates/fe-engineer.md
+    - design-engineer        # .claude/teammates/design-engineer.md
+    - qa-engineer            # .claude/teammates/qa-engineer.md
+  settings:
+    task_timeout_minutes: 30   # 단일 태스크 타임아웃
+    qa_retry_limit: 2          # QA 실패 시 재시도 횟수
+    max_parallel_tasks: 4      # 동시 실행 최대 태스크 수
