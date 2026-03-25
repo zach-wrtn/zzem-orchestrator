@@ -1,4 +1,4 @@
-# Task: 001 - 콘텐츠 공개/비공개 상태 관리
+# Task: 001-content-publish-status
 
 ## Target
 - target_api: meme-api
@@ -6,57 +6,55 @@
 
 ## Context
 - Sprint: 2026-03-sprint-1
-- PRD Section: US1 (피드 공개), AC 1.1~1.4
-- API Contract Reference: PUT /contents/{contentId}/publish-status, GET /contents/{contentId}/publish-info
-- Dependencies: 없음 (선행 태스크 없음)
-- Parallel With: app/001
+- PRD Section: 콘텐츠 공개/비공개 상태 관리
+- API Contract Reference: PUT /contents/{contentId}/publish
+  - Contract 위치: ../sprint-orchestrator/sprints/2026-03-sprint-1/api-contract.yaml
+- Dependencies: 없음
+- Parallel With: 001-profile-api, 001-nickname-auto-generation
 
 ## Objective
-콘텐츠의 공개/비공개 상태를 관리하는 API를 구현한다.
-기존 콘텐츠 스키마에 `isPublished` 필드를 추가하고, 공개/비공개 전환 API와 상태 조회 API를 만든다.
-커스텀 프롬프트 콘텐츠는 공개 불가 처리한다.
+콘텐츠에 공개/비공개 상태(isPublished)를 추가하여 사용자가 자신의 콘텐츠를 피드에 공개하거나 비공개로 전환할 수 있도록 한다. 커스텀 프롬프트로 생성된 콘텐츠는 공개할 수 없으며, 기존 콘텐츠는 모두 비공개 상태로 마이그레이션한다.
 
 ## Specification
 
 ### Input
-- PUT /contents/{contentId}/publish-status: `{ isPublished: boolean }`
-- GET /contents/{contentId}/publish-info: contentId (path param)
+- **PUT /contents/{contentId}/publish**
+  - Path Parameter: `contentId` (string, required)
+  - Body: `{ "isPublished": boolean }`
+  - Auth: `@DUser("userId")`, `@UseGuards(LibUserGuard)`
 
 ### Output
-- PUT: `{ contentId, isPublished, updatedAt }`
-- GET: `{ contentId, isPublished, isCustomPrompt, totalPaybackCredits, regenerationCount }`
+- **PUT /contents/{contentId}/publish**
+  - 200 OK: `{ "contentId": string, "isPublished": boolean, "updatedAt": string }`
+  - 400 Bad Request: 커스텀 프롬프트 콘텐츠인 경우
+  - 403 Forbidden: 본인 콘텐츠가 아닌 경우
+  - 404 Not Found: 콘텐츠가 존재하지 않는 경우
 
 ### Business Rules
-1. 커스텀 프롬프트 결과물은 공개(isPublished=true) 전환 시 400 에러 반환
-2. 기능 업데이트 이전 콘텐츠는 비공개 상태 유지 (마이그레이션은 별도 배치)
-3. 업데이트 이후 신규 콘텐츠는 공개가 디폴트
-4. 비공개 전환 시 이미 지급된 페이백 크레딧은 회수하지 않음
-5. 공개/비공개 전환은 콘텐츠 소유자만 가능
+1. Content 스키마에 `isPublished: boolean` 필드를 추가한다 (default: false).
+2. 커스텀 프롬프트로 생성된 콘텐츠는 공개 전환 불가 (400 에러 반환).
+3. 콘텐츠 소유자만 공개/비공개 상태를 변경할 수 있다.
+4. 기존 콘텐츠 마이그레이션: 모든 기존 콘텐츠를 `isPublished: false`(비공개)로 설정한다.
+5. 공개된 콘텐츠만 피드 및 다른 사용자의 프로필에 노출된다.
+6. 비공개 콘텐츠는 본인 프로필의 private 탭에서만 확인 가능하다.
 
 ## Implementation Hints
-- 기존 패턴 참조: `apps/meme-api/src/application/favorite/` (toggle 패턴)
-- 기존 콘텐츠 관련 스키마를 찾아 `isPublished: boolean` 필드 추가
-- `isCustomPrompt` 필드도 확인 (커스텀 프롬프트 여부 판별 로직)
-- **필수 스킬 참조:**
-  - `.claude/skills/nestjs-architecture/SKILL.md` — Controller → Application → Domain → Persistence 레이어 구조
-  - `.claude/skills/backend-ground-rule/SKILL.md` — 네이밍, DTO 규칙
-
-### 레이어 구현 순서
-1. Persistence: 기존 콘텐츠 스키마에 `isPublished` 필드 추가
-2. Domain: ContentPublishDomainService (상태 전환 로직, 커스텀 프롬프트 체크)
-3. Application: ContentPublishAppController + ContentPublishAppService
-4. DTOs: request/response 정의
+- 기존 패턴 참조: content 도메인의 기존 CRUD 패턴
+- 마이그레이션 스크립트: MongoDB migration으로 기존 document에 `isPublished: false` 추가
+- 필수 스킬 참조:
+  - `.claude/skills/nestjs-architecture/SKILL.md` — 레이어 구조
+  - `.claude/skills/backend-ground-rule/SKILL.md` — 네이밍, DTO, DB 규칙
 
 ## Acceptance Criteria
-- [ ] PUT /contents/{contentId}/publish-status 로 공개↔비공개 전환 가능
-- [ ] 커스텀 프롬프트 콘텐츠에 isPublished=true 요청 시 400 에러
-- [ ] 콘텐츠 소유자가 아닌 유저의 요청은 403 에러
-- [ ] GET /contents/{contentId}/publish-info 로 상태 조회 가능
-- [ ] 신규 생성 콘텐츠의 isPublished 기본값 = true (커스텀 프롬프트 제외)
+- [ ] Content 스키마에 `isPublished` 필드가 추가되었다
+- [ ] PUT /contents/{contentId}/publish API가 정상 동작한다
+- [ ] 커스텀 프롬프트 콘텐츠 공개 시 400 에러가 반환된다
+- [ ] 본인 콘텐츠가 아닌 경우 403 에러가 반환된다
+- [ ] 기존 콘텐츠 마이그레이션 스크립트가 존재하고 정상 동작한다
+- [ ] 공개 상태 변경 후 updatedAt이 갱신된다
 
 ## QA Checklist
-- [ ] Unit tests 통과 (커스텀 프롬프트 체크, 소유권 검증)
-- [ ] TypeScript 컴파일 에러 없음
-- [ ] Lint 통과
+- [ ] Unit tests 통과
+- [ ] Lint/Type check 통과
 - [ ] 기존 테스트 regression 없음
-- [ ] Swagger 문서에 정상 노출
+- [ ] 수정된 파일이 target_path 범위 내인지 확인

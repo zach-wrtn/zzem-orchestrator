@@ -1,86 +1,71 @@
 openapi: 3.0.3
 info:
-  title: ZZEM Sprint 1 API Contract
-  description: |
-    Sprint 1 (MVP): 피드 공개/비공개, 프로필, 크레딧 페이백
-    기존 API 위에 레이어링. 기존 favorite(좋아요) API는 그대로 사용.
+  title: ZZEM UGC Platform API
+  description: PRD-001 UGC Platform Sprint 1 API Contract
   version: 1.0.0
 
 servers:
   - url: /meme/v1
+    description: meme-api base path
+
+tags:
+  - name: content-publish
+    description: 콘텐츠 공개/비공개 관리
+  - name: profile
+    description: 프로필 조회/편집
+  - name: follow
+    description: 팔로우/언팔로우
+  - name: credit-payback
+    description: 크레딧 페이백
+  - name: notification
+    description: 알림센터
+  - name: block
+    description: 차단
+  - name: report
+    description: 신고
+  - name: opinion
+    description: 의견 보내기
 
 paths:
-  # --- Feed Content Publish ---
-  /contents/{contentId}/publish-status:
+  # ── US1: 피드 공개 ──
+  /contents/{contentId}/publish:
     put:
-      operationId: updateContentPublishStatus
+      tags: [content-publish]
+      operationId: toggleContentPublish
       summary: 콘텐츠 공개/비공개 전환
-      tags: [Feed]
-      security: [{ bearerAuth: [] }]
+      description: |
+        공개 ↔ 비공개 토글. 커스텀 프롬프트 콘텐츠는 공개 불가 (400).
+        비공개 전환 시 클라이언트에서 확인 바텀시트 노출 후 호출.
       parameters:
-        - name: contentId
-          in: path
-          required: true
-          schema: { type: string }
+        - $ref: "#/components/parameters/ContentId"
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UpdatePublishStatusRequest"
+              type: object
+              required: [isPublished]
+              properties:
+                isPublished:
+                  type: boolean
+                  description: "true=공개, false=비공개"
       responses:
         "200":
-          description: 상태 변경 성공
+          description: 성공
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UpdatePublishStatusResponse"
+                $ref: "#/components/schemas/ContentPublishResponse"
         "400":
           description: 커스텀 프롬프트 콘텐츠는 공개 불가
 
-  /contents/{contentId}/publish-info:
-    get:
-      operationId: getContentPublishInfo
-      summary: 콘텐츠 공개 상태 및 페이백 정보 조회
-      tags: [Feed]
-      security: [{ bearerAuth: [] }]
-      parameters:
-        - name: contentId
-          in: path
-          required: true
-          schema: { type: string }
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ContentPublishInfoResponse"
-
-  # --- Profile ---
+  # ── US2: 프로필 ──
   /profiles/me:
     get:
+      tags: [profile]
       operationId: getMyProfile
       summary: 내 프로필 조회
-      tags: [Profile]
-      security: [{ bearerAuth: [] }]
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ProfileResponse"
-
-    put:
-      operationId: updateMyProfile
-      summary: 내 프로필 수정 (닉네임, 프로필 이미지)
-      tags: [Profile]
-      security: [{ bearerAuth: [] }]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/UpdateProfileRequest"
+      description: 프로필 이미지, 닉네임, 팔로워/팔로잉/재생성된 카운트 포함
       responses:
         "200":
           content:
@@ -90,15 +75,37 @@ paths:
 
   /profiles/{userId}:
     get:
+      tags: [profile]
       operationId: getUserProfile
       summary: 타 유저 프로필 조회
-      tags: [Profile]
+      description: 게시물 탭만 노출. 비공개/좋아요 탭 미노출.
       parameters:
-        - name: userId
-          in: path
-          required: true
-          schema: { type: string }
-      security: [{ bearerAuth: [] }]
+        - $ref: "#/components/parameters/UserId"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfileResponse"
+
+  /profiles/me/edit:
+    put:
+      tags: [profile]
+      operationId: updateMyProfile
+      summary: 프로필 편집 (닉네임, 프로필 이미지)
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                nickname:
+                  type: string
+                  maxLength: 20
+                profileImage:
+                  type: string
+                  format: binary
       responses:
         "200":
           content:
@@ -108,45 +115,52 @@ paths:
 
   /profiles/{userId}/contents:
     get:
-      operationId: getProfileContents
-      summary: 프로필 콘텐츠 탭 조회 (게시물/비공개/좋아요)
-      tags: [Profile]
-      security: [{ bearerAuth: [] }]
+      tags: [profile]
+      operationId: getUserContents
+      summary: 유저 프로필 콘텐츠 목록 (탭별)
       parameters:
-        - name: userId
-          in: path
-          required: true
-          schema: { type: string }
+        - $ref: "#/components/parameters/UserId"
         - name: tab
           in: query
           required: true
           schema:
             type: string
             enum: [published, private, liked]
-        - name: cursor
-          in: query
-          required: false
-          schema: { type: string }
-        - name: limit
-          in: query
-          required: false
-          schema:
-            type: integer
-            default: 20
+          description: "published=게시물, private=비공개(본인만), liked=좋아요"
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ProfileContentsResponse"
+                $ref: "#/components/schemas/ContentListResponse"
 
-  # --- Credit Payback ---
-  /payback/config:
+  /profiles/me/share-url:
     get:
+      tags: [profile]
+      operationId: getProfileShareUrl
+      summary: 프로필 공유 딥링크 URL 생성
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  shareUrl:
+                    type: string
+                    format: uri
+
+  # ── US3: 좋아요 (기존 favorite 확장) ──
+  # 기존 favorite toggle API 유지, 좋아요 목록은 profiles/{userId}/contents?tab=liked로 제공
+
+  # ── US4: 크레딧 페이백 ──
+  /credit/payback/config:
+    get:
+      tags: [credit-payback]
       operationId: getPaybackConfig
-      summary: 페이백 설정 조회
-      tags: [Payback]
-      security: [{ bearerAuth: [] }]
+      summary: 페이백 설정 조회 (비율 등)
       responses:
         "200":
           content:
@@ -154,51 +168,292 @@ paths:
               schema:
                 $ref: "#/components/schemas/PaybackConfigResponse"
 
+  /credit/payback/trigger:
+    post:
+      tags: [credit-payback]
+      operationId: triggerPayback
+      summary: 재생성 시 페이백 트리거 (내부 호출)
+      description: |
+        콘텐츠 재생성 시 내부적으로 호출. 마진 체크 후 원작자에게 페이백.
+        페르소나 계정 콘텐츠는 스킵.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [originalContentId, regeneratedByUserId, generationCost]
+              properties:
+                originalContentId:
+                  type: string
+                regeneratedByUserId:
+                  type: string
+                generationCost:
+                  type: number
+                  description: 재생성 비용 (크레딧)
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaybackResultResponse"
+
+  # ── US5: 알림 ──
+  /notifications:
+    get:
+      tags: [notification]
+      operationId: getNotifications
+      summary: 알림 목록 조회
+      parameters:
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotificationListResponse"
+
+  /notifications/{notificationId}/read:
+    put:
+      tags: [notification]
+      operationId: markNotificationRead
+      summary: 알림 읽음 처리
+      parameters:
+        - name: notificationId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: 성공
+
+  /notifications/unread-count:
+    get:
+      tags: [notification]
+      operationId: getUnreadNotificationCount
+      summary: 미확인 알림 수
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+
+  /notifications/settings:
+    get:
+      tags: [notification]
+      operationId: getNotificationSettings
+      summary: 알림 카테고리별 설정 조회
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotificationSettingsResponse"
+    put:
+      tags: [notification]
+      operationId: updateNotificationSettings
+      summary: 알림 카테고리별 ON/OFF 설정
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NotificationSettingsRequest"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotificationSettingsResponse"
+
+  # ── US6: 팔로우 ──
+  /follows/{targetUserId}:
+    post:
+      tags: [follow]
+      operationId: followUser
+      summary: 유저 팔로우
+      parameters:
+        - $ref: "#/components/parameters/TargetUserId"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FollowStatusResponse"
+    delete:
+      tags: [follow]
+      operationId: unfollowUser
+      summary: 유저 언팔로우
+      parameters:
+        - $ref: "#/components/parameters/TargetUserId"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FollowStatusResponse"
+
+  /profiles/{userId}/followers:
+    get:
+      tags: [follow]
+      operationId: getFollowers
+      summary: 팔로워 목록 (본인만 조회 가능)
+      parameters:
+        - $ref: "#/components/parameters/UserId"
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FollowListResponse"
+        "403":
+          description: 본인 프로필이 아닌 경우
+
+  /profiles/{userId}/followings:
+    get:
+      tags: [follow]
+      operationId: getFollowings
+      summary: 팔로잉 목록 (본인만 조회 가능)
+      parameters:
+        - $ref: "#/components/parameters/UserId"
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FollowListResponse"
+        "403":
+          description: 본인 프로필이 아닌 경우
+
+  # ── US7: 차단/신고/의견 ──
+  /blocks/{targetUserId}:
+    post:
+      tags: [block]
+      operationId: blockUser
+      summary: 유저 차단
+      description: |
+        차단 시 A→B 팔로우만 해제. B→A 유지.
+        차단 사실 미통지. 좋아요 DB 유지, 노출만 차단.
+      parameters:
+        - $ref: "#/components/parameters/TargetUserId"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BlockStatusResponse"
+    delete:
+      tags: [block]
+      operationId: unblockUser
+      summary: 유저 차단 해제
+      parameters:
+        - $ref: "#/components/parameters/TargetUserId"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BlockStatusResponse"
+
+  /reports:
+    post:
+      tags: [report]
+      operationId: reportContent
+      summary: 콘텐츠/유저 신고
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReportRequest"
+      responses:
+        "201":
+          description: 신고 접수 완료
+
+  /opinions:
+    post:
+      tags: [opinion]
+      operationId: sendOpinion
+      summary: 의견 보내기
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [targetUserId, message]
+              properties:
+                targetUserId:
+                  type: string
+                contentId:
+                  type: string
+                  description: 자동 첨부되는 콘텐츠 ID (optional)
+                message:
+                  type: string
+                  maxLength: 300
+      responses:
+        "201":
+          description: 의견 접수 완료
+
 components:
-  securitySchemes:
-    bearerAuth:
-      type: http
-      scheme: bearer
+  parameters:
+    ContentId:
+      name: contentId
+      in: path
+      required: true
+      schema:
+        type: string
+    UserId:
+      name: userId
+      in: path
+      required: true
+      schema:
+        type: string
+    TargetUserId:
+      name: targetUserId
+      in: path
+      required: true
+      schema:
+        type: string
+    Cursor:
+      name: cursor
+      in: query
+      schema:
+        type: string
+        format: base64
+      description: 커서 기반 페이지네이션
+    Limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        default: 20
+        minimum: 1
+        maximum: 100
 
   schemas:
-    # --- Feed Publish ---
-    UpdatePublishStatusRequest:
-      type: object
-      required: [isPublished]
-      properties:
-        isPublished:
-          type: boolean
-          description: "true=공개, false=비공개"
-
-    UpdatePublishStatusResponse:
+    ContentPublishResponse:
       type: object
       properties:
         contentId:
           type: string
         isPublished:
           type: boolean
-        updatedAt:
+        publishedAt:
           type: string
           format: date-time
+          nullable: true
 
-    ContentPublishInfoResponse:
-      type: object
-      properties:
-        contentId:
-          type: string
-        isPublished:
-          type: boolean
-        isCustomPrompt:
-          type: boolean
-          description: 커스텀 프롬프트 여부 (true면 공개 불가)
-        totalPaybackCredits:
-          type: number
-          description: 이 콘텐츠로 받은 총 페이백 크레딧
-        regenerationCount:
-          type: integer
-          description: 이 콘텐츠가 재생성된 횟수
-
-    # --- Profile ---
     ProfileResponse:
       type: object
       properties:
@@ -208,49 +463,50 @@ components:
           type: string
         profileImageUrl:
           type: string
-          nullable: true
+          format: uri
         followerCount:
           type: integer
         followingCount:
           type: integer
         regeneratedCount:
           type: integer
-          description: 내 공개 콘텐츠가 타 유저에 의해 재생성된 총 횟수
-        isMe:
+          description: 내 공개 콘텐츠가 타 유저에 의해 재생성된 횟수
+        isFollowing:
           type: boolean
-          description: 현재 로그인 유저의 프로필인지 여부
+          description: 현재 유저가 이 프로필을 팔로우하고 있는지
+        followStatus:
+          type: string
+          enum: [none, following, mutual]
+          description: "none=미팔로우, following=팔로잉, mutual=맞팔로우"
+        isBlocked:
+          type: boolean
+          description: 현재 유저가 이 프로필을 차단했는지
+        isPersona:
+          type: boolean
+          description: 페르소나 계정 여부
 
-    UpdateProfileRequest:
+    ContentListResponse:
       type: object
       properties:
-        nickname:
-          type: string
-          minLength: 1
-          maxLength: 20
-        profileImageUrl:
-          type: string
-          nullable: true
-
-    ProfileContentsResponse:
-      type: object
-      properties:
-        items:
+        list:
           type: array
           items:
-            $ref: "#/components/schemas/ProfileContentItem"
+            $ref: "#/components/schemas/ContentItem"
         nextCursor:
           type: string
           nullable: true
-        hasNext:
-          type: boolean
 
-    ProfileContentItem:
+    ContentItem:
       type: object
       properties:
-        contentId:
+        id:
           type: string
         thumbnailUrl:
           type: string
+          format: uri
+        mediaUrl:
+          type: string
+          format: uri
         mediaType:
           type: string
           enum: [image, video]
@@ -258,18 +514,186 @@ components:
           type: boolean
         favoriteCount:
           type: integer
+        isFavorited:
+          type: boolean
         createdAt:
           type: string
           format: date-time
+        userProfile:
+          $ref: "#/components/schemas/ProfileSummary"
+        filter:
+          $ref: "#/components/schemas/FilterSummary"
+        generationType:
+          type: string
+          enum: [filter, custom-prompt]
 
-    # --- Payback ---
+    ProfileSummary:
+      type: object
+      properties:
+        userId:
+          type: string
+        nickname:
+          type: string
+        profileImageUrl:
+          type: string
+          format: uri
+
+    FilterSummary:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        typeIcon:
+          type: string
+          format: uri
+
     PaybackConfigResponse:
       type: object
       properties:
-        paybackRatePercent:
+        paybackRate:
           type: number
-          description: 페이백 비율 (예: 1.0 = 1%)
+          description: 페이백 비율 (0.01 = 1%)
+        minPaybackRate:
+          type: number
+          description: 마진 압박 시 최저 비율
         creditType:
           type: string
           enum: [promotion]
-          description: 페이백 크레딧 타입
+
+    PaybackResultResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        paybackAmount:
+          type: number
+          nullable: true
+          description: 지급된 페이백 크레딧 (올림 처리)
+        reason:
+          type: string
+          nullable: true
+          description: 실패 시 사유 (margin_insufficient, persona_content 등)
+
+    NotificationListResponse:
+      type: object
+      properties:
+        list:
+          type: array
+          items:
+            $ref: "#/components/schemas/NotificationItem"
+        nextCursor:
+          type: string
+          nullable: true
+
+    NotificationItem:
+      type: object
+      properties:
+        id:
+          type: string
+        category:
+          type: string
+          enum: [like, credit, news, follow]
+        title:
+          type: string
+        body:
+          type: string
+        thumbnailUrl:
+          type: string
+          format: uri
+          nullable: true
+        isRead:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        deepLink:
+          type: string
+          nullable: true
+
+    NotificationSettingsResponse:
+      type: object
+      properties:
+        like:
+          type: boolean
+        credit:
+          type: boolean
+        news:
+          type: boolean
+        follow:
+          type: boolean
+
+    NotificationSettingsRequest:
+      type: object
+      properties:
+        like:
+          type: boolean
+        credit:
+          type: boolean
+        news:
+          type: boolean
+        follow:
+          type: boolean
+
+    FollowStatusResponse:
+      type: object
+      properties:
+        targetUserId:
+          type: string
+        status:
+          type: string
+          enum: [following, mutual, none]
+        followerCount:
+          type: integer
+        followingCount:
+          type: integer
+
+    FollowListResponse:
+      type: object
+      properties:
+        list:
+          type: array
+          items:
+            $ref: "#/components/schemas/FollowUserItem"
+        nextCursor:
+          type: string
+          nullable: true
+
+    FollowUserItem:
+      type: object
+      properties:
+        userId:
+          type: string
+        nickname:
+          type: string
+        profileImageUrl:
+          type: string
+          format: uri
+        followStatus:
+          type: string
+          enum: [none, following, mutual]
+
+    BlockStatusResponse:
+      type: object
+      properties:
+        targetUserId:
+          type: string
+        isBlocked:
+          type: boolean
+
+    ReportRequest:
+      type: object
+      required: [targetType, targetId, reason, description]
+      properties:
+        targetType:
+          type: string
+          enum: [content, user]
+        targetId:
+          type: string
+        reason:
+          type: string
+          enum: [spam, inappropriate, copyright, other]
+        description:
+          type: string
+          maxLength: 100

@@ -75,11 +75,18 @@ worktree 디렉토리에서 Agent tool을 사용하여 태스크를 실행한다
 - API contract (api-contract.yaml)
 - 수정 범위 제한 (target_path)
 - 해당 레포의 기존 CLAUDE.md/skills 규칙을 따를 것
+- (app 태스크) `## Prototype Reference` 섹션이 있으면 해당 HTML 파일도 읽어 시각적 참조로 활용
+
+**Prototype Gate 확인:**
+- 실행 전 `prototypes/app/approval-status.yaml` 확인
+- `pending` 또는 `rejected` 상태 태스크가 있으면 경고 출력
+- `--force` 플래그로 무시 가능
 
 에이전트가 수행할 작업:
 1. 태스크 파일의 Context, Specification 이해
 2. Implementation Hints의 기존 코드 패턴 + 필수 스킬 참고
-3. 구현
+3. (app 태스크) Prototype Reference HTML이 있으면 레이아웃/구조 참조
+4. 구현
 4. Self-QA 수행:
    - TypeScript 체크
    - Lint

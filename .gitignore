@@ -2,3 +2,5 @@
 app-core-packages/
 wrtn-backend/
 .worktrees/
+.mcp.json
+.env

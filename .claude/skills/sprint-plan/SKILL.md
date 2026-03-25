@@ -141,7 +141,7 @@ Sprint Plan: {sprint-id}
     002: backend/002 → app/002  (app depends on backend)
     ...
 
-Next: /sprint-run {sprint-id}
+Next: /sprint-prototype {sprint-id}
 ```
 
 ## Constraints

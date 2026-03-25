@@ -1,0 +1,10 @@
+sprint_id: "2026-03-sprint-1"
+
+branches:
+  backend:
+    base: "develop"
+  app:
+    base: "meme-release-1.2.1"
+
+defaults:
+  base: "main"

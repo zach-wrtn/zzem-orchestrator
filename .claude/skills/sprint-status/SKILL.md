@@ -30,6 +30,10 @@ sprint-id가 주어지지 않으면 `sprint-orchestrator/sprints/` 하위에서 
   - result 파일 위치: 해당 프로젝트 레포 내 `{task-id}.result.md`
   - Status: COMPLETED | PARTIAL | FAILED | MISSING (result 파일 없음)
 
+**프로토타입 상태:**
+- `prototypes/app/approval-status.yaml` 파일이 있으면 파싱
+- 태스크별 화면의 승인 상태: approved | pending | rejected | revision-requested | skipped
+
 **브랜치 상태:**
 - 각 레포에서 sprint 브랜치(`zzem/{sprint-id}`) 존재 여부
 - sprint 브랜치의 커밋 수 (base branch 대비)
@@ -59,6 +63,13 @@ sprint-id가 주어지지 않으면 `sprint-orchestrator/sprints/` 하위에서 
     wrtn-backend:       zzem/{sprint-id} ({N} commits ahead of {base})
     app-core-packages:  zzem/{sprint-id} ({N} commits ahead of {base})
 
+  Prototypes:
+    001-profile-screen       ProfileScreen           ✓ approved
+    001-feed-publish-toggle  SwipeFeedPublishView    ✓ approved
+    002-follow-ui            FollowerListScreen      → revision
+    003-block-report-ui      ReportScreen            ○ pending
+    004-persona-handling     (skipped)
+
   PRs:
     wrtn-backend:       {url} [{state}]
     app-core-packages:  not created
@@ -74,7 +85,9 @@ sprint-id가 주어지지 않으면 `sprint-orchestrator/sprints/` 하위에서 
 
 | 상태 | 추천 |
 |------|------|
-| 태스크 파일만 있고 실행 안 됨 | `/sprint-run {sprint-id}` |
+| 태스크 파일만 있고 프로토타입 없음 | `/sprint-prototype {sprint-id}` |
+| 프로토타입 pending/rejected 있음 | `/sprint-prototype {sprint-id} --review` |
+| 프로토타입 승인 완료, 실행 안 됨 | `/sprint-run {sprint-id}` |
 | 일부 태스크 실패 | `/sprint-run {sprint-id} {failed-task-id}` (재실행) |
 | 전체 완료, PR 없음 | `/sprint-pr {sprint-id}` |
 | PR 생성됨 | PR 리뷰 링크 안내 |

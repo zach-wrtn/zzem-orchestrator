@@ -1,0 +1,63 @@
+tasks:
+  001-feed-publish-toggle-cta:
+    SwipeFeedPublishView:
+      status: pending
+      reviewed_at: null
+      notes: ""
+  001-profile-screen:
+    ProfileScreen:
+      status: pending
+      reviewed_at: null
+      notes: ""
+  001-profile-edit-screen:
+    ProfileEditScreen:
+      status: pending
+      reviewed_at: null
+      notes: ""
+  002-payback-bottomsheet:
+    PaybackInfoBottomSheet:
+      status: pending
+      reviewed_at: null
+      notes: ""
+  002-follow-ui:
+    FollowerListScreen:
+      status: pending
+      reviewed_at: null
+      notes: ""
+    FollowingListScreen:
+      status: pending
+      reviewed_at: null
+      notes: ""
+  003-block-report-ui:
+    ProfileMoreMenu:
+      status: pending
+      reviewed_at: null
+      notes: ""
+    BlockConfirmBottomSheet:
+      status: pending
+      reviewed_at: null
+      notes: ""
+    BlockedProfileView:
+      status: pending
+      reviewed_at: null
+      notes: ""
+    ReportScreen:
+      status: pending
+      reviewed_at: null
+      notes: ""
+    OpinionScreen:
+      status: pending
+      reviewed_at: null
+      notes: ""
+  003-notification-center:
+    NotificationListScreen:
+      status: pending
+      reviewed_at: null
+      notes: ""
+    NotificationSettingsScreen:
+      status: pending
+      reviewed_at: null
+      notes: ""
+  004-persona-handling:
+    _skipped: true
+    _reason: "UI 없음 — 로직 전용 태스크"
