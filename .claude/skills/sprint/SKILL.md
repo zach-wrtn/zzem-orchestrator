@@ -27,7 +27,7 @@ BE/FE/Design/QA 전문 Teammate를 스폰하여 태스크를 병렬 실행하고
 
 - Agent Teams 활성화: `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` (settings.local.json)
 - Teammate 정의: `.claude/teammates/` 디렉토리에 4개 파일
-- Stitch MCP 서버 설정 (Design Engineer용)
+- Figma MCP 서버 설정 (Design Engineer용)
 
 ---
 
@@ -98,7 +98,7 @@ Sprint Plan: {sprint-id}
 
 ## Phase 3: Prototype (Sprint Lead + Design Engineer)
 
-App 태스크의 UI 프로토타입을 생성하고 리뷰한다.
+App 태스크의 UI 프로토타입을 Figma에 직접 생성하고 리뷰한다.
 
 ### Workflow
 
@@ -114,11 +114,13 @@ Teammate 정의 파일을 읽는다: `.claude/teammates/design-engineer.md`
 각 대상 태스크에 대해 `TaskCreate`:
 ```
 Subject: proto/app/{task-id}/{ScreenName}
-Description: <태스크 파일 전문 + stitch-prompt-template.md 참조 지시>
+Description: <태스크 파일 전문 + figma-prompt-template.md 참조 지시 + DESIGN_TOKENS_METADATA.md 참조>
 Owner: Design Engineer
 ```
 
-Design Engineer가 각 화면의 프로토타입을 생성하고 `TaskUpdate: completed`로 보고한다.
+Design Engineer가 Figma MCP (`use_figma`)로 각 화면의 프로토타입을 생성하고 `TaskUpdate: completed`로 보고한다.
+
+**주의**: Design Engineer는 `use_figma` 호출 전에 반드시 `figma-use` 스킬을 로드해야 한다.
 
 #### 3.3 리뷰 (Sprint Lead ↔ 사용자)
 
@@ -127,18 +129,19 @@ Design Engineer가 각 화면의 프로토타입을 생성하고 `TaskUpdate: co
 ```
 ─────────────────────────────────────────
 Prototype: {task-id} / {ScreenName}
-File: prototypes/app/{task-id}/{ScreenName}.html
+Figma: {figma-url}
+Screenshot: prototypes/app/{task-id}/{ScreenName}.png
 ─────────────────────────────────────────
 ```
 
-브라우저에서 열기: `open {html-file-path}`
+Figma 스크린샷을 표시하거나 Figma URL을 공유하여 리뷰한다.
 
 사용자 선택:
 | 선택 | 동작 |
 |------|------|
 | **approve** | `approval-status.yaml` 업데이트, 태스크 파일에 `## Prototype Reference` 추가 |
 | **reject** | 상태 기록, 프로토타입 참조 제외 |
-| **revise** | 피드백 수집 → Design Engineer에게 수정 태스크 할당 → Stitch 재호출 |
+| **revise** | 피드백 수집 → Design Engineer에게 수정 태스크 할당 → Figma `use_figma` 재호출 |
 | **skip** | pending 상태 유지, 다음 화면으로 이동 |
 
 #### 3.4 태스크 파일 연결
@@ -147,7 +150,8 @@ File: prototypes/app/{task-id}/{ScreenName}.html
 
 ```markdown
 ## Prototype Reference
-- Approved: ../prototypes/app/{task-id}/{ScreenName}.html
+- Figma: {figma-url-with-node-id}
+- Screenshot: ../prototypes/app/{task-id}/{ScreenName}.png
 - Key visual decisions: {승인 시 노트}
 ```
 
@@ -160,7 +164,7 @@ Phase 4 진입 전 `approval-status.yaml` 확인:
 ### Output
 ```
 Sprint Prototype: {sprint-id}
-  Generated: {N} screens across {M} tasks
+  Generated: {N} screens across {M} tasks (Figma)
   Approved: {N}, Pending: {N}, Rejected: {N}
 
 → Proceeding to Phase 4: Execute
@@ -437,7 +441,7 @@ Sprint pipeline complete! 🎉
 |----------|------|------|
 | BE Engineer | `.claude/teammates/be-engineer.md` | Backend 태스크 구현 |
 | FE Engineer | `.claude/teammates/fe-engineer.md` | App 태스크 구현 |
-| Design Engineer | `.claude/teammates/design-engineer.md` | Stitch UI 프로토타입 |
+| Design Engineer | `.claude/teammates/design-engineer.md` | Figma UI 프로토타입 |
 | QA Engineer | `.claude/teammates/qa-engineer.md` | Acceptance Criteria 검증 |
 
 ### Task Naming Convention

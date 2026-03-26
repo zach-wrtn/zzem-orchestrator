@@ -40,7 +40,7 @@
 | Sprint Lead | 메인 세션 (Team Lead) | 오케스트레이션 전체 | 전 Phase |
 | BE Engineer | Teammate 세션 | wrtn-backend | Phase 4 |
 | FE Engineer | Teammate 세션 | app-core-packages | Phase 4 |
-| Design Engineer | Teammate 세션 | Stitch MCP | Phase 3 |
+| Design Engineer | Teammate 세션 | Figma MCP (`use_figma`) | Phase 3 |
 | QA Engineer | Teammate 세션 | 양쪽 레포 (read-only) | Phase 4 |
 
 ### Teammate 정의 파일
@@ -49,7 +49,7 @@
 .claude/teammates/
 ├── be-engineer.md       # Backend 구현 전문 프롬프트
 ├── fe-engineer.md       # Frontend 구현 전문 프롬프트
-├── design-engineer.md   # Stitch 프로토타입 전문 프롬프트
+├── design-engineer.md   # Figma 프로토타입 전문 프롬프트
 └── qa-engineer.md       # 품질 검증 전문 프롬프트
 ```
 
@@ -162,7 +162,7 @@ zzem/{sprint-id}/{task-id} → zzem/{sprint-id} → {base-branch}
 | 머지 충돌 | Sprint Lead → 사용자 | 스프린트 중단, 충돌 상세 출력, 수동 해결 요청 |
 | QA 실패 | Sprint Lead | 원 Teammate에게 QA report와 함께 fix 태스크 재할당 |
 | Teammate 타임아웃 | Sprint Lead | 30분 초과 시 FAILED, 다음 태스크 진행 |
-| Stitch MCP 불가 | Design Engineer | 수동 폴백 프롬프트 출력, Sprint Lead에 통보 |
+| Figma MCP 불가 | Design Engineer | 수동 폴백 디자인 사양 출력, Sprint Lead에 통보 |
 
 ## 7. 설정
 

@@ -3,7 +3,7 @@
 ## Role
 
 app-core-packages (React Native MemeApp) 프론트엔드 태스크 구현 전담 엔지니어.
-Sprint Lead가 할당한 태스크를 worktree에서 구현하고, Stitch 프로토타입을 시각적 참조로 활용한다.
+Sprint Lead가 할당한 태스크를 worktree에서 구현하고, Figma 프로토타입을 시각적 참조로 활용한다.
 
 ## Working Directory
 
@@ -97,7 +97,7 @@ Sprint Lead가 QA 실패를 통보하면:
 - **target_path 밖 수정 금지**: 태스크 파일의 `target_path`에 명시된 경로만 수정한다.
 - **원격 push 금지**: Sprint Lead가 처리한다.
 - **브랜치 머지 금지**: Sprint Lead가 처리한다.
-- **프로토타입은 참조용**: Stitch HTML을 그대로 변환하지 않고, React Native 네이티브로 구현한다.
+- **프로토타입은 참조용**: Figma 디자인을 그대로 변환하지 않고, React Native 네이티브로 구현한다.
 - **새 패턴 도입 금지**: 기존 코드베이스 패턴을 따른다.
 - **3회 QA 실패 시 FAILED**: `TaskUpdate: failed`로 보고한다.
 - **불확실할 때 질문**: Sprint Lead에게 메시지로 확인한다.
