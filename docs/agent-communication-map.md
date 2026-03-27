@@ -38,7 +38,7 @@
 └──────┬─────┘ └──────┬─────┘ └──────┬─────┘ └──────┬─────┘
        │              │              │              │
        ▼              ▼              ▼              ▼
-   HTML 프로토타입   worktree 커밋   worktree 커밋   QA Report
+   Figma 프로토타입  worktree 커밋   worktree 커밋   QA Report
 ```
 
 ---
@@ -77,13 +77,13 @@
 │• task  │ │• task  │   │• task  │    │• task  │
 │  .md   │ │  .md   │   │  .md   │    │  .md   │
 │• DESIGN│ │• api-  │   │• api-  │    │• api-  │
-│  .md   │ │  contract│ │  contract│  │  contract│
-│        │ │• repo  │   │• proto │    │• test- │
-│ 쓰는것: │ │  skills│   │  .html │    │  scenarios│
-│• proto │ │        │   │• repo  │    │• 구현  │
-│  .html │ │ 쓰는것: │   │  skills│    │  코드  │
-│• stitch│ │• 구현  │   │        │    │  (읽기만)│
-│  prompt│ │  코드  │   │ 쓰는것: │    │        │
+│ TOKENS │ │  contract│ │  contract│  │  contract│
+│  .md   │ │• repo  │   │• Figma │    │• test- │
+│ 쓰는것: │ │  skills│   │  스크린샷│   │  scenarios│
+│• Figma │ │        │   │• repo  │    │• 구현  │
+│  디자인 │ │ 쓰는것: │   │  skills│    │  코드  │
+│• figma │ │• 구현  │   │        │    │  (읽기만)│
+│  spec  │ │  코드  │   │ 쓰는것: │    │        │
 │• approv│ │        │   │• 구현  │    │ 쓰는것: │
 │  status│ │        │   │  코드  │    │• QA    │
 │        │ │        │   │        │    │  Report│
@@ -92,7 +92,8 @@
     ▼          ▼            ▼             ▼
  prototypes/   .worktrees/    .worktrees/   QA Report
  app/{id}/     backend_{id}   app_{id}      (TaskUpdate)
- {Screen}.html
+ {Screen}.png
+ figma-link.md
 ```
 
 ---
@@ -103,7 +104,7 @@
 |-----------|------|----------|
 | **Sprint Lead → 각 Agent** | `TaskCreate` + `SendMessage` | 태스크 할당, 컨텍스트 전달, fix 요청 |
 | **각 Agent → Sprint Lead** | `TaskUpdate` + `SendMessage` | 완료 보고, 질문, 실패 보고 |
-| **Design → FE** (간접) | **파일 기반** (`prototypes/app/{id}/`) | HTML 프로토타입을 FE가 참조 |
+| **Design → FE** (간접) | **파일 기반** (`prototypes/app/{id}/`) | Figma 스크린샷 + URL을 FE가 참조 |
 | **BE ↔ FE** (간접) | **파일 기반** (`api-contract.yaml`) | API 스키마가 양측의 공통 계약 |
 | **BE/FE → QA** (간접) | **파일 기반** (sprint 브랜치 코드) | 머지된 코드를 QA가 검증 |
 | **QA → BE/FE** (간접) | Sprint Lead 경유 (`SendMessage`) | QA FAIL 시 Sprint Lead가 fix 재할당 |
@@ -123,7 +124,7 @@
 ```
 api-contract.yaml  ← BE/FE/QA 모두 참조하는 단일 진실의 원천
 task.md            ← 각 에이전트가 자기 태스크만 읽음
-prototypes/*.html  ← Design이 쓰고, FE가 읽음 (시각적 참조만)
+prototypes/*.png + figma-link.md  ← Design이 쓰고, FE가 읽음 (시각적 참조만)
 sprint 브랜치 코드  ← 엔지니어가 쓰고, QA가 읽음
 ```
 
