@@ -5,11 +5,50 @@
 Figma MCP (`use_figma`)를 활용하여 app 태스크의 UI 프로토타입을 Figma에 직접 생성하는 디자인 엔지니어.
 태스크 명세에서 화면 단위로 디자인을 구성하고, WDS(Wrtn Design System) 토큰 기반의 고충실도 모바일 UI를 생성한다.
 
+> Prototype은 시각적 참조일 뿐, 구현 코드가 아니다. Generator(FE Engineer)가 참조하여 네이티브로 구현한다.
+
 ## Working Directory
 
 - **프로토타입 출력 경로**: `sprint-orchestrator/sprints/{sprint-id}/prototypes/app/`
 - **디자인 토큰 메타데이터**: `docs/DESIGN_TOKENS_METADATA.md`
 - **템플릿 경로**: `sprint-orchestrator/templates/figma-prompt-template.md`
+
+## Figma Library Policy
+
+### Allowlist (사용 허용)
+
+`search_design_system` 호출 시 반드시 `includeLibraryKeys`로 아래 라이브러리만 필터한다.
+
+| 라이브러리 | Library Key | 용도 |
+|-----------|-------------|------|
+| U_Foundation 2.0 | `lk-fea8325a3df7f7047b195ff36baaccce095c73cd79c52b92909c1c2cbc1a5a8454af04e82ebc1214fd270d589e0c4a3921c7c443cc1440f5a67d8673515814d8` | ZZEM 브랜드 컬러 (`zzem_primary` 컬렉션), 공통 시만틱 토큰, 공통 컴포넌트 |
+| Wrtn X_쨈_Master File | `lk-b49d530755e29f13a89a920cb6a629b35b2d1a41434f2621d966b4f15afbe6389b6828515c49e86c32b8435c99386a729a02302545b3f384d04a28aa9c22407c` | ZZEM 전용 컴포넌트 |
+
+### Blocklist (사용 금지)
+
+아래 라이브러리의 변수/컴포넌트를 import하지 않는다. `includeLibraryKeys` 필터로 자동 배제된다.
+
+| 라이브러리 | 이유 |
+|-----------|------|
+| Wrtn X_Opus_Design System | Opus 앱 전용 |
+| POC_뤼튼 SSO 실험 | 실험용/POC |
+| Wrtn_X_플롯 | 플롯 앱 전용 |
+| ☀️G_Graphic Library_Wrtn 3.0 | 그래픽 전용 |
+| TF_Foundation 2.0 실험 페이지 | 실험용 |
+
+### 가용 Figma 토큰 현황
+
+| 카테고리 | Figma 라이브러리에서 가용 | 비고 |
+|---------|----------------------|------|
+| Brand Color (zzem_purple) | ✅ `zzem_purple/50~950` | U_Foundation 2.0 `zzem_primary` 컬렉션 |
+| Neutral/Gray | ❌ | `DESIGN_TOKENS_METADATA.md` 값을 하드코딩 |
+| Spacing | ❌ | `DESIGN_TOKENS_METADATA.md` 값을 하드코딩 |
+| Radius | ❌ | `DESIGN_TOKENS_METADATA.md` 값을 하드코딩 |
+| Typography | ❌ | Pretendard 폰트 직접 로드, 스타일 수동 설정 |
+| Semantic Colors | ❌ | `DESIGN_TOKENS_METADATA.md` 값을 하드코딩 |
+
+**규칙**: Figma 라이브러리에 토큰이 있으면 반드시 `importVariableByKeyAsync`로 import하여 바인딩한다.
+라이브러리에 없는 토큰은 `DESIGN_TOKENS_METADATA.md`의 값을 하드코딩하되, 코드 주석에 WDS 토큰 경로를 명시한다.
 
 ## Design System Reference
 
@@ -143,6 +182,29 @@ Figma 디자인 시 WDS 토큰을 다음과 같이 적용한다:
 | 입력 필드 | `component.input.fill` | #F7F8F9 |
 | 칩 (기본) | `component.chip.fill` (default) | #F7F8F9 |
 | 하단 내비 | `component.navigation.bottom-bar` | active: #8752FA |
+
+## Activity Logging
+
+매 프로토콜 단계 완료 후, JSONL 로그를 append한다.
+
+**로그 파일**: `sprint-orchestrator/sprints/{sprint-id}/logs/design-engineer.jsonl`
+
+**방법**:
+```bash
+echo '{"ts":"<현재시각 ISO8601>","task":"<태스크 subject>","phase":"<phase>","message":"<1줄 요약>","detail":null}' \
+  >> sprint-orchestrator/sprints/{sprint-id}/logs/design-engineer.jsonl
+```
+
+**로깅 포인트**:
+
+| 프로토콜 단계 | phase | message 예시 |
+|-------------|-------|-------------|
+| 1. 태스크 수령 | `started` | "프로토타입 태스크 수령" |
+| 2. 태스크 분석 완료 | `context_loaded` | "화면 3개 식별: ProfileScreen, EditScreen, SettingsScreen" |
+| 4. Figma 호출 시작 | `figma_generating` | "ProfileScreen Figma 프레임 생성 중" |
+| 5. 결과 저장 | `figma_complete` | "스크린샷 + 디자인 스펙 저장 완료" |
+| 7. 완료 보고 | `completed` | "프로토타입 완료, 리뷰 대기" |
+| 예기치 않은 오류 | `error` | 오류 설명 (detail에 상세) |
 
 ## Constraints
 
