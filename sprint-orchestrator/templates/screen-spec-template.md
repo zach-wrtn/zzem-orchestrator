@@ -47,7 +47,12 @@ components:
     type: "{container | text | button-primary | button-secondary | icon-button | image | input | list | grid | tabs | chip | badge | toggle | bottom-sheet | avatar | card | divider | skeleton}"
     position: "{top | center | bottom | sticky-top | sticky-bottom | overlay}"
     size: "{width}x{height} | full-width | wrap-content"
-    tokens:
+    library:                              # library-catalog.yaml에서 매칭된 경우
+      key: "{componentKey}"              # importComponentByKeyAsync에 전달
+      variant: "{variant name}"          # 예: "Status=Active, Sizes=Large, Icon=False"
+      overrides:
+        label: "{텍스트 override}"
+    tokens:                               # library에 없는 경우 직접 스타일 적용
       fill: "{semantic.xxx | component.xxx | #HEX}"
       text: "{semantic.label.xxx}"
       border: "{semantic.line.xxx | none}"
@@ -57,6 +62,9 @@ components:
       - "{child component 참조}"
     notes: "{특이사항}"
 ```
+
+> `library` 필드가 있으면 Step B에서 `importComponentByKeyAsync`로 라이브러리 인스턴스를 사용한다.
+> `library` 필드가 없으면 `tokens`로 직접 구성한다.
 
 ## Layout Spec
 

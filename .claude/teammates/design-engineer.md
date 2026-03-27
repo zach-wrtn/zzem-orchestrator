@@ -149,33 +149,111 @@ spec 작성 후 다음을 확인:
 
 ---
 
+## Step A.5: Library Discovery (Step A와 B 사이)
+
+Figma 프로토타입 생성 전, 라이브러리에서 사용 가능한 컴포넌트를 카탈로그한다.
+
+### Discovery 프로세스
+
+```
+1. search_design_system으로 Allowlist 라이브러리 검색
+   - 검색 키워드: button, input, textfield, tab, navigation, toggle, avatar,
+     chip, badge, card, skeleton, icon, bottom sheet, snackbar, modal
+   - includeLibraryKeys 필터 필수
+2. 결과를 library-catalog.yaml로 저장
+   - available: 사용 가능 컴포넌트 (name, key, library, use_for)
+   - not_available: 라이브러리에 없어 직접 구성 필요한 컴포넌트
+3. Screen Spec의 각 컴포넌트와 카탈로그 매칭
+```
+
+**저장 경로**: `sprints/{sprint-id}/prototypes/library-catalog.yaml`
+
+### Catalog 포맷
+
+```yaml
+available:
+  - name: "RegularButton"
+    library: "U_Foundation 2.0"
+    key: "{componentKey}"
+    type: "component_set"
+    use_for: "Primary/Secondary 버튼"
+    variants:
+      - "Status=Active, Sizes=Large, Icon=False"
+      - "Status=Disable, Sizes=Large, Icon=False"
+
+not_available:
+  - "Avatar / Profile Image"
+  - "Tab Bar"
+```
+
+---
+
 ## Step B: Prototype Generation (Screen Spec → Figma)
 
-작성된 screen spec 파일을 읽어 Figma 프로토타입을 생성한다.
+작성된 screen spec 파일과 library catalog를 읽어 Figma 프로토타입을 생성한다.
 
 ### B.1 사전 준비
 
-**반드시 `figma-use` 스킬을 먼저 로드**한 후 `use_figma`를 호출한다.
+1. **`figma-use` 스킬 로드** (필수)
+2. **`figma-generate-design` 스킬 로드** (권장 — 디자인 시스템 연동 워크플로우)
+3. **library-catalog.yaml 읽기** — 사용 가능 컴포넌트 확인
 
-### B.2 Figma 생성
+### B.2 Multi-Pass Generation
+
+한 번에 완성하지 않는다. 단계별로 쌓아 올린다.
 
 ```
-1. Screen Spec 파일 ({ScreenName}.spec.md) 읽기
-2. figma-generate-design 스킬 로드
-3. figma-use 스킬 로드
-4. mcp__plugin_figma_figma__use_figma → Figma 프레임 생성
-   - Component Tree → Figma 노드 계층
-   - Token Map → 색상/스타일 바인딩
-   - Layout Spec → Auto Layout 구성
-   - Labels → 텍스트 노드 생성
-5. mcp__plugin_figma_figma__get_screenshot → 스크린샷 캡처
+Pass 1: Structure  — 화면 프레임 + Auto Layout 계층 구성
+Pass 2: Library    — 카탈로그 매칭 컴포넌트를 라이브러리 인스턴스로 교체
+Pass 3: Custom     — 라이브러리에 없는 컴포넌트는 직접 구성 (Token Map 적용)
+Pass 4: Content    — 한국어 라벨 + 실제적인 placeholder 콘텐츠
+Pass 5: Validate   — get_screenshot으로 시각적 검증, 이슈 수정
 ```
 
-Figma 파일 구조:
+### B.3 Library Component 활용 패턴
+
+라이브러리 컴포넌트를 import하여 사용할 때의 패턴:
+
+```
+1. importComponentByKeyAsync(key) → 컴포넌트 참조 획득
+2. component.createInstance() → 인스턴스 생성
+3. parent.appendChild(instance) → 배치
+4. instance.layoutSizingHorizontal = 'FILL' → Auto Layout 설정 (appendChild 후)
+```
+
+**텍스트 Override (Pretendard 폰트 미가용 시):**
+
+라이브러리 컴포넌트가 Pretendard를 사용하나 Figma 환경에 설치되지 않은 경우:
+
+```
+1. instance.detachInstance() → 일반 프레임으로 변환
+2. 내부 TEXT 노드를 찾아 삭제
+3. 새 TEXT 노드 생성 (Inter 폰트, 동일 fontSize/fills)
+4. parent.insertChild(index, newText) → 같은 위치에 삽입
+```
+
+**주의**: detach하면 라이브러리 업데이트가 반영되지 않으므로, Pretendard 폰트가 가용한 환경에서는 detach 없이 직접 override하는 것이 이상적.
+
+### B.4 컴포넌트 매핑 기준
+
+Screen Spec의 컴포넌트 타입별 라이브러리 매핑:
+
+| Spec type | Library Component | 비고 |
+|-----------|------------------|------|
+| `button-primary` | RegularButton (Active/Large) | 텍스트 override 필요 |
+| `button-secondary` | RegularButton (Active/Large) + detach + fill 변경 | 또는 별도 variant |
+| `icon-button` | IconButton | variant 선택 |
+| `input` | Textfield | placeholder override |
+| `button-cta` | CTA | 하단 고정 CTA |
+| `toast` | snackbar | 토스트 메시지 |
+| `chip` | Category_Button | 카테고리/태그 |
+
+### B.5 Figma 파일 구조
+
 - Page: `Sprint {sprint-id} Prototypes`
 - Frame: `{task-id}/{ScreenName}` (390x844 iPhone 14 Pro)
 
-### B.3 State Variant 프레임
+### B.6 State Variant 프레임
 
 States에 정의된 각 상태별로 별도 프레임을 생성한다:
 - `{task-id}/{ScreenName}` — default
@@ -183,7 +261,7 @@ States에 정의된 각 상태별로 별도 프레임을 생성한다:
 - `{task-id}/{ScreenName}/loading` — 로딩
 - `{task-id}/{ScreenName}/error` — 에러
 
-### B.4 Manual Fallback
+### B.7 Manual Fallback
 
 Figma MCP가 사용 불가하거나 실패하면:
 1. Screen Spec 파일이 이미 존재하므로, 이것이 성과물이 된다
