@@ -63,8 +63,48 @@ components:
     notes: "{특이사항}"
 ```
 
-> `library` 필드가 있으면 Step B에서 `importComponentByKeyAsync`로 라이브러리 인스턴스를 사용한다.
+> `library` 필드가 있으면 Step C에서 `importComponentByKeyAsync`로 라이브러리 인스턴스를 사용한다.
 > `library` 필드가 없으면 `tokens`로 직접 구성한다.
+
+### Enhanced Component Metadata
+
+> 참조: design-engineer.md Step B.3 — Component-as-Data
+
+각 컴포넌트에 다음 메타데이터 카테고리를 추가한다 (해당 컴포넌트에 관련 있는 것만):
+
+```yaml
+    # Behavioral Metadata
+    behavior:
+      purpose: "{이 컴포넌트가 존재하는 이유 — Context Engine WHY 레이어에서 도출}"
+      user_action: "{사용자가 이 컴포넌트로 수행하는 행동}"
+      feedback: "{행동에 대한 피드백 유형: visual | haptic | navigation | toast}"
+
+    # State Metadata
+    states:
+      default: "{기본 외관}"
+      disabled: "{비활성 조건 — null이면 항상 활성}"
+      loading: "{로딩 중 외관 — null이면 로딩 상태 없음}"
+      error: "{에러 시 외관 — null이면 에러 표시 없음}"
+
+    # Layout Metadata
+    layout:
+      direction: "{horizontal | vertical}"
+      alignment: "{start | center | end | space-between}"
+      sizing: "{fixed | hug | fill}"
+
+    # Accessibility Metadata
+    a11y:
+      role: "{button | link | heading | img | text | list | tab | switch | ...}"
+      label: "{스크린리더 라벨 — 한국어}"
+
+    # Composition Constraints
+    constraints:
+      min_height: "{N}px | null"
+      max_lines: "{N} | null"
+      truncation: "{ellipsis | fade | none}"
+```
+
+적용 우선순위: `behavior` > `states` > `a11y` > `layout` > `constraints`
 
 ## Layout Spec
 
@@ -209,4 +249,27 @@ tokens:
   input_radius: "component.input.radius → 12px"
   nav_active: "component.navigation.bottom-bar.active → #8752FA"
   nav_inactive: "component.navigation.bottom-bar.inactive → #8E9199"
+```
+
+## Quality Score
+
+> 참조: design-engineer.md Step B.5 — 메타데이터 품질 점수
+
+```yaml
+quality_score:
+  extraction_accuracy:
+    total_components: {N}
+    with_library_match: {N}
+    with_token_map: {N}
+    score: "{with_library_match + with_token_map} / {total_components * 2}"
+  fabrication_risk:
+    inferred_fields: ["{AI가 PRD에 없는 내용을 추론한 필드 목록}"]
+    risk_level: "{none | low | medium | high}"
+  schema_completeness:
+    required_sections: ["meta", "component_tree", "layout_spec", "states", "interactions", "labels", "token_map"]
+    present_sections: ["{실제 작성된 섹션}"]
+    score: "{present} / {required}"
+  context_coverage:
+    why_linked: "{ui_impact가 연결된 AC 수} / {전체 AC 수}"
+    what_resolved: "{토큰/컴포넌트가 확인된 수} / {필요한 수}"
 ```

@@ -35,7 +35,7 @@ v4: Harness Design (반복 루프)
 |------|-----------|-------|-------|----------|
 | Planner | Planner | Sprint Lead | Phase 2 | PRD → deliverable-focused 명세 |
 | Orchestrator | — | Sprint Lead | 전 Phase | 파이프라인 조율, 머지, PR |
-| Prototype | — | Design Engineer | Phase 3 | Figma UI 프로토타입 |
+| Prototype | — | Design Engineer | Phase 3 | Context Engine → Screen Spec → Figma 프로토타입 (3단계) |
 | Generator | Generator | BE Engineer | Phase 4 | Backend 구현 |
 | Generator | Generator | FE Engineer | Phase 4 | Frontend 구현 |
 | Evaluator | Evaluator | Evaluator | Phase 4 | 능동적 품질 평가 |
@@ -175,9 +175,16 @@ sprints/{sprint-id}/
 │   ├── group-001.md               # Build: 평가 보고서 (Evaluator → Generator)
 │   ├── group-002.md
 │   └── ...
-├── prototypes/app/                # Prototype: Figma 스크린샷/링크
-│   ├── {task-id}/
-│   └── approval-status.yaml
+├── prototypes/
+│   ├── context/
+│   │   └── context-engine.yaml    # Prototype: Context Engine (WHY/WHAT/HOW)
+│   ├── library-catalog.yaml       # Prototype: Figma 라이브러리 카탈로그
+│   └── app/                       # Prototype: Figma 스크린샷/링크
+│       ├── {task-id}/
+│       │   ├── {ScreenName}.spec.md  # Machine-readable Screen Spec
+│       │   ├── {ScreenName}.png      # Figma 스크린샷
+│       │   └── figma-link.md         # Figma URL
+│       └── approval-status.yaml
 └── logs/
 ```
 

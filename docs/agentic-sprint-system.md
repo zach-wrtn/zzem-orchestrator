@@ -1,5 +1,18 @@
 # Agentic Sprint System (v3 — Agent Teams)
 
+> ⚠️ **DEPRECATED**: 이 문서는 v3 아키텍처 기준으로 작성되었으며, 현재는 **v4 (Harness Design)** 가 최신입니다.
+> v4 문서는 다음을 참조하세요:
+> - [`docs/designs/agentic-sprint-system.md`](designs/agentic-sprint-system.md) — v4 개요
+> - [`docs/designs/harness-design.md`](designs/harness-design.md) — Harness Design 원칙
+> - [`docs/designs/agent-teams-architecture.md`](designs/agent-teams-architecture.md) — 팀 구성 및 실행 모델
+> - [`docs/designs/branch-strategy.md`](designs/branch-strategy.md) — Git 브랜치 전략
+>
+> **v3 → v4 주요 변경**:
+> - QA Engineer → **Evaluator** (능동적 평가, Self-QA 제거)
+> - 일괄 디스패치 → **그룹 단위 반복 루프** (Sprint Contract 기반)
+> - `figma-prompt-template.md` → **screen-spec-template.md** + Design Engineer 3단계 파이프라인
+> - Phase 이름 변경: Plan → **Spec**, Execute → **Build**
+
 > **v2 Shell Scripts → v3 Agent Teams 전환 완료.**
 > 모든 오케스트레이션을 Claude Code의 Agent Teams 기능으로 통합.
 > 단일 `/sprint` 스킬이 5개 Phase를 관리하고, 4명의 전문 Teammate를 스폰한다.
