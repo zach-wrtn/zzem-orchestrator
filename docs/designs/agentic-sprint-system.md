@@ -49,6 +49,11 @@ Phase 4: Build ─────────────── Iterative Loop per 
   │   └─ 4.5 Fix/Accept
   │
 Phase 5: PR ────────────────── Sprint Lead solo
+Phase 6: Retrospective ─────── Sprint Lead solo (Gap Analysis + Pattern Digest + Deferral Index)
+  │
+  ├─ All AC fulfilled ───────── Sprint complete
+  ├─ Few deferred (small) ──── --continue (같은 브랜치에서 이어서)
+  └─ Many deferred / new req ── --follow-up (새 스프린트, Delta PRD)
 ```
 
 ### Team
@@ -81,9 +86,11 @@ Phase 5: PR ────────────────── Sprint Lead s
 ## Invocation
 
 ```
-/sprint <sprint-id>              # Full pipeline
-/sprint <sprint-id> --phase=X    # Single phase (init/spec/prototype/build/pr)
-/sprint <sprint-id> --status     # Dashboard
+/sprint <sprint-id>                              # Full pipeline (Phase 1~6)
+/sprint <sprint-id> --phase=X                    # Single phase (init/spec/prototype/build/pr/retro)
+/sprint <sprint-id> --continue                   # 이월 항목 이어서 진행
+/sprint <new-id> --follow-up=<prev-id>           # 후속 스프린트 (Delta PRD 기반)
+/sprint <sprint-id> --status                     # Dashboard
 ```
 
 ## Directory Structure
@@ -103,7 +110,7 @@ zzem-orchestrator/
 │   │   ├── sprint-config-template.yaml
 │   │   ├── sprint-contract-template.md # v4 신규
 │   │   ├── evaluation-criteria.md      # v4 신규
-│   │   ├── figma-prompt-template.md
+│   │   ├── screen-spec-template.md       # Design Engineer Screen Spec
 │   │   └── prd-template.md
 │   └── sprints/{sprint-id}/
 │       ├── PRD.md
@@ -112,8 +119,15 @@ zzem-orchestrator/
 │       ├── tasks/{backend,app}/*.md
 │       ├── contracts/group-{N}.md      # v4 신규
 │       ├── evaluations/group-{N}.md    # v4 신규
-│       ├── prototypes/app/
-│       ├── qa/
+│       ├── prototypes/
+│       │   ├── context/context-engine.yaml  # Design Context Engine
+│       │   ├── library-catalog.yaml         # Figma Library Catalog
+│       │   └── app/                         # Figma 스크린샷/링크
+│       ├── retrospective/                   # Phase 6 산출물
+│       │   ├── gap-analysis.yaml
+│       │   ├── pattern-digest.yaml
+│       │   └── deferred-items.yaml
+│       ├── follow-up-context.yaml           # --follow-up 시 이전 스프린트 연결
 │       └── logs/
 └── docs/
     ├── prds/

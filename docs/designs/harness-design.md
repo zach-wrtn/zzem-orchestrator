@@ -138,7 +138,7 @@ Evaluator에게 제공하는 캘리브레이션:
 
 ## 5. Iteration Protocol
 
-전체 파이프라인 흐름:
+### 5.1 Within-Sprint Iteration (스프린트 내부)
 
 ```
 Phase 1: Init ──────────────── Sprint Lead solo
@@ -154,4 +154,37 @@ Phase 4: Build ─────────────── Iterative Loop
   │   └─ 4.5 Fix/Accept ── Loop or proceed
   │
 Phase 5: PR ────────────────── Sprint Lead solo
+Phase 6: Retrospective ─────── Sprint Lead solo
 ```
+
+### 5.2 Post-Sprint Iteration (스프린트 간 연결)
+
+스프린트 내부의 fix loop이 **미시적 반복**이라면, 스프린트 간 연결은 **거시적 반복**이다.
+
+```
+Sprint A                    Sprint B (follow-up)
+  Phase 1~5                   Phase 1: Init (이전 컨텍스트 상속)
+  Phase 6: Retrospective ──►  Phase 2: Spec (Delta PRD + Regression Guard)
+    ├─ gap-analysis       ──►    ├─ 이월 항목 → 새 태스크
+    ├─ pattern-digest     ──►    ├─ 패턴 → Evaluator 캘리브레이션
+    └─ deferred-items     ──►    └─ 미충족 AC → 보강된 AC
+                                Phase 3~5: 기존과 동일
+                                Phase 6: Retrospective (추이 추적)
+```
+
+**핵심 원칙**:
+- **Gap Analysis**: 스프린트 종료 시 PRD AC 대비 달성률을 구조화한다
+- **Pattern Learning**: 반복 실패 패턴을 추출하여 후속 스프린트의 Evaluator를 보정한다
+- **Regression Guard**: 이전 스프린트에서 충족된 AC가 후속 작업으로 깨지지 않음을 보장한다
+- **Deferral Tracking**: 이월 항목을 구조화하여 누락 없이 후속 스프린트로 피딩한다
+
+### 5.3 Sprint Continuation vs Follow-Up
+
+| | `--continue` | `--follow-up` |
+|--|------------|--------------|
+| 브랜치 | 같은 sprint 브랜치 | 새 sprint 브랜치 |
+| PRD | 같은 PRD (변경 없음) | Delta PRD (보강) |
+| API Contract | 같은 contract | 상속 + 확장 |
+| 그룹 번호 | 이어서 (N+1~) | 새로 (001~) |
+| 적합한 상황 | 소수 이월 (1~2건, small) | 다수 이월 또는 추가 요구사항 |
+| Regression | 같은 맥락이므로 간소 | 전체 이전 AC 회귀 검증 |

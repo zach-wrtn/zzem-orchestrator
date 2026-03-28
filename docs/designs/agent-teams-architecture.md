@@ -185,6 +185,11 @@ sprints/{sprint-id}/
 │       │   ├── {ScreenName}.png      # Figma 스크린샷
 │       │   └── figma-link.md         # Figma URL
 │       └── approval-status.yaml
+├── retrospective/                     # Retro: 스프린트 회고 (Phase 6)
+│   ├── gap-analysis.yaml              # PRD AC 달성 여부 매핑
+│   ├── pattern-digest.yaml            # 반복 실패 패턴 + 메트릭
+│   └── deferred-items.yaml            # 이월 항목 레지스트리
+├── follow-up-context.yaml             # Follow-up: 이전 스프린트 연결 (선택)
 └── logs/
 ```
 
@@ -213,3 +218,33 @@ sprints/{sprint-id}/
 | 설정 | task_timeout + qa_retry | eval_retry_limit만 |
 
 기존 스프린트 데이터, 브랜치 전략, Figma 워크플로우는 변경 없이 호환.
+
+## 8. Post-Sprint Iteration (v4.1)
+
+### Phase 6: Retrospective
+
+PR 생성 후 자동 실행. PRD AC 달성률 분석, 반복 패턴 추출, 이월 항목 구조화.
+
+```
+Sprint Lead
+    │
+    ├─ 6.1 Gap Analysis      PRD AC vs 실제 달성 매핑
+    ├─ 6.2 Pattern Digest    Evaluator 보고서 종합 → 시스템 패턴
+    ├─ 6.3 Deferral Index    이월 항목 구조화
+    └─ 6.4 Next Action       사용자에게 --continue / --follow-up 제안
+```
+
+### Sprint Continuation (`--continue`)
+
+같은 sprint 브랜치 위에서 이월 항목만 이어서 처리:
+- retrospective/deferred-items.yaml 기반
+- 새 그룹 번호로 Phase 4 재진입
+- 기존 PR에 추가 커밋 또는 새 PR 생성
+
+### Follow-Up Sprint (`--follow-up`)
+
+이전 스프린트의 Retrospective를 기반으로 새 스프린트 생성:
+- Delta PRD: 이월 항목 + 보강된 AC + 개선 사항
+- Evaluator 캘리브레이션: pattern-digest 반영
+- Regression Guard: 이전 충족 AC 회귀 검증
+- 추이 추적: 스프린트 간 품질 메트릭 비교
