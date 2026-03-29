@@ -1,0 +1,31 @@
+patterns:
+  - pattern: "BE/FE API 경로/필드명 불일치 (pagination shape, endpoint path)"
+    category: "integration"
+    frequency: 3
+    groups: ["group-004", "group-007"]
+    severity: "major"
+    systemic_fix: "API contract YAML을 BE/FE 공동 참조 SSOT로 강화. 응답 필드명 컨벤션 통일 (data/nextCursor/hasMore). FE 구현 시 BE 실제 경로 확인 필수."
+
+  - pattern: "조건 분기 로직 반전 (persona check, isPublished default)"
+    category: "correctness"
+    frequency: 2
+    groups: ["group-002", "group-005"]
+    severity: "critical"
+    systemic_fix: "Boolean 조건의 의도를 주석 또는 변수명으로 명확히. Evaluator가 모든 skip/guard 조건의 positive/negative case를 검증."
+
+  - pattern: "FE Clean Architecture 경계 위반 (domain에 React Query import)"
+    category: "code_quality"
+    frequency: 1
+    groups: ["group-001"]
+    severity: "major"
+    systemic_fix: "FE 태스크 디스패치 시 Clean Architecture 규칙 명시. Group 001 이후 반복 없음 — 피드백 학습 효과 확인."
+
+metrics:
+  total_groups: 7
+  first_pass_rate: 0.29
+  avg_fix_cycles: 0.71
+  critical_issues_found: 2
+  major_issues_found: 6
+  minor_issues_found: 1
+  issues_fixed: 9
+  issues_deferred: 0

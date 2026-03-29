@@ -9,7 +9,7 @@ branches:
   backend:
     base: "develop"          # wrtn-backend PR 타겟
   app:
-    base: "main"             # app-core-packages PR 타겟
+    base: "meme-release-1.2.1"             # app-core-packages PR 타겟
 
 # 미지정 프로젝트의 폴백 base branch
 defaults:

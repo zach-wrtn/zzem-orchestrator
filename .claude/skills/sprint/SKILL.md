@@ -634,7 +634,69 @@ improvements:
     priority: "{high | medium | low}"
 ```
 
-#### 6.4 사용자에게 Next Action 제안
+#### 6.4 Sprint Report 생성
+
+모든 retrospective 산출물을 통합하여 `REPORT.md`를 생성한다.
+
+저장: `sprints/{sprint-id}/REPORT.md`
+
+```markdown
+# Sprint Report: {sprint-id}
+
+> Generated: {date}
+> Architecture: Planner-Generator-Evaluator (Harness Design v4)
+> PRD: {prd-source}
+
+## Executive Summary
+{1~2문장 요약: 무엇을 구현했고 결과는 어떤지}
+
+## PRD Coverage
+| User Story | AC 수 | 충족 | 미충족 |
+{gap-analysis.yaml에서 US별 집계}
+**Fulfillment Rate: {rate}%**
+
+## Build Results
+| Group | Feature | BE Task | FE Task | Eval Result | Fix Loops |
+{각 그룹별 결과}
+
+## Quality Metrics
+| Metric | Value |
+{pattern-digest.yaml의 metrics 섹션}
+
+## Issues Found by Evaluator
+### Critical
+{이슈 테이블: Group, Issue, Root Cause, Resolution}
+### Major
+{이슈 테이블}
+### Minor
+{이슈 테이블}
+
+## Systemic Patterns
+{pattern-digest.yaml의 patterns 섹션을 서술형으로}
+
+## Deliverables
+### Code
+| Repository | Branch | Base | Files | Lines |
+### New Modules / Screens / Components
+{구현된 모듈, 화면, 컴포넌트 목록}
+### API Contract
+{endpoint 수, 파일 경로}
+### Sprint Artifacts
+{contract 수, DC 수, evaluation report 수}
+
+## PR Links
+| Repository | Status | Link |
+
+## Improvements for Next Sprint
+| Priority | Improvement | Source |
+{deferred-items.yaml의 improvements 섹션}
+
+## Timeline
+| Phase | Duration | Notes |
+{각 phase별 소요 시간}
+```
+
+#### 6.5 사용자에게 Next Action 제안
 
 gap-analysis 결과에 따라 분기:
 
@@ -668,6 +730,7 @@ Sprint Retrospective: {sprint-id}
   Deferred items:        {N} ({N} critical, {N} high)
 
   Retrospective saved: sprints/{sprint-id}/retrospective/
+  Sprint Report: sprints/{sprint-id}/REPORT.md
 
 → Recommendation: {context-aware next action}
 ```
