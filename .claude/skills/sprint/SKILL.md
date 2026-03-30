@@ -191,7 +191,7 @@ Design Engineer가 HTML 프로토타입을 생성 후 `TaskUpdate: completed`.
 |------|------|
 | **approve** | `approval-status.yaml` 업데이트, 태스크에 `## Prototype Reference` 추가 |
 | **reject** | 상태 기록, 프로토타입 참조 제외 |
-| **revise** | 피드백 → Design Engineer 수정 태스크 할당 (HTML 재생성) |
+| **revise** | 아래 Revision 워크플로우 실행 |
 | **skip** | pending 유지, 다음 화면 |
 
 **`## Prototype Reference` 형식** (approve 시 태스크에 추가):
@@ -200,6 +200,122 @@ Design Engineer가 HTML 프로토타입을 생성 후 `TaskUpdate: completed`.
 - **프로토타입**: `prototypes/app/{task-id}/prototype.html`
 - **스크린샷**: `prototypes/app/{task-id}/screenshots/`
 - **상태**: approved
+```
+
+#### 3.3.1 Revision 분기
+
+사용자가 `revise`를 선택하면 Sprint Lead가 피드백 내용으로 보정 규모를 자동 판단한다.
+
+| 분류 | 기준 | 예시 |
+|------|------|------|
+| **minor** | CSS/콘텐츠 수정 — 구조 변경 없음 | 간격, 색상, 크기, 텍스트, 폰트 |
+| **major** | 레이아웃 구조, 컴포넌트, 인터랙션 변경 | 탭 순서, 컴포넌트 추가/삭제, 새 상태, 내비게이션 수정 |
+
+**규칙**: 사용자에게 minor/major를 묻지 않는다. 피드백 내용에서 자동 판단. 애매하면 major로 처리.
+
+#### 3.3.2 Baseline 관리
+
+revise 진입 시 수정 전 스크린샷을 보존하여 before/after 비교에 사용한다.
+
+```
+sprints/{sprint-id}/prototypes/app/{task-id}/
+├── prototype.html
+├── screenshots/                 # 최신 (수정 후)
+└── baseline/                    # 수정 전 (revise 시 자동 생성)
+```
+
+| 시점 | 동작 |
+|------|------|
+| 최초 revise 진입 | `screenshots/` → `baseline/` 복사 |
+| 연속 revise (baseline 이미 존재) | baseline 유지, screenshots만 갱신 |
+| approve | `baseline/` 삭제 |
+| reject | `baseline/` → `screenshots/` 복원 후 baseline 삭제 |
+
+#### 3.3.3 Minor Revision (Annotation 방식)
+
+```
+1. 사용자 피드백 수집
+2. baseline 보존 (3.3.2 규칙)
+3. Design Engineer에게 수정 태스크 할당:
+   TaskCreate:
+     Subject: revise/minor/app/{task-id}
+     Description: |
+       피드백:
+       - {피드백 항목 1}
+       - {피드백 항목 2}
+       대상 파일: prototypes/app/{task-id}/prototype.html
+       변경 스크린: {ScreenName}
+     Owner: Design Engineer
+4. Design Engineer 수정 완료 후 자동 스크린샷 재캡처
+5. Visual Regression 비교 (3.3.5)
+6. 사용자 확인 → approve / revise / reject
+```
+
+#### 3.3.4 Major Revision (Live Preview 방식)
+
+```
+1. baseline 보존 (3.3.2 규칙)
+2. 로컬 서버 시작:
+   python3 -m http.server 8080 --directory sprints/{sprint-id}/prototypes/app/{task-id}/
+   사용자에게 안내: http://localhost:8080/prototype.html
+3. Design Engineer에게 수정 태스크 할당:
+   TaskCreate:
+     Subject: revise/major/app/{task-id}
+     Description: |
+       모드: live-preview
+       피드백:
+       - {피드백 항목 1}
+       - {피드백 항목 2}
+       대상 파일: prototypes/app/{task-id}/prototype.html
+       로컬 서버: http://localhost:8080/prototype.html
+     Owner: Design Engineer
+4. 대화형 수정 루프:
+   사용자 피드백 → Design Engineer 수정 → 사용자 새로고침 → 반복
+5. 사용자가 "approve" 또는 "이제 됐어" 선언
+6. 최종 스크린샷 캡처 + Visual Regression 비교 (3.3.5)
+7. 사용자 최종 확인 → approve / revise
+8. 로컬 서버 종료
+```
+
+#### 3.3.5 Visual Regression (before/after 비교)
+
+minor와 major 모두 수정 후 공통으로 실행.
+
+1. 변경된 스크린만 식별 (전체 스크린 × 전체 상태 재캡처 후 baseline과 비교)
+2. 변경된 스크린의 before/after를 side-by-side로 제시:
+
+```markdown
+## Revision 비교: {ScreenName}
+
+| Before | After |
+|--------|-------|
+| baseline/{ScreenName}-default.png | screenshots/{ScreenName}-default.png |
+
+변경 사항:
+- {피드백 항목 1 반영}
+- {피드백 항목 2 반영}
+```
+
+3. 변경되지 않은 스크린은 제시하지 않음
+
+#### 3.3.6 approval-status.yaml 확장
+
+revise를 거친 프로토타입에 revision 추적 필드를 추가:
+
+```yaml
+tasks:
+  {task-id}:
+    {ScreenName}:
+      status: approved
+      prototype: "prototype.html#{ScreenName}"
+      screenshot: "screenshots/{ScreenName}-default.png"
+      states_captured: [default, loading, empty, error]
+      revision_count: 2          # revise 횟수 (0이면 1회에 approve)
+      last_revision: "minor"     # 마지막 revise 유형 (minor | major | null)
+      quality_score: "{schema_completeness score}"
+      fabrication_risk: "{none | low | medium}"
+      reviewed_at: null
+      notes: ""
 ```
 
 #### 3.4 Gate → Phase 4
