@@ -425,277 +425,126 @@ quality_score:
 
 ---
 
-## Step B.5: Library Discovery (Step B와 C 사이)
+## Step C: Prototype Generation (Screen Spec → HTML)
 
-Figma 프로토타입 생성 전, 라이브러리에서 사용 가능한 컴포넌트를 카탈로그한다.
-
-### Discovery 프로세스
-
-```
-1. search_design_system으로 Allowlist 라이브러리 검색
-   - 검색 키워드: button, input, textfield, tab, navigation, toggle, avatar,
-     chip, badge, card, skeleton, icon, bottom sheet, snackbar, modal
-   - includeLibraryKeys 필터 필수
-2. 결과를 library-catalog.yaml로 저장
-   - available: 사용 가능 컴포넌트 (name, key, library, use_for)
-   - not_available: 라이브러리에 없어 직접 구성 필요한 컴포넌트
-3. Screen Spec의 각 컴포넌트와 카탈로그 매칭
-```
-
-**저장 경로**: `sprints/{sprint-id}/prototypes/library-catalog.yaml`
-
-### Enhanced Catalog 포맷 (Component-as-Data)
-
-> 참조: "Machine-Readable Design Systems: Designing for AI as a User" — AIX 원칙
-
-카탈로그의 각 컴포넌트에 행동·상태·레이아웃 메타데이터를 추가한다.
-이 메타데이터는 Step C에서 AI가 올바른 variant를 선택하고 올바른 위치에 배치하는 데 사용된다.
-
-```yaml
-available:
-  - name: "RegularButton"
-    library: "U_Foundation 2.0"
-    key: "{componentKey}"
-    type: "component_set"
-    use_for: "Primary/Secondary 버튼"
-    variants:
-      - "Status=Active, Sizes=Large, Icon=False"
-      - "Status=Disable, Sizes=Large, Icon=False"
-    # === Enhanced Metadata ===
-    behavior:
-      action_type: "submit | navigate | toggle | dismiss"
-      feedback: "visual state change"
-    state_map:
-      default: "Status=Active"
-      disabled: "Status=Disable"
-      loading: null            # 로딩 variant 없음 → custom 구성 필요
-    layout_rules:
-      sizing: "fill-width in parent | hug-content"
-      min_height: "48px"
-      spacing_inside: "16px horizontal"
-    overridable_props:
-      - property: "label"
-        node_type: "TEXT"
-        description: "버튼 텍스트"
-      - property: "icon"
-        node_type: "INSTANCE"
-        description: "좌측 아이콘 (선택)"
-    composition_notes: "CTA 영역에서는 full-width, 인라인에서는 hug-content"
-
-not_available:
-  - name: "Avatar / Profile Image"
-    fallback_spec:
-      type: "custom-frame"
-      tokens: { fill: "semantic.fill.neutral", radius: "full" }
-      sizes: ["24x24", "40x40", "80x80"]
-  - name: "Tab Bar"
-    fallback_spec:
-      type: "custom-frame"
-      layout: "horizontal, space-between"
-      tokens: { active: "semantic.fill.brand-primary", inactive: "semantic.label.assistive" }
-```
-
----
-
-## Step C: Prototype Generation (Screen Spec → Figma)
-
-작성된 screen spec 파일과 library catalog를 읽어 Figma 프로토타입을 생성한다.
+작성된 screen spec 파일과 tokens.css를 읽어 self-contained HTML 프로토타입을 생성한다.
 
 ### C.1 사전 준비
 
-1. **`figma-use` 스킬 로드** (필수)
-2. **`figma-generate-design` 스킬 로드** (권장 — 디자인 시스템 연동 워크플로우)
-3. **library-catalog.yaml 읽기** — 사용 가능 컴포넌트 확인
-4. **context-engine.yaml 읽기** — HOW 레이어의 composition_rules 확인
+1. **`tokens.css` 읽기** — `sprints/{sprint-id}/prototypes/context/tokens.css`
+2. **HTML 템플릿 참조** — `sprint-orchestrator/templates/html-prototype-template.html`
+3. **context-engine.yaml 읽기** — HOW 레이어의 composition_rules 확인
+4. **모든 Screen Spec 읽기** — 해당 태스크의 모든 `{ScreenName}.spec.md` 파일
 
-### C.2 Intent-Driven Multi-Pass Generation
+### C.2 HTML Generation Passes
 
-> 참조: "Intent-Driven Context for AI Design Systems" — 컨텍스트는 문서가 아니라 의도다
-
-한 번에 완성하지 않는다. 단계별로 쌓아 올리되, **각 Pass에 필요한 컨텍스트만 스코프하여 투입한다**.
+Screen Spec을 HTML로 변환할 때도 단계적으로 구성한다.
 
 ```
-Pass 1: Structure  — 화면 프레임 + Auto Layout 계층 구성
-  Context: Layout Spec (ASCII) + Component Tree (계층만) + HOW.constraints
-  Intent: "화면의 뼈대를 잡는다"
+Pass 1: Structure  — 스크린 프레임 + 레이아웃 구조 생성
+  Input: Layout Spec + Component Tree (계층만)
+  Output: <section> 구조 + CSS flex/grid 레이아웃
 
-Pass 2: Library    — 카탈로그 매칭 컴포넌트를 라이브러리 인스턴스로 교체
-  Context: Component Details (library 필드만) + catalog.available + catalog.state_map
-  Intent: "디자인 시스템 컴포넌트를 배치한다"
+Pass 2: Components — 컴포넌트를 HTML 요소로 변환
+  Input: Component Details (tag, id, tokens) + Token Map
+  Output: 각 컴포넌트의 HTML + CSS 스타일
 
-Pass 3: Custom     — 라이브러리에 없는 컴포넌트는 직접 구성 (Token Map 적용)
-  Context: Component Details (tokens 필드만) + catalog.not_available.fallback_spec + Token Map
-  Intent: "커스텀 요소를 토큰 기반으로 구성한다"
+Pass 3: Content    — 한국어 라벨 + placeholder 콘텐츠
+  Input: Labels (ko) + Component Details (behavior.purpose)
+  Output: 텍스트, placeholder 이미지, 아이콘
 
-Pass 4: Content    — 한국어 라벨 + 실제적인 placeholder 콘텐츠
-  Context: Labels (ko) + Component Details (behavior.purpose) + WHY.user_stories
-  Intent: "실제 사용 맥락에 맞는 콘텐츠를 채운다"
+Pass 4: States     — 상태별 가시성 + state 컨테이너
+  Input: States (visible/hidden mapping)
+  Output: data-state 속성 + 상태별 대체 콘텐츠 (empty, loading, error)
 
-Pass 5: Validate   — get_screenshot으로 시각적 검증, 이슈 수정
-  Context: Layout Spec (ASCII와 스크린샷 비교) + quality_score
-  Intent: "설계와 결과의 차이를 식별하고 수정한다"
+Pass 5: Interactions — 내비게이션 + 이벤트 바인딩
+  Input: Interactions (trigger/target/action/destination)
+  Output: JS 이벤트 리스너 + Control Panel 구성
 
-Pass 6: Flow       — 화면 간 UX 플로우 연결 (Prototype Connections)
-  Context: Interactions (navigation 필드만) + WHY.acceptance_criteria
-  Intent: "사용자 여정을 프로토타입으로 재현한다"
+Pass 6: Polish     — 통합 검증 + 미세 조정
+  Input: 전체 HTML 결과물
+  Output: 최종 prototype.html
 ```
 
 ### C.3 Pass별 컨텍스트 스코핑 규칙
 
-> 참조: "Intent-Driven Context for AI Design Systems" — 모든 것을 넣지 말고 의도에 필요한 것만 넣는다
-
 | Pass | 투입 컨텍스트 | 제외 컨텍스트 | 이유 |
 |------|-------------|-------------|------|
-| 1 Structure | Layout ASCII, Tree 계층, HOW constraints | Labels, Token 값, Interactions | 구조에 텍스트/색상 불필요 |
-| 2 Library | library 필드, catalog available, state_map | Token Map, custom fallback | 라이브러리 컴포넌트만 다룸 |
-| 3 Custom | tokens 필드, not_available fallback, Token Map | library 필드, Interactions | 커스텀 요소만 다룸 |
-| 4 Content | Labels, behavior.purpose, WHY stories | Token Map, layout | 텍스트 채우기에 시각 토큰 불필요 |
-| 5 Validate | Layout ASCII, screenshot, quality_score | WHY 전체, HOW 전체 | 시각적 비교에만 집중 |
-| 6 Flow | Interactions, AC의 navigation 관련 항목 | Token Map, Labels | 플로우 연결에만 집중 |
+| 1 Structure | Layout Spec, Tree 계층 | Labels, Token 값, Interactions | 구조에 텍스트/색상 불필요 |
+| 2 Components | Component Details (tag, id, tokens), Token Map | Interactions, States | 개별 요소 스타일링에 집중 |
+| 3 Content | Labels, behavior.purpose, WHY stories | Token Map, Layout | 텍스트 채우기에 시각 토큰 불필요 |
+| 4 States | States (visible/hidden), component tree | Interactions | 상태 분기에만 집중 |
+| 5 Interactions | Interactions, Screen 목록 | Token Map, Labels | 이벤트 바인딩에만 집중 |
+| 6 Polish | 전체 HTML 결과물 | 개별 Spec 섹션 | 통합 검증에만 집중 |
 
-**원칙**: 적시에 적절한 컨텍스트를 투입한다. 잘못된 시점의 올바른 메타데이터는 노이즈이고, 올바른 시점의 잘못된 메타데이터는 환각의 원인이다.
+**원칙**: 적시에 적절한 컨텍스트를 투입한다.
 
-### C.4 Library Component 활용 패턴
+### C.4 HTML 생성 규칙
 
-라이브러리 컴포넌트를 import하여 사용할 때의 패턴:
-
-```
-1. importComponentByKeyAsync(key) → 컴포넌트 참조 획득
-2. component.createInstance() → 인스턴스 생성
-3. parent.appendChild(instance) → 배치
-4. instance.layoutSizingHorizontal = 'FILL' → Auto Layout 설정 (appendChild 후)
-```
-
-**Variant 선택 시 catalog의 state_map 참조**:
-```
-// catalog에 state_map이 있는 경우
-// state_map.default → 기본 variant 선택
-// state_map.disabled → disabled 상태 프레임에서 사용
-// state_map.loading === null → skeleton으로 대체
-```
-
-**텍스트 Override (Pretendard 폰트 미가용 시):**
-
-라이브러리 컴포넌트가 Pretendard를 사용하나 Figma 환경에 설치되지 않은 경우:
+**파일 구조**: 태스크당 하나의 self-contained HTML 파일.
 
 ```
-1. instance.detachInstance() → 일반 프레임으로 변환
-2. 내부 TEXT 노드를 찾아 삭제
-3. 새 TEXT 노드 생성 (Inter 폰트, 동일 fontSize/fills)
-4. parent.insertChild(index, newText) → 같은 위치에 삽입
+sprints/{sprint-id}/prototypes/app/{task-id}/prototype.html
 ```
 
-**주의**: detach하면 라이브러리 업데이트가 반영되지 않으므로, Pretendard 폰트가 가용한 환경에서는 detach 없이 직접 override하는 것이 이상적.
+**필수 요소**:
 
-### C.5 컴포넌트 매핑 기준
+1. **tokens.css inline** — `<style>` 내에 `tokens.css` 내용을 그대로 포함
+2. **모바일 프레임** — `.device-frame` 390x844px 고정
+3. **스크린 구조** — 각 화면은 `<section class="screen" id="{ScreenName}">` 으로 구분
+4. **상태 컨테이너** — `data-state="{stateName}"` 속성으로 상태별 콘텐츠 구분
+5. **Control Panel** — device frame 외부에 스크린 선택, 상태 토글, breadcrumb
+6. **이벤트 바인딩** — Screen Spec의 interactions를 JS `addEventListener`로 변환
 
-Screen Spec의 컴포넌트 타입별 라이브러리 매핑:
+**컴포넌트 렌더링 규칙**:
 
-| Spec type | Library Component | 비고 |
-|-----------|------------------|------|
-| `button-primary` | RegularButton (Active/Large) | 텍스트 override 필요 |
-| `button-secondary` | RegularButton (Active/Large) + detach + fill 변경 | 또는 별도 variant |
-| `icon-button` | IconButton | variant 선택 |
-| `input` | Textfield | placeholder override |
-| `button-cta` | CTA | 하단 고정 CTA |
-| `toast` | snackbar | 토스트 메시지 |
-| `chip` | Category_Button | 카테고리/태그 |
+| Spec type | HTML 렌더링 | CSS |
+|-----------|-----------|-----|
+| `button-primary` | `<button class="btn-primary">` | `background: var(--component-button-primary-fill); color: var(--component-button-primary-label); border-radius: var(--radius-md); padding: 16px; width: 100%;` |
+| `button-secondary` | `<button class="btn-secondary">` | `background: var(--color-fill-neutral); color: var(--color-label-normal); border-radius: var(--radius-md); padding: 16px;` |
+| `icon-button` | `<button class="icon-btn">` | 24x24, no background |
+| `input` | `<div class="input-field">` | `background: var(--component-input-fill); border-radius: var(--component-input-radius); padding: 12px 16px;` |
+| `card` | `<div class="card">` | `background: var(--component-card-fill); border-radius: var(--component-card-radius); padding: 16px;` |
+| `avatar` | `<div class="avatar placeholder-image">` | circular, `border-radius: var(--radius-full);` |
+| `image` | `<div class="placeholder-image">` | label 텍스트로 용도 표시 |
+| `skeleton` | `<div class="skeleton">` | shimmer animation |
+| `divider` | `<hr class="divider">` | `border-color: var(--color-line-normal);` |
+| `tabs` | `<div class="tab-bar">` | horizontal flex, active tab에 brand color underline |
+| `bottom-sheet` | `<div class="overlay-content" id="{Name}">` | overlay-backdrop 내부, slide-up |
+| `navigation` | `<nav class="bottom-nav">` | 5-tab flex, sticky bottom |
 
-### C.6 Figma 파일 구조
+**아이콘 처리**: 인라인 텍스트 placeholder 사용 (예: `←`, `⋮`, `♡`, `🔔`, `+`). SVG가 필요한 경우 간단한 인라인 SVG로 구성.
 
-- Page: `Sprint {sprint-id} Prototypes`
-- Frame: `{task-id}/{ScreenName}` (390x844 iPhone 14 Pro)
+**이미지 처리**: `<div class="placeholder-image" style="width:W;height:H">{설명}</div>` 형태로 용도를 텍스트로 표시.
 
-### C.7 State Variant 프레임
+### C.5 Interactions → JS 변환 규칙
 
-States에 정의된 각 상태별로 별도 프레임을 생성한다:
-- `{task-id}/{ScreenName}` — default
-- `{task-id}/{ScreenName}/empty` — 빈 상태
-- `{task-id}/{ScreenName}/loading` — 로딩
-- `{task-id}/{ScreenName}/error` — 에러
+Screen Spec의 `interactions` 섹션을 JavaScript 이벤트 바인딩으로 변환한다.
 
-**catalog의 state_map 활용**: 라이브러리 컴포넌트에 해당 상태 variant가 있으면 variant를 교체, 없으면 (null) custom fallback으로 대체.
+| action | JS 코드 |
+|--------|---------|
+| `navigate` | `el.addEventListener('click', () => navigate('{destination}', '{transition}'))` |
+| `toggle-state` | `el.addEventListener('click', () => toggleState('{state_key}'))` |
+| `open-overlay` | `el.addEventListener('click', () => openOverlay('{destination}', '{transition}'))` |
+| `close-overlay` | `el.addEventListener('click', () => closeOverlay())` |
+| `switch-tab` | 탭 UI 내부 active 클래스 토글 + 콘텐츠 전환 |
+| `go-back` | `el.addEventListener('click', () => goBack())` |
 
-### C.8 UX Flow Connections (Pass 6)
+### C.6 Control Panel 구성
 
-모든 화면 프레임 생성 후, Screen Spec의 `Interactions` 섹션을 기반으로 Figma Prototype Connections를 설정한다.
+HTML 상단의 Control Panel은 자동으로 구성된다:
 
-#### Flow 연결 규칙
+1. **Screen Select** — 모든 `<section class="screen">` 의 id를 `<option>`으로 나열
+2. **State Buttons** — 현재 스크린의 Screen Spec `states` 키를 버튼으로 생성
+3. **Breadcrumb** — 내비게이션 히스토리를 `→`로 연결하여 표시
 
-| Interaction 유형 | Figma Prototype Action | 예시 |
-|-----------------|----------------------|------|
-| 화면 전환 (navigation) | `Navigate to` → 대상 프레임 | 팔로워 탭 → FollowListScreen |
-| 바텀시트 열기 | `Open overlay` → 바텀시트 프레임 (position: bottom) | 차단하기 → BlockConfirmBottomSheet |
-| 모달 열기 | `Open overlay` → 모달 프레임 (position: center) | 최초 공개 → PaybackFirstTimeModal |
-| 뒤로가기 | `Navigate to` → 이전 프레임 또는 `Back` | BackButton → 이전 화면 |
-| 닫기/취소 | `Close overlay` | 바텀시트 취소 버튼 → 닫기 |
-| 탭 전환 | `Swap with` → 해당 탭 상태 프레임 | 게시물 탭 ↔ 비공개 탭 ↔ 좋아요 탭 |
+### C.7 Manual Fallback
 
-#### 설정 방법 (`use_figma` 활용)
-
-```javascript
-// 1. 소스 노드(버튼 등)에 reaction 추가
-const sourceNode = figma.getNodeById(buttonNodeId);
-sourceNode.reactions = [
-  {
-    action: {
-      type: "NODE",               // Navigate to
-      destinationId: targetFrameId,
-      navigation: "NAVIGATE",     // NAVIGATE | OVERLAY | SWAP
-      transition: {
-        type: "SLIDE_IN",         // SLIDE_IN | DISSOLVE | MOVE_IN
-        direction: "LEFT",
-        duration: 0.3,
-        easing: { type: "EASE_OUT" }
-      }
-    },
-    trigger: { type: "ON_CLICK" }
-  }
-];
-
-// 2. 바텀시트 오버레이
-sourceNode.reactions = [
-  {
-    action: {
-      type: "NODE",
-      destinationId: bottomSheetFrameId,
-      navigation: "OVERLAY",
-      overlayRelativePosition: { x: 0, y: 0 },  // bottom-aligned
-      transition: {
-        type: "SLIDE_IN",
-        direction: "UP",
-        duration: 0.3,
-        easing: { type: "EASE_OUT" }
-      }
-    },
-    trigger: { type: "ON_CLICK" }
-  }
-];
-
-// 3. 오버레이 닫기
-closeButton.reactions = [
-  {
-    action: { type: "BACK" },
-    trigger: { type: "ON_CLICK" }
-  }
-];
-```
-
-#### Flow 커버리지 체크리스트
-
-- [ ] 모든 `navigation` 필드가 non-null인 Interaction에 대해 연결 설정
-- [ ] 바텀시트/모달은 overlay로 설정 (navigate 아님)
-- [ ] 닫기/취소/뒤로 버튼에 Back action 설정
-- [ ] 탭 전환 시 동일 화면의 탭 variant 프레임으로 swap
-- [ ] Figma Play 모드에서 전체 플로우가 재생 가능한지 검증
-
-### C.9 Manual Fallback
-
-Figma MCP가 사용 불가하거나 실패하면:
+HTML 생성이 실패하면:
 1. Screen Spec 파일이 이미 존재하므로, 이것이 성과물이 된다
 2. Sprint Lead에게 메시지:
    ```
-   Figma MCP 사용 불가. Screen Spec 기반 수동 생성 필요:
+   HTML 프로토타입 생성 실패. Screen Spec 기반 수동 확인 필요:
    Spec 경로: prototypes/app/{task-id}/{ScreenName}.spec.md
    ```
 
