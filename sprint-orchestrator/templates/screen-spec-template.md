@@ -1,6 +1,6 @@
 # Screen Spec: {ScreenName}
 
-> Machine-readable 화면 명세. Design Engineer agent가 이 파일을 읽어 Figma 프로토타입을 생성한다.
+> Machine-readable 화면 명세. Design Engineer agent가 이 파일을 읽어 HTML 프로토타입을 생성한다.
 > 모든 필드는 구조화되어 있으며, 산문(prose)은 사용하지 않는다.
 
 ## Meta
@@ -18,23 +18,23 @@ theme: "light"
 
 ## Component Tree
 
-들여쓰기로 계층 구조를 표현한다. 각 노드는 `ComponentName [type] — 설명` 형식.
+들여쓰기로 계층 구조를 표현한다. 각 노드는 `ComponentName [type] (tag) #id — 설명` 형식.
 
 ```
 Screen [frame: 390x844]
-├── StatusBar [system]
-├── Header [container]
-│   ├── BackButton [icon-button] — 뒤로가기
-│   ├── Title [text] — "{화면 타이틀}"
-│   └── ActionButton [icon-button] — {액션 설명}
-├── Body [scroll-container]
-│   ├── {SectionName} [container]
-│   │   ├── {ComponentName} [type] — {설명}
+├── StatusBar [system] (div) #status-bar
+├── Header [container] (header) #header
+│   ├── BackButton [icon-button] (button) #back-button — 뒤로가기
+│   ├── Title [text] (h1) #title — "{화면 타이틀}"
+│   └── ActionButton [icon-button] (button) #action-button — {액션 설명}
+├── Body [scroll-container] (main) #body
+│   ├── {SectionName} [container] (section) #{section-id}
+│   │   ├── {ComponentName} [type] (tag) #{id} — {설명}
 │   │   └── ...
 │   └── ...
-├── BottomAction [container] — (있는 경우만)
-│   └── CTAButton [button-primary] — "{버튼 텍스트}"
-└── BottomNav [navigation] — 5탭 (홈, 검색, 만들기, 알림, MY)
+├── BottomAction [container] (div) #bottom-action — (있는 경우만)
+│   └── CTAButton [button-primary] (button) #cta-button — "{버튼 텍스트}"
+└── BottomNav [navigation] (nav) #bottom-nav — 5탭 (홈, 검색, 만들기, 알림, MY)
 ```
 
 ### Component Details
@@ -44,15 +44,12 @@ Screen [frame: 390x844]
 ```yaml
 components:
   - name: "{ComponentName}"
+    id: "{html-element-id}"
+    tag: "{header | main | nav | section | div | button | h1 | p | img | input | ul | li | span}"
     type: "{container | text | button-primary | button-secondary | icon-button | image | input | list | grid | tabs | chip | badge | toggle | bottom-sheet | avatar | card | divider | skeleton}"
     position: "{top | center | bottom | sticky-top | sticky-bottom | overlay}"
     size: "{width}x{height} | full-width | wrap-content"
-    library:                              # library-catalog.yaml에서 매칭된 경우
-      key: "{componentKey}"              # importComponentByKeyAsync에 전달
-      variant: "{variant name}"          # 예: "Status=Active, Sizes=Large, Icon=False"
-      overrides:
-        label: "{텍스트 override}"
-    tokens:                               # library에 없는 경우 직접 스타일 적용
+    tokens:
       fill: "{semantic.xxx | component.xxx | #HEX}"
       text: "{semantic.label.xxx}"
       border: "{semantic.line.xxx | none}"
@@ -63,8 +60,7 @@ components:
     notes: "{특이사항}"
 ```
 
-> `library` 필드가 있으면 Step C에서 `importComponentByKeyAsync`로 라이브러리 인스턴스를 사용한다.
-> `library` 필드가 없으면 `tokens`로 직접 구성한다.
+> `tag`와 `id` 필드는 Step C에서 HTML 요소 생성 시 사용한다. `tokens` 필드로 CSS 스타일을 적용한다.
 
 ### Enhanced Component Metadata
 
@@ -108,47 +104,50 @@ components:
 
 ## Layout Spec
 
-화면의 전체 레이아웃을 ASCII로 표현한다.
+화면의 전체 레이아웃을 구조화된 CSS 레이아웃 힌트로 표현한다.
 
-```
-┌─────────────────────────────┐ 390px
-│ StatusBar (44px)            │
-├─────────────────────────────┤
-│ Header (56px)               │
-│ [← Back] [Title] [Action]  │
-├─────────────────────────────┤
-│                             │
-│ Scrollable Body             │
-│                             │
-│ ┌─────────────────────────┐ │
-│ │ Section A               │ │
-│ └─────────────────────────┘ │
-│ ┌─────────────────────────┐ │
-│ │ Section B               │ │
-│ └─────────────────────────┘ │
-│                             │
-├─────────────────────────────┤
-│ Bottom Nav (83px)           │
-│ [홈] [검색] [+] [알림] [MY]│
-└─────────────────────────────┘ 844px
+```yaml
+layout_spec:
+  type: flex-column
+  viewport: 390x844
+  regions:
+    - id: status-bar
+      height: fixed(44px)
+    - id: header
+      sticky: top
+      height: fixed(56px)
+    - id: body
+      scroll: vertical
+      flex: 1
+      children:
+        - id: "{section-id}"
+          type: flex-column
+          gap: "{N}px"
+    - id: bottom-action
+      sticky: bottom
+      height: fixed(auto)
+      padding: "16px 16px 34px"
+    - id: bottom-nav
+      sticky: bottom
+      height: fixed(83px)
 ```
 
 ## States
 
-화면의 모든 상태를 열거한다. 각 상태별로 **무엇이 달라지는지**만 명시.
+화면의 모든 상태를 열거한다. 각 상태별로 visible/hidden 컴포넌트를 매핑한다.
 
 ```yaml
 states:
   default:
     description: "기본 상태"
-    visible: ["모든 컴포넌트"]
+    active: true
+    visible_components: [body]
+    hidden_components: []
 
   empty:
     description: "콘텐츠 없음"
-    changes:
-      - target: "Body"
-        action: "replace"
-        with: "EmptyState [container] — 일러스트 + 안내 문구 + CTA"
+    visible_components: [empty-state-view]
+    hidden_components: [body]
     labels:
       title: "{빈 상태 제목}"
       description: "{빈 상태 설명}"
@@ -156,17 +155,13 @@ states:
 
   loading:
     description: "로딩 중"
-    changes:
-      - target: "{ComponentName}"
-        action: "replace"
-        with: "Skeleton [skeleton] — {크기 설명}"
+    visible_components: [skeleton-loader]
+    hidden_components: [body, empty-state-view]
 
   error:
     description: "에러 발생"
-    changes:
-      - target: "Body"
-        action: "replace"
-        with: "ErrorState [container] — 에러 아이콘 + 메시지 + 재시도"
+    visible_components: [error-view]
+    hidden_components: [body]
     labels:
       message: "{에러 메시지}"
       retry: "다시 시도"
@@ -174,21 +169,37 @@ states:
 
 ## Interactions
 
-사용자 행동 → 화면 반응을 매핑한다. 기술 용어 없이 UX 관점만.
+사용자 행동 → 화면 반응을 구조화된 이벤트 바인딩으로 매핑한다.
 
 ```yaml
 interactions:
-  - trigger: "{유저 행동}"
-    response: "{화면 반응}"
-    navigation: "{이동 대상 화면 | null}"
+  - trigger: tap
+    target: "#{element-id}"
+    action: navigate
+    destination: "{ScreenName}"
+    transition: slide-left
 
-  - trigger: "탭: {탭명}"
-    response: "해당 탭 콘텐츠로 전환"
-    navigation: null
+  - trigger: tap
+    target: "#{tab-id}"
+    action: switch-tab
+    destination: null
+    transition: none
 
-  - trigger: "탭: {컴포넌트명}"
-    response: "{바텀시트 열기 | 화면 전환 | 토글}"
-    navigation: "{ScreenName | BottomSheetName | null}"
+  - trigger: tap
+    target: "#{element-id}"
+    action: toggle-state
+    state_key: "{state-name}"
+
+  - trigger: tap
+    target: "#{element-id}"
+    action: open-overlay
+    destination: "{BottomSheetName}"
+    transition: slide-up
+
+  - trigger: tap
+    target: "#{close-button-id}"
+    action: close-overlay
+    transition: slide-down
 ```
 
 ## Visual Rules
@@ -259,9 +270,9 @@ tokens:
 quality_score:
   extraction_accuracy:
     total_components: {N}
-    with_library_match: {N}
     with_token_map: {N}
-    score: "{with_library_match + with_token_map} / {total_components * 2}"
+    with_html_mapping: {N}
+    score: "{with_token_map + with_html_mapping} / {total_components * 2}"
   fabrication_risk:
     inferred_fields: ["{AI가 PRD에 없는 내용을 추론한 필드 목록}"]
     risk_level: "{none | low | medium | high}"

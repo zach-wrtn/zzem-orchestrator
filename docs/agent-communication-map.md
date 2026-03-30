@@ -41,7 +41,7 @@
 └──────┬─────┘ └──────┬─────┘ └──────┬─────┘ └──────┬─────┘
        │              │              │              │
        ▼              ▼              ▼              ▼
-   Figma 프로토타입  worktree 커밋   worktree 커밋   Evaluation
+   HTML 프로토타입   worktree 커밋   worktree 커밋   Evaluation
    + Screen Spec                                    Report
 ```
 
@@ -81,14 +81,14 @@
 │  .md   │ │  .md   │   │  .md   │    │  group-N   │
 │• design│ │• api-  │   │• api-  │    │• 머지된 코드│
 │  tokens│ │  contract│ │  contract│  │• evaluation│
-│        │ │• repo  │   │• Figma │    │  /criteria │
-│ 쓰는것: │ │  skills│   │  스크린샷│   │            │
+│        │ │• repo  │   │• HTML  │    │  /criteria │
+│ 쓰는것: │ │  skills│   │  prototype│  │            │
 │• context││        │   │• repo  │    │ 쓰는것:     │
 │  engine│ │ 쓰는것: │   │  skills│    │• evaluation│
 │• screen│ │• 구현  │   │        │    │  /group-N  │
 │  spec  │ │  코드  │   │ 쓰는것: │    │  .md       │
-│• Figma │ │        │   │• 구현  │    │            │
-│  디자인 │ │        │   │  코드  │    │            │
+│• HTML  │ │        │   │• 구현  │    │            │
+│  proto │ │        │   │  코드  │    │            │
 │• approv│ │        │   │        │    │            │
 │  status│ │        │   │        │    │            │
 └───┬────┘ └───┬────┘   └───┬────┘    └───┬────────┘
@@ -110,7 +110,7 @@
 | **Sprint Lead → 각 Agent** | `TaskCreate` + `SendMessage` | 태스크 할당, 컨텍스트 전달, fix 요청 |
 | **각 Agent → Sprint Lead** | `TaskUpdate` + `SendMessage` | 완료 보고, 질문, 실패 보고 |
 | **Sprint Lead ↔ Evaluator** | Sprint Contract (`contracts/group-{N}.md`) | Done Criteria 합의 + 평가 결과 |
-| **Design → FE** (간접) | **파일 기반** (`prototypes/app/{id}/`) | Screen Spec + Figma 스크린샷 + URL을 FE가 참조 |
+| **Design → FE** (간접) | **파일 기반** (`prototypes/app/{id}/`) | Screen Spec + HTML 프로토타입 + 스크린샷을 FE가 참조 |
 | **BE ↔ FE** (간접) | **파일 기반** (`api-contract.yaml`) | API 스키마가 양측의 공통 계약 |
 | **BE/FE → Evaluator** (간접) | **파일 기반** (sprint 브랜치 코드) | 머지된 코드를 Evaluator가 능동 평가 |
 | **Evaluator → BE/FE** (간접) | Sprint Lead 경유 (`SendMessage`) | ISSUES/FAIL 시 Sprint Lead가 fix 재할당 |
@@ -140,7 +140,7 @@ sprint 브랜치 코드          ← 엔지니어가 쓰고, Evaluator가 읽음
 ### 4.3 시간적 의존성 (실행 순서)
 
 ```
-Phase 3: Design Engineer (Context Engine → Screen Spec → Figma 프로토타입 + 사용자 승인)
+Phase 3: Design Engineer (Context Engine → Screen Spec → HTML 프로토타입 + 사용자 승인)
                 │
                 ▼ approved 프로토타입이 task.md에 Prototype Reference로 추가
 Phase 4: 그룹 단위 반복 루프

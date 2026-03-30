@@ -10,7 +10,7 @@
 > **v3 → v4 주요 변경**:
 > - QA Engineer → **Evaluator** (능동적 평가, Self-QA 제거)
 > - 일괄 디스패치 → **그룹 단위 반복 루프** (Sprint Contract 기반)
-> - `figma-prompt-template.md` → **screen-spec-template.md** + Design Engineer 3단계 파이프라인
+> - `figma-prompt-template.md` → **screen-spec-template.md** + **html-prototype-template.html** + Design Engineer 3단계 파이프라인
 > - Phase 이름 변경: Plan → **Spec**, Execute → **Build**
 
 > **v2 Shell Scripts → v3 Agent Teams 전환 완료.**

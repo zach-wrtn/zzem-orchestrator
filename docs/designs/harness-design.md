@@ -72,7 +72,7 @@ sprints/{sprint-id}/
 ├── tasks/{project}/*.md    # Planner → Generator (태스크 명세)
 ├── contracts/group-{N}.md  # Planner → Generator + Evaluator (합의)
 ├── evaluations/group-{N}.md # Evaluator → Generator (피드백)
-└── prototypes/app/         # Design → Generator (시각적 참조)
+└── prototypes/app/         # Design → Generator (HTML 프로토타입 → 시각적 참조)
 ```
 
 ### 2.5 Deliverable-Focused Specification
@@ -143,7 +143,7 @@ Evaluator에게 제공하는 캘리브레이션:
 ```
 Phase 1: Init ──────────────── Sprint Lead solo
 Phase 2: Spec ──────────────── Sprint Lead as Planner
-Phase 3: Prototype ─────────── Sprint Lead + Design Engineer
+Phase 3: Prototype (Planner+Design → HTML) ── Sprint Lead + Design Engineer
 Phase 4: Build ─────────────── Iterative Loop
   │
   ├─ For each group:
