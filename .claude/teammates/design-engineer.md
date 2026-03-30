@@ -105,7 +105,7 @@ WDS(Wrtn Design System) 토큰을 반드시 준수한다:
 │  Layer 1: WHY (Business Intent)         │ ← PRD에서 추출
 │  "이 화면이 왜 존재하는가"                │
 ├─────────────────────────────────────────┤
-│  Layer 2: WHAT (Design System)          │ ← design-tokens/ + library에서 추출
+│  Layer 2: WHAT (Design System)          │ ← design-tokens/에서 추출
 │  "어떤 요소로 구성되는가"                 │
 ├─────────────────────────────────────────┤
 │  Layer 3: HOW (Orchestration Rules)     │ ← 이 문서의 규칙 + task 규칙에서 추출
@@ -153,8 +153,6 @@ what:
   components_needed:
     - name: "{ComponentName}"
       category: "{navigation | content | input | feedback | layout}"
-      source: "{library | custom}"
-      library_key: "{key | null}"
   patterns_needed:
     - name: "{PatternName}"
       description: "{예: 무한 스크롤 리스트, 탭 기반 콘텐츠 전환}"
@@ -183,12 +181,97 @@ how:
 
 ### A.3 Context Engine 저장
 
-**저장 경로**: `sprints/{sprint-id}/prototypes/context/context-engine.yaml`
+**저장 경로**:
+- `sprints/{sprint-id}/prototypes/context/context-engine.yaml`
+- `sprints/{sprint-id}/prototypes/context/tokens.css`
 
 **품질 검증** (Zero-Contamination 원칙):
 - WHY 레이어의 모든 내용은 PRD 원문에서 직접 추출 (AI 추론/보완 금지)
 - WHAT 레이어의 토큰 값은 `design-tokens/`에서 직접 조회 (추측 금지)
 - HOW 레이어의 규칙은 태스크 파일 + 이 문서에서만 도출
+
+### A.4 디자인 토큰 CSS 변환
+
+`design-tokens/` JSON 파일을 CSS Custom Properties로 변환하여 `tokens.css`를 생성한다.
+HTML 프로토타입이 이 파일을 inline으로 포함한다.
+
+**변환 규칙**:
+
+| JSON key path | CSS variable |
+|---------------|-------------|
+| `color.brand.primary` | `--color-brand-primary` |
+| `color.bg.normal` | `--color-bg-normal` |
+| `font.size.body` | `--font-size-body` |
+| `spacing.{N}` | `--spacing-{N}` |
+| `radius.{name}` | `--radius-{name}` |
+| `semantic.label.normal` | `--color-label-normal` |
+| `component.button.primary.fill` | `--component-button-primary-fill` |
+
+**생성 예시**:
+```css
+:root {
+  /* Color - Brand */
+  --color-brand-primary: #8752FA;
+  --color-brand-primary-dark: #A17BFF;
+
+  /* Color - Background */
+  --color-bg-normal: #FFFFFF;
+
+  /* Color - Label */
+  --color-label-normal: #212228;
+  --color-label-alternative: #6B6E76;
+  --color-label-assistive: #8E9199;
+
+  /* Color - Line */
+  --color-line-normal: #E4E5E9;
+
+  /* Color - Fill */
+  --color-fill-neutral: #F0F1F3;
+  --color-fill-brand-primary: #8752FA;
+
+  /* Typography */
+  --font-family-default: 'Pretendard', -apple-system, 'SF Pro', sans-serif;
+  --font-size-heading1: 24px;
+  --font-size-heading2: 20px;
+  --font-size-body1: 16px;
+  --font-size-body2: 14px;
+  --font-size-caption: 12px;
+  --font-weight-bold: 700;
+  --font-weight-medium: 500;
+  --font-weight-regular: 400;
+
+  /* Spacing (4px grid) */
+  --spacing-0: 0px;
+  --spacing-1: 4px;
+  --spacing-2: 8px;
+  --spacing-4: 16px;
+  --spacing-6: 24px;
+  --spacing-8: 32px;
+
+  /* Radius */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+  --radius-full: 9999px;
+
+  /* Component Tokens */
+  --component-button-primary-fill: #8752FA;
+  --component-button-primary-label: #FFFFFF;
+  --component-card-fill: #FFFFFF;
+  --component-card-radius: 16px;
+  --component-input-fill: #F7F8F9;
+  --component-input-radius: 12px;
+  --component-nav-active: #8752FA;
+  --component-nav-inactive: #8E9199;
+}
+```
+
+**저장 경로**: `sprints/{sprint-id}/prototypes/context/tokens.css`
+
+**Zero-Contamination**: 토큰 값은 `design-tokens/` JSON에서 직접 변환한다. 값을 추측하거나 보완하지 않는다.
 
 ---
 
