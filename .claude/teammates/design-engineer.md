@@ -294,8 +294,8 @@ HTML 프로토타입이 이 파일을 inline으로 포함한다.
 
 1. **산문(prose) 금지** — 모든 내용은 YAML 블록, 테이블, 들여쓰기 트리 형식으로 작성
 2. **Component Tree 필수** — 화면의 전체 컴포넌트 계층을 들여쓰기 트리로 표현
-3. **Layout Spec 필수** — ASCII 다이어그램으로 화면 레이아웃을 시각화
-4. **States 전수 나열** — default, empty, loading, error + 화면 특화 상태
+3. **Layout Spec 필수** — CSS 레이아웃 힌트(flex/grid/sticky)로 화면 레이아웃을 구조화
+4. **States 전수 나열** — default, empty, loading, error + 화면 특화 상태, visible/hidden 컴포넌트 매핑 포함
 5. **Labels 빠짐없이** — PRD의 한국어 텍스트를 모두 추출하여 labels 블록에 기재
 6. **Token Map 완전성** — 화면에서 사용하는 모든 WDS 토큰을 `design-tokens/`에서 조회하여 매핑
 
@@ -303,10 +303,10 @@ HTML 프로토타입이 이 파일을 inline으로 포함한다.
 
 | 태스크 섹션 | Screen Spec 섹션 | 추출 방법 |
 |------------|-----------------|----------|
-| `Screens / Components` | Component Tree + Component Details | 컴포넌트 계층 구조화, `(new)` 표시는 새 컴포넌트 |
-| `User Interactions` | Interactions | trigger → response → navigation YAML로 변환 |
+| `Screens / Components` | Component Tree + Component Details | 컴포넌트 계층 구조화 + HTML tag/id 힌트 부여, `(new)` 표시는 새 컴포넌트 |
+| `User Interactions` | Interactions | trigger/target/action/destination/transition 구조화 YAML로 변환 |
 | `Business Rules` | Visual Rules | UI 영향 규칙만 필터 (서버 로직 제외) |
-| `Interaction States` | States | 상태별 changes YAML로 변환 |
+| `Interaction States` | States | 상태별 visible/hidden 컴포넌트 매핑으로 변환 |
 | PRD 한국어 텍스트 | Labels (ko) | 버튼/탭/안내문구/토스트/에러 메시지 전수 수집 |
 | `design-tokens/` | Token Map | semantic → component → primitive 순 조회 |
 | Context Engine WHY | Business Context | AC의 ui_impact를 각 컴포넌트에 연결 |
@@ -323,9 +323,10 @@ components:
   - name: "{ComponentName}"
     type: "{type}"
     # === 기존 필드 ===
+    id: "{html-element-id}"
+    tag: "{HTML tag}"
     position: "{position}"
     size: "{size}"
-    library: { ... }
     tokens: { ... }
     children: [...]
 
