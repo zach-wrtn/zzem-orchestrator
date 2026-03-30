@@ -615,6 +615,59 @@ echo '{"ts":"<현재시각 ISO8601>","task":"<태스크 subject>","phase":"<phas
 | 완료 보고 | `completed` | "프로토타입 완료, 품질 accuracy 0.95 / completeness 1.0" |
 | 오류 | `error` | 오류 설명 (detail에 상세) |
 
+## Revision Protocol
+
+Design Engineer가 Sprint Lead로부터 revision 태스크를 받았을 때의 처리 프로토콜.
+
+### Revision 태스크 식별
+
+| Subject 패턴 | 유형 | 처리 방식 |
+|-------------|------|----------|
+| `revise/minor/app/{task-id}` | Minor | Annotation — 피드백 반영 후 완료 보고 |
+| `revise/major/app/{task-id}` | Major | Live Preview — 사용자 approve까지 대화형 수정 |
+
+### Minor Revision 처리
+
+```
+1. 태스크 Description에서 피드백 항목과 변경 스크린 확인
+2. prototype.html 읽기
+3. 피드백 항목을 순서대로 반영:
+   - CSS 변경: 해당 스타일 수정
+   - 콘텐츠 변경: HTML 텍스트 수정
+   - 크기/간격 변경: 인라인 스타일 또는 CSS 변수 조정
+4. 수정된 스크린을 셀프 검증 (변경 의도와 결과 일치 확인)
+5. TaskUpdate: completed
+   Sprint Lead에게: "Minor revision 완료. 변경: {변경 요약}. 재캡처 대기."
+```
+
+### Major Revision 처리
+
+```
+1. 태스크 Description에서 피드백 항목과 로컬 서버 URL 확인
+2. prototype.html 읽기
+3. 피드백 항목 중 첫 번째부터 반영
+4. 반영 후 Sprint Lead에게 메시지:
+   "수정 완료: {변경 내용}. 브라우저 새로고침 후 확인해 주세요."
+5. 추가 피드백 대기 → 반영 → 메시지 → 반복
+6. 사용자가 approve하면 TaskUpdate: completed
+   Sprint Lead에게: "Major revision 완료. 총 {N}건 수정."
+```
+
+### Revision 공통 규칙
+
+- **Screen Spec 미수정**: revision은 prototype.html만 수정한다. Screen Spec(.spec.md)은 변경하지 않는다.
+- **구조 보존**: minor revision에서 HTML 구조(section, data-state 등)를 변경하지 않는다. CSS와 콘텐츠만 수정.
+- **변경 최소화**: 피드백에 명시된 항목만 수정한다. 관련 없는 부분을 함께 개선하지 않는다.
+- **tokens.css 유지**: 디자인 토큰 값을 직접 수정하지 않는다. 토큰 변경이 필요하면 Sprint Lead에 보고.
+
+### Revision Logging
+
+| 프로토콜 단계 | phase | message 예시 |
+|-------------|-------|-------------|
+| Revision 수령 | `revision_started` | "Minor revision 수령: 카드 간격, 아바타 크기" |
+| 항목 반영 | `revision_applying` | "피드백 1/3 반영: 카드 간격 16px → 24px" |
+| Revision 완료 | `revision_completed` | "Minor revision 완료. 2건 반영." |
+
 ## Constraints
 
 - **화면 단위 작업**: Screen/View/BottomSheet 단위로 1 spec, 태스크 단위로 1 prototype.html
