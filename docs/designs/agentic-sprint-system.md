@@ -81,7 +81,8 @@ Phase 6: Retrospective ─────── Sprint Lead solo (Gap Analysis + Pa
 
 - [Harness Design](harness-design.md) — v4 설계 원칙 및 패턴 상세
 - [Agent Teams Architecture](agent-teams-architecture.md) — 팀 구성, 실행 모델, 에러 처리
-- [Branch Strategy](branch-strategy.md) — Git 브랜칭 + worktree 격리 (변경 없음)
+- [Branch Strategy](branch-strategy.md) — Git 브랜칭 + worktree 격리
+- [Agent Communication Map](agent-communication-map.md) — 에이전트 간 소통 및 Context 공유
 
 ## Invocation
 
@@ -110,7 +111,8 @@ zzem-orchestrator/
 │   │   ├── sprint-config-template.yaml
 │   │   ├── sprint-contract-template.md # v4 신규
 │   │   ├── evaluation-criteria.md      # v4 신규
-│   │   ├── screen-spec-template.md       # Design Engineer Screen Spec
+│   │   ├── screen-spec-template.md     # Design Engineer Screen Spec
+│   │   ├── html-prototype-template.html # HTML 프로토타입 스켈레톤
 │   │   └── prd-template.md
 │   └── sprints/{sprint-id}/
 │       ├── PRD.md
@@ -121,8 +123,7 @@ zzem-orchestrator/
 │       ├── evaluations/group-{N}.md    # v4 신규
 │       ├── prototypes/
 │       │   ├── context/context-engine.yaml  # Design Context Engine
-│       │   ├── library-catalog.yaml         # Figma Library Catalog
-│       │   └── app/                         # Figma 스크린샷/링크
+│       │   └── app/                         # HTML 프로토타입/스크린샷
 │       ├── retrospective/                   # Phase 6 산출물
 │       │   ├── gap-analysis.yaml
 │       │   ├── pattern-digest.yaml

@@ -1,6 +1,7 @@
 # Branch Strategy: Hybrid Task-to-Sprint Merge
 
-> PR 생성 시 브랜치 전략 명세. Agentic Sprint System의 `create-pr.sh`, `run-task.sh`에서 참조한다.
+> Agentic Sprint System v4의 Git 브랜치 전략 명세.
+> Sprint Lead가 Agent Teams를 통해 이 전략을 실행한다.
 
 ## 1. 전략 개요
 
@@ -41,7 +42,6 @@ base branch (동적)
 `sprint-orchestrator/sprints/{sprint-id}/sprint-config.yaml`
 
 ```yaml
-# sprint-config.yaml
 sprint_id: "2026-03-sprint-1"
 
 branches:
@@ -50,7 +50,6 @@ branches:
   app:
     base: "main"             # app-core-packages의 PR 타겟 브랜치
 
-# 기본값: 명시하지 않으면 "main"
 defaults:
   base: "main"
 ```
@@ -63,36 +62,6 @@ sprint-config.yaml의 branches.{project}.base
 sprint-config.yaml의 defaults.base
   ↓ (미지정 시)
 "main" (하드코딩 폴백)
-```
-
-### 2.3 런타임 해석 (common.sh 확장)
-
-```bash
-# common.sh에 추가
-resolve_base_branch() {
-  local project=$1  # "backend" | "app"
-  local sprint_id=$2
-  local config="$ORCHESTRATOR_ROOT/sprint-orchestrator/sprints/$sprint_id/sprint-config.yaml"
-
-  if [ ! -f "$config" ]; then
-    echo "main"
-    return
-  fi
-
-  # project별 base branch 조회
-  local branch
-  branch=$(python3 -c "
-import yaml, sys
-with open('$config') as f:
-    cfg = yaml.safe_load(f)
-branches = cfg.get('branches', {})
-project = branches.get('$project', {})
-base = project.get('base', cfg.get('defaults', {}).get('base', 'main'))
-print(base)
-" 2>/dev/null)
-
-  echo "${branch:-main}"
-}
 ```
 
 ---
@@ -112,146 +81,43 @@ print(base)
 
 ---
 
-## 4. 실행 단계별 브랜치 라이프사이클
+## 4. 단계별 브랜치 라이프사이클
 
 ### Phase 1: Sprint 브랜치 생성
 
-스프린트 실행 시작 전, 각 레포에 sprint 브랜치를 생성한다.
+Sprint Lead가 각 레포에 sprint 브랜치를 생성한다.
 
-```bash
-# run-sprint.sh에서 호출
-setup_sprint_branch() {
-  local project=$1      # "backend" | "app"
-  local sprint_id=$2
-  local project_dir=$(resolve_project_dir "$project")
-  local base_branch=$(resolve_base_branch "$project" "$sprint_id")
-  local sprint_branch="zzem/$sprint_id"
-
-  cd "$project_dir"
-  git fetch origin "$base_branch"
-  git checkout -b "$sprint_branch" "origin/$base_branch"
-  log_info "$project: Created sprint branch '$sprint_branch' from '$base_branch'"
-}
+```
+git fetch origin {base-branch}
+git checkout -b zzem/{sprint-id} origin/{base-branch}
 ```
 
-### Phase 2: Task 브랜치 생성 (worktree isolation)
+### Phase 2: Task 브랜치 생성 (Worktree 격리)
 
-각 태스크는 독립 worktree에서 태스크 브랜치를 생성하여 작업한다.
+각 Engineer Teammate가 독립 worktree에서 태스크 브랜치를 생성하여 작업한다.
 
-```bash
-# run-task.sh에서 호출
-setup_task_worktree() {
-  local project=$1
-  local sprint_id=$2
-  local task_id=$3
-  local project_dir=$(resolve_project_dir "$project")
-  local sprint_branch="zzem/$sprint_id"
-  local task_branch="zzem/$sprint_id/$task_id"
-  local worktree_dir="$ORCHESTRATOR_ROOT/.worktrees/${project}_${task_id}"
-
-  cd "$project_dir"
-
-  # sprint 브랜치에서 task 브랜치 분기 + worktree 생성
-  git worktree add -b "$task_branch" "$worktree_dir" "$sprint_branch"
-  log_info "$project/$task_id: Worktree created at $worktree_dir (branch: $task_branch)"
-
-  echo "$worktree_dir"
-}
+```
+git worktree add -b zzem/{sprint-id}/{task-id} .worktrees/{project}_{task-id} zzem/{sprint-id}
 ```
 
 ### Phase 3: Task 완료 → Sprint 브랜치로 머지
 
-태스크 완료 후, 태스크 브랜치를 sprint 브랜치에 머지하고 worktree를 정리한다.
+Sprint Lead가 태스크 완료 후 sprint 브랜치에 순차 머지하고 worktree를 정리한다.
 
-```bash
-# run-task.sh 태스크 완료 후 호출
-merge_task_to_sprint() {
-  local project=$1
-  local sprint_id=$2
-  local task_id=$3
-  local worktree_dir=$4
-  local project_dir=$(resolve_project_dir "$project")
-  local sprint_branch="zzem/$sprint_id"
-  local task_branch="zzem/$sprint_id/$task_id"
-
-  cd "$project_dir"
-  git checkout "$sprint_branch"
-
-  # 태스크 브랜치를 sprint 브랜치에 머지
-  if ! git merge "$task_branch" --no-ff -m "merge: $task_id into $sprint_branch"; then
-    log_error "$project/$task_id: Merge conflict detected"
-    log_error "Resolve manually in $project_dir on branch $sprint_branch"
-    return 1
-  fi
-
-  # 정리
-  git worktree remove "$worktree_dir" --force 2>/dev/null || true
-  git branch -d "$task_branch" 2>/dev/null || true
-  log_info "$project/$task_id: Merged to $sprint_branch and cleaned up"
-}
+```
+git checkout zzem/{sprint-id}
+git merge zzem/{sprint-id}/{task-id} --no-ff
+git worktree remove .worktrees/{project}_{task-id}
+git branch -d zzem/{sprint-id}/{task-id}
 ```
 
 ### Phase 4: PR 생성
 
 Sprint 브랜치에서 base branch로 PR을 생성한다.
 
-```bash
-# create-pr.sh 개선
-create_pr_for_repo() {
-  local project=$1      # "backend" | "app"
-  local sprint_id=$2
-  local project_dir=$(resolve_project_dir "$project")
-  local base_branch=$(resolve_base_branch "$project" "$sprint_id")
-  local sprint_branch="zzem/$sprint_id"
-  local repo_name
-  case $project in
-    backend) repo_name="meme-api" ;;
-    app)     repo_name="MemeApp" ;;
-  esac
-
-  cd "$project_dir"
-  git checkout "$sprint_branch"
-
-  # base branch 대비 변경사항 확인
-  if [ -z "$(git log "origin/$base_branch..$sprint_branch" --oneline)" ]; then
-    log_info "$repo_name: No changes to create PR"
-    return 0
-  fi
-
-  # Push
-  git push -u origin "$sprint_branch"
-
-  # PR 생성 (base branch 동적 지정)
-  local status_output
-  status_output=$("$SCRIPT_DIR/sprint-status.sh" "$sprint_id" 2>/dev/null || echo "Status unavailable")
-
-  gh pr create \
-    --base "$base_branch" \
-    --head "$sprint_branch" \
-    --title "feat: Sprint $sprint_id — $repo_name" \
-    --body "$(cat <<EOF
-## Sprint: $sprint_id
-
-### Branch Strategy
-- **Base**: \`$base_branch\`
-- **Sprint Branch**: \`$sprint_branch\`
-- **Merge Strategy**: task branches → sprint branch → PR
-
-### Task Merge History
-$(git log "origin/$base_branch..$sprint_branch" --oneline --no-decorate)
-
-### Status
-\`\`\`
-$status_output
-\`\`\`
-
-### Generated by
-zzem-orchestrator Agentic Sprint System
-EOF
-)"
-
-  log_info "$repo_name: PR created ($sprint_branch → $base_branch)"
-}
+```
+git push -u origin zzem/{sprint-id}
+gh pr create --base {base-branch} --head zzem/{sprint-id} --title "feat: Sprint {sprint-id}"
 ```
 
 ---
@@ -280,7 +146,7 @@ app/001     ─┘                     backend/002 → sprint branch
 | 상황 | 처리 |
 |------|------|
 | Task → Sprint 머지 성공 | 자동 진행 |
-| Task → Sprint 머지 충돌 | 스프린트 중단, 로그 출력, 수동 해결 요청 |
+| Task → Sprint 머지 충돌 | 스프린트 중단, 사용자 수동 해결 요청 |
 | Sprint → Base PR 충돌 | GitHub PR에서 리뷰어가 해결 |
 
 ### 충돌 최소화 원칙
@@ -297,22 +163,7 @@ app/001     ─┘                     backend/002 → sprint branch
 |------|------|------|
 | 태스크 머지 후 | Task 브랜치 + worktree | 자동 삭제 |
 | PR 머지 후 | Sprint 브랜치 | GitHub에서 자동 삭제 (repo 설정) 또는 수동 |
-| 스프린트 실패/중단 시 | 모든 worktree | `cleanup_worktrees()` 호출 |
-
-```bash
-cleanup_worktrees() {
-  local project=$1
-  local project_dir=$(resolve_project_dir "$project")
-
-  cd "$project_dir"
-  git worktree list --porcelain | grep "^worktree " | while read -r _ path; do
-    if [[ "$path" == *"/.worktrees/"* ]]; then
-      git worktree remove "$path" --force 2>/dev/null || true
-      log_info "Cleaned up worktree: $path"
-    fi
-  done
-}
-```
+| 스프린트 실패/중단 시 | 모든 worktree | 일괄 정리 |
 
 ---
 
@@ -325,7 +176,7 @@ sprint-config.yaml
   │
   ▼
 ┌──────────────────────────────────────────────────────────────────────┐
-│  run-sprint.sh                                                       │
+│  Sprint Lead (Agent Teams 오케스트레이션)                              │
 │                                                                      │
 │  1. sprint-config.yaml에서 base branch 해석                           │
 │                                                                      │
@@ -333,9 +184,9 @@ sprint-config.yaml
 │     wrtn-backend:       develop → zzem/2026-03-sprint-1              │
 │     app-core-packages:  main    → zzem/2026-03-sprint-1              │
 │                                                                      │
-│  3. 태스크 그룹별 실행                                                 │
+│  3. 기능 그룹별 반복 루프 (Harness Design)                             │
 │     ┌─────────────────────────────────────────────────────────┐      │
-│     │  Task Group 001 (병렬)                                   │      │
+│     │  Group 001: Contract → Implement → Merge → Evaluate     │      │
 │     │                                                         │      │
 │     │  ┌─ worktree ──────────────┐  ┌─ worktree ───────────┐ │      │
 │     │  │ backend/001-publish     │  │ app/001-profile      │ │      │
@@ -346,9 +197,11 @@ sprint-config.yaml
 │     │           ▼                            ▼                │      │
 │     │  merge → sprint branch       merge → sprint branch      │      │
 │     │  (wrtn-backend)              (app-core-packages)        │      │
+│     │           │                            │                │      │
+│     │           └────────── Evaluator ───────┘                │      │
 │     └─────────────────────────────────────────────────────────┘      │
 │                                                                      │
-│  4. 반복: Task Group 002, 003, ...                                   │
+│  4. 반복: Group 002, 003, ...                                        │
 │                                                                      │
 │  5. PR 생성                                                           │
 │     wrtn-backend:       zzem/2026-03-sprint-1 → develop (PR)        │
