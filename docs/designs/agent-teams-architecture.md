@@ -35,7 +35,7 @@ v4: Harness Design (반복 루프)
 |------|-----------|-------|-------|----------|
 | Planner | Planner | Sprint Lead | Phase 2 | PRD → deliverable-focused 명세 |
 | Orchestrator | — | Sprint Lead | 전 Phase | 파이프라인 조율, 머지, PR |
-| Prototype | — | Design Engineer | Phase 3 | Context Engine → Screen Spec → Figma 프로토타입 (3단계) |
+| Prototype | — | Design Engineer | Phase 3 | Context Engine → Screen Spec → HTML 프로토타입 (3단계) |
 | Generator | Generator | BE Engineer | Phase 4 | Backend 구현 |
 | Generator | Generator | FE Engineer | Phase 4 | Frontend 구현 |
 | Evaluator | Evaluator | Evaluator | Phase 4 | 능동적 품질 평가 |
@@ -46,7 +46,7 @@ v4: Harness Design (반복 루프)
 .claude/teammates/
 ├── be-engineer.md       # Backend Generator
 ├── fe-engineer.md       # Frontend Generator
-├── design-engineer.md   # Figma Prototype
+├── design-engineer.md   # HTML Prototype
 └── evaluator.md         # Active Evaluator (v3의 qa-engineer.md 대체)
 ```
 
@@ -178,12 +178,12 @@ sprints/{sprint-id}/
 ├── prototypes/
 │   ├── context/
 │   │   └── context-engine.yaml    # Prototype: Context Engine (WHY/WHAT/HOW)
-│   ├── library-catalog.yaml       # Prototype: Figma 라이브러리 카탈로그
-│   └── app/                       # Prototype: Figma 스크린샷/링크
+│   └── app/                       # Prototype: HTML 프로토타입/스크린샷
 │       ├── {task-id}/
 │       │   ├── {ScreenName}.spec.md  # Machine-readable Screen Spec
-│       │   ├── {ScreenName}.png      # Figma 스크린샷
-│       │   └── figma-link.md         # Figma URL
+│       │   ├── prototype.html        # Self-contained HTML 프로토타입
+│       │   ├── prototype.png         # 대표 스크린샷
+│       │   └── screenshots/          # 스크린 × 상태별 스크린샷
 │       └── approval-status.yaml
 ├── retrospective/                     # Retro: 스프린트 회고 (Phase 6)
 │   ├── gap-analysis.yaml              # PRD AC 달성 여부 매핑
@@ -202,7 +202,7 @@ sprints/{sprint-id}/
 | Evaluator ISSUES | Engineer에게 보고서 전달 → fix loop | NEW: 능동 평가 기반 |
 | Evaluator FAIL | fix loop (최대 2회) → FAILED | NEW: Active evaluation |
 | Fix loop 3회 초과 | FAILED + 사용자 개입 | v3의 self-QA 3회 → Eval loop 3회 |
-| Figma MCP 불가 | Design Engineer 수동 폴백 | 변경 없음 |
+| HTML 생성 실패 | Design Engineer 수동 폴백 (Screen Spec 기반) | Figma → HTML 전환 |
 
 ## 7. v3 → v4 마이그레이션
 
@@ -217,7 +217,7 @@ sprints/{sprint-id}/
 | 타임아웃 | 30분 | 제거 (Opus 4.6 신뢰) |
 | 설정 | task_timeout + qa_retry | eval_retry_limit만 |
 
-기존 스프린트 데이터, 브랜치 전략, Figma 워크플로우는 변경 없이 호환.
+기존 스프린트 데이터, 브랜치 전략은 변경 없이 호환. 프로토타입은 HTML 기반으로 전환.
 
 ## 8. Post-Sprint Iteration (v4.1)
 
