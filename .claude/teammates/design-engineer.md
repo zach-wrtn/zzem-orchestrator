@@ -555,15 +555,18 @@ HTML 생성이 실패하면:
 ```
 sprint-orchestrator/sprints/{sprint-id}/prototypes/
 ├── context/
-│   └── context-engine.yaml              # Step A 산출물 (Context Engine)
-├── library-catalog.yaml                 # Step B.5 산출물
+│   ├── context-engine.yaml              # Step A 산출물 (Context Engine)
+│   └── tokens.css                       # Step A 산출물 (디자인 토큰 CSS)
 ├── app/
 │   ├── {task-id}/
 │   │   ├── {ScreenName}.spec.md         # Step B 산출물 (machine-readable + quality_score)
-│   │   ├── {ScreenName}.png             # Step C 산출물 (Figma 스크린샷)
-│   │   ├── {ScreenName}/empty.png       # State variant 스크린샷
-│   │   ├── {ScreenName}/loading.png
-│   │   └── figma-link.md                # Figma URL
+│   │   ├── prototype.html               # Step C 산출물 (self-contained HTML)
+│   │   ├── prototype.png                # 대표 스크린샷 (첫 스크린 default)
+│   │   └── screenshots/
+│   │       ├── {ScreenName}-default.png
+│   │       ├── {ScreenName}-loading.png
+│   │       ├── {ScreenName}-empty.png
+│   │       └── {ScreenName}-error.png
 │   └── approval-status.yaml             # 리뷰 상태 추적
 └── quality-report.yaml                  # 전체 품질 리포트
 ```
@@ -576,8 +579,9 @@ tasks:
     {ScreenName}:
       status: pending
       spec: "{ScreenName}.spec.md"
-      figma_url: "https://figma.com/design/..."
-      screenshot: "{ScreenName}.png"
+      prototype: "prototype.html#{ScreenName}"
+      screenshot: "screenshots/{ScreenName}-default.png"
+      states_captured: [default, loading, empty, error]
       quality_score: "{schema_completeness score}"
       fabrication_risk: "{none | low | medium}"
       reviewed_at: null
@@ -615,7 +619,7 @@ screens:
 
 ```
 TaskUpdate: completed
-Sprint Lead에게: "Prototype {task-id} complete. {N}개 화면 spec 작성 + Figma 생성. 품질 점수: accuracy {X}, completeness {Y}, fabrication_risk: {Z}. 리뷰 대기."
+Sprint Lead에게: "Prototype {task-id} complete. {N}개 화면 spec 작성 + HTML 생성. 품질 점수: accuracy {X}, completeness {Y}, fabrication_risk: {Z}. 리뷰 대기. 프로토타입: prototypes/app/{task-id}/prototype.html"
 ```
 
 ---
@@ -641,23 +645,25 @@ echo '{"ts":"<현재시각 ISO8601>","task":"<태스크 subject>","phase":"<phas
 | A. Context Engine 조립 | `context_engine` | "WHY 3 stories / WHAT 12 tokens / HOW 4 rules 조립 완료" |
 | B. Spec 작성 시작 | `spec_writing` | "ProfileScreen spec 작성 중" |
 | B. Spec 작성 완료 | `spec_complete` | "3개 화면 spec 완료, avg accuracy 0.92, fabrication none" |
-| B.5 Library Discovery | `library_discovery` | "available 8 / not_available 3 컴포넌트 카탈로그 완료" |
-| C. Figma Pass 1-4 | `figma_generating` | "ProfileScreen Pass 2 (Library) 완료" |
-| C. Figma Pass 5 | `figma_validating` | "스크린샷 검증 완료, 2건 수정" |
-| C. Figma Pass 6 | `flow_connecting` | "12개 인터랙션 플로우 연결 완료" |
+| A. tokens.css 생성 | `tokens_generated` | "tokens.css 생성 완료 (42 variables)" |
+| C. HTML Pass 1-3 | `html_generating` | "ProfileScreen Pass 2 (Components) 완료" |
+| C. HTML Pass 4-5 | `html_interactions` | "상태 4개 + 인터랙션 12개 바인딩 완료" |
+| C. HTML Pass 6 | `html_polishing` | "통합 검증 완료, prototype.html 저장" |
 | 완료 보고 | `completed` | "프로토타입 완료, 품질 accuracy 0.95 / completeness 1.0" |
 | 오류 | `error` | 오류 설명 (detail에 상세) |
 
 ## Constraints
 
-- **화면 단위 작업**: Screen/View/BottomSheet 단위로 1 spec + 1 Figma 프레임
-- **Spec 항상 보존**: Figma 생성 성공 여부와 무관하게 .spec.md는 항상 저장 (재현성)
+- **화면 단위 작업**: Screen/View/BottomSheet 단위로 1 spec, 태스크 단위로 1 prototype.html
+- **Spec 항상 보존**: HTML 생성 성공 여부와 무관하게 .spec.md는 항상 저장 (재현성)
 - **산문 금지**: spec 파일에 서술형 문장을 사용하지 않는다. YAML/테이블/트리만 사용
-- **figma-use 스킬 필수**: `use_figma` 호출 전에 반드시 `figma-use` 스킬을 로드
+- **HTML 템플릿 참조**: `sprint-orchestrator/templates/html-prototype-template.html` 구조를 기반으로 생성
+- **tokens.css 필수**: Step A에서 생성한 tokens.css를 HTML에 inline 포함
+- **Self-Contained**: 외부 의존성 없이 (Pretendard CDN 제외) 단일 HTML 파일로 완결
 - **WDS 토큰 준수**: `design-tokens/` JSON의 실제 값을 정확히 적용
 - **Backend 태스크 무시**: backend/* 태스크는 대상이 아니다
 - **한국어 라벨 필수**: 모든 UI 텍스트를 한국어로 명시
 - **모바일 프레임**: 390x844 (iPhone 14 Pro) 기준
 - **Zero-Contamination**: 메타데이터 추출(Step A~B)은 결정론적 — AI 추론으로 사실을 보완하지 않는다
-- **Intent-Scoped Context**: 각 Generation Pass에 해당 Pass의 의도에 맞는 컨텍스트만 투입한다
+- **Intent-Scoped Context**: 각 HTML Generation Pass에 해당 Pass의 의도에 맞는 컨텍스트만 투입한다
 - **Fabrication High 금지**: fabrication_risk가 high인 spec은 생성하지 않고 Sprint Lead에 질의한다
