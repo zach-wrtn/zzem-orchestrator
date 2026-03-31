@@ -318,12 +318,76 @@ tasks:
       notes: ""
 ```
 
-#### 3.4 Gate → Phase 4
+#### 3.4 PRD Amendment Extraction
+
+revision이 발생한 스프린트에서 PRD 갭을 역추출하여 개정안을 생성한다.
+
+**Auto-Skip 조건**: `approval-status.yaml`에서 `revision_count >= 1`인 화면이 0개이면 스킵.
+
+스킵 시 출력:
+```
+Phase 3.4 skipped: no revisions occurred — PRD amendment not needed
+```
+
+**입력 데이터**:
+- `approval-status.yaml` — revision_count, last_revision, fabrication_risk per screen
+- 각 revision 태스크의 Description (피드백 항목 목록)
+- Before/After 스크린샷 (`baseline/` vs `screenshots/`)
+- 원본 PRD의 관련 AC (Given/When/Then)
+- 원본 태스크 spec의 `### Screens / Components` 섹션
+
+**분석 로직**:
+
+| Revision 시그널 | PRD 갭 유형 | 개정안 카테고리 |
+|----------------|-----------|-------------|
+| Major revision + 새 컴포넌트 추가 | AC 누락 | `new_ac` — 새 AC 제안 |
+| Minor revision + 텍스트/라벨 변경 | AC 모호 | `clarify_ac` — 기존 AC 구체화 |
+| Major revision + 레이아웃 구조 변경 | UI 명세 부재 | `add_ui_spec` — UI 요구사항 추가 |
+| fabrication_risk: medium + approved | PRD 미언급 추론 승인 | `implicit_req` — 암묵적 요구사항 명문화 |
+| 다수 화면에서 동일 패턴 revision | 공통 규칙 누락 | `add_rule` — 비즈니스 룰 추가 |
+
+**Workflow**:
+
+1. `approval-status.yaml`에서 `revision_count >= 1`인 화면 목록 수집
+2. 각 화면의 revision 태스크 Description에서 피드백 항목 추출
+3. 피드백을 PRD 갭 유형으로 분류 (위 분석 로직 테이블)
+4. 원본 PRD AC와 대조하여 amendment 항목 생성
+5. `prd-amendment.md` 생성 및 저장: `sprints/{sprint-id}/prototypes/prd-amendment.md`
+6. 사용자에게 요약 제시 + amendment별 적용 여부 확인
+
+**산출물**: `sprints/{sprint-id}/prototypes/prd-amendment.md` (템플릿: `sprint-orchestrator/templates/prd-amendment-template.md`)
+
+**사용자 액션** (amendment별):
+
+| 선택 | 동작 |
+|------|------|
+| **apply** | 해당 amendment를 태스크 spec AC에 반영. API contract 변경 필요 시 업데이트. |
+| **defer** | `prd-amendment.md`에 기록만. Phase 6 Retrospective에서 재검토. |
+| **dismiss** | 해당 amendment 무시. |
+
+**apply 시 자동 반영**:
+- 태스크 spec의 `## Acceptance Criteria` 섹션에 amendment 내용 추가/수정
+- API contract 변경이 필요한 경우 Sprint Lead가 수동으로 `api-contract.yaml` 업데이트
+- 변경된 태스크 목록을 Phase 4 진입 시 표시
+
+**출력**:
+```
+PRD Amendment: {sprint-id}
+  Revised screens: {N}
+  Amendments generated: {M}
+    new_ac: {N}, clarify_ac: {N}, add_ui_spec: {N}
+    implicit_req: {N}, add_rule: {N}
+  Applied: {N}, Deferred: {N}, Dismissed: {N}
+  Task specs updated: {list}
+```
+
+#### 3.5 Gate → Phase 4
 
 다음 조건 확인:
 - [ ] `approval-status.yaml` 존재
 - [ ] 모든 대상 화면에 approve/reject/skip 판정 완료 (pending 0)
 - [ ] rejected 화면의 태스크에서 `## Prototype Reference` 제거 확인
+- [ ] `prd-amendment.md` 존재 시, 모든 amendment에 apply/defer/dismiss 판정 완료
 
 **Warning 진입**: pending 또는 rejected 존재 시 경고 출력. `--force`로 무시 가능.
 
@@ -332,6 +396,7 @@ tasks:
 Sprint Prototype: {sprint-id}
   Generated: {N} screens (HTML)
   Approved: {N}, Pending: {N}, Rejected: {N}
+  PRD Amendments: {N} applied, {N} deferred, {N} dismissed
 
 → Proceeding to Phase 4: Build
 ```
@@ -690,6 +755,18 @@ coverage:
   partially_fulfilled: {N}
   unfulfilled: {N}
   fulfillment_rate: "{fulfilled / total_ac}"
+
+prototype_amendments:
+  total: {N}
+  applied: {N}
+  deferred: {N}
+  dismissed: {N}
+  categories:
+    new_ac: {N}
+    clarify_ac: {N}
+    add_ui_spec: {N}
+    implicit_req: {N}
+    add_rule: {N}
 
 items:
   - ac_id: "AC-{N}"

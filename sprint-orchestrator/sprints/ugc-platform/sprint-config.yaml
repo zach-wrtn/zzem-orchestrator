@@ -1,0 +1,17 @@
+sprint-id: ugc-platform
+prd: docs/prds/PRD-001-ugc-platform.md
+created: 2026-03-30
+branches:
+  backend:
+    repo: wrtn-backend
+    base: apple
+    sprint: zzem/ugc-platform
+  app:
+    repo: app-core-packages
+    base: meme-release-1.2.1
+    sprint: zzem/ugc-platform
+team:
+  be-engineer: .claude/teammates/be-engineer.md
+  fe-engineer: .claude/teammates/fe-engineer.md
+  design-engineer: .claude/teammates/design-engineer.md
+  evaluator: .claude/teammates/evaluator.md
