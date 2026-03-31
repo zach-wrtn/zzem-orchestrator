@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>APP-006 Block, Report & Social UI Prototype</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --color-brand-primary: #8752FA;
+      --color-brand-primary-light: #A77DFF;
+      --color-status-negative: #F04452;
+      --color-bg-normal: #FFFFFF;
+      --color-bg-secondary: #F7F7F7;
+      --color-label-normal: #262626;
+      --color-label-secondary: #656565;
+      --color-label-tertiary: #8A8A8A;
+      --color-label-assistive: #8E9199;
+      --color-label-disabled: #C4C4C4;
+      --color-fill-neutral: #F0F1F3;
+      --color-outline-secondary: #E2E2E2;
+      --color-outline-tertiary: #EEEEEE;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-full: 9999px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Pretendard', -apple-system, 'SF Pro', sans-serif;
+      background: #f0f0f0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 16px;
+    }
+
+    /* === Control Panel === */
+    .control-panel {
+      width: 390px;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      border-radius: 12px 12px 0 0;
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 13px;
+    }
+    .control-panel__row { display: flex; align-items: center; gap: 8px; }
+    .control-panel__label { color: #888; font-size: 11px; min-width: 48px; }
+    .control-panel select {
+      background: #2a2a3e; color: #e0e0e0; border: 1px solid #444;
+      border-radius: 6px; padding: 4px 8px; font-size: 12px; flex: 1;
+    }
+    .control-panel__states { display: flex; gap: 4px; flex-wrap: wrap; }
+    .control-panel__state-btn {
+      background: #2a2a3e; color: #888; border: 1px solid #444;
+      border-radius: 6px; padding: 4px 10px; font-size: 11px; cursor: pointer; transition: all 0.15s;
+    }
+    .control-panel__state-btn.active {
+      background: var(--color-brand-primary); color: #fff; border-color: var(--color-brand-primary);
+    }
+    .control-panel__breadcrumb { color: #666; font-size: 11px; font-family: monospace; }
+
+    /* === Device Frame === */
+    .device-frame {
+      width: 390px; height: 844px; background: var(--color-bg-normal);
+      overflow: hidden; position: relative; border: 1px solid #ddd; border-radius: 0 0 12px 12px;
+    }
+
+    /* === Screen === */
+    .screen {
+      display: none; flex-direction: column; width: 100%; height: 100%;
+      position: absolute; top: 0; left: 0;
+    }
+    .screen.active { display: flex; }
+
+    /* === Transitions === */
+    @keyframes slideLeftIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+    @keyframes slideRightIn { from { transform: translateX(-100%); } to { transform: translateX(0); } }
+    @keyframes slideUpIn { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideDownOut { from { transform: translateY(0); } to { transform: translateY(100%); } }
+    .transition-slide-left { animation: slideLeftIn 0.3s ease-out; }
+    .transition-slide-right { animation: slideRightIn 0.3s ease-out; }
+    .transition-slide-up { animation: slideUpIn 0.3s ease-out; }
+    .transition-fade { animation: fadeIn 0.2s ease-out; }
+    .transition-slide-down { animation: slideDownOut 0.25s ease-in; }
+
+    /* === Overlay === */
+    .overlay-backdrop {
+      display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.4); z-index: 100;
+    }
+    .overlay-backdrop.active { display: block; }
+    .overlay-content {
+      position: absolute; bottom: 0; left: 0; right: 0; z-index: 101;
+      display: none;
+    }
+    .overlay-content.active { display: flex; flex-direction: column; }
+
+    /* === Placeholder === */
+    .placeholder-image {
+      background: var(--color-fill-neutral); display: flex; align-items: center;
+      justify-content: center; color: var(--color-label-assistive); font-size: 12px;
+      border-radius: var(--radius-md);
+    }
+
+    /* === Toast === */
+    .toast {
+      position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%);
+      background: #333; color: #fff; padding: 10px 20px; border-radius: 20px;
+      font-size: 13px; z-index: 200; display: none; white-space: nowrap;
+    }
+    .toast.show { display: block; animation: fadeIn 0.2s ease-out; }
+
+    /* ====================== */
+    /* === SCREEN STYLES === */
+    /* ====================== */
+
+    /* --- Header Bar --- */
+    .header-bar {
+      height: 48px; display: flex; align-items: center; padding: 0 16px;
+      border-bottom: 1px solid var(--color-outline-tertiary); flex-shrink: 0;
+    }
+    .header-bar__back {
+      width: 24px; height: 24px; cursor: pointer; display: flex; align-items: center;
+      justify-content: center; font-size: 20px; color: var(--color-label-normal); background: none; border: none;
+    }
+    .header-bar__title {
+      flex: 1; text-align: center; font-size: 16px; font-weight: 600;
+      color: var(--color-label-normal); margin: 0 8px;
+    }
+    .header-bar__right {
+      display: flex; gap: 8px; align-items: center;
+    }
+    .header-bar__action {
+      width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 18px; color: var(--color-label-normal); background: none; border: none;
+    }
+
+    /* --- Profile Header --- */
+    .profile-header {
+      padding: 20px 16px; display: flex; flex-direction: column; align-items: center; gap: 12px;
+    }
+    .profile-avatar {
+      width: 80px; height: 80px; border-radius: 50%; background: var(--color-fill-neutral);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 32px; color: var(--color-label-assistive);
+    }
+    .profile-nickname {
+      font-size: 18px; font-weight: 700; color: var(--color-label-normal);
+    }
+    .profile-stats {
+      display: flex; gap: 24px; align-items: center;
+    }
+    .profile-stat {
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
+    }
+    .profile-stat__count {
+      font-size: 16px; font-weight: 700; color: var(--color-label-normal);
+    }
+    .profile-stat__label {
+      font-size: 12px; color: var(--color-label-tertiary);
+    }
+    .profile-actions {
+      display: flex; gap: 8px; align-items: center; margin-top: 4px;
+    }
+
+    /* --- Follow Button --- */
+    .follow-btn {
+      height: 36px; padding: 0 24px; border-radius: var(--radius-full);
+      font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.15s;
+      border: none; display: flex; align-items: center; justify-content: center;
+    }
+    .follow-btn--follow {
+      background: var(--color-brand-primary); color: #fff;
+    }
+    .follow-btn--following {
+      background: var(--color-bg-normal); color: var(--color-label-normal);
+      border: 1px solid var(--color-outline-secondary);
+    }
+    .follow-btn--mutual {
+      background: var(--color-bg-normal); color: var(--color-brand-primary);
+      border: 1px solid var(--color-brand-primary);
+    }
+
+    /* --- Opinion (bubble) icon button --- */
+    .opinion-icon-btn {
+      width: 36px; height: 36px; border-radius: 50%; background: var(--color-fill-neutral);
+      display: flex; align-items: center; justify-content: center; cursor: pointer;
+      border: none; font-size: 18px; color: var(--color-label-normal); transition: background 0.15s;
+    }
+    .opinion-icon-btn:hover { background: var(--color-outline-secondary); }
+
+    /* --- Tab --- */
+    .tab-bar {
+      display: flex; border-bottom: 1px solid var(--color-outline-tertiary); flex-shrink: 0;
+    }
+    .tab-bar__item {
+      flex: 1; text-align: center; padding: 12px 0; font-size: 14px; font-weight: 600;
+      color: var(--color-label-normal); cursor: pointer; position: relative;
+      border: none; background: none;
+    }
+    .tab-bar__item::after {
+      content: ''; position: absolute; bottom: 0; left: 0; right: 0;
+      height: 2px; background: var(--color-label-normal);
+    }
+
+    /* --- Image Grid --- */
+    .image-grid {
+      flex: 1; overflow-y: auto; display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 2px; padding: 2px; align-content: start;
+    }
+    .image-grid__item {
+      aspect-ratio: 1; background: var(--color-fill-neutral); display: flex;
+      align-items: center; justify-content: center; color: var(--color-label-assistive);
+      font-size: 11px; cursor: pointer;
+    }
+
+    /* --- Bottom Sheet --- */
+    .bottom-sheet {
+      background: #fff; border-radius: 16px 16px 0 0; padding: 8px 0 34px;
+    }
+    .bottom-sheet__handle {
+      width: 36px; height: 4px; background: #D9D9D9; border-radius: 2px;
+      margin: 4px auto 12px;
+    }
+    .bottom-sheet__item {
+      padding: 14px 20px; font-size: 16px; color: var(--color-label-normal);
+      cursor: pointer; display: flex; align-items: center; gap: 12px;
+      border: none; background: none; width: 100%; text-align: left;
+    }
+    .bottom-sheet__item:hover { background: var(--color-bg-secondary); }
+    .bottom-sheet__item--danger { color: var(--color-status-negative); }
+    .bottom-sheet__item-icon { font-size: 20px; width: 24px; text-align: center; }
+
+    /* --- Block Confirm Sheet --- */
+    .confirm-sheet {
+      background: #fff; border-radius: 16px 16px 0 0; padding: 24px 20px 34px;
+      text-align: center;
+    }
+    .confirm-sheet__title {
+      font-size: 17px; font-weight: 700; color: var(--color-label-normal); margin-bottom: 8px;
+    }
+    .confirm-sheet__desc {
+      font-size: 14px; color: var(--color-label-secondary); margin-bottom: 24px;
+    }
+    .confirm-sheet__buttons {
+      display: flex; gap: 8px;
+    }
+    .confirm-sheet__btn {
+      flex: 1; height: 48px; border-radius: var(--radius-sm); font-size: 15px; font-weight: 600;
+      cursor: pointer; border: none; transition: all 0.15s;
+    }
+    .confirm-sheet__btn--cancel {
+      background: var(--color-fill-neutral); color: var(--color-label-normal);
+    }
+    .confirm-sheet__btn--block {
+      background: var(--color-status-negative); color: #fff;
+    }
+
+    /* --- Blocked Profile View --- */
+    .blocked-view {
+      flex: 1; display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 16px; padding: 40px;
+    }
+    .blocked-view__icon {
+      width: 64px; height: 64px; border-radius: 50%; background: var(--color-fill-neutral);
+      display: flex; align-items: center; justify-content: center; font-size: 28px;
+      color: var(--color-label-assistive);
+    }
+    .blocked-view__text {
+      font-size: 16px; font-weight: 600; color: var(--color-label-normal); text-align: center;
+    }
+    .blocked-view__btn {
+      height: 44px; padding: 0 28px; border-radius: var(--radius-sm);
+      background: var(--color-fill-neutral); color: var(--color-label-normal);
+      font-size: 14px; font-weight: 600; cursor: pointer; border: none;
+    }
+
+    /* --- Report Sheet --- */
+    .report-sheet {
+      background: #fff; border-radius: 16px 16px 0 0; padding: 20px 20px 34px;
+      max-height: 560px; overflow-y: auto;
+    }
+    .report-sheet__title {
+      font-size: 17px; font-weight: 700; color: var(--color-label-normal); margin-bottom: 20px;
+      text-align: center;
+    }
+    .report-radio-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 16px; }
+    .report-radio {
+      display: flex; align-items: center; gap: 12px; padding: 12px 0; cursor: pointer;
+    }
+    .report-radio__circle {
+      width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--color-outline-secondary);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      transition: border-color 0.15s;
+    }
+    .report-radio.selected .report-radio__circle {
+      border-color: var(--color-brand-primary);
+    }
+    .report-radio.selected .report-radio__circle::after {
+      content: ''; width: 10px; height: 10px; border-radius: 50%;
+      background: var(--color-brand-primary);
+    }
+    .report-radio__label { font-size: 15px; color: var(--color-label-normal); }
+    .report-textarea-wrapper { margin-bottom: 16px; }
+    .report-textarea-wrapper label {
+      display: block; font-size: 13px; color: var(--color-label-secondary); margin-bottom: 6px;
+    }
+    .report-textarea {
+      width: 100%; height: 100px; border: 1px solid var(--color-outline-secondary);
+      border-radius: var(--radius-sm); padding: 12px; font-size: 14px; resize: none;
+      font-family: 'Pretendard', sans-serif; color: var(--color-label-normal);
+      transition: border-color 0.15s;
+    }
+    .report-textarea:focus { outline: none; border-color: var(--color-brand-primary); }
+    .report-counter {
+      text-align: right; font-size: 12px; color: var(--color-label-tertiary); margin-top: 4px;
+    }
+    .report-counter.over { color: var(--color-status-negative); }
+    .report-submit {
+      width: 100%; height: 48px; border-radius: var(--radius-sm); font-size: 15px;
+      font-weight: 600; cursor: pointer; border: none; transition: all 0.15s;
+    }
+    .report-submit--disabled {
+      background: var(--color-fill-neutral); color: var(--color-label-disabled); pointer-events: none;
+    }
+    .report-submit--enabled {
+      background: var(--color-brand-primary); color: #fff;
+    }
+
+    /* --- Opinion Screen --- */
+    .opinion-body {
+      flex: 1; padding: 16px; display: flex; flex-direction: column; gap: 12px;
+    }
+    .opinion-content-badge {
+      display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px;
+      background: var(--color-fill-neutral); border-radius: var(--radius-full);
+      font-size: 12px; color: var(--color-label-secondary); align-self: flex-start;
+    }
+    .opinion-content-badge__icon { font-size: 14px; }
+    .opinion-textarea {
+      flex: 1; border: 1px solid var(--color-outline-secondary); border-radius: var(--radius-md);
+      padding: 14px; font-size: 15px; resize: none; font-family: 'Pretendard', sans-serif;
+      color: var(--color-label-normal); min-height: 200px; transition: border-color 0.15s;
+    }
+    .opinion-textarea:focus { outline: none; border-color: var(--color-brand-primary); }
+    .opinion-counter {
+      text-align: right; font-size: 12px; color: var(--color-label-tertiary);
+    }
+    .opinion-counter.over { color: var(--color-status-negative); }
+    .opinion-footer {
+      padding: 12px 16px 34px; border-top: 1px solid var(--color-outline-tertiary);
+    }
+    .opinion-submit {
+      width: 100%; height: 52px; border-radius: var(--radius-sm); font-size: 16px;
+      font-weight: 600; cursor: pointer; border: none; transition: all 0.15s;
+    }
+    .opinion-submit--disabled {
+      background: var(--color-fill-neutral); color: var(--color-label-disabled); pointer-events: none;
+    }
+    .opinion-submit--enabled {
+      background: var(--color-brand-primary); color: #fff;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Control Panel -->
+  <div class="control-panel">
+    <div class="control-panel__row">
+      <span class="control-panel__label">Screen</span>
+      <select id="screen-select" onchange="navigateBySelect(this.value)">
+        <option value="screen-profile">OtherUserProfileScreen</option>
+        <option value="screen-blocked">BlockedProfileView</option>
+        <option value="screen-opinion">OpinionScreen</option>
+      </select>
+    </div>
+    <div class="control-panel__row">
+      <span class="control-panel__label">State</span>
+      <div class="control-panel__states" id="state-toggles">
+        <button class="control-panel__state-btn active" data-state="default" onclick="switchState('default')">default</button>
+        <button class="control-panel__state-btn" data-state="blocked" onclick="switchState('blocked')">blocked</button>
+        <button class="control-panel__state-btn" data-state="more-menu" onclick="switchState('more-menu')">more-menu</button>
+        <button class="control-panel__state-btn" data-state="block-confirm" onclick="switchState('block-confirm')">block-confirm</button>
+        <button class="control-panel__state-btn" data-state="report" onclick="switchState('report')">report</button>
+        <button class="control-panel__state-btn" data-state="opinion" onclick="switchState('opinion')">opinion</button>
+      </div>
+    </div>
+    <div class="control-panel__row">
+      <span class="control-panel__breadcrumb" id="breadcrumb">screen-profile</span>
+    </div>
+  </div>
+
+  <!-- Device Frame -->
+  <div class="device-frame" id="device-frame">
+
+    <!-- ===== OtherUserProfileScreen ===== -->
+    <div class="screen" id="screen-profile">
+      <!-- Header -->
+      <div class="header-bar">
+        <button class="header-bar__back" onclick="goBack()">&#x2039;</button>
+        <span class="header-bar__title">프로필</span>
+        <div class="header-bar__right">
+          <button class="header-bar__action" id="btn-more" onclick="openMoreMenu()">&#x22EE;</button>
+        </div>
+      </div>
+
+      <!-- Default Profile Content -->
+      <div id="profile-default-content" style="display:flex; flex-direction:column; flex:1; overflow:hidden;">
+        <!-- Profile Header -->
+        <div class="profile-header">
+          <div class="profile-avatar">&#x1F464;</div>
+          <div class="profile-nickname">밈러버_42</div>
+          <div class="profile-stats">
+            <div class="profile-stat">
+              <span class="profile-stat__count">1,234</span>
+              <span class="profile-stat__label">팔로워</span>
+            </div>
+            <div class="profile-stat">
+              <span class="profile-stat__count">567</span>
+              <span class="profile-stat__label">팔로잉</span>
+            </div>
+            <div class="profile-stat">
+              <span class="profile-stat__count">89</span>
+              <span class="profile-stat__label">재생성</span>
+            </div>
+          </div>
+          <div class="profile-actions">
+            <button class="follow-btn follow-btn--follow" id="follow-btn" onclick="toggleFollow()">팔로우</button>
+            <button class="opinion-icon-btn" onclick="navigate('screen-opinion', 'slide-left')" title="의견 보내기">&#x1F4AC;</button>
+          </div>
+        </div>
+
+        <!-- Tab -->
+        <div class="tab-bar">
+          <button class="tab-bar__item">게시물</button>
+        </div>
+
+        <!-- Image Grid -->
+        <div class="image-grid">
+          <div class="image-grid__item">1</div>
+          <div class="image-grid__item">2</div>
+          <div class="image-grid__item">3</div>
+          <div class="image-grid__item">4</div>
+          <div class="image-grid__item">5</div>
+          <div class="image-grid__item">6</div>
+          <div class="image-grid__item">7</div>
+          <div class="image-grid__item">8</div>
+          <div class="image-grid__item">9</div>
+          <div class="image-grid__item">10</div>
+          <div class="image-grid__item">11</div>
+          <div class="image-grid__item">12</div>
+        </div>
+      </div>
+
+      <!-- Blocked Content (replaces default) -->
+      <div id="profile-blocked-content" style="display:none; flex-direction:column; flex:1;">
+        <div class="blocked-view">
+          <div class="blocked-view__icon">&#x1F6AB;</div>
+          <div class="blocked-view__text">이 계정을 차단했어요</div>
+          <button class="blocked-view__btn" onclick="unblock()">차단 해제</button>
+        </div>
+      </div>
+
+      <!-- Overlay Backdrop -->
+      <div class="overlay-backdrop" id="profile-backdrop" onclick="closeAllOverlays()"></div>
+
+      <!-- More Menu Sheet -->
+      <div class="overlay-content" id="overlay-more-menu">
+        <div class="bottom-sheet">
+          <div class="bottom-sheet__handle"></div>
+          <button class="bottom-sheet__item" onclick="copyProfileURL()">
+            <span class="bottom-sheet__item-icon">&#x1F517;</span>
+            프로필 URL 복사
+          </button>
+          <button class="bottom-sheet__item bottom-sheet__item--danger" onclick="openBlockConfirm()">
+            <span class="bottom-sheet__item-icon">&#x1F6AB;</span>
+            차단하기
+          </button>
+          <button class="bottom-sheet__item bottom-sheet__item--danger" onclick="openReport()">
+            <span class="bottom-sheet__item-icon">&#x26A0;</span>
+            신고하기
+          </button>
+        </div>
+      </div>
+
+      <!-- Block Confirm Sheet -->
+      <div class="overlay-content" id="overlay-block-confirm">
+        <div class="confirm-sheet">
+          <div class="confirm-sheet__title">이 유저를 차단하시겠습니까?</div>
+          <div class="confirm-sheet__desc">차단하면 상대방의 콘텐츠를 볼 수 없습니다</div>
+          <div class="confirm-sheet__buttons">
+            <button class="confirm-sheet__btn confirm-sheet__btn--cancel" onclick="closeAllOverlays()">취소</button>
+            <button class="confirm-sheet__btn confirm-sheet__btn--block" onclick="confirmBlock()">차단</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Report Sheet -->
+      <div class="overlay-content" id="overlay-report">
+        <div class="report-sheet">
+          <div class="report-sheet__title">신고하기</div>
+          <div class="report-radio-group" id="report-radios">
+            <label class="report-radio" onclick="selectReportReason(this)">
+              <span class="report-radio__circle"></span>
+              <span class="report-radio__label">스팸</span>
+            </label>
+            <label class="report-radio" onclick="selectReportReason(this)">
+              <span class="report-radio__circle"></span>
+              <span class="report-radio__label">부적절한 콘텐츠</span>
+            </label>
+            <label class="report-radio" onclick="selectReportReason(this)">
+              <span class="report-radio__circle"></span>
+              <span class="report-radio__label">괴롭힘</span>
+            </label>
+            <label class="report-radio" onclick="selectReportReason(this)">
+              <span class="report-radio__circle"></span>
+              <span class="report-radio__label">기타</span>
+            </label>
+          </div>
+          <div class="report-textarea-wrapper">
+            <label>상세 내용 (필수)</label>
+            <textarea class="report-textarea" id="report-text" placeholder="신고 사유를 입력해주세요" maxlength="100" oninput="updateReportForm()"></textarea>
+            <div class="report-counter" id="report-counter">0/100</div>
+          </div>
+          <button class="report-submit report-submit--disabled" id="report-submit-btn" onclick="submitReport()">신고하기</button>
+        </div>
+      </div>
+
+      <!-- Toast -->
+      <div class="toast" id="toast-profile"></div>
+    </div>
+
+    <!-- ===== BlockedProfileView (standalone screen) ===== -->
+    <div class="screen" id="screen-blocked">
+      <div class="header-bar">
+        <button class="header-bar__back" onclick="goBack()">&#x2039;</button>
+        <span class="header-bar__title">프로필</span>
+        <div class="header-bar__right">
+          <button class="header-bar__action">&#x22EE;</button>
+        </div>
+      </div>
+      <div class="blocked-view">
+        <div class="blocked-view__icon">&#x1F6AB;</div>
+        <div class="blocked-view__text">이 계정을 차단했어요</div>
+        <button class="blocked-view__btn" onclick="showToast('toast-blocked', '차단이 해제되었습니다')">차단 해제</button>
+      </div>
+      <div class="toast" id="toast-blocked"></div>
+    </div>
+
+    <!-- ===== OpinionScreen ===== -->
+    <div class="screen" id="screen-opinion">
+      <div class="header-bar">
+        <button class="header-bar__back" onclick="goBack()">&#x2039;</button>
+        <span class="header-bar__title">의견 보내기</span>
+        <div class="header-bar__right"></div>
+      </div>
+      <div class="opinion-body">
+        <div class="opinion-content-badge">
+          <span class="opinion-content-badge__icon">&#x1F3A8;</span>
+          <span>콘텐츠 #content-2847</span>
+        </div>
+        <textarea class="opinion-textarea" id="opinion-text" placeholder="의견을 입력해주세요" maxlength="300" oninput="updateOpinionForm()"></textarea>
+        <div class="opinion-counter" id="opinion-counter">0/300</div>
+      </div>
+      <div class="opinion-footer">
+        <button class="opinion-submit opinion-submit--disabled" id="opinion-submit-btn" onclick="submitOpinion()">보내기</button>
+      </div>
+      <div class="toast" id="toast-opinion"></div>
+    </div>
+
+  </div>
+
+  <script>
+    // === State ===
+    let currentScreen = null;
+    let currentState = 'default';
+    const navHistory = [];
+
+    // Follow button state: 0=follow, 1=following, 2=mutual
+    let followState = 0;
+
+    // Report form state
+    let reportReasonSelected = false;
+
+    // === Navigation ===
+    function navigate(screenId, transition = 'slide-left') {
+      const target = document.getElementById(screenId);
+      if (!target || (currentScreen && currentScreen.id === screenId)) return;
+
+      if (currentScreen) {
+        navHistory.push(currentScreen.id);
+        currentScreen.classList.remove('active');
+        currentScreen.className = currentScreen.className.replace(/transition-\S+/g, '');
+      }
+
+      target.classList.add('active');
+      if (transition !== 'none') {
+        target.classList.add('transition-' + transition);
+        target.addEventListener('animationend', function handler() {
+          target.classList.remove('transition-' + transition);
+          target.removeEventListener('animationend', handler);
+        });
+      }
+
+      currentScreen = target;
+      currentState = 'default';
+      updateControlPanel();
+    }
+
+    function goBack() {
+      if (navHistory.length === 0) return;
+      const prevId = navHistory.pop();
+      const target = document.getElementById(prevId);
+      if (!target) return;
+
+      if (currentScreen) {
+        currentScreen.classList.remove('active');
+      }
+
+      target.classList.add('active', 'transition-slide-right');
+      target.addEventListener('animationend', function handler() {
+        target.classList.remove('transition-slide-right');
+        target.removeEventListener('animationend', handler);
+      });
+
+      currentScreen = target;
+      currentState = 'default';
+      updateControlPanel();
+    }
+
+    function navigateBySelect(screenId) {
+      // Reset overlays on the current screen
+      closeAllOverlays();
+      navHistory.length = 0;
+      navigate(screenId, 'fade');
+    }
+
+    // === Control Panel state switch ===
+    function switchState(stateName) {
+      currentState = stateName;
+      updateStateButtons();
+
+      // Close all overlays first
+      closeAllOverlays();
+
+      // Switch screens based on state
+      if (stateName === 'blocked') {
+        navigateBySelect('screen-blocked');
+        currentState = 'blocked';
+        updateStateButtons();
+        return;
+      }
+
+      if (stateName === 'opinion') {
+        navigateBySelect('screen-opinion');
+        currentState = 'opinion';
+        updateStateButtons();
+        return;
+      }
+
+      // For profile-related states, ensure we're on profile screen
+      if (currentScreen && currentScreen.id !== 'screen-profile') {
+        navigateBySelect('screen-profile');
+      }
+
+      // Reset profile to default
+      document.getElementById('profile-default-content').style.display = 'flex';
+      document.getElementById('profile-blocked-content').style.display = 'none';
+
+      if (stateName === 'more-menu') {
+        openMoreMenu();
+      } else if (stateName === 'block-confirm') {
+        openOverlay('overlay-block-confirm');
+      } else if (stateName === 'report') {
+        openOverlay('overlay-report');
+      }
+    }
+
+    // === Overlay ===
+    function openOverlay(overlayId) {
+      if (!currentScreen) return;
+      const backdrop = currentScreen.querySelector('.overlay-backdrop');
+      const overlay = document.getElementById(overlayId);
+      if (!backdrop || !overlay) return;
+
+      backdrop.classList.add('active');
+      overlay.classList.add('active');
+      overlay.classList.add('transition-slide-up');
+      overlay.addEventListener('animationend', function handler() {
+        overlay.classList.remove('transition-slide-up');
+        overlay.removeEventListener('animationend', handler);
+      });
+    }
+
+    function closeAllOverlays() {
+      document.querySelectorAll('.overlay-backdrop').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.overlay-content').forEach(o => o.classList.remove('active'));
+    }
+
+    // === More Menu ===
+    function openMoreMenu() {
+      openOverlay('overlay-more-menu');
+    }
+
+    // === Block Flow ===
+    function openBlockConfirm() {
+      closeAllOverlays();
+      setTimeout(() => openOverlay('overlay-block-confirm'), 250);
+    }
+
+    function confirmBlock() {
+      closeAllOverlays();
+      // Show blocked state inline
+      document.getElementById('profile-default-content').style.display = 'none';
+      document.getElementById('profile-blocked-content').style.display = 'flex';
+      currentState = 'blocked';
+      updateStateButtons();
+      showToast('toast-profile', '유저를 차단했습니다');
+    }
+
+    function unblock() {
+      document.getElementById('profile-default-content').style.display = 'flex';
+      document.getElementById('profile-blocked-content').style.display = 'none';
+      currentState = 'default';
+      updateStateButtons();
+      showToast('toast-profile', '차단이 해제되었습니다');
+    }
+
+    // === Report Flow ===
+    function openReport() {
+      closeAllOverlays();
+      setTimeout(() => openOverlay('overlay-report'), 250);
+    }
+
+    function selectReportReason(el) {
+      document.querySelectorAll('.report-radio').forEach(r => r.classList.remove('selected'));
+      el.classList.add('selected');
+      reportReasonSelected = true;
+      updateReportForm();
+    }
+
+    function updateReportForm() {
+      const text = document.getElementById('report-text').value;
+      const counter = document.getElementById('report-counter');
+      const btn = document.getElementById('report-submit-btn');
+
+      counter.textContent = text.length + '/100';
+      counter.classList.toggle('over', text.length > 100);
+
+      const isValid = reportReasonSelected && text.length > 0 && text.length <= 100;
+      btn.className = 'report-submit ' + (isValid ? 'report-submit--enabled' : 'report-submit--disabled');
+    }
+
+    function submitReport() {
+      closeAllOverlays();
+      // Reset form
+      document.querySelectorAll('.report-radio').forEach(r => r.classList.remove('selected'));
+      document.getElementById('report-text').value = '';
+      reportReasonSelected = false;
+      updateReportForm();
+      showToast('toast-profile', '신고가 접수되었습니다');
+    }
+
+    // === Copy URL ===
+    function copyProfileURL() {
+      closeAllOverlays();
+      showToast('toast-profile', '프로필 URL이 복사되었습니다');
+    }
+
+    // === Follow Button ===
+    function toggleFollow() {
+      const btn = document.getElementById('follow-btn');
+      followState = (followState + 1) % 3;
+
+      if (followState === 0) {
+        btn.className = 'follow-btn follow-btn--follow';
+        btn.textContent = '팔로우';
+      } else if (followState === 1) {
+        btn.className = 'follow-btn follow-btn--following';
+        btn.textContent = '팔로잉';
+      } else {
+        btn.className = 'follow-btn follow-btn--mutual';
+        btn.textContent = '맞팔로우';
+      }
+    }
+
+    // === Opinion Form ===
+    function updateOpinionForm() {
+      const text = document.getElementById('opinion-text').value;
+      const counter = document.getElementById('opinion-counter');
+      const btn = document.getElementById('opinion-submit-btn');
+
+      counter.textContent = text.length + '/300';
+      counter.classList.toggle('over', text.length > 300);
+
+      const isValid = text.length > 0 && text.length <= 300;
+      btn.className = 'opinion-submit ' + (isValid ? 'opinion-submit--enabled' : 'opinion-submit--disabled');
+    }
+
+    function submitOpinion() {
+      document.getElementById('opinion-text').value = '';
+      updateOpinionForm();
+      showToast('toast-opinion', '의견이 전송되었습니다');
+    }
+
+    // === Toast ===
+    function showToast(toastId, message) {
+      const toast = document.getElementById(toastId);
+      if (!toast) return;
+      toast.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+
+    // === Control Panel ===
+    function updateControlPanel() {
+      if (!currentScreen) return;
+      const select = document.getElementById('screen-select');
+      if (select) select.value = currentScreen.id;
+
+      const breadcrumb = document.getElementById('breadcrumb');
+      if (breadcrumb) {
+        const path = [...navHistory, currentScreen.id].join(' > ');
+        breadcrumb.textContent = path;
+      }
+      updateStateButtons();
+    }
+
+    function updateStateButtons() {
+      document.querySelectorAll('.control-panel__state-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.state === currentState);
+      });
+    }
+
+    // === Init ===
+    document.addEventListener('DOMContentLoaded', () => {
+      const firstScreen = document.getElementById('screen-profile');
+      if (firstScreen) {
+        firstScreen.classList.add('active');
+        currentScreen = firstScreen;
+        updateControlPanel();
+      }
+    });
+  </script>
+
+</body>
+</html>
