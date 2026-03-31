@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZZEM Sprint Prototypes</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Pretendard', -apple-system, 'SF Pro', sans-serif;
+      background: #0a0a14;
+      color: #e0e0e0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* === Top Bar === */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 24px;
+      background: #12122a;
+      border-bottom: 1px solid #1e1e3a;
+      flex-shrink: 0;
+      z-index: 10;
+    }
+
+    .top-bar__left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .top-bar__logo {
+      font-size: 20px;
+      font-weight: 800;
+      color: #8752FA;
+      letter-spacing: -0.5px;
+    }
+
+    .top-bar__divider {
+      width: 1px;
+      height: 18px;
+      background: #2a2a4a;
+    }
+
+    .top-bar__title {
+      font-size: 14px;
+      font-weight: 500;
+      color: #888;
+    }
+
+    .top-bar__right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .top-bar__count {
+      font-size: 12px;
+      color: #555;
+    }
+
+    .top-bar__count strong {
+      color: #8752FA;
+      font-weight: 700;
+    }
+
+    /* === Main Layout === */
+    .main {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* === Sidebar === */
+    .sidebar {
+      width: 280px;
+      background: #0f0f20;
+      border-right: 1px solid #1e1e3a;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      overflow-y: auto;
+    }
+
+    .sidebar::-webkit-scrollbar { width: 4px; }
+    .sidebar::-webkit-scrollbar-track { background: transparent; }
+    .sidebar::-webkit-scrollbar-thumb { background: #2a2a4a; border-radius: 4px; }
+
+    .sidebar__section {
+      padding: 0;
+    }
+
+    /* Sprint Group */
+    .sprint-group {
+      border-bottom: 1px solid #1a1a30;
+    }
+
+    .sprint-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 16px;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s;
+    }
+
+    .sprint-header:hover {
+      background: #16162e;
+    }
+
+    .sprint-header__arrow {
+      font-size: 10px;
+      color: #555;
+      transition: transform 0.2s;
+      width: 16px;
+      text-align: center;
+    }
+
+    .sprint-group.open .sprint-header__arrow {
+      transform: rotate(90deg);
+    }
+
+    .sprint-header__info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .sprint-header__prd {
+      font-size: 10px;
+      font-weight: 600;
+      color: #555;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .sprint-header__name {
+      font-size: 13px;
+      font-weight: 600;
+      color: #ccc;
+      margin-top: 2px;
+    }
+
+    .sprint-header__badge {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 10px;
+      background: #1e1e3a;
+      color: #666;
+      flex-shrink: 0;
+    }
+
+    .sprint-group.open .sprint-header__badge {
+      background: rgba(135, 82, 250, 0.15);
+      color: #8752FA;
+    }
+
+    /* Prototype Items */
+    .proto-list {
+      display: none;
+      padding: 0 0 8px 0;
+    }
+
+    .sprint-group.open .proto-list {
+      display: block;
+    }
+
+    .proto-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 16px 9px 42px;
+      cursor: pointer;
+      transition: all 0.15s;
+      border-left: 2px solid transparent;
+      font-size: 12px;
+      color: #777;
+    }
+
+    .proto-item:hover {
+      background: #16162e;
+      color: #aaa;
+    }
+
+    .proto-item.active {
+      background: #18183a;
+      color: #fff;
+      border-left-color: #8752FA;
+    }
+
+    .proto-item__id {
+      font-size: 10px;
+      font-weight: 700;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: #1e1e3a;
+      color: #666;
+      flex-shrink: 0;
+    }
+
+    .proto-item.active .proto-item__id {
+      background: rgba(135, 82, 250, 0.2);
+      color: #8752FA;
+    }
+
+    .proto-item__name {
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .proto-item__type {
+      font-size: 9px;
+      font-weight: 600;
+      text-transform: uppercase;
+      padding: 1px 5px;
+      border-radius: 3px;
+      background: #1a2a1a;
+      color: #4a8;
+      flex-shrink: 0;
+    }
+
+    .proto-item__type--app { background: #1a2a1a; color: #4a8; }
+    .proto-item__type--backend { background: #2a1a1a; color: #a84; }
+
+    /* === Content Area === */
+    .content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: #0d0d1a;
+      min-width: 0;
+    }
+
+    /* Content Header */
+    .content-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 20px;
+      background: #12122a;
+      border-bottom: 1px solid #1e1e3a;
+      flex-shrink: 0;
+    }
+
+    .content-header__left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .content-header__sprint {
+      font-size: 11px;
+      color: #555;
+      font-weight: 500;
+    }
+
+    .content-header__sep {
+      color: #333;
+      font-size: 12px;
+    }
+
+    .content-header__proto {
+      font-size: 13px;
+      font-weight: 600;
+      color: #ddd;
+    }
+
+    .content-header__right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .content-header__btn {
+      font-size: 11px;
+      padding: 5px 12px;
+      border-radius: 6px;
+      border: 1px solid #2a2a4a;
+      background: #1a1a30;
+      color: #888;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-decoration: none;
+    }
+
+    .content-header__btn:hover {
+      background: #222244;
+      color: #bbb;
+      border-color: #3a3a5a;
+    }
+
+    /* Iframe Container */
+    .iframe-wrap {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .iframe-wrap iframe {
+      border: none;
+      width: 430px;
+      height: calc(100vh - 100px);
+      border-radius: 16px;
+      background: #f0f0f0;
+      box-shadow: 0 8px 48px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Empty State */
+    .empty-state {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      color: #444;
+    }
+
+    .empty-state__icon {
+      font-size: 48px;
+      opacity: 0.3;
+    }
+
+    .empty-state__text {
+      font-size: 14px;
+    }
+
+    /* === Keyboard Hints === */
+    .keyboard-hint {
+      position: fixed;
+      bottom: 12px;
+      right: 20px;
+      display: flex;
+      gap: 14px;
+      font-size: 10px;
+      color: #444;
+      z-index: 10;
+    }
+
+    .keyboard-hint kbd {
+      background: #1e1e3a;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: inherit;
+      color: #666;
+      border: 1px solid #2a2a4a;
+      font-size: 10px;
+    }
+
+    /* === Responsive === */
+    @media (max-width: 900px) {
+      .sidebar { width: 220px; }
+      .proto-item { padding-left: 32px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <div class="top-bar__left">
+      <span class="top-bar__logo">ZZEM</span>
+      <span class="top-bar__divider"></span>
+      <span class="top-bar__title">Sprint Prototypes</span>
+    </div>
+    <div class="top-bar__right">
+      <span class="top-bar__count"><strong id="total-count">0</strong> prototypes across <strong id="sprint-count">0</strong> sprints</span>
+    </div>
+  </div>
+
+  <!-- Main Layout -->
+  <div class="main">
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+      <!-- Populated by JS -->
+    </div>
+
+    <!-- Content -->
+    <div class="content" id="content">
+      <div class="empty-state" id="empty-state">
+        <div class="empty-state__icon">&#9776;</div>
+        <div class="empty-state__text">Select a prototype from the sidebar</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Keyboard Hints -->
+  <div class="keyboard-hint">
+    <span><kbd>&uarr;</kbd> <kbd>&darr;</kbd> Navigate</span>
+    <span><kbd>Enter</kbd> Open</span>
+    <span><kbd>1</kbd>-<kbd>9</kbd> Jump</span>
+  </div>
+
+  <script>
+    // === Sprint & Prototype Registry ===
+    const SPRINTS = [
+      {
+        id: 'zzem-home-001',
+        prd: 'PRD-002',
+        name: 'ZZEM Home',
+        description: 'ZZEM 앱 홈 화면',
+        prototypes: [
+          {
+            id: 'APP-001',
+            name: 'Home Screen',
+            type: 'app',
+            path: '../sprints/zzem-home-001/prototypes/app/APP-001-home-screen/prototype.html'
+          },
+          {
+            id: 'APP-003',
+            name: 'Bottom Tab Navigation',
+            type: 'app',
+            path: '../sprints/zzem-home-001/prototypes/app/APP-003-bottom-tab-navigation/prototype.html'
+          }
+        ]
+      },
+      // Future sprints will be added here
+    ];
+
+    // === State ===
+    let activeSprintIdx = null;
+    let activeProtoIdx = null;
+    let flatProtos = []; // flattened list for keyboard nav
+
+    // === Build Sidebar ===
+    function buildSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      sidebar.innerHTML = '';
+      flatProtos = [];
+
+      let totalProtos = 0;
+
+      SPRINTS.forEach((sprint, si) => {
+        const group = document.createElement('div');
+        group.className = 'sprint-group open';
+        group.dataset.sprint = si;
+
+        const protoCount = sprint.prototypes.length;
+        totalProtos += protoCount;
+
+        group.innerHTML = `
+          <div class="sprint-header" onclick="toggleSprint(${si})">
+            <span class="sprint-header__arrow">&#9654;</span>
+            <div class="sprint-header__info">
+              <div class="sprint-header__prd">${sprint.prd}</div>
+              <div class="sprint-header__name">${sprint.name}</div>
+            </div>
+            <span class="sprint-header__badge">${protoCount}</span>
+          </div>
+          <div class="proto-list">
+            ${sprint.prototypes.map((p, pi) => {
+              flatProtos.push({ si, pi, proto: p, sprint });
+              return `
+                <div class="proto-item" data-sprint="${si}" data-proto="${pi}" onclick="selectProto(${si}, ${pi})">
+                  <span class="proto-item__id">${p.id}</span>
+                  <span class="proto-item__name">${p.name}</span>
+                  <span class="proto-item__type proto-item__type--${p.type}">${p.type}</span>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `;
+
+        sidebar.appendChild(group);
+      });
+
+      document.getElementById('total-count').textContent = totalProtos;
+      document.getElementById('sprint-count').textContent = SPRINTS.length;
+    }
+
+    // === Toggle Sprint Group ===
+    function toggleSprint(si) {
+      const group = document.querySelector(`.sprint-group[data-sprint="${si}"]`);
+      if (group) group.classList.toggle('open');
+    }
+
+    // === Select Prototype ===
+    function selectProto(si, pi) {
+      const sprint = SPRINTS[si];
+      const proto = sprint.prototypes[pi];
+
+      // Update active state
+      activeSprintIdx = si;
+      activeProtoIdx = pi;
+
+      // Update sidebar highlight
+      document.querySelectorAll('.proto-item').forEach(el => el.classList.remove('active'));
+      const activeEl = document.querySelector(`.proto-item[data-sprint="${si}"][data-proto="${pi}"]`);
+      if (activeEl) {
+        activeEl.classList.add('active');
+        activeEl.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      }
+
+      // Ensure sprint group is open
+      const group = document.querySelector(`.sprint-group[data-sprint="${si}"]`);
+      if (group && !group.classList.contains('open')) group.classList.add('open');
+
+      // Render content
+      const content = document.getElementById('content');
+      content.innerHTML = `
+        <div class="content-header">
+          <div class="content-header__left">
+            <span class="content-header__sprint">${sprint.prd} / ${sprint.name}</span>
+            <span class="content-header__sep">/</span>
+            <span class="content-header__proto">${proto.id} ${proto.name}</span>
+          </div>
+          <div class="content-header__right">
+            <a class="content-header__btn" href="${proto.path}" target="_blank">Open in New Tab</a>
+          </div>
+        </div>
+        <div class="iframe-wrap">
+          <iframe src="${proto.path}" loading="lazy"></iframe>
+        </div>
+      `;
+    }
+
+    // === Keyboard Navigation ===
+    function getFlatIndex() {
+      if (activeSprintIdx === null || activeProtoIdx === null) return -1;
+      return flatProtos.findIndex(f => f.si === activeSprintIdx && f.pi === activeProtoIdx);
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') return;
+
+      const currentIdx = getFlatIndex();
+
+      if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+        e.preventDefault();
+        const next = Math.min(currentIdx + 1, flatProtos.length - 1);
+        if (next >= 0) selectProto(flatProtos[next].si, flatProtos[next].pi);
+      } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+        e.preventDefault();
+        const prev = Math.max(currentIdx - 1, 0);
+        if (prev >= 0) selectProto(flatProtos[prev].si, flatProtos[prev].pi);
+      } else if (e.key >= '1' && e.key <= '9') {
+        const idx = parseInt(e.key) - 1;
+        if (idx < flatProtos.length) {
+          selectProto(flatProtos[idx].si, flatProtos[idx].pi);
+        }
+      }
+    });
+
+    // === Init ===
+    buildSidebar();
+
+    // Auto-select first prototype
+    if (flatProtos.length > 0) {
+      selectProto(flatProtos[0].si, flatProtos[0].pi);
+    }
+  </script>
+
+</body>
+</html>

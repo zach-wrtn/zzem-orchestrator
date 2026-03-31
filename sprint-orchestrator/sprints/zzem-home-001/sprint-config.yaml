@@ -1,0 +1,12 @@
+sprint_id: zzem-home-001
+prd_source: docs/prds/PRD-002-zzem-home.md
+created_at: "2026-03-31"
+
+branches:
+  backend:
+    base: develop
+  app:
+    base: develop
+
+defaults:
+  base: develop
