@@ -381,13 +381,144 @@ PRD Amendment: {sprint-id}
   Task specs updated: {list}
 ```
 
-#### 3.5 Gate → Phase 4
+#### 3.5 Prototype-Driven PRD Refinement
+
+승인된 프로토타입을 분석하여 구체화된 PRD를 역추출한다. 프로토타입이 시각적 source of truth가 되어, 빌드 단계에서 사용할 정밀한 명세를 생성한다.
+
+**트리거 조건**: `approval-status.yaml`에서 `revision_count >= 1` **AND** `status: approved`인 화면이 1개 이상.
+
+**Auto-Skip 조건**: 모든 approved 화면의 `revision_count === 0`이면 스킵 (원본 PRD 대로 승인 = 추가 추출 불필요).
+
+스킵 시 출력:
+```
+Phase 3.5 skipped: all prototypes approved without revision — PRD refinement not needed
+```
+
+**입력 데이터**:
+- 승인된 프로토타입 HTML 파일 (`prototypes/app/{task-id}/prototype.html`)
+- 원본 PRD AC (Given/When/Then)
+- 태스크 spec의 `### Screens / Components` 섹션
+- `approval-status.yaml` (revision 이력)
+- `prd-amendment.md` (Phase 3.4 산출물, 존재 시)
+
+**추출 대상**:
+
+| 카테고리 | 추출 항목 | 예시 |
+|---------|---------|------|
+| **UI Components** | 화면에 존재하는 모든 컴포넌트, 속성, 계층 | `Header: logo(좌) + coin_btn + bell_btn(우)` |
+| **Screen States** | control panel에 정의된 상태 목록 + 각 상태별 UI 차이 | `default`, `notification-badge`, `ranking-expanded` |
+| **Interactions** | 클릭/탭/스크롤/토글 등 인터랙션 목록 | `chip 탭 → 그리드 필터링`, `하트 탭 → 좋아요 토글` |
+| **Data Schema** | 표시되는 데이터 필드, 포맷, placeholder 값 | `카드: thumbnail + title(max 1줄) + creator(avatar 20px + name) + likeCount` |
+| **Layout Rules** | 열 수, 간격, 스크롤 방향, sticky 동작 | `2열 매거진, 열간격 6px, 행간격 16px, 필터칩 sticky` |
+| **Edge Case UI** | 빈 상태, 에러 상태, 로딩 상태 등 | `필터 결과 0건 → 빈 상태 표시` |
+
+**Workflow**:
+
+1. `approval-status.yaml`에서 `revision_count >= 1 AND status: approved`인 화면 목록 수집
+2. 각 화면의 prototype.html 읽기
+3. HTML 구조 분석:
+   - `#screen-select` → 스크린 목록
+   - `#state-toggles` → 상태 목록
+   - `.screen` → 각 스크린의 DOM 구조 → 컴포넌트 계층
+   - `onclick`, `navigate()` → 인터랙션 매핑
+   - `[data-state]` → 상태별 UI 차이
+4. 추출된 요구사항을 구조화하여 `refined-prd.md` 생성
+5. 원본 PRD AC와 diff:
+   - **new**: 프로토타입에 있지만 원본 PRD에 없는 요구사항
+   - **refined**: 원본 PRD에 있지만 프로토타입이 더 구체적인 요구사항
+   - **unchanged**: 원본 PRD와 일치하는 요구사항
+6. 사용자에게 diff 요약 제시 + 반영 여부 확인
+
+**산출물**: `sprints/{sprint-id}/prototypes/refined-prd.md`
+
+```markdown
+# Refined PRD: {sprint-id}
+
+> Source: Approved prototypes (post-revision)
+> Generated: {date}
+> Original PRD: {prd-source}
+
+## {task-id}: {Screen Name}
+
+### Components
+| Component | Properties | Notes |
+|-----------|-----------|-------|
+| {name}    | {속성}     | {비고} |
+
+### States
+| State | Trigger | UI Changes |
+|-------|---------|-----------|
+| {상태} | {트리거} | {UI 차이} |
+
+### Interactions
+| Element | Action | Result |
+|---------|--------|--------|
+| {요소}  | {동작}  | {결과}  |
+
+### Data Schema
+| Field | Type | Format | Constraints |
+|-------|------|--------|------------|
+| {필드} | {타입} | {포맷} | {제약}     |
+
+### Layout
+| Rule | Value |
+|------|-------|
+| {규칙} | {값} |
+
+### Diff from Original PRD
+| Type | AC | Detail |
+|------|----|----|
+| new | — | {프로토타입에만 존재하는 요구사항} |
+| refined | AC {N} | {원본 → 구체화된 내용} |
+| unchanged | AC {N} | {일치} |
+```
+
+**사용자 액션**:
+
+| 선택 | 동작 |
+|------|------|
+| **accept** | `refined-prd.md`를 기준으로 태스크 spec AC를 전면 갱신. Phase 4에서 이 spec을 사용. |
+| **partial** | 사용자가 반영할 항목을 선택. 선택된 항목만 태스크 spec에 반영. |
+| **review-only** | 기록만 유지. 태스크 spec은 변경하지 않음. Phase 4에서 참조 자료로 사용. |
+
+**accept 시 자동 반영**:
+- 태스크 spec의 `## Acceptance Criteria` 섹션을 refined-prd 기준으로 갱신
+- 태스크 spec에 `## Refined PRD Reference` 섹션 추가:
+  ```markdown
+  ## Refined PRD Reference
+  - **Refined PRD**: `prototypes/refined-prd.md#{task-id}`
+  - **Extraction source**: approved prototype (revision {N})
+  - **Status**: accepted
+  ```
+- API contract 변경이 필요한 경우 Sprint Lead가 `api-contract.yaml` 업데이트
+
+**Phase 3.4와의 관계**:
+- 3.4 (Amendment Extraction): revision 피드백 기반 → **무엇이 바뀌었는지** (delta)
+- 3.5 (PRD Refinement): 승인된 프로토타입 기반 → **무엇이 있는지** (full spec)
+- 3.4가 먼저 실행되어 amendment가 태스크 spec에 반영된 후, 3.5가 프로토타입 전체를 분석하여 누락된 요구사항을 추가로 포착
+- 3.4에서 이미 apply된 항목은 3.5의 diff에서 `unchanged`로 표시
+
+**출력**:
+```
+PRD Refinement: {sprint-id}
+  Analyzed screens: {N} (revised + approved)
+  Requirements extracted:
+    Components: {N}, States: {N}, Interactions: {N}
+    Data fields: {N}, Layout rules: {N}
+  Diff from original PRD:
+    new: {N}, refined: {N}, unchanged: {N}
+  User action: {accept | partial | review-only}
+  Task specs updated: {list}
+```
+
+#### 3.6 Gate → Phase 4
 
 다음 조건 확인:
 - [ ] `approval-status.yaml` 존재
 - [ ] 모든 대상 화면에 approve/reject/skip 판정 완료 (pending 0)
 - [ ] rejected 화면의 태스크에서 `## Prototype Reference` 제거 확인
 - [ ] `prd-amendment.md` 존재 시, 모든 amendment에 apply/defer/dismiss 판정 완료
+- [ ] `refined-prd.md` 존재 시, 사용자가 accept/partial/review-only 판정 완료
 
 **Warning 진입**: pending 또는 rejected 존재 시 경고 출력. `--force`로 무시 가능.
 
@@ -397,6 +528,7 @@ Sprint Prototype: {sprint-id}
   Generated: {N} screens (HTML)
   Approved: {N}, Pending: {N}, Rejected: {N}
   PRD Amendments: {N} applied, {N} deferred, {N} dismissed
+  PRD Refinement: {N} new, {N} refined — {accept | partial | review-only}
 
 → Proceeding to Phase 4: Build
 ```
