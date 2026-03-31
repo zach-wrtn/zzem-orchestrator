@@ -5,3 +5,4 @@ design-tokens/
 .worktrees/
 .mcp.json
 .env
+.gstack/
