@@ -1,3 +1,9 @@
 [submodule "wds-tokens"]
 	path = wds-tokens
 	url = git@github.wrtn.club:pepper/wds-tokens.git
+[submodule "app-core-packages"]
+	path = app-core-packages
+	url = git@github.com:wrtn-tech/app-core-packages.git
+[submodule "wrtn-backend"]
+	path = wrtn-backend
+	url = git@github.wrtn.club:wrtn-tech/wrtn-backend.git

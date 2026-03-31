@@ -1,6 +1,4 @@
 .DS_Store
-app-core-packages/
-wrtn-backend/
 design-tokens/
 .worktrees/
 .mcp.json
