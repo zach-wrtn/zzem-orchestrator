@@ -1,0 +1,3 @@
+[submodule "wds-tokens"]
+	path = wds-tokens
+	url = git@github.wrtn.club:pepper/wds-tokens.git
