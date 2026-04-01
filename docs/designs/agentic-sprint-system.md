@@ -39,6 +39,18 @@ Planner (Sprint Lead) ──spec──► Generator (BE/FE) ──code──► 
 Phase 1: Init ──────────────── Sprint Lead solo
 Phase 2: Spec ──────────────── Sprint Lead as Planner
 Phase 3: Prototype ─────────── Sprint Lead + Design Engineer
+  │
+  ├─ 3.1 태스크 필터
+  ├─ 3.2 Design Engineer 스폰 → HTML 프로토타입 생성
+  ├─ 3.3 리뷰 (approve / revise / reject / skip)
+  │   ├─ 3.3.1 Minor Revision (Annotation)
+  │   ├─ 3.3.2 Baseline 관리
+  │   ├─ 3.3.3 Major Revision (Live Preview)
+  │   └─ 3.3.5 Visual Regression
+  ├─ 3.4 PRD Amendment Extraction — revision 피드백에서 갭 역추출
+  ├─ 3.5 Prototype-Driven PRD Refinement — 승인된 프로토타입에서 요구사항 추출
+  └─ 3.6 Gate → Phase 4
+  │
 Phase 4: Build ─────────────── Iterative Loop per feature group
   │
   ├─ For each group:
@@ -83,6 +95,7 @@ Phase 6: Retrospective ─────── Sprint Lead solo (Gap Analysis + Pa
 - [Agent Teams Architecture](agent-teams-architecture.md) — 팀 구성, 실행 모델, 에러 처리
 - [Branch Strategy](branch-strategy.md) — Git 브랜칭 + worktree 격리
 - [Agent Communication Map](agent-communication-map.md) — 에이전트 간 소통 및 Context 공유
+- [Prototype Production Guide](prototype-production-guide.md) — HTML 프로토타입 제작·리뷰·PRD 추출 메뉴얼
 
 ## Invocation
 
@@ -100,20 +113,25 @@ Phase 6: Retrospective ─────── Sprint Lead solo (Gap Analysis + Pa
 zzem-orchestrator/
 ├── .claude/
 │   ├── skills/sprint/SKILL.md          # Unified /sprint skill (v4)
-│   ├── skills/_archived/               # v2 deprecated skills
 │   └── teammates/
 │       ├── be-engineer.md              # Generator
 │       ├── fe-engineer.md              # Generator
 │       ├── design-engineer.md          # Prototype
 │       └── evaluator.md               # Evaluator (v4 신규)
+├── app-core-packages/                  # Git submodule (wrtn-tech/app-core-packages)
+├── wrtn-backend/                       # Git submodule (wrtn-tech/wrtn-backend)
+├── wds-tokens/                         # Git submodule (pepper/wds-tokens)
 ├── sprint-orchestrator/
+│   ├── prototypes/
+│   │   └── index.html                  # 통합 프로토타입 뷰어 (PRD 기준 사이드바)
 │   ├── templates/
 │   │   ├── sprint-config-template.yaml
 │   │   ├── sprint-contract-template.md # v4 신규
 │   │   ├── evaluation-criteria.md      # v4 신규
 │   │   ├── screen-spec-template.md     # Design Engineer Screen Spec
 │   │   ├── html-prototype-template.html # HTML 프로토타입 스켈레톤
-│   │   └── prd-template.md
+│   │   ├── prd-template.md
+│   │   └── prd-amendment-template.md   # Phase 3.4 개정안 템플릿
 │   └── sprints/{sprint-id}/
 │       ├── PRD.md
 │       ├── sprint-config.yaml
@@ -122,19 +140,27 @@ zzem-orchestrator/
 │       ├── contracts/group-{N}.md      # v4 신규
 │       ├── evaluations/group-{N}.md    # v4 신규
 │       ├── prototypes/
-│       │   ├── context/context-engine.yaml  # Design Context Engine
-│       │   └── app/                         # HTML 프로토타입/스크린샷
-│       ├── retrospective/                   # Phase 6 산출물
+│       │   ├── app/{task-id}/          # HTML 프로토타입 + 스크린샷
+│       │   │   ├── prototype.html
+│       │   │   ├── screenshots/
+│       │   │   └── baseline/           # revision 시 before 보존
+│       │   ├── approval-status.yaml    # 프로토타입 승인 상태
+│       │   ├── prd-amendment.md        # Phase 3.4 산출물
+│       │   └── refined-prd.md          # Phase 3.5 산출물
+│       ├── retrospective/              # Phase 6 산출물
 │       │   ├── gap-analysis.yaml
 │       │   ├── pattern-digest.yaml
 │       │   └── deferred-items.yaml
-│       ├── follow-up-context.yaml           # --follow-up 시 이전 스프린트 연결
+│       ├── REPORT.md                   # Phase 6 통합 보고서
+│       ├── follow-up-context.yaml      # --follow-up 시 이전 스프린트 연결
 │       └── logs/
 └── docs/
-    ├── prds/
-    └── designs/
+    ├── prds/                           # PRD 원본
+    └── designs/                        # 시스템 설계 문서
         ├── agentic-sprint-system.md    # This file
-        ├── harness-design.md           # v4 신규
+        ├── harness-design.md
         ├── agent-teams-architecture.md
-        └── branch-strategy.md
+        ├── agent-communication-map.md
+        ├── branch-strategy.md
+        └── prototype-production-guide.md  # 프로토타입 메뉴얼
 ```
