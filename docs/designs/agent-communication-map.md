@@ -83,22 +83,18 @@
 │  tokens│ │  contract│ │  contract│  │• evaluation│
 │        │ │• repo  │   │• HTML  │    │  /criteria │
 │ 쓰는것: │ │  skills│   │  prototype│  │            │
-│• context││        │   │• repo  │    │ 쓰는것:     │
-│  engine│ │ 쓰는것: │   │  skills│    │• evaluation│
-│• screen│ │• 구현  │   │        │    │  /group-N  │
-│  spec  │ │  코드  │   │ 쓰는것: │    │  .md       │
-│• HTML  │ │        │   │• 구현  │    │            │
-│  proto │ │        │   │  코드  │    │            │
-│• approv│ │        │   │        │    │            │
-│  status│ │        │   │        │    │            │
+│• HTML  │ │        │   │• repo  │    │ 쓰는것:     │
+│  proto │ │ 쓰는것: │   │  skills│    │• evaluation│
+│• approv│ │• 구현  │   │        │    │  /group-N  │
+│  status│ │  코드  │   │ 쓰는것: │    │  .md       │
+│        │ │        │   │• 구현  │    │            │
+│        │ │        │   │  코드  │    │            │
 └───┬────┘ └───┬────┘   └───┬────┘    └───┬────────┘
     │          │            │             │
     ▼          ▼            ▼             ▼
  prototypes/   .worktrees/    .worktrees/   evaluations/
- context/      backend_{id}   app_{id}      group-{N}.md
- app/{id}/
- {Screen}.spec.md
- {Screen}.png
+ app/{id}/     backend_{id}   app_{id}      group-{N}.md
+ prototype.html
 ```
 
 ---
@@ -131,8 +127,7 @@
 api-contract.yaml          ← BE/FE/Evaluator 모두 참조하는 단일 진실의 원천
 task.md                    ← 각 에이전트가 자기 태스크만 읽음
 contracts/group-{N}.md     ← Sprint Lead가 작성, Evaluator가 리뷰/합의, 평가 기준
-prototypes/context/        ← Design Engineer Context Engine 출력
-prototypes/app/{id}/*.spec.md + *.png  ← Design이 쓰고, FE가 읽음 (시각적 참조만)
+prototypes/app/{id}/       ← Design이 HTML 프로토타입을 쓰고, FE가 읽음 (시각적 참조)
 evaluations/group-{N}.md  ← Evaluator가 쓰고, Sprint Lead/Engineer가 읽음
 sprint 브랜치 코드          ← 엔지니어가 쓰고, Evaluator가 읽음
 ```
@@ -140,7 +135,7 @@ sprint 브랜치 코드          ← 엔지니어가 쓰고, Evaluator가 읽음
 ### 4.3 시간적 의존성 (실행 순서)
 
 ```
-Phase 3: Design Engineer (Context Engine → Screen Spec → HTML 프로토타입 + 사용자 승인)
+Phase 3: Design Engineer (태스크 Spec → HTML 프로토타입 + 사용자 승인)
                 │
                 ▼ approved 프로토타입이 task.md에 Prototype Reference로 추가
 Phase 4: 그룹 단위 반복 루프

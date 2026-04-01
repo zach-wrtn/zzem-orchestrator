@@ -1,6 +1,24 @@
-# Agentic Sprint System — Design Overview
+# Agentic Sprint System — ZZEM
 
 > ZZEM 앱(MemeApp + meme-api)의 자동화 스프린트 시스템. PRD → 코드 → PR 파이프라인.
+
+---
+
+## Reading Guide
+
+이 시스템을 이해하기 위한 문서 읽기 순서:
+
+| 순서 | 문서 | 소요 | 목적 |
+|------|------|------|------|
+| 1 | **이 문서** | 3분 | 시스템 개요, 파이프라인, 디렉토리 구조 파악 |
+| 2 | [System Architecture](system-architecture.md) | 15분 | 설계 원칙, 팀 구성, 실행 모델, Evaluator 캘리브레이션 |
+| 3 | [Agent Communication Map](agent-communication-map.md) | 5분 | 에이전트 간 데이터 흐름, Context 공유 경로 |
+| 4 | [Branch Strategy](branch-strategy.md) | 5분 | Git 브랜칭, worktree 격리, 머지 순서 (필요 시) |
+| 5 | [Prototype Production Guide](prototype-production-guide.md) | 10분 | HTML 프로토타입 제작·리뷰·PRD 추출 메뉴얼 (필요 시) |
+
+> **운영 레퍼런스**: `.claude/skills/sprint/SKILL.md`는 `/sprint` 명령 실행 시 참조하는 운영 명세로, 위 설계 문서와는 별개.
+
+---
 
 ## Version History
 
@@ -11,156 +29,75 @@
 | v3 | Agent Teams | 통합 `/sprint` + 4 Teammates (BE/FE/Design/QA) |
 | **v4** | **Harness Design** | **Planner-Generator-Evaluator + Iterative Loop** |
 
-## Current: v4 Harness Design
+---
 
-> Ref: [Harness Design for Long-Running Agentic Applications](https://www.anthropic.com/engineering/harness-design-long-running-apps) (Anthropic Engineering)
-
-### Core Principles
-
-1. **Planner-Generator-Evaluator 분리** — 생성과 평가를 분리. Self-evaluation은 신뢰할 수 없다.
-2. **Sprint Contract** — 구현 전 Generator와 Evaluator가 "done" 기준에 합의.
-3. **Feature-by-Feature Iteration** — 기능 그룹 단위 반복 루프.
-4. **Active Evaluation** — 정적 검사가 아닌, 코드 로직 추적 및 엣지 케이스 탐색.
-5. **Deliverable-Focused Spec** — 결과물 중심 명세. 구현 세부사항 사전 지정 금지.
-6. **File-Based Handoff** — 에이전트 간 상태 전달은 구조화된 파일 아티팩트.
-7. **Minimal Harness** — 모델이 자체 처리 가능한 부분은 scaffolding 제거.
-
-### Architecture
-
-```
-Planner (Sprint Lead) ──spec──► Generator (BE/FE) ──code──► Evaluator
-                                      ▲                         │
-                                      └──── feedback ───────────┘
-```
-
-### Pipeline
+## Pipeline
 
 ```
 Phase 1: Init ──────────────── Sprint Lead solo
 Phase 2: Spec ──────────────── Sprint Lead as Planner
 Phase 3: Prototype ─────────── Sprint Lead + Design Engineer
-  │
-  ├─ 3.1 태스크 필터
-  ├─ 3.2 Design Engineer 스폰 → HTML 프로토타입 생성
-  ├─ 3.3 리뷰 (approve / revise / reject / skip)
-  │   ├─ 3.3.1 Minor Revision (Annotation)
-  │   ├─ 3.3.2 Baseline 관리
-  │   ├─ 3.3.3 Major Revision (Live Preview)
-  │   └─ 3.3.5 Visual Regression
-  ├─ 3.4 PRD Amendment Extraction — revision 피드백에서 갭 역추출
-  ├─ 3.5 Prototype-Driven PRD Refinement — 승인된 프로토타입에서 요구사항 추출
-  └─ 3.6 Gate → Phase 4
-  │
+  ├─ 3.1~3.3 생성 + 리뷰 (approve / revise / reject)
+  ├─ 3.4 PRD Amendment Extraction (revision 피드백 → 갭 역추출)
+  ├─ 3.5 PRD Refinement (승인된 프로토타입 → 요구사항 추출)
+  └─ 3.6 Gate
 Phase 4: Build ─────────────── Iterative Loop per feature group
-  │
-  ├─ For each group:
-  │   ├─ 4.1 Contract  ─── Sprint Lead + Evaluator
-  │   ├─ 4.2 Implement ─── BE/FE Engineers (parallel)
-  │   ├─ 4.3 Merge     ─── Sprint Lead
-  │   ├─ 4.4 Evaluate  ─── Evaluator (active)
-  │   └─ 4.5 Fix/Accept
-  │
+  ├─ 4.1 Contract  ─── Sprint Lead + Evaluator
+  ├─ 4.2 Implement ─── BE/FE Engineers (parallel)
+  ├─ 4.3 Merge     ─── Sprint Lead
+  ├─ 4.4 Evaluate  ─── Evaluator (active)
+  └─ 4.5 Fix/Accept
 Phase 5: PR ────────────────── Sprint Lead solo
-Phase 6: Retrospective ─────── Sprint Lead solo (Gap Analysis + Pattern Digest + Deferral Index)
-  │
-  ├─ All AC fulfilled ───────── Sprint complete
-  ├─ Few deferred (small) ──── --continue (같은 브랜치에서 이어서)
-  └─ Many deferred / new req ── --follow-up (새 스프린트, Delta PRD)
+Phase 6: Retrospective ─────── Sprint Lead solo
+  ├─ All AC fulfilled → Sprint complete
+  ├─ Few deferred → --continue
+  └─ Many deferred → --follow-up
 ```
 
-### Team
-
-| Role | Agent | Archetype |
-|------|-------|-----------|
-| Sprint Lead | Main session | Planner + Orchestrator |
-| BE Engineer | Teammate | Generator |
-| FE Engineer | Teammate | Generator |
-| Design Engineer | Teammate | Prototype |
-| Evaluator | Teammate | Evaluator |
-
-### Key Changes (v3 → v4)
-
-| Aspect | v3 | v4 |
-|--------|----|----|
-| QA | Self-QA + static QA Engineer | Build Check + Active Evaluator |
-| Dispatch | All tasks at once | Group-by-group iteration |
-| Contract | None | Sprint Contract per group |
-| Evaluation | tsc/lint/jest + AC checklist | Logic tracing + edge case probing |
-| Timeout | 30 min per task | Removed (trust Opus 4.6) |
-| Phase naming | Plan / Execute | Spec / Build |
-
-## Detailed Designs
-
-- [Harness Design](harness-design.md) — v4 설계 원칙 및 패턴 상세
-- [Agent Teams Architecture](agent-teams-architecture.md) — 팀 구성, 실행 모델, 에러 처리
-- [Branch Strategy](branch-strategy.md) — Git 브랜칭 + worktree 격리
-- [Agent Communication Map](agent-communication-map.md) — 에이전트 간 소통 및 Context 공유
-- [Prototype Production Guide](prototype-production-guide.md) — HTML 프로토타입 제작·리뷰·PRD 추출 메뉴얼
+---
 
 ## Invocation
 
 ```
 /sprint <sprint-id>                              # Full pipeline (Phase 1~6)
-/sprint <sprint-id> --phase=X                    # Single phase (init/spec/prototype/build/pr/retro)
+/sprint <sprint-id> --phase=X                    # Single phase
 /sprint <sprint-id> --continue                   # 이월 항목 이어서 진행
-/sprint <new-id> --follow-up=<prev-id>           # 후속 스프린트 (Delta PRD 기반)
+/sprint <new-id> --follow-up=<prev-id>           # 후속 스프린트
 /sprint <sprint-id> --status                     # Dashboard
 ```
+
+---
 
 ## Directory Structure
 
 ```
 zzem-orchestrator/
 ├── .claude/
-│   ├── skills/sprint/SKILL.md          # Unified /sprint skill (v4)
-│   └── teammates/
-│       ├── be-engineer.md              # Generator
-│       ├── fe-engineer.md              # Generator
-│       ├── design-engineer.md          # Prototype
-│       └── evaluator.md               # Evaluator (v4 신규)
+│   ├── skills/sprint/SKILL.md          # /sprint 운영 명세
+│   └── teammates/                      # Agent 정의 (4명)
 ├── app-core-packages/                  # Git submodule (wrtn-tech/app-core-packages)
 ├── wrtn-backend/                       # Git submodule (wrtn-tech/wrtn-backend)
 ├── wds-tokens/                         # Git submodule (pepper/wds-tokens)
 ├── sprint-orchestrator/
 │   ├── prototypes/
-│   │   └── index.html                  # 통합 프로토타입 뷰어 (PRD 기준 사이드바)
-│   ├── templates/
-│   │   ├── sprint-config-template.yaml
-│   │   ├── sprint-contract-template.md # v4 신규
-│   │   ├── evaluation-criteria.md      # v4 신규
-│   │   ├── screen-spec-template.md     # Design Engineer Screen Spec
-│   │   ├── html-prototype-template.html # HTML 프로토타입 스켈레톤
-│   │   ├── prd-template.md
-│   │   └── prd-amendment-template.md   # Phase 3.4 개정안 템플릿
+│   │   └── index.html                  # 통합 프로토타입 뷰어
+│   ├── templates/                      # 아티팩트 템플릿
 │   └── sprints/{sprint-id}/
 │       ├── PRD.md
 │       ├── sprint-config.yaml
 │       ├── api-contract.yaml
 │       ├── tasks/{backend,app}/*.md
-│       ├── contracts/group-{N}.md      # v4 신규
-│       ├── evaluations/group-{N}.md    # v4 신규
+│       ├── contracts/group-{N}.md
+│       ├── evaluations/group-{N}.md
 │       ├── prototypes/
-│       │   ├── app/{task-id}/          # HTML 프로토타입 + 스크린샷
-│       │   │   ├── prototype.html
-│       │   │   ├── screenshots/
-│       │   │   └── baseline/           # revision 시 before 보존
-│       │   ├── approval-status.yaml    # 프로토타입 승인 상태
+│       │   ├── app/{task-id}/prototype.html
+│       │   ├── approval-status.yaml
 │       │   ├── prd-amendment.md        # Phase 3.4 산출물
 │       │   └── refined-prd.md          # Phase 3.5 산출물
-│       ├── retrospective/              # Phase 6 산출물
-│       │   ├── gap-analysis.yaml
-│       │   ├── pattern-digest.yaml
-│       │   └── deferred-items.yaml
-│       ├── REPORT.md                   # Phase 6 통합 보고서
-│       ├── follow-up-context.yaml      # --follow-up 시 이전 스프린트 연결
+│       ├── retrospective/
+│       ├── REPORT.md
 │       └── logs/
 └── docs/
     ├── prds/                           # PRD 원본
-    └── designs/                        # 시스템 설계 문서
-        ├── agentic-sprint-system.md    # This file
-        ├── harness-design.md
-        ├── agent-teams-architecture.md
-        ├── agent-communication-map.md
-        ├── branch-strategy.md
-        └── prototype-production-guide.md  # 프로토타입 메뉴얼
+    └── designs/                        # ← 지금 읽고 있는 곳
 ```
