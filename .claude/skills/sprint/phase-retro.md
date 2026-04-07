@@ -193,6 +193,14 @@ gap-analysis 결과에 따라 분기:
 | root_cause가 spec_ambiguity 다수 | "PRD/태스크 spec 재작성 후 후속 스프린트 권장" |
 | systemic_fix 존재 | "시스템 개선 선행 후 후속 스프린트 권장" |
 
+### 6.6 DESIGN.md 갱신 검토
+
+스프린트에서 새로운 컴포넌트·화면·인터랙션 패턴이 추가된 경우, `docs/designs/DESIGN.md`의 갱신 필요 여부를 검토한다.
+
+- **갱신 트리거**: 새 컴포넌트 토큰 추가, 기존 Do's/Don'ts에 반하는 패턴 도입, 디자인 시스템 변경
+- **갱신 방법**: `/extract-design --update` 실행 → 기존 DESIGN.md와 diff 출력 → 사용자 확인 후 반영
+- **스킵 조건**: 기존 컴포넌트만 사용하고 디자인 시스템 변경이 없으면 스킵
+
 ## Gate
 
 Phase 6는 최종 단계이므로 별도 gate 없음. 산출물 생성 완료 시 종료.

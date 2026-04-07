@@ -182,6 +182,15 @@ completed 태스크를 순차 머지:
 같은 레포 내: 번호 오름차순 순차 머지.
 다른 레포: 독립이므로 병렬 머지 가능.
 
+## 4.3.1 QA Pattern Check (App 태스크 머지 후)
+
+App 태스크가 포함된 그룹의 머지 완료 후, Evaluator 할당 **전에** Sprint Lead가 `qa-pattern-check` 스킬을 실행한다:
+
+- **대상**: domain/ 또는 data/ 레이어 파일이 변경된 app 태스크
+- **검증 항목**: 폴링 자기 무효화 무한루프 (ESLint), Zod 스키마 nullable (Jest fixture)
+- **FAIL 시**: 해당 FE Engineer에게 fix 태스크 재할당 후 재머지. Evaluator 할당하지 않는다.
+- **PASS 또는 해당 없음**: 4.4 Evaluate 진행
+
 ## 4.4 Evaluate (Evaluator)
 
 그룹의 모든 태스크 머지 완료 후, Evaluator에게 평가 할당:

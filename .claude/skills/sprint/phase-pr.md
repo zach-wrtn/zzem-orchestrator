@@ -6,7 +6,8 @@ Sprint 브랜치에서 base branch로 PR을 생성한다.
 
 1. **사전 확인**: 각 레포 sprint 브랜치 변경사항 확인.
 2. **태스크 상태 수집**: COMPLETED/FAILED 목록.
-3. **Push + PR 생성** (레포별, **사용자 확인 필수**):
+3. **App PR**: app-core-packages PR 생성 시 **`/meme-pr-create` 스킬 사용을 권장**한다. 이 스킬은 브랜치에서 과일환경을 자동 추출하고, CodePush 배포 가능 여부를 분석하여 AI 네이티브 PR을 생성한다. 사용하지 않는 경우 아래 수동 워크플로우를 따른다.
+4. **Push + PR 생성** (레포별, **사용자 확인 필수**):
 
 ```bash
 cd {project-dir}

@@ -46,8 +46,14 @@ git worktree add -b zzem/{sprint-id}/{task-id} \
 - **Presentation**: Screen → ViewModel (React Query hooks)
 - **Domain**: Entity (Zod), Repository interface, UseCase
 - **Data**: DTO namespace, Mapper, RepositoryImpl, API client
+- **참조**: MemeApp 아키텍처 규칙은 `app-core-packages/apps/MemeApp/.claude/rules/` 및 `.claude/decisions/`에 정의
+
+#### API 코드 생성
+
+새 API 엔드포인트 연동 시 **`/meme-api-gen` 스킬**을 사용한다. 태스크의 API contract 정보를 입력하면 Clean Architecture 전체 레이어(DTO, Entity, Mapper, Repository, QueryKey, UseCase, Cache Invalidation)를 자동 생성한다.
 
 #### Design System Tokens
+- **DESIGN.md**: `docs/designs/DESIGN.md` — Visual Atmosphere, Component Stylings, Do's/Don'ts 참조
 - Font: Pretendard
 - Background: #FFFFFF (light), #1E1E1E (dark)
 - Text: #262626 (primary), #8E8E8E (secondary)
@@ -74,6 +80,14 @@ npx jest --passWithNoTests                  # 단위 테스트
 ```
 
 실패 시 수정 후 재시도.
+
+### 5.1 QA Pattern Check (domain/data 변경 시 필수)
+
+domain/ 또는 data/ 레이어 파일을 변경한 경우 **`/qa-pattern-check` 스킬을 반드시 실행**한다:
+- 폴링 자기 무효화 무한루프 탐지 (ESLint 커스텀 규칙)
+- Zod 스키마 nullable 검증 (Jest fixture 테스트)
+
+이 검사를 통과해야 완료 보고할 수 있다.
 
 ### 6. 완료 보고
 
