@@ -1,36 +1,47 @@
-> 📝 PRD 작성 시 이 템플릿을 복사하여 `docs/prds/PRD-{순번3자리}-{feature-slug}.md`로 저장하세요.
-> 네이밍 예시: PRD-002-creator-monetization.md
+> 📝 PRD 작성 시 이 템플릿을 복사하여 `docs/prds/PRD-{project}-{번호}-{slug}.md`로 저장하세요.
+> 네이밍 예시: PRD-ugc-platform-2-feed-interaction.md
 
 ---
 
-# 1. Overview
-
-## 한 줄 요약
-
-- (이 PRD가 해결하려는 핵심을 1~2문장으로)
-
-## Why (비즈니스 목표)
-
-1. (목표 1)
-2. (목표 2)
-
-## 대상 사용자
-
-- (사용자 세그먼트)
-
-## KPI 기여 논리
-
-- (지표 → 인과관계 → 비즈니스 임팩트)
-
-## 선행 조건
-
-- (이 PRD가 의존하는 기존 시스템/PRD)
+```yaml
+title: "(PRD 제목)"
+domain: ZZEM
+status: 대기  # 대기 | 진행 중 | 완료
+description: "(한 줄 요약 — 핵심 범위와 선행 조건)"
+kpi: "(지표 → 인과관계 → 비즈니스 임팩트)"
+notion_url: (Notion 원본 링크)
+```
 
 ---
 
-# 2. User Stories & Acceptance Criteria
+# (PRD 제목)
 
-## US1: (스토리 제목)
+> 📋 (시리즈 PRD인 경우) 관련 PRD 목록과 개발 순서를 기술한다.
+>
+> 1. (PRD 1 제목) — (순서/조건)
+> 2. (PRD 2 제목) — (순서/조건)
+
+## 교차 참조 규칙
+
+- (이 PRD에서 구현하는 것 vs 다른 PRD에서 구현하는 것의 경계를 명시)
+- (예: "팔로워 카운트 UI는 본 PRD에서, 팔로우 기능 자체는 PRD 3에서 구현")
+
+---
+
+## Overview
+
+(이 PRD가 구축하는 시스템/기능의 전체 그림을 1~2문장으로)
+
+### 구현 범위
+
+- (범위 항목 1)
+- (범위 항목 2)
+
+---
+
+## User Stories & Acceptance Criteria
+
+### US1: (스토리 제목)
 
 (역할)로서, (행동)하여 (가치)를 얻고 싶다.
 
@@ -42,34 +53,21 @@
 
 ---
 
-# 3. Boundary & Constraints
+## 비즈니스 룰
 
-## 3-Tier Boundary
+### (도메인 규칙 그룹명)
 
-| Tier | 항목 | 설명 |
-|------|------|------|
-| Must | | |
-| Should | | |
-| Won't (this version) | | |
+1. (규칙 1)
+2. (규칙 2)
 
 ---
 
-# 4. Edge Cases
+## 경계 (Boundary)
 
-| # | 시나리오 | 처리 방안 |
-|---|---------|----------|
-| 1 | | |
+### ALWAYS DO
 
----
+1. (반드시 지켜야 할 사항)
 
-# 5. Out of Scope
+### NEVER DO
 
-- (이번 버전에서 다루지 않는 항목)
-
----
-
-# 6. Open Questions
-
-| # | 질문 | 상태 | 결정 |
-|---|------|------|------|
-| 1 | | | |
+1. (이번 버전에서 절대 하지 않는 것 — Out of Scope 포함)
