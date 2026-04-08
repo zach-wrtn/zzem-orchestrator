@@ -4,8 +4,8 @@ on:
   push:
     branches: [main]
     paths:
-      - 'sprint-orchestrator/sprints/*/prototypes/**'
-      - 'sprint-orchestrator/prototypes/**'
+      - 'sprint-orchestrator/**'
+      - '.github/workflows/deploy-prototypes.yml'
 
   workflow_dispatch:
 
@@ -28,6 +28,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          submodules: false
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
