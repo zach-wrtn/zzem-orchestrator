@@ -6,7 +6,7 @@
 
 이 시스템은 Claude Code Agent Teams를 활용한 **Planner-Generator-Evaluator** 패턴 기반 스프린트 오케스트레이션 시스템이다.
 
-### 8 Core Principles
+### 9 Core Principles
 
 1. **Planner-Generator-Evaluator 분리**: 생성과 평가를 분리. Self-evaluation은 신뢰할 수 없다.
 2. **Sprint Contract**: 구현 전 Generator와 Evaluator가 "done" 기준에 합의.
@@ -16,6 +16,7 @@
 6. **File-Based Handoff**: 에이전트 간 상태 전달은 구조화된 파일 아티팩트로.
 7. **Minimal Harness**: 모델이 자체 처리 가능한 부분은 scaffolding 제거.
 8. **Context Checkpoint**: Phase/Group 전환 시 구조화된 요약을 파일로 보존.
+9. **Cross-Session Knowledge**: 스프린트 간 발견된 패턴을 Knowledge Base에 누적. 다음 스프린트의 Contract와 Evaluation에 자동 반영.
 
 ---
 
@@ -184,9 +185,10 @@ Step B: UX Decomposition
   Context Engine → 화면별 Screen Spec (machine-readable md)
   Component Tree + Layout Spec + States + Interactions + Labels + Token Map
 
-Step C: Prototype Generation
-  Screen Spec + HTML Template → self-contained HTML prototype
-  Control Panel (스크린 선택, 상태 토글) + Device Frame (390×844)
+Step C: Prototype Generation (PTC 2-Phase)
+  Phase α: Screen Spec 해석 → prototype-alpha.html (Structure + Components)
+  Phase β: alpha + Labels/States/Interactions → prototype.html (단일 Write)
+  6-pass → 2-phase 최적화 (tool calls 12→4, 67% 컨텍스트 절감)
 ```
 
 ### Review Workflow
@@ -231,6 +233,37 @@ checkpoints/
 - 태스크 파일: AC 섹션 중심
 - Evaluation 보고서: verdict + 이슈 목록만
 - 이전 그룹: checkpoint summary만
+
+### Budget Pressure Injection
+
+> Ref: Hermes Agent IterationBudget
+
+Build Loop에서 fix loop 및 이슈 누적 시 동적으로 에이전트 행동을 조정한다.
+
+| 레벨 | 조건 | 행동 |
+|------|------|------|
+| 🟢 Normal | fix loop 0회 | 정상 진행 |
+| 🟡 Caution | fix loop 1회 또는 Engineer 재할당 2회+ | 즉시 checkpoint + Minor 이슈 이월 |
+| 🔴 Urgent | fix loop 2회 또는 이슈 5건+ | scope 축소 옵션 → 사용자 개입 |
+
+Sprint Lead가 TaskCreate Description에 pressure 힌트를 주입하여 Engineer/Evaluator 행동을 스티어링.
+
+### Frozen Snapshot Protocol
+
+> Ref: Hermes Agent frozen snapshot
+
+Teammate 스폰 시 참조 문서(DESIGN.md, component-patterns.md, KB 패턴)를 **1회만 로드**하여 TaskCreate Description에 인라인 제공. Teammate는 이 파일들을 별도로 Read하지 않는다.
+
+```
+Sprint Lead (1회):
+  Read DESIGN.md + component-patterns.md + KB patterns
+  → Frozen Snapshot 조립
+
+TaskCreate:
+  --- FROZEN SNAPSHOT ---
+  {인라인 참조 데이터}
+  --- END SNAPSHOT ---
+```
 
 ---
 
@@ -290,3 +323,51 @@ checkpoints/
 - Fix loop 최대 2회, 3회 실패 시 FAILED + 사용자 개입
 - Checkpoint 미생성 시 Phase/Group 전환 차단
 - `.worktrees/` 디렉토리는 `.gitignore`에 포함
+
+---
+
+## Knowledge Base System
+
+> Ref: Hermes Agent self-improving skills + cross-session memory
+
+스프린트 간 발견된 패턴을 구조화된 YAML 파일로 누적하는 지식 관리 시스템.
+
+### 구조
+
+```
+sprint-orchestrator/knowledge-base/
+├── patterns/                    # Evaluator 발견 코드 패턴
+│   ├── README.md                # 인덱스 (검색용)
+│   └── {category}-{NNN}.yaml   # 개별 패턴
+└── design/                      # Design Engineer 프로토타입 패턴
+    ├── README.md                # 인덱스 (검색용)
+    └── {category}-{NNN}.yaml   # 개별 패턴
+```
+
+### 패턴 스키마
+
+```yaml
+id: "{category}-{NNN}"
+title: "{제목}"
+category: "{correctness | completeness | integration | edge_case | code_quality | design_proto | design_spec}"
+severity: "{critical | major | minor}"
+frequency: {N}              # 발견 스프린트 수
+last_seen: "{sprint-id}"
+contract_clause: |           # Sprint Contract에 자동 주입할 조항
+  {조항 내용}
+```
+
+### 라이프사이클
+
+| Phase | 동작 | 설명 |
+|-------|------|------|
+| Phase 2 Spec | KB Search | 태스크 분해 시 관련 패턴 참조 |
+| Phase 4.1 Contract | KB Search → 자동 주입 | critical 패턴의 contract_clause를 Done Criteria에 추가 |
+| Phase 4.4 Evaluate | KB Search | Evaluator 체크리스트에 기존 패턴 반영 |
+| Phase 6 Retro | KB Write | pattern-digest → KB 기록 (기존 갱신 or 신규 생성) |
+
+### Self-Improving Nudge
+
+- `frequency >= 3`인 패턴 → Sprint Contract 템플릿에 영구 반영 권장
+- `last_seen`이 3개 스프린트 미갱신 → `archived` 마킹
+- Design Engineer의 fabrication_risk 이상 → Design KB에 자동 기록

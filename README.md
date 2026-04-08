@@ -8,7 +8,7 @@ PRD → Task Spec → HTML Prototype → Code → Evaluation → PR 파이프라
 
 ```
 zzem-orchestrator/                     ← 오케스트레이션 레이어
-├── sprint-orchestrator/               ← 스프린트 관리 (templates, sprints)
+├── sprint-orchestrator/               ← 스프린트 관리 (templates, sprints, knowledge-base)
 ├── docs/prds/                         ← PRD 원본
 ├── app-core-packages/   [submodule]   ← React Native 프론트엔드
 ├── wrtn-backend/        [submodule]   ← NestJS 백엔드
@@ -64,6 +64,14 @@ sprint-orchestrator/
 │   ├── evaluation-criteria.md           # 평가 기준 프레임워크
 │   └── html-prototype-template.html     # 프로토타입 HTML 셸
 │
+├── knowledge-base/                    # Cross-Session 패턴 저장소
+│   ├── patterns/                      # Evaluator 발견 코드 패턴 (YAML)
+│   │   ├── README.md                  # 패턴 인덱스 (검색용)
+│   │   └── {category}-{NNN}.yaml     # 개별 패턴 파일
+│   └── design/                        # Design Engineer 프로토타입 패턴
+│       ├── README.md                  # 디자인 패턴 인덱스
+│       └── {category}-{NNN}.yaml     # 개별 디자인 패턴 파일
+│
 └── sprints/{sprint-id}/                 # 스프린트 인스턴스
     ├── PRD.md                           # 스프린트 PRD
     ├── sprint-config.yaml               # 팀 + 브랜치 설정
@@ -91,3 +99,15 @@ sprint-orchestrator/
 | `/meme-pr-create` | MemeApp PR 생성 (과일환경 추출 + CodePush 분석) |
 | `/qa-pattern-check` | QA 버그 패턴 자동 검증 (폴링 무한루프, Zod nullable) |
 | `/extract-design` | 코드베이스에서 DESIGN.md 역추출 |
+
+## Hermes-Inspired Enhancements
+
+> Ref: [nousresearch/hermes-agent](https://github.com/nousresearch/hermes-agent) 패턴 적용
+
+| 패턴 | 적용 위치 | 효과 |
+|------|----------|------|
+| **Budget Pressure Injection** | Phase 4 Build Loop | 컨텍스트 소진 전 동적 스티어링 (Normal → Caution → Urgent) |
+| **Frozen Snapshot Caching** | Phase 3 + Teammate 스폰 | 참조 파일 1회 로드 후 인라인 제공, 반복 Read 제거 |
+| **Self-Improving Skill Nudge** | Phase 6 Retro → KB Write | 패턴 자동 누적, 다음 스프린트 Contract에 자동 주입 |
+| **PTC-Style 2-Phase Generation** | Design Engineer HTML 생성 | 6-pass → 2-phase (tool calls 12→4, 67% 절감) |
+| **Cross-Session Knowledge Base** | `knowledge-base/` 디렉토리 | 스프린트 간 패턴 검색/누적 (YAML 파일 기반) |

@@ -77,6 +77,7 @@ Sprint Lead(Planner)가 수행하는 작업:
 3. `api-contract.yaml` 생성 (OpenAPI 3.0)
 4. 태스크 분해 → `tasks/backend/*.md`, `tasks/app/*.md`
 5. `evaluations/criteria.md` 생성
+6. **KB 패턴 조회**: `knowledge-base/patterns/README.md`에서 관련 패턴을 검색하여 태스크 spec과 evaluation criteria에 반영
 
 **태스크 필수 섹션**: Target, Context, Objective, Specification, Acceptance Criteria
 
@@ -95,6 +96,12 @@ Sprint Lead(Planner)가 수행하는 작업:
 - app 태스크 0개
 - 모든 app 태스크에 `Screens / Components` 섹션 없음
 - `sprint-config.yaml`에 `prototype: skip`
+
+**Frozen Snapshot 조립**: Sprint Lead가 첫 Design Engineer 태스크 생성 전에 DESIGN.md + component-patterns.md + KB 디자인 패턴을 1회 읽고 snapshot을 조립한다. 이 snapshot은 모든 Design Engineer 태스크의 Description에 `--- FROZEN SNAPSHOT ---` 블록으로 인라인 제공된다.
+
+**PTC 2-Phase HTML 생성**: Design Engineer는 6-pass 대신 2-phase로 HTML을 생성한다:
+- Phase α: Screen Spec → prototype-alpha.html (구조 + 컴포넌트)
+- Phase β: alpha → prototype.html (콘텐츠 + 상태 + 인터랙션, 단일 Write)
 
 **리뷰 옵션**:
 
@@ -129,6 +136,13 @@ For each group:
   4.5 Fix/Accept → PASS면 다음 그룹, ISSUES/FAIL면 fix loop
 ```
 
+**Budget Pressure 모니터링**: Build Loop 중 Sprint Lead가 자동으로 pressure 레벨을 관리한다:
+- 🟢 Normal: 정상 진행
+- 🟡 Caution (fix loop 1회 진입): Minor 이슈 이월, 핵심 AC에 집중 지시
+- 🔴 Urgent (fix loop 2회 진입): 사용자에게 scope 축소 옵션 제시
+
+**KB 패턴 자동 주입**: Sprint Contract 작성 시 Knowledge Base의 critical 패턴이 Done Criteria에 자동 추가된다. `(KB: {pattern-id})` 태그로 출처 표시.
+
 **사용자 개입이 필요한 상황**:
 - 머지 충돌 발생
 - Fix loop 3회차 실패
@@ -158,6 +172,7 @@ App PR은 `/meme-pr-create` 스킬 사용 권장 (과일환경 추출 + CodePush
 | `gap-analysis.yaml` | PRD AC 달성 여부 (fulfilled/partially/unfulfilled) |
 | `pattern-digest.yaml` | 반복 실패 패턴 + 시스템 개선 제안 |
 | `deferred-items.yaml` | 이월 항목 + 우선순위 + 접근 방법 |
+| **KB Write** | Knowledge Base 자동 갱신 (기존 패턴 frequency 증가 + 신규 패턴 등록) |
 | `REPORT.md` | 통합 스프린트 리포트 |
 
 ---
@@ -191,7 +206,7 @@ App PR은 `/meme-pr-create` 스킬 사용 권장 (과일환경 추출 + CodePush
 1. 이전 gap-analysis + deferred-items + pattern-digest 상속
 2. Delta PRD 생성 (이월 + 추가 요구사항)
 3. Regression Guard: 이전 fulfilled AC의 회귀 검증 필수
-4. Evaluator 캘리브레이션에 이전 패턴 반영
+4. **Evaluator 캘리브레이션**: KB 인덱스 조회 → critical/major 패턴의 detection + contract_clause를 evaluation criteria에 자동 반영
 5. 전체 Phase 1~6 실행
 
 ---
@@ -421,3 +436,47 @@ wds-tokens/
 
 - Primary: **Pretendard** (fallback: SF Pro Display)
 - Device frame: 390×844 (iOS)
+
+---
+
+## 9. Knowledge Base 운영
+
+### 검색
+
+KB는 `sprint-orchestrator/knowledge-base/` 디렉토리에 YAML 파일로 저장된다.
+
+```bash
+# 패턴 인덱스 확인
+cat sprint-orchestrator/knowledge-base/patterns/README.md
+
+# 특정 카테고리 패턴 검색
+grep "correctness" sprint-orchestrator/knowledge-base/patterns/README.md
+
+# 개별 패턴 상세 확인
+cat sprint-orchestrator/knowledge-base/patterns/correctness-001.yaml
+```
+
+### 자동 기록 (Phase 6)
+
+Phase 6 Retrospective에서 자동으로:
+1. `pattern-digest.yaml`의 각 패턴을 KB에 매칭
+2. 기존 패턴 → frequency 증가 + last_seen 갱신
+3. 신규 패턴 → 새 .yaml 파일 생성 + 인덱스 갱신
+4. Design Engineer quality-report의 fabrication_risk → Design KB에 기록
+
+### Nudge 알림
+
+| 조건 | 사용자 알림 |
+|------|-----------|
+| 신규 패턴 2건+ | "KB에 {N}개 신규 패턴 기록" |
+| 패턴 frequency ≥ 3 | "⚠ 패턴 반복 — Sprint Contract 템플릿 영구 반영 권장" |
+
+### 수동 관리
+
+```bash
+# 패턴 수동 추가 (필요 시)
+# knowledge-base/README.md의 스키마 참조하여 .yaml 파일 생성
+
+# 오래된 패턴 정리
+# last_seen이 3개 스프린트 이상 미갱신된 패턴은 archived 마킹
+```
