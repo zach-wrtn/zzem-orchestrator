@@ -55,6 +55,45 @@ Sprint Lead가 파일을 읽을 때 context 효율을 위해:
 - **Evaluation 보고서**: 이슈 목록 + verdict 섹션만 읽기
 - **이전 그룹 정보**: `checkpoints/group-{N}-summary.md`만 참조
 
+### Budget Pressure Protocol
+
+> Build Loop 진행 중 자동으로 pressure 레벨을 산출하고, 에이전트 행동을 조정한다.
+
+**레벨 산출 (매 4.x 단계 전이 시)**:
+
+```
+pressure = "normal"
+
+if fix_loop_count >= 1 OR engineer_reassign_count >= 2:
+    pressure = "caution"
+
+if fix_loop_count >= 2 OR total_issues_in_group >= 5:
+    pressure = "urgent"
+```
+
+**Normal → Caution 전이 시 Sprint Lead 필수 행동**:
+
+1. 현재 그룹의 checkpoint 즉시 생성 (중간 checkpoint)
+2. 이전 그룹의 evaluation 원본 참조 금지 (summary만)
+3. Engineer 태스크 Description에 caution 힌트 추가
+4. Evaluator 재평가 시 "Minor 이슈는 다음 스프린트로 이월" 지시
+
+**Caution → Urgent 전이 시 Sprint Lead 필수 행동**:
+
+1. 사용자에게 상황 보고:
+   ```
+   ⚠ Budget Pressure: Urgent
+   Group {N}: fix loop {M}회, 이슈 {K}건
+   옵션:
+   a) Scope 축소 — Critical 이슈만 수정, Major는 deferred
+   b) 수동 개입 — 사용자가 직접 코드 확인/수정
+   c) 그룹 FAILED — 다음 그룹으로 이동, Phase 6에서 이월
+   ```
+2. 사용자 선택에 따라 진행
+3. Evaluator 재평가 시 Critical 이슈만 검증 지시
+
+**압력 해소**: 그룹 PASS 시 다음 그룹은 "normal"로 리셋.
+
 ## 파이프라인 병렬화 규칙
 
 순차 실행이 기본이지만, 다음 조건에서 병렬화 허용:
@@ -109,6 +148,25 @@ Sprint Lead가 해당 그룹의 계약서를 구성한다:
 ```
 
 저장: `sprints/{sprint-id}/contracts/group-{N}.md`
+
+### KB 패턴 자동 주입
+
+Contract 작성 전 `knowledge-base.md`의 KB Search를 실행하여,
+해당 그룹 태스크와 관련된 기존 패턴을 조회한다.
+
+**주입 규칙**:
+1. `patterns/README.md` 인덱스에서 현재 그룹 태스크의 category와 매칭되는 패턴 조회
+2. `severity: critical` 패턴의 `contract_clause`를 Done Criteria에 자동 추가
+3. `severity: major` + `frequency >= 2` 패턴도 추가
+4. 추가된 조항에 출처 표기: `(KB: {pattern-id})`
+
+**예시**:
+```markdown
+## Done Criteria
+- [ ] 프로필 API 200 응답 반환 (AC-2.1)
+- [ ] 페이지네이션 API: nextCursor가 실제 값 반환 (KB: correctness-001)
+- [ ] BE 응답 필드명이 api-contract.yaml과 정확히 일치 (KB: integration-001)
+```
 
 Evaluator에게 계약서 리뷰 요청:
 
@@ -217,14 +275,20 @@ Evaluator는 **Active Evaluation** 수행:
 | **ISSUES** | Critical 0, Major 1+ | 4.5 Fix Loop |
 | **FAIL** | Critical 1+, 또는 Major 3+ | 4.5 Fix Loop (또는 재구현) |
 
-## 4.5 Fix Loop
+## 4.5 Fix Loop (Budget Pressure 연동)
 
 ISSUES 또는 FAIL 시:
-1. Evaluator 보고서를 원 Engineer에게 전달
-2. Engineer가 이슈별 수정 후 완료 보고
-3. Sprint Lead 머지
-4. Evaluator 재평가
-5. **최대 2회 반복**, 3회차 실패 시 FAILED 처리 + 사용자 개입 요청
+
+1. **Pressure 레벨 갱신**: fix_loop_count += 1 → pressure 재산출
+2. Evaluator 보고서를 원 Engineer에게 전달
+   - 🟡 Caution: `⚠ Context Pressure: Caution — Critical/Major만 수정. Minor는 다음 스프린트로 이월.`
+   - 🔴 Urgent: 사용자에게 scope 축소 옵션 제시 (Budget Pressure Protocol 참조)
+3. Engineer가 이슈별 수정 후 완료 보고
+4. Sprint Lead 머지
+5. Evaluator 재평가
+   - 🟡 Caution: Minor 이슈는 보고하되 verdict에 영향 없음 (PASS 가능)
+   - 🔴 Urgent: Critical 이슈만 검증
+6. **최대 2회 반복**, 3회차 실패 시 FAILED 처리 + 사용자 개입 요청
 
 ## 4.6 에러 처리 및 복구 플레이북
 

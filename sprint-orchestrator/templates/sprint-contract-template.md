@@ -53,3 +53,15 @@ Evaluator가 각 criterion을 **어떻게** 검증할지 명시한다.
 ---
 
 _Evaluator 리뷰 완료: {날짜} / {합의 여부}_
+
+## KB Pattern Clauses (자동 주입)
+
+> Sprint Lead가 Contract 작성 시, `knowledge-base/patterns/README.md`에서
+> 관련 패턴의 `contract_clause`를 Done Criteria에 자동 추가한다.
+>
+> 형식: `- [ ] {clause 내용} (KB: {pattern-id})`
+>
+> 주입 기준:
+> - `severity: critical` → 항상 주입
+> - `severity: major` + `frequency >= 2` → 주입
+> - `severity: minor` → 주입하지 않음

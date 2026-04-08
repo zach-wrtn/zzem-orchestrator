@@ -201,6 +201,69 @@ gap-analysis 결과에 따라 분기:
 - **갱신 방법**: `/extract-design --update` 실행 → 기존 DESIGN.md와 diff 출력 → 사용자 확인 후 반영
 - **스킵 조건**: 기존 컴포넌트만 사용하고 디자인 시스템 변경이 없으면 스킵
 
+### 6.7 Knowledge Base Write (자동 패턴 누적)
+
+> Ref: Hermes Agent self-improving skills — 스프린트 완료 후 패턴을 KB에 자동 기록.
+
+Pattern Digest + Quality Report를 KB에 기록한다.
+
+**Workflow**:
+
+```
+1. pattern-digest.yaml 읽기
+2. knowledge-base/patterns/README.md 인덱스 읽기
+3. For each pattern in pattern-digest:
+   a. 인덱스에서 동일 title/category 매칭 검색
+   b. 매칭 발견:
+      - 해당 .yaml 파일 Read
+      - frequency += 1
+      - last_seen = current sprint-id
+      - groups 배열에 현재 그룹 추가
+      - Write (갱신)
+      - README.md 인덱스의 Freq, Last Seen 갱신
+   c. 매칭 없음 (신규):
+      - 새 .yaml 파일 생성 (스키마: knowledge-base/README.md 참조)
+      - pattern-digest의 systemic_fix → prevention 필드로 변환
+      - pattern-digest의 pattern → description 필드로 변환
+      - contract_clause: systemic_fix에서 Contract 조항 도출 (없으면 null)
+      - README.md 인덱스에 행 추가
+4. prototypes/quality-report.yaml 읽기 (존재 시)
+5. fabrication_risk: medium 항목을 design/ KB에 동일 절차로 기록
+```
+
+**Design Engineer 패턴 기록**:
+
+프로토타입에서 반복된 품질 이슈도 KB에 기록한다:
+
+| 시그널 | Design KB 패턴 |
+|--------|--------------|
+| 같은 revision 사유가 2회+ | `design-proto-{NNN}`: 반복 보정 패턴 |
+| fabrication_risk: medium + approved | `design-spec-{NNN}`: PRD 암묵적 요구사항 |
+| quality_score.extraction_accuracy < 0.8 | `design-spec-{NNN}`: 추출 정확도 개선 필요 |
+
+**Nudge 메커니즘**:
+
+Retrospective 산출물 생성 후, 다음 조건을 체크:
+
+```
+if new_patterns_count >= 2:
+    사용자에게: "이번 스프린트에서 {N}개 신규 패턴 발견, KB에 기록. 
+    다음 스프린트의 Contract/Evaluation에 자동 반영됩니다."
+
+if any pattern.frequency >= 3:
+    사용자에게: "⚠ 패턴 '{title}'이 {N}개 스프린트에서 반복. 
+    Sprint Contract 템플릿에 영구 반영을 권장합니다."
+    → 사용자 승인 시 sprint-contract-template.md에 해당 clause 추가
+```
+
+**출력에 추가** (기존 Phase 6 Output 블록 안에):
+```
+  KB Update:
+    Patterns updated: {N} (existing: {M} updated, new: {K} created)
+    Design patterns: {N}
+    Template nudge: {있으면 표시, 없으면 생략}
+```
+
 ## Gate
 
 Phase 6는 최종 단계이므로 별도 gate 없음. 산출물 생성 완료 시 종료.

@@ -83,6 +83,76 @@ sprints/{sprint-id}/checkpoints/
 - **Evaluation 보고서**: verdict + 이슈 목록 섹션만
 - **이전 그룹 정보**: `checkpoints/group-{N}-summary.md`만 참조
 
+### Budget Pressure Injection
+
+> Ref: Hermes Agent IterationBudget — 컨텍스트 소진 전 동적 스티어링.
+
+장기 Build Loop에서 컨텍스트 윈도우 품질을 유지하기 위해,
+Sprint Lead는 각 그룹의 진행 상황을 모니터링하고 pressure 레벨에 따라 행동을 조정한다.
+
+**Pressure 레벨 판단**:
+
+| 레벨 | 조건 | Sprint Lead 행동 |
+|------|------|-----------------|
+| 🟢 Normal | 현재 그룹 내 fix loop 0회 | 정상 진행 |
+| 🟡 Caution | fix loop 1회차 진입 또는 Engineer 태스크 2회 이상 재할당 | Checkpoint 즉시 생성 + 이전 그룹 상세 컨텍스트 drop |
+| 🔴 Urgent | fix loop 2회차 또는 그룹 내 총 이슈 5건+ | scope 축소 제안 + 사용자 개입 요청 준비 |
+
+**Pressure 주입 방식**:
+
+Sprint Lead가 Engineer/Evaluator에게 태스크를 할당할 때,
+현재 pressure 레벨에 따라 태스크 Description에 컨텍스트 힌트를 추가한다:
+
+- 🟡 Caution: `⚠ Context Pressure: Caution — 핵심 AC에 집중. 부가 개선 금지.`
+- 🔴 Urgent: `🔴 Context Pressure: Urgent — 최소 기능만 구현. scope 축소 가능성 있음.`
+
+이 힌트는 Engineer/Evaluator의 동작에 직접 영향을 준다:
+- Engineer: Caution에서 불필요한 리팩토링/추가 기능 금지. Urgent에서 AC 충족 최소 구현만.
+- Evaluator: Caution에서 Minor 이슈 보고 생략. Urgent에서 Critical만 보고.
+
+### Frozen Snapshot Protocol
+
+> Ref: Hermes Agent — 세션 시작 시 시스템 프롬프트를 1회 로드 후 고정. Anthropic prompt caching 최적화.
+
+**원칙**: Teammate가 스폰될 때 참조하는 디자인 시스템, 패턴 라이브러리, KB 데이터를
+**1회만 로드하고 세션 내에서 재로드하지 않는다**.
+
+**Snapshot 대상** (Teammate 스폰 시 1회 로드):
+
+| 대상 | 파일 | 소비자 |
+|------|------|--------|
+| Design System | `docs/designs/DESIGN.md` | Design Engineer |
+| Component Patterns | `docs/designs/component-patterns.md` | Design Engineer |
+| Design KB | `knowledge-base/design/README.md` + 관련 .yaml | Design Engineer |
+| Code KB | `knowledge-base/patterns/README.md` + 관련 .yaml | Evaluator, Engineers |
+| API Contract (그룹 범위) | `contracts/api-contract.yaml` (현재 그룹 endpoints) | Engineers, Evaluator |
+
+**적용 방식**:
+
+Sprint Lead가 Teammate에게 TaskCreate 시, Description에 snapshot context를 **인라인으로 포함**한다.
+Teammate는 별도로 이 파일들을 Read하지 않는다.
+
+```
+TaskCreate:
+  Subject: proto/app/{task-id}/{ScreenName}
+  Description: |
+    --- FROZEN SNAPSHOT ---
+    {DESIGN.md 핵심 섹션 발췌}
+    {component-patterns.md 관련 패턴}
+    {KB design 패턴 중 관련 항목}
+    --- END SNAPSHOT ---
+
+    태스크 상세: {task-id} 참조
+    Screen Spec 템플릿: sprint-orchestrator/templates/screen-spec-template.md
+```
+
+**금지 사항**:
+- Teammate가 snapshot 대상 파일을 직접 Read하는 것 (Sprint Lead가 이미 제공)
+- Sprint Lead가 같은 세션 내에서 snapshot을 재구성하는 것 (한 번만)
+- 단, `tokens.css`와 `context-engine.yaml`은 Design Engineer가 직접 생성하므로 예외
+
+**비용 효과**: 4-agent × 다회 호출 구조에서 시스템 프롬프트 + 참조 파일의 반복 로드를 제거.
+
 ---
 
 ## Phase Routing

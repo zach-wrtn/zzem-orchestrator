@@ -146,14 +146,25 @@ previous_metrics:
 - [ ] AC-001 ~ AC-{M}: 이전 충족 항목 회귀 없음
 ```
 
-2. **Evaluator 캘리브레이션 보강**: pattern-digest의 systemic_fix를 evaluation criteria에 반영.
+2. **Evaluator 캘리브레이션 보강 (KB 자동 조회)**:
+
+KB의 pattern 인덱스를 조회하여 evaluation criteria를 자동 보강한다.
 
 ```
-evaluation/criteria.md에 추가:
-## Calibration from {prev-sprint-id}
-- Pattern: {반복 패턴} → 이 패턴에 대해 추가 주의
-- Pattern: {반복 패턴} → {systemic_fix} 적용 여부 확인
+1. knowledge-base/patterns/README.md 읽기
+2. severity: critical 또는 (severity: major AND frequency >= 2) 패턴 필터
+3. 필터된 패턴의 .yaml 파일 Read
+4. 각 패턴의 detection + contract_clause를 evaluation/criteria.md에 추가:
+
+## KB-Calibrated Checks (from {prev-sprint-id} + accumulated KB)
+- Pattern: {title} (KB: {pattern-id}, freq: {N})
+  Detection: {detection 필드 요약}
+  Contract clause: {contract_clause}
 ```
+
+기존 pattern-digest 기반 캘리브레이션은 유지하되, KB가 더 포괄적이므로 우선 적용:
+- KB에 있고 pattern-digest에도 있는 패턴 → KB 버전 사용 (frequency 반영)
+- pattern-digest에만 있는 패턴 → 기존대로 추가
 
 3. **Regression AC 생성**: 이전 스프린트에서 fulfilled된 AC를 간소화한 regression 체크리스트 생성.
 
