@@ -1,0 +1,23 @@
+sprint_id: "ugc-profile-nav-001"
+
+# 프로젝트별 base branch 설정
+branches:
+  backend:
+    base: "apple"
+  app:
+    base: "meme-release-1.2.2"
+
+# 미지정 프로젝트의 폴백 base branch
+defaults:
+  base: "main"
+
+# Agent Teams 설정 (Harness Design v4)
+team:
+  teammates:
+    - be-engineer
+    - fe-engineer
+    - design-engineer
+    - evaluator
+  settings:
+    eval_retry_limit: 2
+    max_parallel_tasks: 4

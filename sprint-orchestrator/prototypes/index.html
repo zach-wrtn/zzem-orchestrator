@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZZEM — Prototype Gallery</title>
+<style>
+  @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --sidebar-w: 260px;
+    --header-h: 56px;
+    --bg: #fff;
+    --bg-sidebar: #fafafa;
+    --border: #e8e8e8;
+    --text: #1a1a1a;
+    --text-secondary: #888;
+    --text-tertiary: #bbb;
+    --brand: #8752FA;
+    --brand-light: #f3eeff;
+  }
+  body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif; color: var(--text); background: var(--bg); }
+
+  /* ===== Header ===== */
+  .header { position: fixed; top: 0; left: 0; right: 0; height: var(--header-h); background: #fff; border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 28px; z-index: 100; }
+  .header-logo { font-size: 20px; font-weight: 800; color: var(--brand); }
+  .header-divider { width: 1px; height: 24px; background: var(--border); margin: 0 20px; }
+  .header-title { font-size: 15px; font-weight: 500; color: var(--text-secondary); }
+
+  /* ===== Sidebar ===== */
+  .sidebar { position: fixed; top: var(--header-h); left: 0; bottom: 0; width: var(--sidebar-w); background: var(--bg-sidebar); border-right: 1px solid var(--border); overflow-y: auto; padding: 20px 0; z-index: 90; }
+  .sidebar-section { margin-bottom: 24px; }
+  .sidebar-label { font-size: 10px; font-weight: 700; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 1px; padding: 0 24px; margin-bottom: 8px; }
+  .sidebar-sprint { margin-bottom: 4px; }
+  .sidebar-sprint-header { display: flex; align-items: center; gap: 8px; padding: 8px 24px; font-size: 13px; font-weight: 600; color: var(--text); cursor: pointer; transition: background 0.15s; border-left: 3px solid transparent; }
+  .sidebar-sprint-header:hover { background: #f0f0f0; }
+  .sidebar-sprint-header.active { color: var(--brand); border-left-color: var(--brand); background: var(--brand-light); }
+  .sidebar-sprint-header .sprint-status { font-size: 9px; padding: 2px 6px; border-radius: 3px; margin-left: auto; }
+  .sidebar-sprint-header .sprint-status.complete { background: #dcfce7; color: #16a34a; }
+  .sidebar-sprint-header .sprint-status.in-progress { background: #fef3c7; color: #d97706; }
+  .sidebar-sprint-header .sprint-status.review { background: var(--brand-light); color: var(--brand); }
+  .sidebar-screens { padding-left: 36px; display: none; }
+  .sidebar-screens.open { display: block; }
+  .sidebar-screen { display: block; padding: 5px 24px 5px 12px; font-size: 12px; color: var(--text-secondary); cursor: pointer; border-radius: 0 6px 6px 0; transition: all 0.15s; text-decoration: none; }
+  .sidebar-screen:hover { color: var(--text); background: #eee; }
+  .sidebar-screen.active { color: var(--brand); background: var(--brand-light); font-weight: 500; }
+  .sidebar-screen .screen-group { font-size: 9px; color: var(--text-tertiary); margin-left: 4px; }
+
+  /* ===== Main ===== */
+  .main { margin-left: var(--sidebar-w); margin-top: var(--header-h); min-height: calc(100vh - var(--header-h)); }
+
+  /* ===== Gallery Page ===== */
+  .gallery { padding: 40px; display: block; }
+  .gallery.hidden { display: none; }
+  .gallery h1 { font-size: 32px; font-weight: 700; margin-bottom: 8px; }
+  .gallery .subtitle { font-size: 14px; color: var(--text-secondary); margin-bottom: 40px; line-height: 1.6; }
+
+  /* Sprint Section */
+  .sprint-section { margin-bottom: 56px; }
+  .sprint-section-header { display: flex; align-items: baseline; gap: 12px; margin-bottom: 8px; }
+  .sprint-section-header h2 { font-size: 20px; font-weight: 700; }
+  .sprint-section-header .sprint-meta { font-size: 12px; color: var(--text-secondary); }
+  .sprint-section-header .status-pill { font-size: 11px; padding: 3px 10px; border-radius: 12px; font-weight: 500; }
+  .sprint-section-header .status-pill.review { background: var(--brand-light); color: var(--brand); }
+  .sprint-section-header .status-pill.complete { background: #dcfce7; color: #16a34a; }
+  .sprint-section-desc { font-size: 13px; color: var(--text-secondary); margin-bottom: 20px; }
+  .sprint-section-links { display: flex; gap: 12px; margin-bottom: 24px; }
+  .sprint-section-links a { font-size: 12px; color: var(--brand); text-decoration: none; padding: 5px 12px; border: 1px solid var(--brand); border-radius: 6px; transition: all 0.15s; cursor: pointer; }
+  .sprint-section-links a:hover { background: var(--brand-light); }
+
+  /* Screen Cards Grid */
+  .screen-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+  .screen-card { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04); cursor: pointer; transition: all 0.2s; }
+  .screen-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.10), 0 0 0 1px rgba(135,82,250,0.2); transform: translateY(-2px); }
+  .screen-card .card-preview { width: 100%; aspect-ratio: 9/16; background: #f5f5f5; position: relative; overflow: hidden; }
+  .screen-card .card-preview iframe { position: absolute; top: 0; left: 0; width: 390px; height: 844px; border: none; transform-origin: 0 0; pointer-events: none; }
+  .screen-card .card-body { padding: 12px 14px; }
+  .screen-card .card-body h3 { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
+  .screen-card .card-body p { font-size: 11px; color: var(--text-secondary); line-height: 1.4; }
+  .screen-card .card-body .tags { display: flex; gap: 3px; margin-top: 6px; flex-wrap: wrap; }
+  .screen-card .card-body .tag { font-size: 9px; padding: 1px 5px; border-radius: 3px; background: var(--brand-light); color: var(--brand); }
+
+  /* ===== Viewer (iframe embed) ===== */
+  .viewer { display: none; height: calc(100vh - var(--header-h)); }
+  .viewer.active { display: flex; flex-direction: column; }
+  .viewer-bar { display: flex; align-items: center; gap: 12px; padding: 12px 24px; border-bottom: 1px solid var(--border); flex-shrink: 0; background: #fff; }
+  .viewer-bar .back-btn { background: none; border: 1px solid var(--border); border-radius: 6px; padding: 4px 12px; font-size: 12px; cursor: pointer; color: var(--text-secondary); font-family: inherit; }
+  .viewer-bar .back-btn:hover { background: #f5f5f5; }
+  .viewer-bar h3 { font-size: 14px; font-weight: 600; }
+  .viewer-bar .viewer-sprint { font-size: 11px; color: var(--text-tertiary); margin-left: auto; }
+  .viewer-body { flex: 1; }
+  .viewer-body iframe { width: 100%; height: 100%; border: none; }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <span class="header-logo">ZZEM</span>
+  <div class="header-divider"></div>
+  <span class="header-title">Prototype Gallery</span>
+</header>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-section">
+    <div class="sidebar-label">Gallery</div>
+    <div class="sidebar-sprint-header active" onclick="showGallery()">전체 보기</div>
+  </div>
+
+  <!-- Sprint: ugc-profile-nav-001 -->
+  <div class="sidebar-section">
+    <div class="sidebar-label">Sprints</div>
+    <div class="sidebar-sprint">
+      <div class="sidebar-sprint-header" onclick="toggleSprint(this)" data-sprint="ugc-profile-nav-001">
+        프로필 & 네비게이션
+        <span class="sprint-status review">Review</span>
+      </div>
+      <div class="sidebar-screens" id="screens-ugc-profile-nav-001">
+        <a class="sidebar-screen" onclick="openViewer('ugc-profile-nav-001', 'viewer', '통합 뷰어')">
+          📋 통합 뷰어
+        </a>
+        <a class="sidebar-screen" onclick="openViewer('ugc-profile-nav-001', 'flow', 'UX Flow')">
+          🔀 UX Flow
+        </a>
+        <a class="sidebar-screen" onclick="openScreen('ugc-profile-nav-001', '001-tab-navigation', '네비게이션 + 프로필')">
+          네비게이션 + 프로필 <span class="screen-group">G1</span>
+        </a>
+        <a class="sidebar-screen" onclick="openScreen('ugc-profile-nav-001', '003-profile-edit', '프로필 편집')">
+          프로필 편집 <span class="screen-group">G2</span>
+        </a>
+        <a class="sidebar-screen" onclick="openScreen('ugc-profile-nav-001', '004-settings-screen', '설정')">
+          설정 <span class="screen-group">G2</span>
+        </a>
+        <a class="sidebar-screen" onclick="openScreen('ugc-profile-nav-001', '005-other-user-profile', '타 유저 프로필')">
+          타 유저 프로필 <span class="screen-group">G3</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Future sprints will be added here -->
+  <!--
+  <div class="sidebar-section">
+    <div class="sidebar-label">Past Sprints</div>
+    <div class="sidebar-sprint">
+      <div class="sidebar-sprint-header" onclick="toggleSprint(this)" data-sprint="ugc-platform-001">
+        UGC Platform (피드)
+        <span class="sprint-status complete">Complete</span>
+      </div>
+      <div class="sidebar-screens" id="screens-ugc-platform-001">
+        ...
+      </div>
+    </div>
+  </div>
+  -->
+</aside>
+
+<div class="main">
+
+  <!-- Gallery View -->
+  <div class="gallery" id="galleryView">
+    <h1>Prototype Gallery</h1>
+    <p class="subtitle">ZZEM 앱 스프린트별 UI 프로토타입 아카이브. 각 스프린트의 화면을 탐색하고, UX 플로우를 확인할 수 있습니다.</p>
+
+    <!-- Sprint: ugc-profile-nav-001 -->
+    <div class="sprint-section" id="section-ugc-profile-nav-001">
+      <div class="sprint-section-header">
+        <h2>프로필 & 네비게이션</h2>
+        <span class="sprint-meta">ugc-profile-nav-001</span>
+        <span class="status-pill review">Prototype Review</span>
+      </div>
+      <p class="sprint-section-desc">앱 골격(3탭 탭바), MY 3탭, 프로필 편집, 타유저 프로필, 설정 화면. PRD 1의 선행 조건.</p>
+      <div class="sprint-section-links">
+        <a onclick="openViewer('ugc-profile-nav-001', 'viewer', '통합 뷰어')">📋 통합 뷰어</a>
+        <a onclick="openViewer('ugc-profile-nav-001', 'flow', 'UX Flow')">🔀 UX Flow</a>
+      </div>
+
+      <div class="screen-grid">
+        <div class="screen-card" onclick="openScreen('ugc-profile-nav-001', '001-tab-navigation', '네비게이션 + 프로필')">
+          <div class="card-preview">
+            <iframe src="../sprints/ugc-profile-nav-001/prototypes/app/001-tab-navigation/prototype.html" loading="lazy"></iframe>
+          </div>
+          <div class="card-body">
+            <h3>네비게이션 + 프로필</h3>
+            <p>3탭 탭바, 프로필 헤더, 게시물·비공개·좋아요 3탭</p>
+            <div class="tags"><span class="tag">AC 2.1</span><span class="tag">AC 2.2</span></div>
+          </div>
+        </div>
+
+        <div class="screen-card" onclick="openScreen('ugc-profile-nav-001', '003-profile-edit', '프로필 편집')">
+          <div class="card-preview">
+            <iframe src="../sprints/ugc-profile-nav-001/prototypes/app/003-profile-edit/prototype.html" loading="lazy"></iframe>
+          </div>
+          <div class="card-body">
+            <h3>프로필 편집</h3>
+            <p>이미지 변경, 닉네임 수정, 랜덤 닉네임, 공유</p>
+            <div class="tags"><span class="tag">AC 2.4</span><span class="tag">AC 2.6</span></div>
+          </div>
+        </div>
+
+        <div class="screen-card" onclick="openScreen('ugc-profile-nav-001', '004-settings-screen', '설정')">
+          <div class="card-preview">
+            <iframe src="../sprints/ugc-profile-nav-001/prototypes/app/004-settings-screen/prototype.html" loading="lazy"></iframe>
+          </div>
+          <div class="card-body">
+            <h3>설정</h3>
+            <p>7개 메뉴: 편집, 알림, 차단, 약관, 개인정보, 로그아웃, 탈퇴</p>
+            <div class="tags"><span class="tag">AC 2.8</span></div>
+          </div>
+        </div>
+
+        <div class="screen-card" onclick="openScreen('ugc-profile-nav-001', '005-other-user-profile', '타 유저 프로필')">
+          <div class="card-preview">
+            <iframe src="../sprints/ugc-profile-nav-001/prototypes/app/005-other-user-profile/prototype.html" loading="lazy"></iframe>
+          </div>
+          <div class="card-body">
+            <h3>타 유저 프로필</h3>
+            <p>게시물 탭만, 더보기 메뉴, 생성 후 랜딩</p>
+            <div class="tags"><span class="tag">AC 7.1</span><span class="tag">AC 2.7</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Future sprint sections added here by Sprint Lead -->
+
+  </div>
+
+  <!-- Viewer (iframe embed for individual screens or sprint viewer) -->
+  <div class="viewer" id="viewerView">
+    <div class="viewer-bar">
+      <button class="back-btn" onclick="showGallery()">← Gallery</button>
+      <h3 id="viewerTitle"></h3>
+      <span class="viewer-sprint" id="viewerSprint"></span>
+    </div>
+    <div class="viewer-body">
+      <iframe id="viewerFrame"></iframe>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// Sprint base paths (relative from this index.html)
+const SPRINT_BASES = {
+  'ugc-profile-nav-001': '../sprints/ugc-profile-nav-001/prototypes'
+};
+
+function scaleCardPreviews() {
+  document.querySelectorAll('.card-preview').forEach(c => {
+    const iframe = c.querySelector('iframe');
+    if (!iframe) return;
+    const scale = c.offsetWidth / 390;
+    iframe.style.transform = `scale(${scale})`;
+  });
+}
+
+function toggleSprint(header) {
+  const sprint = header.dataset.sprint;
+  const screens = document.getElementById('screens-' + sprint);
+  if (screens) screens.classList.toggle('open');
+}
+
+function showGallery() {
+  document.getElementById('galleryView').classList.remove('hidden');
+  document.getElementById('viewerView').classList.remove('active');
+  // Reset sidebar
+  document.querySelectorAll('.sidebar-screen').forEach(s => s.classList.remove('active'));
+  document.querySelector('.sidebar-sprint-header.active')?.classList.remove('active');
+  document.querySelector('.sidebar-sprint-header[onclick*="showGallery"]')?.classList.add('active');
+  // Rescale after showing
+  setTimeout(scaleCardPreviews, 100);
+}
+
+function openScreen(sprint, screenId, title) {
+  const base = SPRINT_BASES[sprint];
+  const src = base + '/app/' + screenId + '/prototype.html';
+  _openViewer(src, title, sprint);
+}
+
+function openViewer(sprint, type, title) {
+  const base = SPRINT_BASES[sprint];
+  let src;
+  if (type === 'viewer') {
+    src = base + '/viewer.html';
+  } else if (type === 'flow') {
+    src = base + '/viewer.html';
+    // Will switch to flow after load
+    setTimeout(() => {
+      try {
+        document.getElementById('viewerFrame').contentWindow.showPage('flow');
+      } catch(e) {}
+    }, 1000);
+  }
+  _openViewer(src, title, sprint);
+}
+
+function _openViewer(src, title, sprint) {
+  document.getElementById('galleryView').classList.add('hidden');
+  const viewer = document.getElementById('viewerView');
+  viewer.classList.add('active');
+  document.getElementById('viewerTitle').textContent = title;
+  document.getElementById('viewerSprint').textContent = sprint;
+  document.getElementById('viewerFrame').src = src;
+
+  // Update sidebar
+  document.querySelectorAll('.sidebar-screen, .sidebar-sprint-header').forEach(s => s.classList.remove('active'));
+  // Open sprint screens
+  const screens = document.getElementById('screens-' + sprint);
+  if (screens) screens.classList.add('open');
+}
+
+// Init
+window.addEventListener('load', () => setTimeout(scaleCardPreviews, 300));
+window.addEventListener('resize', scaleCardPreviews);
+</script>
+
+</body>
+</html>

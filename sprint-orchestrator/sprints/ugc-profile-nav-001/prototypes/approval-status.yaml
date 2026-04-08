@@ -1,0 +1,98 @@
+tasks:
+  001-tab-navigation:
+    screen-home:
+      status: approved
+      prototype: "app/001-tab-navigation/prototype.html#screen-home"
+      states_captured: [default, empty, loading]
+      revision_count: 1
+      last_revision: "major"
+      reviewed_at: "2026-04-08"
+      notes: "Figma 기준 2열 매거진 그리드로 보정"
+    screen-explore:
+      status: approved
+      prototype: "app/001-tab-navigation/prototype.html#screen-explore"
+      states_captured: [default, empty, loading]
+      revision_count: 1
+      last_revision: "major"
+      reviewed_at: "2026-04-08"
+    screen-profile:
+      status: approved
+      prototype: "app/001-tab-navigation/prototype.html#screen-profile"
+      states_captured: [default, empty, loading]
+      revision_count: 1
+      last_revision: "major"
+      reviewed_at: "2026-04-08"
+      notes: "Figma 기준 아이콘 탭, 회색 버튼, 2열 매거진으로 보정"
+    screen-vertical-feed:
+      status: approved
+      prototype: "app/001-tab-navigation/prototype.html#screen-vertical-feed"
+      states_captured: [default]
+      revision_count: 0
+      reviewed_at: "2026-04-08"
+
+  003-profile-edit:
+    screen-profile-edit:
+      status: approved
+      prototype: "app/003-profile-edit/prototype.html#screen-profile-edit"
+      states_captured: [default, validation-error, saving]
+      revision_count: 1
+      last_revision: "major"
+      reviewed_at: "2026-04-08"
+      notes: "Figma 기준 미니멀 레이아웃, 카메라/앨범+사진삭제 바텀시트로 보정"
+    screen-share:
+      status: approved
+      prototype: "app/003-profile-edit/prototype.html#screen-share"
+      states_captured: [default]
+      revision_count: 0
+      reviewed_at: "2026-04-08"
+
+  004-settings-screen:
+    screen-settings:
+      status: approved
+      prototype: "app/004-settings-screen/prototype.html#screen-settings"
+      states_captured: [default, logout-dialog]
+      revision_count: 1
+      last_revision: "major"
+      reviewed_at: "2026-04-08"
+      notes: "Figma+PRD 병합. 계정/비밀번호/고객센터 추가, 차단관리 유지, 하단 로그아웃 버튼"
+    screen-coming-soon:
+      status: approved
+      prototype: "app/004-settings-screen/prototype.html#screen-coming-soon"
+      states_captured: [default]
+      revision_count: 0
+      reviewed_at: "2026-04-08"
+
+  005-other-user-profile:
+    screen-other-profile:
+      status: approved
+      prototype: "app/005-other-user-profile/prototype.html#screen-other-profile"
+      states_captured: [default]
+      revision_count: 1
+      last_revision: "major"
+      reviewed_at: "2026-04-08"
+      notes: "팔로우 버튼 제거, 바이오 제거, 3탭 하단 네비, 2열 매거진"
+    screen-other-profile-empty:
+      status: approved
+      prototype: "app/005-other-user-profile/prototype.html#screen-other-profile-empty"
+      states_captured: [default]
+      revision_count: 0
+      reviewed_at: "2026-04-08"
+    screen-more-menu:
+      status: approved
+      prototype: "app/005-other-user-profile/prototype.html#screen-more-menu"
+      states_captured: [default]
+      revision_count: 0
+      reviewed_at: "2026-04-08"
+    screen-my-profile-generating:
+      status: approved
+      prototype: "app/005-other-user-profile/prototype.html#screen-my-profile-generating"
+      states_captured: [default]
+      revision_count: 1
+      last_revision: "minor"
+      reviewed_at: "2026-04-08"
+    screen-my-profile-private:
+      status: approved
+      prototype: "app/005-other-user-profile/prototype.html#screen-my-profile-private"
+      states_captured: [default]
+      revision_count: 0
+      reviewed_at: "2026-04-08"

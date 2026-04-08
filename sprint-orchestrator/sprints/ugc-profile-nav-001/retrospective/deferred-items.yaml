@@ -1,0 +1,29 @@
+deferred:
+  - ac_id: "AC-2.2"
+    original_task: "tasks/backend/001-profile-api.md"
+    group: "group-001"
+    status: "partially_fulfilled"
+    reason: "regeneratedCount가 0으로 하드코딩. 재생성 추적 인프라 미구축."
+    root_cause: "dependency"
+    prior_attempts: 0
+    evaluator_notes: "TODO 주석으로 허용 처리됨"
+    suggested_approach: "재생성 이벤트 저장 → Content 기반 집계 쿼리 구현"
+    priority: "medium"
+    estimated_complexity: "medium"
+
+improvements:
+  - description: "PRD → Prototype 품질 갭 최소화를 위한 Component Pattern Library 도입"
+    source: "user_feedback"
+    priority: "high"
+
+  - description: "Sprint Contract에 네비게이션 진입점 체크리스트 추가"
+    source: "pattern_digest"
+    priority: "high"
+
+  - description: "DTO getter 금지 + API contract 필드명 일치 검증 자동화"
+    source: "pattern_digest"
+    priority: "medium"
+
+  - description: "Figma-PRD 매핑 파일(figma-mapping.yaml)을 Phase 2에서 선제적 수집"
+    source: "user_feedback"
+    priority: "medium"

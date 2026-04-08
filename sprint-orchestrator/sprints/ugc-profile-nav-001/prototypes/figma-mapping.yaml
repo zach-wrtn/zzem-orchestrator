@@ -1,0 +1,198 @@
+# Figma-PRD Mapping: ugc-profile-nav-001
+#
+# 사용법:
+# - figma는 항상 배열 형태로 작성합니다.
+#     figma:
+#       - url: "https://www.figma.com/design/..."
+#         note: "설명"
+#
+# - 해당 AC의 Figma 디자인이 없으면 빈 배열: figma: []
+#
+# 입력 후 Sprint Lead가 자동으로:
+# 1. Figma MCP로 디자인 컨텍스트 추출
+# 2. 현재 프로토타입과 diff 분석
+# 3. Design Engineer에게 보정 태스크 할당
+
+# ──────────────────────────────────────
+# Group 1: Navigation + Profile Core
+# Prototype: 네비게이션 + 프로필
+# ──────────────────────────────────────
+
+AC_2.1_프로필_진입점:
+  summary: "하단 MY 탭 → 프로필 페이지 이동, 디폴트 탭 로직"
+  prototype: app/001-tab-navigation
+  screens:
+    - screen: screen-home
+      label: "홈 탭 (탭바 포함)"
+      figma:
+        - url: "https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37160-76513&m=dev"
+          note: "홈 탭 전체 레이아웃"
+    - screen: screen-explore
+      label: "탐색 탭"
+      figma:
+        - url: "https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37160-77641&m=dev"
+          note: "탐색 탭 전체 레이아웃"
+    - screen: screen-profile
+      label: "MY 프로필 탭 (디폴트 진입)"
+      figma:
+        - url: "https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37160-79939&m=dev"
+          note: "MY 프로필 탭 전체 레이아웃"
+
+AC_2.2_프로필_구조_및_탭:
+  summary: "프로필 이미지, 닉네임, 카운트, 3탭 구조"
+  prototype: app/001-tab-navigation
+  screens:
+    - screen: screen-profile
+      label: "프로필 헤더 + 게시물 탭"
+      state: default
+      figma:
+        - url: "https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37160-78421&m=dev"
+          note: "MY_게시물탭_기본"
+        - url: "https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37160-78429&m=dev"
+          note: "MY_게시물탭_노데이터"
+    - screen: screen-profile
+      label: "프로필 - 비공개 탭"
+      state: default
+      figma: 
+        - url: "https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37160-78484&m=dev"
+          note:  "MY_비공개탭_피드있음"
+        - url: "https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37160-78480&m=dev"
+          note: "MY_비공개탭_노데이터"
+    - screen: screen-profile
+      label: "프로필 - 좋아요 탭 (빈 껍데기)"
+      state: default
+      figma: 
+        - url: "https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37160-78478&m=dev"
+          note: "MY_좋아요탭_피드있음"
+        - url: "https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37160-78482&m=dev"
+         note: "MY_좋아요탭_노데이터"
+    - screen: screen-profile
+      label: "프로필 - 빈 상태"
+      state: empty
+      figma: []
+
+AC_2.3_프로필_공유:
+  summary: "OS 공유 시트 + 딥링크 URL"
+  prototype: app/003-profile-edit
+  screens:
+    - screen: screen-share
+      label: "프로필 공유 시트"
+      figma: 
+        - url: "https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37160-80881&m=dev"
+         note: "프로필편집_사진_바텀시트_나가기확인"
+        - url: "https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37160-80879&m=dev"
+         note: "타유저_프로필_팔로우전"
+        
+
+AC_2.4_프로필_편집:
+  summary: "프로필 이미지/닉네임 수정, 2~20자 검증"
+  prototype: app/003-profile-edit
+  screens:
+    - screen: screen-profile-edit
+      label: "프로필 편집 화면"
+      state: default
+      figma: 
+        - url: "https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37160-79939&m=dev"
+          note: "프로필편집_메인"
+        - url: "https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37160-80000&m=dev"
+         note: "프로필편집_닉네임_키보드"
+        - url: "https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37160-79969&m=dev"
+         note: "프로필편집_닉네임_바텀시트_나가기확인"
+        - url: "https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37160-79969&m=dev"
+          note: "MY_프로필_닉네임변경완료"
+    - screen: screen-profile-edit
+      label: "닉네임 검증 에러"
+      state: validation-error
+      figma: []
+    - screen: screen-profile-edit
+      label: "이미지 소스 선택 (카메라/앨범)"
+      state: default
+      figma: 
+        - url: "https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37160-80034&m=dev"
+         note: "프로필편집_사진_바텀시트_선택"
+        - url: "https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37160-80081&m=dev"
+         note: "프로필편집_사진_바텀시트_나가기확인"
+        
+
+AC_2.5_세로_스와이프_진입:
+  summary: "프로필 콘텐츠 탭 → 세로 스와이프 피드"
+  prototype: app/001-tab-navigation
+  screens:
+    - screen: screen-vertical-feed
+      label: "세로 스와이프 피드"
+      figma: []
+
+AC_2.6_닉네임_자동_생성:
+  summary: "형용사+동물+4자리숫자 자동 생성"
+  prototype: app/003-profile-edit
+  screens:
+    - screen: screen-profile-edit
+      label: "랜덤 닉네임 생성 UI"
+      figma: []
+
+AC_2.7_생성_후_프로필_랜딩:
+  summary: "필터→게시물탭, 프롬프트→비공개탭"
+  prototype: app/005-other-user-profile
+  screens:
+    - screen: screen-my-profile-generating
+      label: "MY 프로필 - 게시물 탭 (생성 중)"
+      figma: 
+        - url: "https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37172-28468&m=dev"
+         note: "MY_비공개탭_생성중"
+        - url: "https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37172-28516&m=dev"
+         note: "MY_게시물탭_생성실패"
+    - screen: screen-my-profile-private
+      label: "MY 프로필 - 비공개 탭 (신규 콘텐츠)"
+      figma: []
+
+# ──────────────────────────────────────
+# Group 2: Settings
+# Prototype: 설정
+# ──────────────────────────────────────
+
+AC_2.8_설정_화면:
+  summary: "7개 메뉴 항목"
+  prototype: app/004-settings-screen
+  screens:
+    - screen: screen-settings
+      label: "설정 메인"
+      state: default
+      figma:
+        - url: "https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37160-81249&m=dev"
+          note: "설정 메인 화면"
+    - screen: screen-settings
+      label: "로그아웃 확인 다이얼로그"
+      state: logout-dialog
+      figma: []
+    - screen: screen-coming-soon
+      label: "준비 중 (알림 설정/차단 관리)"
+      figma: []
+
+# ──────────────────────────────────────
+# Group 3: Other User Profile
+# Prototype: 타 유저 프로필
+# ──────────────────────────────────────
+
+AC_7.1_타_유저_프로필:
+  summary: "게시물 탭만, 더보기 메뉴"
+  prototype: app/005-other-user-profile
+  screens:
+    - screen: screen-other-profile
+      label: "타 유저 프로필 (게시물)"
+      figma: 
+        - url: "https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37160-78423&m=dev"
+         note: "타유저_프로필_팔로우전"
+        - url: "https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37160-78425&m=dev"
+         note: "타유저_프로필_맞팔로우"
+        - url: ""
+    - screen: screen-other-profile-empty
+      label: "타 유저 프로필 (빈 상태)"
+      figma: []
+    - screen: screen-more-menu
+      label: "더보기 바텀시트"
+      figma: []
+
+AC_7.5_페르소나_계정:
+  summary: "페르소나 플래그, 생성 화면 이동"
+  prototype: app/005-other-user-profile
+  screens: []

@@ -7,9 +7,9 @@ sprint_id: "{sprint-id}"
 # PR 생성 시 sprint branch가 이 브랜치를 타겟으로 머지됨
 branches:
   backend:
-    base: "develop"          # wrtn-backend PR 타겟
+    base: "apple"          # wrtn-backend PR 타겟
   app:
-    base: "meme-release-1.2.1"             # app-core-packages PR 타겟
+    base: "meme-release-1.2.2"             # app-core-packages PR 타겟
 
 # 미지정 프로젝트의 폴백 base branch
 defaults:

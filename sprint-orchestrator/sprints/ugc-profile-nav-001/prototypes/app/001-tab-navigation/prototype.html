@@ -1,0 +1,2073 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ugc-profile-nav-001 / 001-tab-navigation Prototype</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+  <style>
+    /* === Design Tokens (Figma-aligned) === */
+    :root {
+      /* Color - Brand */
+      --color-brand-primary: #8752FA;
+      --color-brand-primary-dark: #A17BFF;
+
+      /* Color - Background */
+      --color-bg-normal: #FFFFFF;
+      --color-bg-secondary: #F7F7F7;
+
+      /* Color - Label (Figma) */
+      --color-label-normal: #262626;
+      --color-label-alternative: #6B6E76;
+      --color-label-assistive: #8a8a8a;
+      --color-label-disable: #C2C4C8;
+
+      /* Color - Line (Figma) */
+      --color-line-normal: #f1f1f1;
+      --color-line-alternative: #f1f1f1;
+
+      /* Color - Fill */
+      --color-fill-neutral: #f1f1f1;
+      --color-fill-brand-primary: #8752FA;
+
+      /* Figma specific */
+      --color-new-badge: #0080c6;
+
+      /* Typography */
+      --font-family-default: 'Pretendard', -apple-system, 'SF Pro', sans-serif;
+      --font-size-heading1: 24px;
+      --font-size-heading2: 20px;
+      --font-size-body1: 16px;
+      --font-size-body2: 14px;
+      --font-size-caption: 12px;
+      --font-size-label: 11px;
+      --font-weight-bold: 700;
+      --font-weight-semibold: 600;
+      --font-weight-medium: 500;
+      --font-weight-regular: 400;
+
+      /* Spacing (4px grid) */
+      --spacing-0: 0px;
+      --spacing-1: 4px;
+      --spacing-2: 8px;
+      --spacing-3: 12px;
+      --spacing-4: 16px;
+      --spacing-5: 20px;
+      --spacing-6: 24px;
+      --spacing-8: 32px;
+      --spacing-10: 40px;
+
+      /* Radius */
+      --radius-xs: 4px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 20px;
+      --radius-2xl: 24px;
+      --radius-full: 9999px;
+
+      /* Component Tokens */
+      --component-button-primary-fill: #f1f1f1;
+      --component-button-primary-label: #262626;
+      --component-button-secondary-fill: #f1f1f1;
+      --component-button-secondary-label: #262626;
+      --component-card-fill: #FFFFFF;
+      --component-card-radius: 4px;
+      --component-nav-active: #262626;
+      --component-nav-inactive: #8a8a8a;
+      --component-tab-indicator: #262626;
+      --component-header-height: 48px;
+      --component-bottom-nav-height: auto;
+    }
+
+    /* === Reset === */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-family-default);
+      background: #f0f0f0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 16px;
+    }
+
+    /* === Control Panel === */
+    .control-panel {
+      width: 390px;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      border-radius: 12px 12px 0 0;
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 13px;
+    }
+
+    .control-panel__row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .control-panel__label {
+      color: #888;
+      font-size: 11px;
+      min-width: 48px;
+    }
+
+    .control-panel select {
+      background: #2a2a3e;
+      color: #e0e0e0;
+      border: 1px solid #444;
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 12px;
+      flex: 1;
+    }
+
+    .control-panel__states {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+
+    .control-panel__state-btn {
+      background: #2a2a3e;
+      color: #888;
+      border: 1px solid #444;
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .control-panel__state-btn.active {
+      background: var(--color-brand-primary);
+      color: #fff;
+      border-color: var(--color-brand-primary);
+    }
+
+    .control-panel__breadcrumb {
+      color: #666;
+      font-size: 11px;
+      font-family: monospace;
+    }
+
+    /* === Device Frame === */
+    .device-frame {
+      width: 390px;
+      height: 844px;
+      background: var(--color-bg-normal);
+      overflow: hidden;
+      position: relative;
+      border: 1px solid #ddd;
+      border-radius: 0 0 12px 12px;
+    }
+
+    /* === Screen === */
+    .screen {
+      display: none;
+      flex-direction: column;
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    /* === Transitions === */
+    @keyframes slideLeftIn {
+      from { transform: translateX(100%); }
+      to { transform: translateX(0); }
+    }
+
+    @keyframes slideRightIn {
+      from { transform: translateX(-100%); }
+      to { transform: translateX(0); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .transition-slide-left { animation: slideLeftIn 0.3s ease-out; }
+    .transition-slide-right { animation: slideRightIn 0.3s ease-out; }
+    .transition-fade { animation: fadeIn 0.2s ease-out; }
+
+    /* === State Visibility === */
+    [data-state] {
+      display: none;
+    }
+
+    [data-state].state-active {
+      display: block;
+    }
+
+    .empty-state.state-active {
+      display: flex;
+    }
+
+    /* === Skeleton === */
+    .skeleton {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: skeleton-shimmer 1.5s infinite;
+      border-radius: var(--radius-sm);
+    }
+
+    @keyframes skeleton-shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* === Placeholder === */
+    .placeholder-image {
+      background: var(--color-fill-neutral);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-label-assistive);
+      font-size: 12px;
+      border-radius: var(--radius-md);
+    }
+
+    /* ============================================================
+       SCREEN-SPECIFIC STYLES
+       ============================================================ */
+
+    /* --- Home: Category Chips --- */
+    .home-category-chips {
+      display: flex;
+      gap: 8px;
+      padding: 12px 16px 8px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .home-category-chips::-webkit-scrollbar { display: none; }
+    .home-chip {
+      flex-shrink: 0;
+      padding: 8px 14px;
+      border: 1px solid #e8e8e8;
+      border-radius: 9999px;
+      font-family: var(--font-family-default);
+      font-size: 13px;
+      font-weight: var(--font-weight-medium);
+      color: var(--color-label-normal);
+      background: #fff;
+      white-space: nowrap;
+      position: relative;
+      cursor: pointer;
+    }
+    .home-chip:active { background: #f7f7f7; }
+    .home-chip-badge {
+      position: absolute;
+      top: -2px;
+      right: -2px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #34C759;
+    }
+
+    /* --- Home: New Templates Section --- */
+    .home-section-title {
+      font-family: var(--font-family-default);
+      font-size: 16px;
+      font-weight: var(--font-weight-semibold);
+      color: #262626;
+      padding: 16px 16px 10px;
+    }
+    .home-templates-scroll {
+      display: flex;
+      gap: 8px;
+      padding: 0 16px 16px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .home-templates-scroll::-webkit-scrollbar { display: none; }
+    .home-template-card {
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      cursor: pointer;
+    }
+    .home-template-thumb {
+      width: 100px;
+      height: 100px;
+      border-radius: 12px;
+    }
+    .home-template-name {
+      font-family: var(--font-family-default);
+      font-size: 12px;
+      font-weight: var(--font-weight-medium);
+      color: #262626;
+      max-width: 100px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* --- Home: Ranking Section --- */
+    .home-ranking-list {
+      padding: 0 16px 8px;
+    }
+    .home-ranking-row {
+      display: flex;
+      align-items: center;
+      height: 48px;
+      gap: 10px;
+    }
+    .home-ranking-num {
+      font-family: var(--font-family-default);
+      font-size: 16px;
+      font-weight: var(--font-weight-bold);
+      color: #262626;
+      width: 18px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .home-ranking-thumb {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      flex-shrink: 0;
+    }
+    .home-ranking-info {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+    }
+    .home-ranking-name {
+      font-family: var(--font-family-default);
+      font-size: 14px;
+      font-weight: var(--font-weight-medium);
+      color: #262626;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .home-ranking-type {
+      flex-shrink: 0;
+      font-family: var(--font-family-default);
+      font-size: 11px;
+      font-weight: var(--font-weight-medium);
+      color: #8a8a8a;
+      background: #f1f1f1;
+      padding: 2px 6px;
+      border-radius: 9999px;
+    }
+    .home-ranking-btn {
+      flex-shrink: 0;
+      font-family: var(--font-family-default);
+      font-size: 13px;
+      font-weight: var(--font-weight-semibold);
+      color: #8752FA;
+      background: transparent;
+      border: 1px solid #8752FA;
+      border-radius: 9999px;
+      padding: 6px 14px;
+      cursor: pointer;
+    }
+    .home-ranking-btn:active { background: rgba(135,82,250,0.06); }
+    .home-ranking-collapse {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 0 12px;
+      font-family: var(--font-family-default);
+      font-size: 13px;
+      font-weight: var(--font-weight-medium);
+      color: #8a8a8a;
+      cursor: pointer;
+      gap: 4px;
+      border: none;
+      background: none;
+      width: 100%;
+    }
+
+    /* --- Home: Filter Tabs --- */
+    .home-filter-tabs {
+      display: flex;
+      gap: 0;
+      padding: 0 16px;
+      background: #fff;
+      border-bottom: 1px solid #f1f1f1;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .home-filter-tabs::-webkit-scrollbar { display: none; }
+    .home-filter-tab {
+      flex-shrink: 0;
+      padding: 10px 12px;
+      font-family: var(--font-family-default);
+      font-size: 14px;
+      font-weight: var(--font-weight-regular);
+      color: #8a8a8a;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .home-filter-tab.active {
+      font-weight: var(--font-weight-semibold);
+      color: #262626;
+      border-bottom-color: #262626;
+    }
+
+    /* --- Header Bar (Home) --- */
+    .header-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: var(--component-header-height);
+      padding: 0 var(--spacing-4);
+      background: var(--color-bg-normal);
+      flex-shrink: 0;
+    }
+
+    .header-logo {
+      font-size: 22px;
+      font-weight: var(--font-weight-bold);
+      color: var(--color-brand-primary);
+      letter-spacing: -0.5px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-3);
+    }
+
+    .header-credit {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--color-fill-neutral);
+      border-radius: var(--radius-full);
+      padding: 4px 10px;
+      font-size: var(--font-size-caption);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-label-normal);
+    }
+
+    .header-credit svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* --- Explore Header --- */
+    .explore-header-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: var(--component-header-height);
+      padding: 0 var(--spacing-4);
+      background: var(--color-bg-normal);
+      flex-shrink: 0;
+    }
+
+    .explore-header-title {
+      font-size: 18px;
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-label-normal);
+    }
+
+    .icon-btn {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--color-label-normal);
+      border-radius: var(--radius-sm);
+    }
+
+    .icon-btn:active {
+      background: var(--color-fill-neutral);
+    }
+
+    /* --- Masonry Feed Grid (2-column) --- */
+    .feed-scroll {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .masonry-grid {
+      display: flex;
+      gap: 1px;
+      padding: 0;
+      width: 100%;
+    }
+
+    .masonry-column {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    .masonry-card {
+      position: relative;
+      border-radius: 4px;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .masonry-card:active {
+      opacity: 0.85;
+    }
+
+    .masonry-card-bg {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
+
+    .masonry-card-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 8px;
+      background: linear-gradient(transparent, rgba(0,0,0,0.55));
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .masonry-card-title {
+      font-family: var(--font-family-default);
+      font-size: 14px;
+      font-weight: var(--font-weight-semibold);
+      color: #FFFFFF;
+      line-height: 1.3;
+    }
+
+    .masonry-card-creator {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .masonry-card-avatar {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.3);
+      flex-shrink: 0;
+    }
+
+    .masonry-card-username {
+      font-family: var(--font-family-default);
+      font-size: 12px;
+      font-weight: var(--font-weight-regular);
+      color: #FFFFFF;
+    }
+
+    .masonry-card-verified {
+      width: 12px;
+      height: 12px;
+      flex-shrink: 0;
+    }
+
+    .masonry-card-likes {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      margin-left: auto;
+    }
+
+    .masonry-card-likes svg {
+      width: 12px;
+      height: 12px;
+    }
+
+    .masonry-card-likes span {
+      font-family: var(--font-family-default);
+      font-size: 12px;
+      color: #FFFFFF;
+    }
+
+    .masonry-card-badge {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      background: var(--color-new-badge);
+      color: #FFFFFF;
+      font-family: var(--font-family-default);
+      font-size: 12px;
+      font-weight: var(--font-weight-semibold);
+      padding: 2px 8px;
+      border-radius: 8px;
+      z-index: 1;
+    }
+
+    /* Gradient backgrounds for masonry cards */
+    .gradient-1 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .gradient-2 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+    .gradient-3 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+    .gradient-4 { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+    .gradient-5 { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+    .gradient-6 { background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%); }
+    .gradient-7 { background: linear-gradient(135deg, #fccb90 0%, #d57eeb 100%); }
+    .gradient-8 { background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%); }
+    .gradient-9 { background: linear-gradient(135deg, #f5576c 0%, #ff6f00 100%); }
+    .gradient-10 { background: linear-gradient(135deg, #0250c5 0%, #d43f8d 100%); }
+
+    /* Legacy 3-column grid for skeleton/loading */
+    .feed-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2px;
+      padding: 2px;
+    }
+
+    .feed-item {
+      position: relative;
+      aspect-ratio: 1;
+      background: var(--color-fill-neutral);
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .feed-item:active {
+      opacity: 0.85;
+    }
+
+    .feed-item-img {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      color: var(--color-label-assistive);
+      background: var(--color-fill-neutral);
+    }
+
+    /* --- Bottom Tab Bar (Figma: icon-only, 3 items) --- */
+    .bottom-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 10px 12px 26px 12px;
+      background: var(--color-bg-normal);
+      border-top: 0.5px solid #f1f1f1;
+      flex-shrink: 0;
+    }
+
+    .nav-tab {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--component-nav-inactive);
+      transition: color 0.15s;
+      position: relative;
+    }
+
+    .nav-tab.active {
+      color: var(--component-nav-active);
+    }
+
+    .nav-tab svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    /* Purple dot badge for MY tab */
+    .nav-tab-badge {
+      position: absolute;
+      top: -2px;
+      right: calc(50% - 16px);
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--color-brand-primary);
+    }
+
+    /* --- Profile Screen --- */
+    .profile-header-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: var(--component-header-height);
+      padding: 0 var(--spacing-4);
+      background: var(--color-bg-normal);
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .profile-header-bar .username {
+      font-size: 18px;
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-label-normal);
+    }
+
+    .profile-header-bar .icon-btn {
+      position: absolute;
+      right: var(--spacing-4);
+    }
+
+    .profile-section {
+      padding: var(--spacing-4);
+      padding-top: var(--spacing-3);
+      background: var(--color-bg-normal);
+    }
+
+    .profile-info {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--spacing-3);
+      margin-bottom: var(--spacing-3);
+    }
+
+    .profile-avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: var(--radius-full);
+      background: var(--color-fill-neutral);
+      border: 1px solid rgba(136,136,136,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .profile-avatar svg {
+      width: 48px;
+      height: 48px;
+      color: var(--color-label-assistive);
+    }
+
+    .profile-stats {
+      display: flex;
+      width: 100%;
+      justify-content: space-around;
+      text-align: center;
+      padding: 0 40px;
+    }
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      cursor: pointer;
+    }
+
+    .stat-number {
+      font-size: 16px;
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-label-normal);
+    }
+
+    .stat-label {
+      font-size: var(--font-size-caption);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-label-normal);
+    }
+
+    .profile-buttons {
+      display: flex;
+      gap: 6px;
+      margin-bottom: var(--spacing-2);
+    }
+
+    .btn-profile {
+      flex: 1;
+      height: 40px;
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-body2);
+      font-weight: var(--font-weight-semibold);
+      cursor: pointer;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.15s;
+      background: #f1f1f1;
+      color: #262626;
+    }
+
+    .btn-profile:active {
+      opacity: 0.8;
+    }
+
+    /* Both buttons are gray per Figma */
+    .btn-edit-profile {
+      background: #f1f1f1;
+      color: #262626;
+    }
+
+    .btn-share-profile {
+      background: #f1f1f1;
+      color: #262626;
+    }
+
+    /* --- Profile Inner Tabs (Icon-only per Figma) --- */
+    .profile-tab-bar {
+      display: flex;
+      background: var(--color-bg-normal);
+      border-bottom: 1px solid #f1f1f1;
+      flex-shrink: 0;
+      padding: 0 20px;
+    }
+
+    .profile-tab {
+      flex: 1;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--color-label-assistive);
+      position: relative;
+      transition: color 0.15s;
+    }
+
+    .profile-tab svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    .profile-tab.active {
+      color: var(--color-label-normal);
+    }
+
+    .profile-tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 2px;
+      background: #262626;
+      border-radius: 1px;
+    }
+
+    /* --- Profile Content Area --- */
+    .profile-content {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .profile-content-panel {
+      display: none;
+      flex-direction: column;
+      min-height: 100%;
+    }
+
+    .profile-content-panel.active {
+      display: flex;
+    }
+
+    /* --- Profile masonry card: regen count instead of creator --- */
+    .masonry-card-regen {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .masonry-card-regen svg {
+      width: 12px;
+      height: 12px;
+    }
+
+    .masonry-card-regen span {
+      font-family: var(--font-family-default);
+      font-size: 12px;
+      color: #FFFFFF;
+    }
+
+    /* --- Empty State --- */
+    .empty-state {
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: var(--spacing-10) var(--spacing-6);
+      text-align: center;
+      flex: 1;
+    }
+
+    .empty-state-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: var(--radius-full);
+      background: var(--color-fill-neutral);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: var(--spacing-4);
+    }
+
+    .empty-state-icon svg {
+      width: 28px;
+      height: 28px;
+      color: var(--color-label-assistive);
+    }
+
+    .empty-state-title {
+      font-size: var(--font-size-body2);
+      font-weight: var(--font-weight-regular);
+      color: #8a8a8a;
+      opacity: 0.8;
+    }
+
+    .empty-state-desc {
+      font-size: var(--font-size-body2);
+      color: var(--color-label-assistive);
+      line-height: 1.5;
+    }
+
+    /* --- Loading Skeleton --- */
+    .skeleton-grid {
+      display: flex;
+      gap: 1px;
+      padding: 0;
+    }
+
+    .skeleton-column {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    .skeleton-item {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: skeleton-shimmer 1.5s infinite;
+      border-radius: 4px;
+    }
+
+    .skeleton-profile {
+      padding: var(--spacing-4);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .skeleton-profile-row {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--spacing-3);
+      margin-bottom: var(--spacing-3);
+      width: 100%;
+    }
+
+    .skeleton-avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: var(--radius-full);
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: skeleton-shimmer 1.5s infinite;
+      flex-shrink: 0;
+    }
+
+    .skeleton-stats {
+      display: flex;
+      gap: var(--spacing-4);
+      justify-content: center;
+      width: 100%;
+      padding: 0 40px;
+    }
+
+    .skeleton-stat {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .skeleton-stat-num {
+      width: 32px;
+      height: 16px;
+      border-radius: 4px;
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: skeleton-shimmer 1.5s infinite;
+    }
+
+    .skeleton-stat-label {
+      width: 28px;
+      height: 10px;
+      border-radius: 3px;
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: skeleton-shimmer 1.5s infinite;
+    }
+
+    .skeleton-name {
+      width: 100px;
+      height: 16px;
+      border-radius: 4px;
+      margin-bottom: var(--spacing-3);
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: skeleton-shimmer 1.5s infinite;
+    }
+
+    .skeleton-buttons {
+      display: flex;
+      gap: 6px;
+      width: 100%;
+    }
+
+    .skeleton-btn {
+      flex: 1;
+      height: 40px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: skeleton-shimmer 1.5s infinite;
+    }
+
+    /* --- Vertical Feed Screen --- */
+    .vertical-feed-header {
+      display: flex;
+      align-items: center;
+      height: var(--component-header-height);
+      padding: 0 var(--spacing-4);
+      background: var(--color-bg-normal);
+      border-bottom: 1px solid var(--color-line-alternative);
+      flex-shrink: 0;
+    }
+
+    .vertical-feed-header .back-btn {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--color-label-normal);
+      margin-right: var(--spacing-2);
+    }
+
+    .vertical-feed-header .title {
+      font-size: var(--font-size-body1);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-label-normal);
+    }
+
+    .vertical-feed-scroll {
+      flex: 1;
+      overflow-y: auto;
+      scroll-snap-type: y mandatory;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .vertical-feed-item {
+      height: calc(844px - var(--component-header-height));
+      scroll-snap-align: start;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .vertical-feed-content {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      color: var(--color-label-assistive);
+    }
+
+    .vertical-feed-content.purple-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .vertical-feed-content.blue-bg { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+    .vertical-feed-content.pink-bg { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+
+    .vertical-feed-actions {
+      position: absolute;
+      right: var(--spacing-4);
+      bottom: var(--spacing-8);
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-5);
+      align-items: center;
+    }
+
+    .feed-action-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: #FFFFFF;
+    }
+
+    .feed-action-btn svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .feed-action-btn span {
+      font-size: 10px;
+      color: rgba(255,255,255,0.8);
+    }
+
+    .vertical-feed-caption {
+      position: absolute;
+      left: var(--spacing-4);
+      bottom: var(--spacing-8);
+      right: 60px;
+    }
+
+    .caption-user {
+      font-size: var(--font-size-body2);
+      font-weight: var(--font-weight-bold);
+      color: #FFFFFF;
+      margin-bottom: 4px;
+    }
+
+    .caption-text {
+      font-size: var(--font-size-body2);
+      color: rgba(255,255,255,0.8);
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Control Panel -->
+  <div class="control-panel">
+    <div class="control-panel__row">
+      <span class="control-panel__label">Screen</span>
+      <select id="screen-select" onchange="navigateBySelect(this.value)">
+        <option value="screen-home">홈 (Home Tab)</option>
+        <option value="screen-explore">탐색 (Explore Tab)</option>
+        <option value="screen-profile">MY (Profile Tab)</option>
+        <option value="screen-vertical-feed">콘텐츠 피드 (Vertical Swipe)</option>
+      </select>
+    </div>
+    <div class="control-panel__row">
+      <span class="control-panel__label">State</span>
+      <div class="control-panel__states" id="state-toggles">
+        <button class="control-panel__state-btn active" data-state="default" onclick="toggleState('default')">Default</button>
+        <button class="control-panel__state-btn" data-state="empty" onclick="toggleState('empty')">Empty</button>
+        <button class="control-panel__state-btn" data-state="loading" onclick="toggleState('loading')">Loading</button>
+      </div>
+    </div>
+    <div class="control-panel__row">
+      <span class="control-panel__breadcrumb" id="breadcrumb">screen-home</span>
+    </div>
+  </div>
+
+  <!-- Device Frame -->
+  <div class="device-frame" id="device-frame">
+
+    <!-- ============================================================
+         SCREEN 1: HOME TAB
+         ============================================================ -->
+    <section class="screen" id="screen-home">
+
+      <!-- Header (ZZEM logo for Home) -->
+      <div class="header-bar">
+        <span class="header-logo">ZZEM</span>
+        <div class="header-actions">
+          <div class="header-credit">
+            <svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.5"/><path d="M7 4v3h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <span>128</span>
+          </div>
+          <button class="icon-btn" aria-label="알림">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M18 8A6 6 0 1 0 6 8c0 7-3 9-3 9h18s-3-2-3-9ZM13.73 21a2 2 0 0 1-3.46 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Default State: full home layout -->
+      <div class="feed-scroll" data-state="default">
+
+        <!-- Category Chips Row -->
+        <div class="home-category-chips">
+          <div class="home-chip">비디오 생성</div>
+          <div class="home-chip">이미지 생성<span class="home-chip-badge"></span></div>
+          <div class="home-chip">댄스 챌린지</div>
+          <div class="home-chip">얼인합 바꾸기</div>
+        </div>
+
+        <!-- New Templates Section -->
+        <div class="home-section-title">쨈 신규 템플릿</div>
+        <div class="home-templates-scroll" id="home-templates">
+          <!-- Generated by JS -->
+        </div>
+
+        <!-- Real-time Ranking Section -->
+        <div class="home-section-title">실시간 랭킹</div>
+        <div class="home-ranking-list" id="home-ranking">
+          <!-- Generated by JS -->
+        </div>
+        <button class="home-ranking-collapse" id="home-ranking-toggle">닫기 ∧</button>
+
+        <!-- Filter Tabs -->
+        <div class="home-filter-tabs">
+          <button class="home-filter-tab active">추천</button>
+          <button class="home-filter-tab">무료</button>
+          <button class="home-filter-tab">비디오</button>
+          <button class="home-filter-tab">이미지</button>
+          <button class="home-filter-tab">조합</button>
+          <button class="home-filter-tab">말하는 마</button>
+        </div>
+
+        <!-- Masonry Feed Grid -->
+        <div class="masonry-grid" id="home-grid">
+          <!-- Generated by JS -->
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-state" data-state="empty" style="flex-direction: column;">
+        <div class="empty-state-icon">
+          <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.8"/><rect x="3" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.8"/></svg>
+        </div>
+        <div class="empty-state-title">아직 콘텐츠가 없습니다</div>
+        <div class="empty-state-desc">새로운 콘텐츠가 등록되면 여기에 표시됩니다</div>
+      </div>
+
+      <!-- Loading State -->
+      <div class="feed-scroll" data-state="loading">
+        <div class="skeleton-grid" id="home-skeleton">
+          <!-- Generated by JS -->
+        </div>
+      </div>
+
+      <!-- Bottom Nav (icon-only, 3 items) -->
+      <nav class="bottom-nav">
+        <button class="nav-tab active" data-tab="home" onclick="switchMainTab('home')">
+          <!-- House with ZZEM mini logo inside -->
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="currentColor" fill-opacity="0.12"/>
+            <text x="12" y="16" text-anchor="middle" font-size="6" font-weight="700" fill="currentColor" font-family="Pretendard, sans-serif">Z</text>
+          </svg>
+        </button>
+        <button class="nav-tab" data-tab="explore" onclick="switchMainTab('explore')">
+          <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="m21 21-4.35-4.35" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
+        <button class="nav-tab" data-tab="profile" onclick="switchMainTab('profile')" style="position:relative;">
+          <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.8"/><path d="M20 21a8 8 0 1 0-16 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <span class="nav-tab-badge"></span>
+        </button>
+      </nav>
+    </section>
+
+    <!-- ============================================================
+         SCREEN 2: EXPLORE TAB
+         ============================================================ -->
+    <section class="screen" id="screen-explore">
+
+      <!-- Explore Header: centered "탐색" -->
+      <div class="explore-header-bar">
+        <span class="explore-header-title">탐색</span>
+      </div>
+
+      <!-- Default State: 2-column masonry feed -->
+      <div class="feed-scroll" data-state="default">
+        <div class="masonry-grid" id="explore-grid">
+          <!-- Generated by JS -->
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-state" data-state="empty" style="flex-direction: column;">
+        <div class="empty-state-icon">
+          <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="m21 21-4.35-4.35" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </div>
+        <div class="empty-state-title">탐색할 콘텐츠가 없습니다</div>
+        <div class="empty-state-desc">새로운 콘텐츠가 등록되면 여기에 표시됩니다</div>
+      </div>
+
+      <!-- Loading State -->
+      <div class="feed-scroll" data-state="loading">
+        <div class="skeleton-grid" id="explore-skeleton">
+          <!-- Generated by JS -->
+        </div>
+      </div>
+
+      <!-- Bottom Nav -->
+      <nav class="bottom-nav">
+        <button class="nav-tab" data-tab="home" onclick="switchMainTab('home')">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <text x="12" y="16" text-anchor="middle" font-size="6" font-weight="700" fill="currentColor" font-family="Pretendard, sans-serif">Z</text>
+          </svg>
+        </button>
+        <button class="nav-tab active" data-tab="explore" onclick="switchMainTab('explore')">
+          <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2" fill="currentColor" fill-opacity="0.08"/><path d="m21 21-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+        <button class="nav-tab" data-tab="profile" onclick="switchMainTab('profile')" style="position:relative;">
+          <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.8"/><path d="M20 21a8 8 0 1 0-16 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <span class="nav-tab-badge"></span>
+        </button>
+      </nav>
+    </section>
+
+    <!-- ============================================================
+         SCREEN 3: PROFILE (MY) TAB
+         ============================================================ -->
+    <section class="screen" id="screen-profile">
+
+      <!-- Default State -->
+      <div data-state="default" style="flex-direction: column; height: 100%;">
+
+        <!-- Profile Header Bar: centered "아이디" + gear icon -->
+        <div class="profile-header-bar">
+          <span class="username">아이디</span>
+          <button class="icon-btn" aria-label="설정">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" stroke="currentColor" stroke-width="1.8"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" stroke="currentColor" stroke-width="1.8"/></svg>
+          </button>
+        </div>
+
+        <!-- Profile Info (centered layout per Figma) -->
+        <div class="profile-section">
+          <div class="profile-info">
+            <div class="profile-avatar">
+              <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.5"/><path d="M20 21a8 8 0 1 0-16 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </div>
+            <div class="profile-stats">
+              <div class="stat-item">
+                <span class="stat-number">8.6천</span>
+                <span class="stat-label">팔로워</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-number">83</span>
+                <span class="stat-label">팔로잉</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-number">1.8천</span>
+                <span class="stat-label">재생성된</span>
+              </div>
+            </div>
+          </div>
+          <div class="profile-buttons">
+            <button class="btn-profile btn-edit-profile">프로필 편집</button>
+            <button class="btn-profile btn-share-profile">프로필 공유</button>
+          </div>
+        </div>
+
+        <!-- Profile Inner Tabs (ICON ONLY per Figma) -->
+        <div class="profile-tab-bar">
+          <button class="profile-tab active" data-profile-tab="posts" onclick="switchProfileTab('posts')">
+            <!-- Grid/media icon -->
+            <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.8"/><rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.8"/></svg>
+          </button>
+          <button class="profile-tab" data-profile-tab="private" onclick="switchProfileTab('private')">
+            <!-- Lock icon -->
+            <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="currentColor" stroke-width="1.8"/></svg>
+          </button>
+          <button class="profile-tab" data-profile-tab="liked" onclick="switchProfileTab('liked')">
+            <!-- Heart icon -->
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 21s-7-5.5-7-10.5A4.5 4.5 0 0 1 12 6a4.5 4.5 0 0 1 7 4.5C19 15.5 12 21 12 21Z" stroke="currentColor" stroke-width="1.8"/></svg>
+          </button>
+        </div>
+
+        <!-- Profile Content -->
+        <div class="profile-content">
+          <!-- Posts Tab -->
+          <div class="profile-content-panel active" id="profile-tab-posts">
+            <div class="masonry-grid" id="profile-posts-grid">
+              <!-- Generated by JS -->
+            </div>
+          </div>
+
+          <!-- Private Tab -->
+          <div class="profile-content-panel" id="profile-tab-private">
+            <div class="masonry-grid" id="profile-private-grid">
+              <!-- Generated by JS -->
+            </div>
+          </div>
+
+          <!-- Liked Tab -->
+          <div class="profile-content-panel" id="profile-tab-liked">
+            <div class="empty-state" style="display: flex;">
+              <div class="empty-state-title">아직 게시물이 없어요</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom Nav -->
+        <nav class="bottom-nav">
+          <button class="nav-tab" data-tab="home" onclick="switchMainTab('home')">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              <text x="12" y="16" text-anchor="middle" font-size="6" font-weight="700" fill="currentColor" font-family="Pretendard, sans-serif">Z</text>
+            </svg>
+          </button>
+          <button class="nav-tab" data-tab="explore" onclick="switchMainTab('explore')">
+            <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="m21 21-4.35-4.35" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </button>
+          <button class="nav-tab active" data-tab="profile" onclick="switchMainTab('profile')" style="position:relative;">
+            <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.8" fill="currentColor" fill-opacity="0.12"/><path d="M20 21a8 8 0 1 0-16 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            <span class="nav-tab-badge"></span>
+          </button>
+        </nav>
+      </div>
+
+      <!-- Empty State (no content at all) -->
+      <div data-state="empty" style="flex-direction: column; height: 100%;">
+
+        <div class="profile-header-bar">
+          <span class="username">아이디</span>
+          <button class="icon-btn" aria-label="설정">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" stroke="currentColor" stroke-width="1.8"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" stroke="currentColor" stroke-width="1.8"/></svg>
+          </button>
+        </div>
+
+        <div class="profile-section">
+          <div class="profile-info">
+            <div class="profile-avatar">
+              <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.5"/><path d="M20 21a8 8 0 1 0-16 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </div>
+            <div class="profile-stats">
+              <div class="stat-item">
+                <span class="stat-number">0</span>
+                <span class="stat-label">팔로워</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-number">0</span>
+                <span class="stat-label">팔로잉</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-number">0</span>
+                <span class="stat-label">재생성된</span>
+              </div>
+            </div>
+          </div>
+          <div class="profile-buttons">
+            <button class="btn-profile btn-edit-profile">프로필 편집</button>
+            <button class="btn-profile btn-share-profile">프로필 공유</button>
+          </div>
+        </div>
+
+        <div class="profile-tab-bar">
+          <button class="profile-tab active" style="pointer-events:none;">
+            <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.8"/><rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.8"/></svg>
+          </button>
+          <button class="profile-tab" style="pointer-events:none;">
+            <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="currentColor" stroke-width="1.8"/></svg>
+          </button>
+          <button class="profile-tab" style="pointer-events:none;">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 21s-7-5.5-7-10.5A4.5 4.5 0 0 1 12 6a4.5 4.5 0 0 1 7 4.5C19 15.5 12 21 12 21Z" stroke="currentColor" stroke-width="1.8"/></svg>
+          </button>
+        </div>
+
+        <div class="profile-content" style="flex:1;">
+          <div class="empty-state" style="display:flex; height:100%;">
+            <div class="empty-state-title">아직 게시물이 없어요</div>
+          </div>
+        </div>
+
+        <nav class="bottom-nav">
+          <button class="nav-tab" data-tab="home" onclick="switchMainTab('home')">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              <text x="12" y="16" text-anchor="middle" font-size="6" font-weight="700" fill="currentColor" font-family="Pretendard, sans-serif">Z</text>
+            </svg>
+          </button>
+          <button class="nav-tab" data-tab="explore" onclick="switchMainTab('explore')">
+            <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="m21 21-4.35-4.35" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </button>
+          <button class="nav-tab active" data-tab="profile" onclick="switchMainTab('profile')" style="position:relative;">
+            <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.8" fill="currentColor" fill-opacity="0.12"/><path d="M20 21a8 8 0 1 0-16 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            <span class="nav-tab-badge"></span>
+          </button>
+        </nav>
+      </div>
+
+      <!-- Loading State -->
+      <div data-state="loading" style="flex-direction: column; height: 100%;">
+
+        <div class="profile-header-bar">
+          <div class="skeleton" style="width: 60px; height: 18px;"></div>
+          <button class="icon-btn" aria-label="설정" style="opacity:0.3;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" stroke="currentColor" stroke-width="1.8"/></svg>
+          </button>
+        </div>
+
+        <div class="skeleton-profile">
+          <div class="skeleton-profile-row">
+            <div class="skeleton-avatar"></div>
+            <div class="skeleton-stats">
+              <div class="skeleton-stat"><div class="skeleton-stat-num"></div><div class="skeleton-stat-label"></div></div>
+              <div class="skeleton-stat"><div class="skeleton-stat-num"></div><div class="skeleton-stat-label"></div></div>
+              <div class="skeleton-stat"><div class="skeleton-stat-num"></div><div class="skeleton-stat-label"></div></div>
+            </div>
+          </div>
+          <div class="skeleton-buttons" style="width:100%;">
+            <div class="skeleton-btn"></div>
+            <div class="skeleton-btn"></div>
+          </div>
+        </div>
+
+        <div class="profile-tab-bar" style="opacity:0.4;">
+          <button class="profile-tab active" style="pointer-events:none;">
+            <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.8"/><rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.8"/></svg>
+          </button>
+          <button class="profile-tab" style="pointer-events:none;">
+            <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="currentColor" stroke-width="1.8"/></svg>
+          </button>
+          <button class="profile-tab" style="pointer-events:none;">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 21s-7-5.5-7-10.5A4.5 4.5 0 0 1 12 6a4.5 4.5 0 0 1 7 4.5C19 15.5 12 21 12 21Z" stroke="currentColor" stroke-width="1.8"/></svg>
+          </button>
+        </div>
+
+        <div style="flex:1;">
+          <div class="skeleton-grid" id="profile-skeleton">
+            <!-- Generated by JS -->
+          </div>
+        </div>
+
+        <nav class="bottom-nav">
+          <button class="nav-tab" style="pointer-events:none;">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              <text x="12" y="16" text-anchor="middle" font-size="6" font-weight="700" fill="currentColor" font-family="Pretendard, sans-serif">Z</text>
+            </svg>
+          </button>
+          <button class="nav-tab" style="pointer-events:none;">
+            <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="m21 21-4.35-4.35" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </button>
+          <button class="nav-tab active" style="pointer-events:none; position:relative;">
+            <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.8" fill="currentColor" fill-opacity="0.12"/><path d="M20 21a8 8 0 1 0-16 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            <span class="nav-tab-badge"></span>
+          </button>
+        </nav>
+      </div>
+
+    </section>
+
+    <!-- ============================================================
+         SCREEN 4: VERTICAL SWIPE FEED
+         ============================================================ -->
+    <section class="screen" id="screen-vertical-feed">
+
+      <div class="vertical-feed-header">
+        <button class="back-btn" onclick="goBack()" aria-label="뒤로가기">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 19l-7-7 7-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <span class="title">게시물</span>
+      </div>
+
+      <div class="vertical-feed-scroll">
+        <div class="vertical-feed-item">
+          <div class="vertical-feed-content purple-bg">
+            <span style="font-size:48px; opacity:0.4; color:#fff;">UGC</span>
+          </div>
+          <div class="vertical-feed-caption">
+            <div class="caption-user">creative_zzemer</div>
+            <div class="caption-text">AI로 만든 첫 번째 작품입니다</div>
+          </div>
+          <div class="vertical-feed-actions">
+            <div class="feed-action-btn">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M12 21s-7-5.5-7-10.5A4.5 4.5 0 0 1 12 6a4.5 4.5 0 0 1 7 4.5C19 15.5 12 21 12 21Z" stroke="currentColor" stroke-width="1.8"/></svg>
+              <span>234</span>
+            </div>
+            <div class="feed-action-btn">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor" stroke-width="1.8"/></svg>
+              <span>12</span>
+            </div>
+            <div class="feed-action-btn">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" stroke="currentColor" stroke-width="1.8"/><polyline points="16,6 12,2 8,6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="2" x2="12" y2="15" stroke="currentColor" stroke-width="1.8"/></svg>
+              <span>공유</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="vertical-feed-item">
+          <div class="vertical-feed-content blue-bg">
+            <span style="font-size:48px; opacity:0.4; color:#fff;">UGC</span>
+          </div>
+          <div class="vertical-feed-caption">
+            <div class="caption-user">art_lover_99</div>
+            <div class="caption-text">오늘의 AI 아트 도전</div>
+          </div>
+          <div class="vertical-feed-actions">
+            <div class="feed-action-btn">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M12 21s-7-5.5-7-10.5A4.5 4.5 0 0 1 12 6a4.5 4.5 0 0 1 7 4.5C19 15.5 12 21 12 21Z" stroke="currentColor" stroke-width="1.8"/></svg>
+              <span>1.2천</span>
+            </div>
+            <div class="feed-action-btn">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor" stroke-width="1.8"/></svg>
+              <span>45</span>
+            </div>
+            <div class="feed-action-btn">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" stroke="currentColor" stroke-width="1.8"/><polyline points="16,6 12,2 8,6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="2" x2="12" y2="15" stroke="currentColor" stroke-width="1.8"/></svg>
+              <span>공유</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="vertical-feed-item">
+          <div class="vertical-feed-content pink-bg">
+            <span style="font-size:48px; opacity:0.4; color:#fff;">UGC</span>
+          </div>
+          <div class="vertical-feed-caption">
+            <div class="caption-user">pixel_maker</div>
+            <div class="caption-text">이 느낌 좋다</div>
+          </div>
+          <div class="vertical-feed-actions">
+            <div class="feed-action-btn">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M12 21s-7-5.5-7-10.5A4.5 4.5 0 0 1 12 6a4.5 4.5 0 0 1 7 4.5C19 15.5 12 21 12 21Z" stroke="currentColor" stroke-width="1.8"/></svg>
+              <span>567</span>
+            </div>
+            <div class="feed-action-btn">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor" stroke-width="1.8"/></svg>
+              <span>23</span>
+            </div>
+            <div class="feed-action-btn">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" stroke="currentColor" stroke-width="1.8"/><polyline points="16,6 12,2 8,6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="2" x2="12" y2="15" stroke="currentColor" stroke-width="1.8"/></svg>
+              <span>공유</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <script>
+    // === State ===
+    let currentScreen = null;
+    let currentState = 'default';
+    const navHistory = [];
+
+    // === Gradient classes for masonry cards ===
+    const gradients = ['gradient-1', 'gradient-2', 'gradient-3', 'gradient-4', 'gradient-5', 'gradient-6', 'gradient-7', 'gradient-8', 'gradient-9', 'gradient-10'];
+
+    // === Template names for cards ===
+    const templateNames = ['감성 일러스트', '네온 초상화', '수채화 풍경', '판타지 캐릭터', '레트로 포스터', '미니멀 아트', '사이버펑크', '동화 일러스트', '추상 패턴', '팝아트 초상화', '일본풍 일러스트', '빈티지 사진'];
+    const creatorNames = ['쨈', 'zzem', '크리에이터', '아트러버', '픽셀맨'];
+
+    // === Number formatting (Korean) ===
+    function formatNumber(n) {
+      if (n < 1000) return String(n);
+      if (n < 10000) return (n / 1000).toFixed(1).replace(/\.0$/, '') + '천';
+      return (n / 10000).toFixed(1).replace(/\.0$/, '') + '만';
+    }
+
+    // === Generate masonry card HTML ===
+    function createMasonryCard(index, isProfile) {
+      const isSquare = index % 3 !== 1; // alternating: square / tall
+      const aspectRatio = isSquare ? '1 / 1' : '4 / 5';
+      const gradientClass = gradients[index % gradients.length];
+      const templateName = templateNames[index % templateNames.length];
+      const creatorName = creatorNames[index % creatorNames.length];
+      const hasNewBadge = index === 0 || index === 5;
+      const likeCount = Math.floor(Math.random() * 100);
+      const regenCount = Math.floor(Math.random() * 500) + 10;
+
+      const card = document.createElement('div');
+      card.className = 'masonry-card';
+      card.style.aspectRatio = aspectRatio;
+      card.onclick = () => navigate('screen-vertical-feed', 'slide-left');
+
+      let overlayContent = '';
+      if (isProfile) {
+        // Profile cards: regen count bottom-left
+        overlayContent = `
+          <div class="masonry-card-title">${templateName}</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div class="masonry-card-regen">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M1 4v6h6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span>${regenCount}</span>
+            </div>
+            <div class="masonry-card-likes">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M12 21s-7-5.5-7-10.5A4.5 4.5 0 0 1 12 6a4.5 4.5 0 0 1 7 4.5C19 15.5 12 21 12 21Z" stroke="white" stroke-width="1.8"/></svg>
+              <span>${likeCount}</span>
+            </div>
+          </div>`;
+      } else {
+        // Feed cards: creator profile bottom
+        overlayContent = `
+          <div class="masonry-card-title">${templateName}</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div class="masonry-card-creator">
+              <div class="masonry-card-avatar"></div>
+              <span class="masonry-card-username">${creatorName}</span>
+              <svg class="masonry-card-verified" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" fill="#4facfe"/><path d="M5 8l2 2 4-4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="masonry-card-likes">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M12 21s-7-5.5-7-10.5A4.5 4.5 0 0 1 12 6a4.5 4.5 0 0 1 7 4.5C19 15.5 12 21 12 21Z" stroke="white" stroke-width="1.8"/></svg>
+              <span>${likeCount}</span>
+            </div>
+          </div>`;
+      }
+
+      card.innerHTML = `
+        <div class="masonry-card-bg ${gradientClass}">
+          ${hasNewBadge && !isProfile ? '<div class="masonry-card-badge">신규</div>' : ''}
+          <div class="masonry-card-overlay">
+            ${overlayContent}
+          </div>
+        </div>`;
+
+      return card;
+    }
+
+    // === Generate 2-column masonry grid ===
+    function generateMasonryGrid(containerId, count, isProfile) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      container.innerHTML = '';
+
+      const col1 = document.createElement('div');
+      col1.className = 'masonry-column';
+      const col2 = document.createElement('div');
+      col2.className = 'masonry-column';
+
+      for (let i = 0; i < count; i++) {
+        const card = createMasonryCard(i, isProfile);
+        if (i % 2 === 0) {
+          col1.appendChild(card);
+        } else {
+          col2.appendChild(card);
+        }
+      }
+
+      container.appendChild(col1);
+      container.appendChild(col2);
+    }
+
+    // === Generate skeleton masonry grid ===
+    function generateSkeletonGrid(containerId, count) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      container.innerHTML = '';
+
+      const col1 = document.createElement('div');
+      col1.className = 'skeleton-column';
+      const col2 = document.createElement('div');
+      col2.className = 'skeleton-column';
+
+      for (let i = 0; i < count; i++) {
+        const item = document.createElement('div');
+        item.className = 'skeleton-item';
+        const isSquare = i % 3 !== 1;
+        item.style.aspectRatio = isSquare ? '1 / 1' : '4 / 5';
+        if (i % 2 === 0) {
+          col1.appendChild(item);
+        } else {
+          col2.appendChild(item);
+        }
+      }
+
+      container.appendChild(col1);
+      container.appendChild(col2);
+    }
+
+    // === Navigation ===
+    function navigate(screenId, transition) {
+      transition = transition || 'slide-left';
+      const target = document.getElementById(screenId);
+      if (!target || (currentScreen && currentScreen.id === screenId)) return;
+
+      if (currentScreen) {
+        navHistory.push(currentScreen.id);
+        currentScreen.classList.remove('active');
+        currentScreen.className = currentScreen.className.replace(/transition-\S+/g, '');
+      }
+
+      target.classList.add('active');
+      if (transition !== 'none') {
+        target.classList.add('transition-' + transition);
+        target.addEventListener('animationend', function handler() {
+          target.classList.remove('transition-' + transition);
+          target.removeEventListener('animationend', handler);
+        });
+      }
+
+      currentScreen = target;
+      currentState = 'default';
+      applyState(screenId, 'default');
+      updateControlPanel();
+    }
+
+    function goBack() {
+      if (navHistory.length === 0) return;
+      const prevId = navHistory.pop();
+      const target = document.getElementById(prevId);
+      if (!target) return;
+
+      if (currentScreen) {
+        currentScreen.classList.remove('active');
+      }
+
+      target.classList.add('active', 'transition-slide-right');
+      target.addEventListener('animationend', function handler() {
+        target.classList.remove('transition-slide-right');
+        target.removeEventListener('animationend', handler);
+      });
+
+      currentScreen = target;
+      currentState = 'default';
+      applyState(prevId, 'default');
+      updateControlPanel();
+    }
+
+    function navigateBySelect(screenId) {
+      // Clear history for direct select
+      navHistory.length = 0;
+      const target = document.getElementById(screenId);
+      if (!target) return;
+
+      if (currentScreen) {
+        currentScreen.classList.remove('active');
+        currentScreen.className = currentScreen.className.replace(/transition-\S+/g, '');
+      }
+
+      target.classList.add('active', 'transition-fade');
+      target.addEventListener('animationend', function handler() {
+        target.classList.remove('transition-fade');
+        target.removeEventListener('animationend', handler);
+      });
+
+      currentScreen = target;
+      currentState = 'default';
+      applyState(screenId, 'default');
+      updateControlPanel();
+    }
+
+    // === Main Tab Switching ===
+    function switchMainTab(tab) {
+      const screenMap = {
+        home: 'screen-home',
+        explore: 'screen-explore',
+        profile: 'screen-profile'
+      };
+      const screenId = screenMap[tab];
+      if (!screenId) return;
+
+      // Don't push to history for tab switching
+      if (currentScreen) {
+        currentScreen.classList.remove('active');
+        currentScreen.className = currentScreen.className.replace(/transition-\S+/g, '');
+      }
+
+      navHistory.length = 0;
+      const target = document.getElementById(screenId);
+      target.classList.add('active');
+      currentScreen = target;
+      currentState = 'default';
+      applyState(screenId, 'default');
+      updateControlPanel();
+    }
+
+    // === Profile Inner Tab Switching ===
+    function switchProfileTab(tab) {
+      // Update tab buttons
+      document.querySelectorAll('#screen-profile .profile-tab').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.profileTab === tab);
+      });
+
+      // Update content panels
+      document.querySelectorAll('#screen-profile .profile-content-panel').forEach(panel => {
+        panel.classList.toggle('active', panel.id === 'profile-tab-' + tab);
+      });
+    }
+
+    // === State Toggle ===
+    function applyState(screenId, stateName) {
+      const screen = document.getElementById(screenId);
+      if (!screen) return;
+
+      screen.querySelectorAll('[data-state]').forEach(el => {
+        el.classList.toggle('state-active', el.dataset.state === stateName);
+      });
+
+      currentState = stateName;
+      updateStateButtons();
+    }
+
+    function toggleState(stateName) {
+      if (!currentScreen) return;
+      applyState(currentScreen.id, stateName);
+    }
+
+    // === Control Panel ===
+    function updateControlPanel() {
+      if (!currentScreen) return;
+
+      const select = document.getElementById('screen-select');
+      if (select) select.value = currentScreen.id;
+
+      const breadcrumb = document.getElementById('breadcrumb');
+      if (breadcrumb) {
+        const path = [...navHistory, currentScreen.id].join(' \u2192 ');
+        breadcrumb.textContent = path;
+      }
+
+      updateStateButtons();
+    }
+
+    function updateStateButtons() {
+      document.querySelectorAll('.control-panel__state-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.state === currentState);
+      });
+    }
+
+    // === Home: Template Cards ===
+    const homeTemplateData = [
+      { name: '감성 일러스트', gradient: 'gradient-1' },
+      { name: '네온 초상화', gradient: 'gradient-2' },
+      { name: '수채화 풍경', gradient: 'gradient-3' },
+      { name: '판타지 캐릭터', gradient: 'gradient-4' },
+      { name: '레트로 포스터', gradient: 'gradient-5' },
+      { name: '미니멀 아트', gradient: 'gradient-6' },
+    ];
+
+    function generateHomeTemplates() {
+      const container = document.getElementById('home-templates');
+      if (!container) return;
+      container.innerHTML = '';
+      homeTemplateData.forEach(t => {
+        const card = document.createElement('div');
+        card.className = 'home-template-card';
+        card.innerHTML = `<div class="home-template-thumb ${t.gradient}"></div><div class="home-template-name">${t.name}</div>`;
+        container.appendChild(card);
+      });
+    }
+
+    // === Home: Ranking List ===
+    const rankingData = [
+      { name: '감성 일러스트', type: '비디오', gradient: 'gradient-1' },
+      { name: '네온 초상화', type: '이미지', gradient: 'gradient-2' },
+      { name: '수채화 풍경', type: '비디오', gradient: 'gradient-3' },
+      { name: '판타지 캐릭터', type: '이미지', gradient: 'gradient-4' },
+      { name: '레트로 포스터', type: '비디오', gradient: 'gradient-5' },
+      { name: '미니멀 아트', type: '이미지', gradient: 'gradient-6' },
+      { name: '사이버펑크', type: '비디오', gradient: 'gradient-7' },
+      { name: '동화 일러스트', type: '이미지', gradient: 'gradient-8' },
+    ];
+
+    function generateHomeRanking() {
+      const container = document.getElementById('home-ranking');
+      if (!container) return;
+      container.innerHTML = '';
+      rankingData.forEach((item, i) => {
+        const row = document.createElement('div');
+        row.className = 'home-ranking-row';
+        row.innerHTML = `
+          <span class="home-ranking-num">${i + 1}</span>
+          <div class="home-ranking-thumb ${item.gradient}"></div>
+          <div class="home-ranking-info">
+            <span class="home-ranking-name">${item.name}</span>
+            <span class="home-ranking-type">${item.type}</span>
+          </div>
+          <button class="home-ranking-btn">만들기</button>`;
+        container.appendChild(row);
+      });
+    }
+
+    function initRankingToggle() {
+      const btn = document.getElementById('home-ranking-toggle');
+      const list = document.getElementById('home-ranking');
+      if (!btn || !list) return;
+      let collapsed = false;
+      btn.addEventListener('click', () => {
+        collapsed = !collapsed;
+        if (collapsed) {
+          // Show only first 3
+          list.querySelectorAll('.home-ranking-row').forEach((row, i) => {
+            row.style.display = i < 3 ? 'flex' : 'none';
+          });
+          btn.textContent = '더보기 ∨';
+        } else {
+          list.querySelectorAll('.home-ranking-row').forEach(row => {
+            row.style.display = 'flex';
+          });
+          btn.textContent = '닫기 ∧';
+        }
+      });
+    }
+
+    // === Home: Filter Tab Switching ===
+    function initHomeFilterTabs() {
+      document.querySelectorAll('.home-filter-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          document.querySelectorAll('.home-filter-tab').forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+        });
+      });
+    }
+
+    // === Init ===
+    document.addEventListener('DOMContentLoaded', () => {
+      // Generate home templates
+      generateHomeTemplates();
+      // Generate home ranking
+      generateHomeRanking();
+      // Home filter tab switching
+      initHomeFilterTabs();
+      // Ranking toggle
+      initRankingToggle();
+
+      // Generate masonry grids
+      generateMasonryGrid('home-grid', 12, false);
+      generateMasonryGrid('explore-grid', 14, false);
+      generateMasonryGrid('profile-posts-grid', 8, true);
+      generateMasonryGrid('profile-private-grid', 4, true);
+
+      // Generate skeleton grids
+      generateSkeletonGrid('home-skeleton', 8);
+      generateSkeletonGrid('explore-skeleton', 8);
+      generateSkeletonGrid('profile-skeleton', 6);
+
+      // Private grid items get a lock overlay
+      document.querySelectorAll('#profile-private-grid .masonry-card').forEach(item => {
+        const lock = document.createElement('div');
+        lock.style.cssText = 'position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;border-radius:4px;z-index:2;';
+        lock.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="11" width="18" height="11" rx="2" stroke="white" stroke-width="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="white" stroke-width="2"/></svg>';
+        item.appendChild(lock);
+      });
+
+      // Init first screen
+      const firstScreen = document.getElementById('screen-home');
+      if (firstScreen) {
+        firstScreen.classList.add('active');
+        currentScreen = firstScreen;
+        applyState('screen-home', 'default');
+        updateControlPanel();
+      }
+    });
+  </script>
+
+</body>
+</html>
