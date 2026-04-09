@@ -1,6 +1,6 @@
 # Sprint Report: ugc-profile-nav-001
 
-> Generated: 2026-04-08
+> Generated: 2026-04-08 (Phase 5 updated: 2026-04-09)
 > Architecture: Planner-Generator-Evaluator (Harness Design v4)
 > PRD: docs/prds/PRD-ugc-platform-1-profile-navigation.md
 
@@ -103,10 +103,41 @@
 | app-core-packages | Created | [#495](https://github.com/wrtn-tech/app-core-packages/pull/495) |
 | wrtn-backend | Push complete | Manual PR needed at github.wrtn.club |
 
+## Phase 5: Figma 보정 & 회고 (2026-04-09)
+
+### Figma 디자인 컨텍스트 추출
+- Figma MCP로 36개 프레임에서 디자인 토큰/코드/구조 추출
+- 8개 AC별 레퍼런스 파일 생성 (`figma-refs/AC_*.md`)
+- figma-mapping.yaml: AC→Figma URL 매핑 완성 (누락/오류 수정)
+
+### 프로토타입 보정 (~70건)
+| 프로토타입 | 수정 건수 | 주요 변경 |
+|-----------|----------|----------|
+| 001-tab-navigation | 23건 | AC 2.5 상세뷰 전체 구축, 홈 메뉴 카드, 탭 아이콘 fill 전환 |
+| 003-profile-edit | 32건 | 저장 로직, 텍스트필드, 크롭/앨범 화면, 바텀시트 4종 |
+| 004-settings | 12건 | 헤더/메뉴 Figma 스타일, PRD 메뉴 구조 유지 |
+| 005-other-user | 25건+ | 탭 제거, 생성중/실패 상태, 이모지 뱃지, 공유 버튼 |
+
+### PRD-Figma 충돌 해결 (Merge 방식)
+| 항목 | 결정 |
+|------|------|
+| 설정 메뉴 구성 | PRD 메뉴 항목 + Figma 비주얼 스타일 |
+| 알림 설정 | PRD 네비게이션 패턴 유지 |
+| 에러 색상 | Figma 값(#d92800) 채택 |
+
+### Component Patterns 갱신
+- 3개 신규 섹션: Detail View, Generating/Failed 상태, Bottom Sheet 공통
+- 디자인 토큰 테이블 확장 (CSS 변수 기반, 18→27개)
+- Typography Scale 10단계 체계화
+- Code Connect 아이콘 22종 정리
+
+---
+
 ## Improvements for Next Sprint
 | Priority | Improvement | Source |
 |----------|-------------|-------|
 | High | Component Pattern Library로 PRD→Prototype 품질 갭 최소화 | User feedback |
 | High | Sprint Contract에 네비게이션 진입점 체크리스트 추가 | Pattern digest |
+| High | Figma 매핑+추출을 Phase 3 초반에 선제적 실행 | Figma 보정 교훈 |
 | Medium | DTO getter 금지 + API contract 필드명 일치 검증 | Pattern digest |
-| Medium | Figma-PRD 매핑을 Phase 2에서 선제적 수집 | User feedback |
+| Medium | 프로토타입 생성 시 component-patterns.md의 Typography Scale/토큰 테이블 필수 참조 | Figma 보정 교훈 |
