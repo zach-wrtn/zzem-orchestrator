@@ -96,7 +96,7 @@
 
     /* === Control Panel === */
     .control-panel {
-      width: 390px;
+      width: 375px;
       background: #1a1a2e;
       color: #e0e0e0;
       border-radius: 12px 12px 0 0;
@@ -160,13 +160,13 @@
 
     /* === Device Frame === */
     .device-frame {
-      width: 390px;
-      height: 844px;
+      width: 375px;
+      height: 812px;
       background: var(--color-bg-normal);
       overflow: hidden;
       position: relative;
       border: 1px solid #ddd;
-      border-radius: 0 0 12px 12px;
+      border-radius: 40px;
     }
 
     /* === Screen === */
@@ -437,7 +437,7 @@
       align-items: center;
       justify-content: space-between;
       height: var(--component-header-height);
-      padding: 0 var(--spacing-4);
+      padding: 4px var(--spacing-3);
       background: var(--color-bg-normal);
       flex-shrink: 0;
     }
@@ -520,6 +520,13 @@
       width: 100%;
     }
 
+    #screen-explore .masonry-grid {
+      border-radius: 24px;
+      overflow: hidden;
+      margin: 0 4px;
+      width: calc(100% - 8px);
+    }
+
     .masonry-column {
       flex: 1;
       display: flex;
@@ -552,7 +559,7 @@
       left: 0;
       right: 0;
       padding: 8px;
-      background: linear-gradient(transparent, rgba(0,0,0,0.55));
+      background: linear-gradient(180deg, transparent 36%, rgba(19,19,19,0.2) 90%);
       display: flex;
       flex-direction: column;
       gap: 4px;
@@ -563,7 +570,7 @@
       font-size: 14px;
       font-weight: var(--font-weight-semibold);
       color: #FFFFFF;
-      line-height: 1.3;
+      line-height: 1.4;
     }
 
     .masonry-card-creator {
@@ -583,7 +590,7 @@
     .masonry-card-username {
       font-family: var(--font-family-default);
       font-size: 12px;
-      font-weight: var(--font-weight-regular);
+      font-weight: var(--font-weight-semibold);
       color: #FFFFFF;
     }
 
@@ -746,7 +753,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: var(--spacing-3);
+      gap: var(--spacing-4);
       margin-bottom: var(--spacing-3);
     }
 
@@ -754,7 +761,7 @@
       width: 100px;
       height: 100px;
       border-radius: var(--radius-full);
-      background: var(--color-fill-neutral);
+      background: #f5f3ff;
       border: 1px solid rgba(136,136,136,0.2);
       display: flex;
       align-items: center;
@@ -844,8 +851,8 @@
     }
 
     .profile-tab {
-      flex: 1;
-      height: 44px;
+      width: 120px;
+      height: 46px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -855,6 +862,7 @@
       color: var(--color-label-assistive);
       position: relative;
       transition: color 0.15s;
+      padding: 0 20px;
     }
 
     .profile-tab svg {
@@ -1096,7 +1104,7 @@
     }
 
     .vertical-feed-item {
-      height: calc(844px - var(--component-header-height));
+      height: calc(812px - var(--component-header-height));
       scroll-snap-align: start;
       display: flex;
       flex-direction: column;
@@ -1163,6 +1171,370 @@
       color: rgba(255,255,255,0.8);
       line-height: 1.4;
     }
+
+    /* --- Explore Search Bar --- */
+    .explore-search-bar {
+      margin: 8px 16px;
+      padding: 10px 16px;
+      background: var(--color-bg-secondary);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--color-label-assistive);
+      font-size: 14px;
+    }
+    .explore-search-bar svg {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+    }
+
+    /* --- Home Feature Cards (replaces chips) --- */
+    .home-feature-cards {
+      display: flex;
+      gap: 8px;
+      padding: 12px 16px 8px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .home-feature-cards::-webkit-scrollbar { display: none; }
+    .home-feature-card {
+      flex-shrink: 0;
+      padding: 12px 16px;
+      background: var(--color-bg-secondary);
+      border-radius: 16px;
+      font-family: var(--font-family-default);
+      font-size: 14px;
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-label-normal);
+      white-space: nowrap;
+      cursor: pointer;
+      text-align: center;
+      min-width: 72px;
+    }
+    .home-feature-card:active { opacity: 0.8; }
+
+    /* --- Profile Tab Filled Icons (active state) --- */
+    .profile-tab .icon-stroke { display: block; }
+    .profile-tab .icon-fill { display: none; }
+    .profile-tab.active .icon-stroke { display: none; }
+    .profile-tab.active .icon-fill { display: block; }
+
+    /* --- Detail View (PostCard) --- */
+    .detail-view-screen {
+      display: none;
+      flex-direction: column;
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      background: #090909;
+    }
+    .detail-view-screen.active { display: flex; }
+
+    .detail-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 48px;
+      padding: 0 16px;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 10;
+      background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, transparent 100%);
+    }
+    .detail-header .back-btn {
+      width: 32px; height: 32px;
+      display: flex; align-items: center; justify-content: center;
+      background: none; border: none; cursor: pointer; color: #fff;
+    }
+    .detail-header .volume-btn {
+      width: 32px; height: 32px;
+      display: flex; align-items: center; justify-content: center;
+      background: none; border: none; cursor: pointer; color: #fff;
+    }
+
+    .detail-content-area {
+      flex: 1;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .detail-blur-bg {
+      position: absolute; inset: 0;
+      filter: blur(40px);
+      transform: scale(1.2);
+      opacity: 0.6;
+    }
+
+    .detail-top-dimmed {
+      position: absolute; top: 0; left: 0; right: 0; height: 120px;
+      background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, transparent 100%);
+      z-index: 2;
+    }
+
+    .detail-bottom-dimmed {
+      position: absolute; bottom: 0; left: 0; right: 0; height: 200px;
+      background: linear-gradient(0deg, rgba(0,0,0,0.6) 0%, transparent 100%);
+      z-index: 2;
+    }
+
+    .detail-progress-bar {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 3px;
+      background: rgba(255,255,255,0.2);
+      z-index: 5;
+    }
+    .detail-progress-fill {
+      height: 100%;
+      width: 65%;
+      background: #fff;
+      border-radius: 2px;
+    }
+
+    .detail-ai-badge {
+      position: absolute;
+      top: 56px; left: 16px;
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(8px);
+      border-radius: 8px;
+      padding: 4px 8px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #fff;
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .detail-creator-info {
+      position: absolute;
+      bottom: 100px; left: 16px;
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .detail-creator-avatar {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      border: 1.5px solid rgba(255,255,255,0.4);
+    }
+    .detail-creator-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: #fff;
+    }
+    .detail-creator-verified {
+      width: 14px; height: 14px;
+    }
+    .detail-prompt-text {
+      position: absolute;
+      bottom: 80px; left: 16px; right: 80px;
+      z-index: 5;
+      font-size: 13px;
+      color: rgba(255,255,255,0.8);
+      line-height: 1.4;
+      margin-top: 4px;
+      display: none;
+    }
+
+    .detail-side-actions {
+      position: absolute;
+      right: 12px;
+      bottom: 100px;
+      z-index: 5;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      align-items: center;
+    }
+    .detail-action-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: #fff;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+    .detail-action-btn svg { width: 24px; height: 24px; }
+    .detail-action-btn span { font-size: 10px; color: rgba(255,255,255,0.8); }
+    .detail-action-thumb {
+      width: 36px; height: 36px;
+      border-radius: 6px;
+      border: 1.5px solid rgba(255,255,255,0.5);
+    }
+
+    .detail-bottom-bar {
+      display: flex;
+      gap: 8px;
+      padding: 8px 16px 26px;
+      background: rgba(0,0,0,0.8);
+      z-index: 5;
+    }
+    .detail-btn-regen {
+      flex: 1;
+      height: 48px;
+      border-radius: 12px;
+      background: var(--color-fill-neutral);
+      color: var(--color-label-normal);
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+    .detail-btn-regen .coin-icon { font-size: 12px; opacity: 0.7; }
+    .detail-btn-publish {
+      width: 80px;
+      height: 48px;
+      border-radius: 12px;
+      background: var(--color-brand-primary);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .detail-btn-publish.off {
+      background: rgba(255,255,255,0.15);
+    }
+
+    /* Toggle switch in publish button */
+    .toggle-switch {
+      width: 28px; height: 16px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.4);
+      position: relative;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .toggle-switch.on { background: #fff; }
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      top: 2px; left: 2px;
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      background: #8752fa;
+      transition: transform 0.2s;
+    }
+    .toggle-switch.on::after { transform: translateX(12px); }
+
+    /* --- Bottom Sheet --- */
+    .bottom-sheet-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 100;
+      display: none;
+      align-items: flex-end;
+    }
+    .bottom-sheet-overlay.active { display: flex; }
+    .bottom-sheet {
+      width: 100%;
+      background: #fff;
+      border-radius: 20px 20px 0 0;
+      padding: 20px 16px 34px;
+      animation: sheetUp 0.3s ease-out;
+    }
+    @keyframes sheetUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+    .bottom-sheet-handle {
+      width: 36px; height: 4px;
+      border-radius: 2px;
+      background: #ddd;
+      margin: 0 auto 16px;
+    }
+    .bottom-sheet-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--color-label-normal);
+      text-align: center;
+      margin-bottom: 8px;
+    }
+    .bottom-sheet-desc {
+      font-size: 14px;
+      color: var(--color-label-assistive);
+      text-align: center;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+    .bottom-sheet-btn {
+      width: 100%;
+      height: 48px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      margin-bottom: 8px;
+    }
+    .bottom-sheet-btn.primary {
+      background: var(--color-brand-primary);
+      color: #fff;
+    }
+    .bottom-sheet-btn.secondary {
+      background: var(--color-fill-neutral);
+      color: var(--color-label-normal);
+    }
+
+    .bottom-sheet-menu-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 0;
+      font-size: 16px;
+      color: var(--color-label-normal);
+      cursor: pointer;
+      border-bottom: 1px solid #f1f1f1;
+    }
+    .bottom-sheet-menu-item:last-child { border-bottom: none; }
+    .bottom-sheet-menu-item svg { width: 22px; height: 22px; }
+    .bottom-sheet-menu-item.danger { color: #e53e3e; }
+
+    /* --- Toast Message --- */
+    .toast-message {
+      position: absolute;
+      top: 60px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--color-label-normal);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 10px 24px;
+      border-radius: 40px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 200;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    .toast-message.show { opacity: 1; }
   </style>
 </head>
 <body>
@@ -1185,6 +1557,15 @@
         <button class="control-panel__state-btn" data-state="empty" onclick="toggleState('empty')">Empty</button>
         <button class="control-panel__state-btn" data-state="loading" onclick="toggleState('loading')">Loading</button>
       </div>
+    </div>
+    <div class="control-panel__row" id="detail-variant-row" style="display:none;">
+      <span class="control-panel__label">Variant</span>
+      <select id="detail-variant-select" onchange="setDetailVariant(this.value)">
+        <option value="posts-default">게시물탭_기본 (Toggle ON)</option>
+        <option value="private-entry">비공개탭_진입 (Toggle OFF)</option>
+        <option value="liked-other">좋아요탭_타유저</option>
+        <option value="liked-mine">좋아요탭_내게시물</option>
+      </select>
     </div>
     <div class="control-panel__row">
       <span class="control-panel__breadcrumb" id="breadcrumb">screen-home</span>
@@ -1214,14 +1595,14 @@
       </div>
 
       <!-- Default State: full home layout -->
-      <div class="feed-scroll" data-state="default">
+      <div class="feed-scroll" data-state="default" style="padding-bottom:80px;">
 
-        <!-- Category Chips Row -->
-        <div class="home-category-chips">
-          <div class="home-chip">비디오 생성</div>
-          <div class="home-chip">이미지 생성<span class="home-chip-badge"></span></div>
-          <div class="home-chip">댄스 챌린지</div>
-          <div class="home-chip">얼인합 바꾸기</div>
+        <!-- Feature Cards Row (Figma: rounded-16 rectangular cards) -->
+        <div class="home-feature-cards">
+          <div class="home-feature-card">비디오 생성</div>
+          <div class="home-feature-card">짤 생성</div>
+          <div class="home-feature-card">짤 꾸미기</div>
+          <div class="home-feature-card">사진 생성</div>
         </div>
 
         <!-- New Templates Section -->
@@ -1296,6 +1677,12 @@
       <!-- Explore Header: centered "탐색" -->
       <div class="explore-header-bar">
         <span class="explore-header-title">탐색</span>
+      </div>
+
+      <!-- Search Bar -->
+      <div class="explore-search-bar">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="m21 21-4.35-4.35" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <span>검색어를 입력하세요</span>
       </div>
 
       <!-- Default State: 2-column masonry feed -->
@@ -1385,16 +1772,22 @@
         <!-- Profile Inner Tabs (ICON ONLY per Figma) -->
         <div class="profile-tab-bar">
           <button class="profile-tab active" data-profile-tab="posts" onclick="switchProfileTab('posts')">
-            <!-- Grid/media icon -->
-            <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.8"/><rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.8"/></svg>
+            <!-- MediaStroke (inactive) -->
+            <svg class="icon-stroke" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.8"/><rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.8"/></svg>
+            <!-- MediaFill (active) -->
+            <svg class="icon-fill" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1" fill="currentColor"/><rect x="14" y="3" width="7" height="7" rx="1" fill="currentColor"/><rect x="3" y="14" width="7" height="7" rx="1" fill="currentColor"/><rect x="14" y="14" width="7" height="7" rx="1" fill="currentColor"/></svg>
           </button>
           <button class="profile-tab" data-profile-tab="private" onclick="switchProfileTab('private')">
-            <!-- Lock icon -->
-            <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="currentColor" stroke-width="1.8"/></svg>
+            <!-- LockStroke (inactive) -->
+            <svg class="icon-stroke" viewBox="0 0 24 24" fill="none"><rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="currentColor" stroke-width="1.8"/></svg>
+            <!-- LockFill (active) -->
+            <svg class="icon-fill" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" fill="currentColor"/><path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="currentColor" stroke-width="2"/></svg>
           </button>
           <button class="profile-tab" data-profile-tab="liked" onclick="switchProfileTab('liked')">
-            <!-- Heart icon -->
-            <svg viewBox="0 0 24 24" fill="none"><path d="M12 21s-7-5.5-7-10.5A4.5 4.5 0 0 1 12 6a4.5 4.5 0 0 1 7 4.5C19 15.5 12 21 12 21Z" stroke="currentColor" stroke-width="1.8"/></svg>
+            <!-- HeartStroke (inactive) -->
+            <svg class="icon-stroke" viewBox="0 0 24 24" fill="none"><path d="M12 21s-7-5.5-7-10.5A4.5 4.5 0 0 1 12 6a4.5 4.5 0 0 1 7 4.5C19 15.5 12 21 12 21Z" stroke="currentColor" stroke-width="1.8"/></svg>
+            <!-- HeartFill (active) -->
+            <svg class="icon-fill" viewBox="0 0 24 24"><path d="M12 21s-7-5.5-7-10.5A4.5 4.5 0 0 1 12 6a4.5 4.5 0 0 1 7 4.5C19 15.5 12 21 12 21Z" fill="currentColor"/></svg>
           </button>
         </div>
 
@@ -1405,6 +1798,10 @@
             <div class="masonry-grid" id="profile-posts-grid">
               <!-- Generated by JS -->
             </div>
+            <div class="empty-state profile-tab-empty" id="posts-empty" style="display:none;">
+              <div class="empty-state-icon"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.8"/><rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.8"/></svg></div>
+              <div class="empty-state-title">아직 게시물이 없어요</div>
+            </div>
           </div>
 
           <!-- Private Tab -->
@@ -1412,12 +1809,17 @@
             <div class="masonry-grid" id="profile-private-grid">
               <!-- Generated by JS -->
             </div>
+            <div class="empty-state profile-tab-empty" id="private-empty" style="display:none;">
+              <div class="empty-state-icon"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="currentColor" stroke-width="1.8"/></svg></div>
+              <div class="empty-state-title">아직 비공개한 게시물이 없어요</div>
+            </div>
           </div>
 
           <!-- Liked Tab -->
           <div class="profile-content-panel" id="profile-tab-liked">
             <div class="empty-state" style="display: flex;">
-              <div class="empty-state-title">아직 게시물이 없어요</div>
+              <div class="empty-state-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M12 21s-7-5.5-7-10.5A4.5 4.5 0 0 1 12 6a4.5 4.5 0 0 1 7 4.5C19 15.5 12 21 12 21Z" stroke="currentColor" stroke-width="1.8"/></svg></div>
+              <div class="empty-state-title">아직 좋아요한 게시물이 없어요</div>
             </div>
           </div>
         </div>
@@ -1574,90 +1976,142 @@
     </section>
 
     <!-- ============================================================
-         SCREEN 4: VERTICAL SWIPE FEED
+         SCREEN 4: DETAIL VIEW (PostCard — Figma AC 2.5)
          ============================================================ -->
     <section class="screen" id="screen-vertical-feed">
 
-      <div class="vertical-feed-header">
-        <button class="back-btn" onclick="goBack()" aria-label="뒤로가기">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 19l-7-7 7-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
-        <span class="title">게시물</span>
-      </div>
+      <!-- Full-screen PostCard detail -->
+      <div style="display:flex;flex-direction:column;width:100%;height:100%;background:#090909;">
 
-      <div class="vertical-feed-scroll">
-        <div class="vertical-feed-item">
-          <div class="vertical-feed-content purple-bg">
-            <span style="font-size:48px; opacity:0.4; color:#fff;">UGC</span>
+        <!-- Content area with blur bg -->
+        <div class="detail-content-area">
+          <!-- Blur background -->
+          <div class="detail-blur-bg" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
+
+          <!-- Top dimmed gradient -->
+          <div class="detail-top-dimmed"></div>
+
+          <!-- Bottom dimmed gradient -->
+          <div class="detail-bottom-dimmed"></div>
+
+          <!-- Header: back + volume -->
+          <div class="detail-header">
+            <button class="back-btn" onclick="goBack()" aria-label="뒤로가기">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M15 19l-7-7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <button class="volume-btn" aria-label="볼륨">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M11 5L6 9H2v6h4l5 4V5Z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+            </button>
           </div>
-          <div class="vertical-feed-caption">
-            <div class="caption-user">creative_zzemer</div>
-            <div class="caption-text">AI로 만든 첫 번째 작품입니다</div>
+
+          <!-- AI Noti Badge -->
+          <div class="detail-ai-badge">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" fill="#8752fa"/><text x="8" y="11" text-anchor="middle" font-size="8" font-weight="700" fill="white">AI</text></svg>
+            AI로 생성됨
           </div>
-          <div class="vertical-feed-actions">
-            <div class="feed-action-btn">
-              <svg viewBox="0 0 24 24" fill="none"><path d="M12 21s-7-5.5-7-10.5A4.5 4.5 0 0 1 12 6a4.5 4.5 0 0 1 7 4.5C19 15.5 12 21 12 21Z" stroke="currentColor" stroke-width="1.8"/></svg>
+
+          <!-- Main content placeholder -->
+          <div style="position:relative;z-index:3;width:260px;height:350px;border-radius:12px;background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);display:flex;align-items:center;justify-content:center;">
+            <span style="font-size:48px;opacity:0.4;color:#fff;">UGC</span>
+          </div>
+
+          <!-- Creator Info -->
+          <div class="detail-creator-info">
+            <div class="detail-creator-avatar" style="background:linear-gradient(135deg,#667eea,#764ba2);"></div>
+            <span class="detail-creator-name">creative_zzemer</span>
+            <svg class="detail-creator-verified" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" fill="#4facfe"/><path d="M5 8l2 2 4-4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+
+          <!-- Prompt text (visible in private-entry variant) -->
+          <div class="detail-prompt-text">귀여운 고양이 캐릭터, 파스텔톤</div>
+
+          <!-- Side Action Column -->
+          <div class="detail-side-actions">
+            <!-- Heart -->
+            <button class="detail-action-btn" id="detail-heart-btn" onclick="toggleDetailHeart()">
+              <svg class="icon-stroke" viewBox="0 0 24 24" fill="none"><path d="M12 21s-7-5.5-7-10.5A4.5 4.5 0 0 1 12 6a4.5 4.5 0 0 1 7 4.5C19 15.5 12 21 12 21Z" stroke="currentColor" stroke-width="1.8"/></svg>
+              <svg class="icon-fill" viewBox="0 0 24 24" style="display:none;"><path d="M12 21s-7-5.5-7-10.5A4.5 4.5 0 0 1 12 6a4.5 4.5 0 0 1 7 4.5C19 15.5 12 21 12 21Z" fill="#FF4466"/></svg>
               <span>234</span>
-            </div>
-            <div class="feed-action-btn">
-              <svg viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor" stroke-width="1.8"/></svg>
+            </button>
+            <!-- Regenerate -->
+            <button class="detail-action-btn" onclick="showToast('재생성 중...')">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M1 4v6h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
               <span>12</span>
-            </div>
-            <div class="feed-action-btn">
+            </button>
+            <!-- Upload/Share -->
+            <button class="detail-action-btn" onclick="showToast('앨범에 저장됐어요')">
               <svg viewBox="0 0 24 24" fill="none"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" stroke="currentColor" stroke-width="1.8"/><polyline points="16,6 12,2 8,6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="2" x2="12" y2="15" stroke="currentColor" stroke-width="1.8"/></svg>
-              <span>공유</span>
-            </div>
+            </button>
+            <!-- More -->
+            <button class="detail-action-btn" onclick="openBottomSheet('more-sheet')">
+              <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="5" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="12" cy="19" r="1.5" fill="currentColor"/></svg>
+            </button>
+            <!-- Image Thumbnail -->
+            <div class="detail-action-thumb" style="background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
+          </div>
+
+          <!-- Video Progress Bar -->
+          <div class="detail-progress-bar">
+            <div class="detail-progress-fill"></div>
           </div>
         </div>
 
-        <div class="vertical-feed-item">
-          <div class="vertical-feed-content blue-bg">
-            <span style="font-size:48px; opacity:0.4; color:#fff;">UGC</span>
-          </div>
-          <div class="vertical-feed-caption">
-            <div class="caption-user">art_lover_99</div>
-            <div class="caption-text">오늘의 AI 아트 도전</div>
-          </div>
-          <div class="vertical-feed-actions">
-            <div class="feed-action-btn">
-              <svg viewBox="0 0 24 24" fill="none"><path d="M12 21s-7-5.5-7-10.5A4.5 4.5 0 0 1 12 6a4.5 4.5 0 0 1 7 4.5C19 15.5 12 21 12 21Z" stroke="currentColor" stroke-width="1.8"/></svg>
-              <span>1.2천</span>
-            </div>
-            <div class="feed-action-btn">
-              <svg viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor" stroke-width="1.8"/></svg>
-              <span>45</span>
-            </div>
-            <div class="feed-action-btn">
-              <svg viewBox="0 0 24 24" fill="none"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" stroke="currentColor" stroke-width="1.8"/><polyline points="16,6 12,2 8,6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="2" x2="12" y2="15" stroke="currentColor" stroke-width="1.8"/></svg>
-              <span>공유</span>
-            </div>
-          </div>
+        <!-- Bottom CTA buttons -->
+        <div class="detail-bottom-bar" id="detail-bottom-bar">
+          <button class="detail-btn-regen" id="detail-regen-btn">
+            다시 생성하기 <span class="coin-icon">🪙 2</span>
+          </button>
+          <button class="detail-btn-publish" id="detail-publish-btn" onclick="togglePublish()">
+            게시
+            <div class="toggle-switch on" id="publish-toggle"></div>
+          </button>
         </div>
+      </div>
 
-        <div class="vertical-feed-item">
-          <div class="vertical-feed-content pink-bg">
-            <span style="font-size:48px; opacity:0.4; color:#fff;">UGC</span>
+      <!-- Bottom Sheet: 게시 안내 -->
+      <div class="bottom-sheet-overlay" id="publish-guide-sheet" onclick="closeBottomSheet('publish-guide-sheet')">
+        <div class="bottom-sheet" onclick="event.stopPropagation()">
+          <div class="bottom-sheet-handle"></div>
+          <div style="text-align:center;font-size:32px;margin-bottom:12px;">🎉</div>
+          <div class="bottom-sheet-title">게시 안내</div>
+          <div class="bottom-sheet-desc">게시하면 다른 사용자들이 내 작품을<br>볼 수 있어요</div>
+          <button class="bottom-sheet-btn primary" onclick="closeBottomSheet('publish-guide-sheet'); showToast('게시되었어요')">확인</button>
+        </div>
+      </div>
+
+      <!-- Bottom Sheet: 더보기 menu -->
+      <div class="bottom-sheet-overlay" id="more-sheet" onclick="closeBottomSheet('more-sheet')">
+        <div class="bottom-sheet" onclick="event.stopPropagation()">
+          <div class="bottom-sheet-handle"></div>
+          <div class="bottom-sheet-menu-item" onclick="showToast('앨범에 저장됐어요'); closeBottomSheet('more-sheet')">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" stroke-width="1.8"/><polyline points="7,10 12,15 17,10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="15" x2="12" y2="3" stroke="currentColor" stroke-width="1.8"/></svg>
+            다운로드
           </div>
-          <div class="vertical-feed-caption">
-            <div class="caption-user">pixel_maker</div>
-            <div class="caption-text">이 느낌 좋다</div>
+          <div class="bottom-sheet-menu-item" onclick="showToast('피드백 감사합니다'); closeBottomSheet('more-sheet')">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor" stroke-width="1.8"/></svg>
+            피드백
           </div>
-          <div class="vertical-feed-actions">
-            <div class="feed-action-btn">
-              <svg viewBox="0 0 24 24" fill="none"><path d="M12 21s-7-5.5-7-10.5A4.5 4.5 0 0 1 12 6a4.5 4.5 0 0 1 7 4.5C19 15.5 12 21 12 21Z" stroke="currentColor" stroke-width="1.8"/></svg>
-              <span>567</span>
-            </div>
-            <div class="feed-action-btn">
-              <svg viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor" stroke-width="1.8"/></svg>
-              <span>23</span>
-            </div>
-            <div class="feed-action-btn">
-              <svg viewBox="0 0 24 24" fill="none"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" stroke="currentColor" stroke-width="1.8"/><polyline points="16,6 12,2 8,6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="2" x2="12" y2="15" stroke="currentColor" stroke-width="1.8"/></svg>
-              <span>공유</span>
-            </div>
+          <div class="bottom-sheet-menu-item danger" onclick="openBottomSheet('report-sheet'); closeBottomSheet('more-sheet')">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" stroke="currentColor" stroke-width="1.8"/><line x1="12" y1="9" x2="12" y2="13" stroke="currentColor" stroke-width="1.8"/><line x1="12" y1="17" x2="12.01" y2="17" stroke="currentColor" stroke-width="1.8"/></svg>
+            신고하기
           </div>
         </div>
       </div>
+
+      <!-- Bottom Sheet: 신고하기 -->
+      <div class="bottom-sheet-overlay" id="report-sheet" onclick="closeBottomSheet('report-sheet')">
+        <div class="bottom-sheet" onclick="event.stopPropagation()" style="padding-bottom:20px;">
+          <div class="bottom-sheet-handle"></div>
+          <div class="bottom-sheet-title">신고하기</div>
+          <div class="bottom-sheet-desc">이 콘텐츠를 신고하는 이유를 알려주세요</div>
+          <textarea style="width:100%;height:100px;border:1px solid #e0e0e0;border-radius:12px;padding:12px;font-size:14px;font-family:inherit;resize:none;margin-bottom:12px;" placeholder="신고 사유를 입력해주세요"></textarea>
+          <button class="bottom-sheet-btn primary" onclick="closeBottomSheet('report-sheet'); showToast('신고가 접수되었어요')">제출</button>
+          <button class="bottom-sheet-btn secondary" onclick="closeBottomSheet('report-sheet')">취소</button>
+        </div>
+      </div>
+
+      <!-- Toast -->
+      <div class="toast-message" id="detail-toast">앨범에 저장됐어요</div>
 
     </section>
 
@@ -1934,6 +2388,12 @@
         breadcrumb.textContent = path;
       }
 
+      // Show/hide detail variant selector
+      const variantRow = document.getElementById('detail-variant-row');
+      if (variantRow) {
+        variantRow.style.display = currentScreen.id === 'screen-vertical-feed' ? 'flex' : 'none';
+      }
+
       updateStateButtons();
     }
 
@@ -2028,6 +2488,97 @@
       });
     }
 
+    // === Detail View Interactions ===
+    function toggleDetailHeart() {
+      const btn = document.getElementById('detail-heart-btn');
+      if (!btn) return;
+      const strokeIcon = btn.querySelector('.icon-stroke');
+      const fillIcon = btn.querySelector('.icon-fill');
+      if (strokeIcon.style.display === 'none') {
+        strokeIcon.style.display = 'block';
+        fillIcon.style.display = 'none';
+      } else {
+        strokeIcon.style.display = 'none';
+        fillIcon.style.display = 'block';
+      }
+    }
+
+    function togglePublish() {
+      const toggle = document.getElementById('publish-toggle');
+      const btn = document.getElementById('detail-publish-btn');
+      if (!toggle || !btn) return;
+      if (toggle.classList.contains('on')) {
+        toggle.classList.remove('on');
+        btn.classList.add('off');
+      } else {
+        toggle.classList.add('on');
+        btn.classList.remove('off');
+        openBottomSheet('publish-guide-sheet');
+      }
+    }
+
+    // === Bottom Sheet ===
+    function openBottomSheet(id) {
+      const sheet = document.getElementById(id);
+      if (sheet) sheet.classList.add('active');
+    }
+
+    function closeBottomSheet(id) {
+      const sheet = document.getElementById(id);
+      if (sheet) sheet.classList.remove('active');
+    }
+
+    // === Toast Message ===
+    function showToast(message) {
+      const toast = document.getElementById('detail-toast');
+      if (!toast) return;
+      toast.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+
+    // === Detail View Variant Setup ===
+    function setDetailVariant(variant) {
+      const regenBtn = document.getElementById('detail-regen-btn');
+      const publishBtn = document.getElementById('detail-publish-btn');
+      const toggle = document.getElementById('publish-toggle');
+      const heartBtn = document.getElementById('detail-heart-btn');
+      const promptText = document.querySelector('.detail-prompt-text');
+
+      if (!regenBtn) return;
+
+      // Reset
+      if (promptText) promptText.style.display = 'none';
+      regenBtn.style.display = 'flex';
+      publishBtn.style.display = 'flex';
+
+      switch (variant) {
+        case 'posts-default': // 게시물탭_기본
+          regenBtn.innerHTML = '다시 생성하기 <span class="coin-icon">🪙 2</span>';
+          toggle.classList.add('on');
+          publishBtn.classList.remove('off');
+          break;
+        case 'private-entry': // 비공개탭_진입
+          regenBtn.innerHTML = '프롬프트 편집하기';
+          toggle.classList.remove('on');
+          publishBtn.classList.add('off');
+          if (promptText) { promptText.style.display = 'block'; promptText.textContent = '귀여운 고양이 캐릭터, 파스텔톤'; }
+          break;
+        case 'liked-other': // 좋아요탭_타유저
+          regenBtn.innerHTML = '템플릿 사용하기';
+          publishBtn.style.display = 'none';
+          // HeartFill by default
+          if (heartBtn) { heartBtn.querySelector('.icon-stroke').style.display = 'none'; heartBtn.querySelector('.icon-fill').style.display = 'block'; }
+          break;
+        case 'liked-mine': // 좋아요탭_내게시물
+          regenBtn.innerHTML = '다시 생성하기 <span class="coin-icon">🪙 2</span>';
+          toggle.classList.remove('on');
+          publishBtn.classList.add('off');
+          if (heartBtn) { heartBtn.querySelector('.icon-stroke').style.display = 'none'; heartBtn.querySelector('.icon-fill').style.display = 'block'; }
+          break;
+      }
+    }
+
     // === Init ===
     document.addEventListener('DOMContentLoaded', () => {
       // Generate home templates
@@ -2050,11 +2601,11 @@
       generateSkeletonGrid('explore-skeleton', 8);
       generateSkeletonGrid('profile-skeleton', 6);
 
-      // Private grid items get a lock overlay
+      // Private grid items get a small lock icon top-right (Figma: no full overlay)
       document.querySelectorAll('#profile-private-grid .masonry-card').forEach(item => {
         const lock = document.createElement('div');
-        lock.style.cssText = 'position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;border-radius:4px;z-index:2;';
-        lock.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="11" width="18" height="11" rx="2" stroke="white" stroke-width="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="white" stroke-width="2"/></svg>';
+        lock.style.cssText = 'position:absolute;top:8px;right:8px;z-index:2;';
+        lock.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="11" width="18" height="11" rx="2" fill="white" fill-opacity="0.9"/><path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="white" stroke-width="2"/></svg>';
         item.appendChild(lock);
       });
 

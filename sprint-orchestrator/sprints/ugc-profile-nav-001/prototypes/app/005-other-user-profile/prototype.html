@@ -7,43 +7,34 @@
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
   <style>
-    /* === Design Tokens === */
+    /* === Design Tokens (Figma-aligned) === */
     :root {
       --color-brand-primary: #8752FA;
-      --color-brand-primary-dark: #A17BFF;
-      --color-bg-normal: #FFFFFF;
-      --color-bg-secondary: #F7F7F7;
-      --color-bg-dark: #1E1E1E;
-      --color-surface-primary: #FFFFFF;
-      --color-surface-secondary: #F7F7F7;
-      --color-label-normal: #262626;
-      --color-label-secondary: #656565;
-      --color-label-tertiary: #8A8A8A;
-      --color-label-assistive: #8E9199;
-      --color-fill-neutral: #F0F1F3;
-      --color-outline-secondary: #E2E2E2;
-      --color-accent: #00BFFF;
-      --color-error: #E53935;
-      --color-success: #43A047;
+      --background_primary: #FFFFFF;
+      --surface_secondary: #F7F7F7;
+      --surface_button: #f1f1f1;
+      --surface_elevated: #FFFFFF;
+      --surface_primary_invert: #262626;
+      --surface_secondary_invert: #171717;
+      --text_primary: #262626;
+      --text_secondary: #656565;
+      --text_tertiary: #8a8a8a;
+      --text_white: #FFFFFF;
+      --outline_primary: #f1f1f1;
+      --icon_quaternary: #c5c5c5;
+      --dim_secondary: rgba(0,0,0,0.4);
+      --background_primary_30p: rgba(255,255,255,0.3);
+      --avatar_border: rgba(136,136,136,0.2);
+      --avatar_bg: #f5f3ff;
 
       --radius-xs: 4px;
       --radius-sm: 8px;
       --radius-md: 12px;
       --radius-lg: 16px;
       --radius-xl: 20px;
-      --radius-2xl: 24px;
+      --radius-2xl: 28px;
       --radius-full: 9999px;
-
-      --spacing-0: 0px;
-      --spacing-1: 4px;
-      --spacing-2: 8px;
-      --spacing-3: 12px;
-      --spacing-4: 16px;
-      --spacing-5: 20px;
-      --spacing-6: 24px;
-      --spacing-8: 32px;
-      --spacing-10: 40px;
-      --spacing-12: 48px;
+      --radius-screen: 40px;
     }
 
     /* === Reset === */
@@ -61,7 +52,7 @@
 
     /* === Control Panel === */
     .control-panel {
-      width: 390px;
+      width: 375px;
       background: #1a1a2e;
       color: #e0e0e0;
       border-radius: 12px 12px 0 0;
@@ -123,15 +114,15 @@
       font-family: monospace;
     }
 
-    /* === Device Frame === */
+    /* === Device Frame (375x812, rounded-40) === */
     .device-frame {
-      width: 390px;
-      height: 844px;
-      background: var(--color-bg-normal);
+      width: 375px;
+      height: 812px;
+      background: var(--background_primary);
       overflow: hidden;
       position: relative;
+      border-radius: 0 0 var(--radius-screen) var(--radius-screen);
       border: 1px solid #ddd;
-      border-radius: 0 0 12px 12px;
     }
 
     /* === Screen === */
@@ -169,7 +160,8 @@
       display: none;
       position: absolute;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.4);
+      background: var(--dim_secondary);
+      border-radius: var(--radius-screen);
       z-index: 100;
     }
     .overlay-backdrop.active { display: block; }
@@ -183,17 +175,6 @@
       display: none;
     }
     .overlay-content.active { display: flex; }
-
-    /* === Placeholder === */
-    .placeholder-image {
-      background: var(--color-fill-neutral);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--color-label-assistive);
-      font-size: 12px;
-      border-radius: var(--radius-md);
-    }
 
     /* === Skeleton === */
     .skeleton {
@@ -211,37 +192,37 @@
     /* === Screen-Specific Styles === */
     /* ======================================== */
 
-    /* --- Header Bar --- */
+    /* --- Header Bar (px-12 py-4, h-48) --- */
     .header-bar {
       height: 48px;
       display: flex;
       align-items: center;
-      padding: 0 16px;
+      padding: 4px 12px;
       gap: 12px;
-      border-bottom: 1px solid var(--color-outline-secondary);
       flex-shrink: 0;
-      background: var(--color-bg-normal);
+      background: var(--background_primary);
       z-index: 10;
     }
 
     .header-bar__back {
-      width: 24px;
-      height: 24px;
+      width: 32px;
+      height: 32px;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      color: var(--color-label-normal);
-      font-size: 20px;
+      color: var(--text_primary);
       background: none;
       border: none;
+      border-radius: var(--radius-sm);
     }
 
     .header-bar__title {
       flex: 1;
       font-size: 18px;
       font-weight: 600;
-      color: var(--color-label-normal);
+      line-height: 1.5;
+      color: var(--text_primary);
       text-align: center;
       display: flex;
       align-items: center;
@@ -249,40 +230,36 @@
       gap: 4px;
     }
 
-    .header-bar__title .verified-badge {
-      width: 16px;
-      height: 16px;
+    /* emoji_neutral_fill badge (14px) */
+    .header-bar__title .emoji-badge {
+      width: 14px;
+      height: 14px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
     }
 
-    .header-bar__title .verified-badge svg {
-      width: 16px;
-      height: 16px;
-    }
-
     .header-bar__action {
-      width: 24px;
-      height: 24px;
+      width: 32px;
+      height: 32px;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      color: var(--color-label-normal);
-      font-size: 20px;
+      color: var(--text_primary);
       background: none;
       border: none;
+      border-radius: var(--radius-sm);
     }
 
-    /* --- Profile Header --- */
+    /* --- Profile Header (px-16 pt-12 pb-24 gap-16) --- */
     .profile-header {
-      padding: 24px 16px 16px;
+      padding: 12px 16px 24px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 12px;
+      gap: 16px;
       flex-shrink: 0;
     }
 
@@ -290,12 +267,13 @@
       width: 100px;
       height: 100px;
       border-radius: var(--radius-full);
-      background: var(--color-fill-neutral);
+      background: var(--avatar_bg);
+      border: 1px solid var(--avatar_border);
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 40px;
-      color: var(--color-label-assistive);
+      color: var(--text_tertiary);
       overflow: hidden;
     }
 
@@ -305,19 +283,17 @@
       object-fit: cover;
     }
 
-    .profile-nickname {
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--color-label-normal);
-    }
-
+    /* Stats: px-40, flex-1 columns, Subtitle4-16 for values, Body7-12 for labels */
     .profile-stats {
       display: flex;
-      gap: 32px;
-      padding: 12px 0;
+      align-items: center;
+      justify-content: center;
+      padding: 0 40px;
+      width: 100%;
     }
 
     .profile-stat {
+      flex: 1 0 0;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -327,74 +303,83 @@
 
     .profile-stat__value {
       font-size: 16px;
-      font-weight: 700;
-      color: var(--color-label-normal);
+      font-weight: 600;
+      line-height: 1.5;
+      color: var(--text_primary);
     }
 
     .profile-stat__label {
       font-size: 12px;
-      color: var(--color-label-tertiary);
+      font-weight: 500;
+      line-height: 1.5;
+      color: var(--text_primary);
     }
 
-    /* --- Profile Action Buttons --- */
+    /* --- Profile Action Buttons (gap-6, surface_button, rounded-12, h-40) --- */
     .profile-actions {
       display: flex;
-      gap: 8px;
-      padding: 0 16px 16px;
+      gap: 6px;
+      padding: 0 16px 0;
       flex-shrink: 0;
     }
 
-    .btn-edit-profile {
-      flex: 1;
+    .btn-profile-action {
+      flex: 1 0 0;
       height: 40px;
-      border-radius: var(--radius-sm);
+      border-radius: var(--radius-md);
       font-size: 14px;
       font-weight: 600;
+      line-height: 1.4;
       cursor: pointer;
-      border: 1px solid var(--color-outline-secondary);
-      background: var(--color-bg-normal);
-      color: var(--color-label-normal);
+      border: none;
+      background: var(--surface_button);
+      color: var(--text_primary);
       display: flex;
       align-items: center;
       justify-content: center;
     }
 
-    /* --- Tabs --- */
-    .profile-tabs {
+    /* --- MY Profile Tabs (icon-based, h-46) --- */
+    .profile-tabs-my {
       display: flex;
-      border-bottom: 1px solid var(--color-outline-secondary);
+      border-bottom: 1px solid var(--outline_primary);
       flex-shrink: 0;
+      height: 46px;
     }
 
-    .profile-tab {
+    .profile-tab-my {
       flex: 1;
-      height: 44px;
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: center;
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--color-label-tertiary);
+      justify-content: space-between;
+      padding-top: 10px;
       cursor: pointer;
-      position: relative;
       border: none;
       background: none;
+      color: var(--text_tertiary);
+      overflow: hidden;
+      position: relative;
     }
 
-    .profile-tab.active {
-      color: var(--color-label-normal);
-      font-weight: 600;
+    .profile-tab-my svg {
+      width: 24px;
+      height: 24px;
     }
 
-    .profile-tab.active::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 16px;
-      right: 16px;
+    .profile-tab-my.active svg {
+      color: var(--text_primary);
+    }
+
+    .profile-tab-my .tab-indicator {
+      width: 60px;
       height: 2px;
-      background: var(--color-label-normal);
+      background: transparent;
       border-radius: 1px;
+    }
+
+    .profile-tab-my.active .tab-indicator {
+      background: var(--surface_primary_invert);
     }
 
     /* --- 2-Column Masonry Grid --- */
@@ -423,7 +408,7 @@
       overflow: hidden;
       cursor: pointer;
       border-radius: var(--radius-xs);
-      background: var(--color-fill-neutral);
+      background: var(--surface_secondary);
     }
 
     .masonry-item__img {
@@ -437,9 +422,19 @@
       align-items: center;
       justify-content: center;
       font-size: 32px;
-      color: var(--color-label-assistive);
+      color: var(--text_tertiary);
     }
 
+    /* Gradient overlay on normal thumbnails: linear-gradient from transparent to rgba(19,19,19,0.2) */
+    .masonry-item__gradient {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(180deg, transparent 0%, rgba(19,19,19,0.2) 100%);
+      pointer-events: none;
+      border-radius: var(--radius-xs);
+    }
+
+    /* Regen count inside gradient area (no pill badge) */
     .masonry-item__regen {
       position: absolute;
       bottom: 6px;
@@ -447,55 +442,104 @@
       display: flex;
       align-items: center;
       gap: 3px;
-      background: rgba(0, 0, 0, 0.55);
       color: #fff;
-      font-size: 10px;
+      font-size: 14px;
       font-weight: 600;
-      padding: 2px 6px;
-      border-radius: 10px;
+      line-height: 1.4;
     }
 
     .masonry-item__regen svg {
-      width: 12px;
-      height: 12px;
-      fill: #fff;
+      width: 14px;
+      height: 14px;
+      stroke: #fff;
+      fill: none;
+      stroke-width: 1.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
     }
 
-    /* --- Generating Overlay on Card --- */
+    /* --- Generating Thumbnail (dark gradient + white text + LOGO spinner) --- */
     .masonry-item--generating {
       position: relative;
-    }
-
-    .masonry-item--generating .generating-overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(255, 255, 255, 0.65);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
+      aspect-ratio: 187 / 187;
+      background-image: linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0) 100%), linear-gradient(90deg, #f7f7f7 0%, #f7f7f7 100%);
       border-radius: var(--radius-xs);
+      overflow: hidden;
     }
 
-    .generating-overlay__icon {
+    .generating-label {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      line-height: 1.5;
+      color: var(--text_white);
+    }
+
+    .generating-spinner {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-150deg);
+      width: 32px;
+      height: 32px;
+      animation: logo-spin 2s linear infinite;
+    }
+
+    @keyframes logo-spin {
+      from { transform: translate(-50%, -50%) rotate(-150deg); }
+      to { transform: translate(-50%, -50%) rotate(210deg); }
+    }
+
+    /* --- Failed Thumbnail (dark gradient + "생성 실패" + CancelStroke X) --- */
+    .masonry-item--failed {
+      position: relative;
+      aspect-ratio: 187 / 187;
+      background-image: linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0) 100%), linear-gradient(90deg, #f7f7f7 0%, #f7f7f7 100%);
+      border-radius: var(--radius-xs);
+      overflow: hidden;
+    }
+
+    .failed-header {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      right: 10px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+    }
+
+    .failed-label {
+      flex: 1 0 0;
+      font-size: 16px;
+      font-weight: 600;
+      line-height: 1.5;
+      color: var(--text_white);
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .failed-close {
       width: 24px;
       height: 24px;
-      animation: pulse-fade 1.5s ease-in-out infinite;
+      background: var(--background_primary_30p);
+      border-radius: 400px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border: none;
+      flex-shrink: 0;
     }
 
-    @keyframes pulse-fade {
-      0%, 100% { opacity: 0.4; }
-      50% { opacity: 1; }
-    }
-
-    .generating-overlay__label {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--color-label-secondary);
+    .failed-close svg {
+      width: 14px;
+      height: 14px;
+      stroke: white;
+      stroke-width: 2;
+      stroke-linecap: round;
     }
 
     /* --- Private Badge --- */
@@ -514,21 +558,6 @@
       color: #fff;
     }
 
-    /* --- New Badge --- */
-    .new-badge {
-      position: absolute;
-      top: 6px;
-      left: 6px;
-      background: var(--color-brand-primary);
-      color: #fff;
-      font-size: 9px;
-      font-weight: 700;
-      padding: 2px 6px;
-      border-radius: var(--radius-xs);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
     /* --- Empty State --- */
     .empty-state {
       flex: 1;
@@ -538,7 +567,7 @@
       justify-content: center;
       gap: 12px;
       padding: 48px 32px;
-      color: var(--color-label-tertiary);
+      color: var(--text_tertiary);
     }
 
     .empty-state__icon {
@@ -549,7 +578,7 @@
     .empty-state__title {
       font-size: 16px;
       font-weight: 600;
-      color: var(--color-label-secondary);
+      color: var(--text_secondary);
     }
 
     .empty-state__desc {
@@ -558,30 +587,44 @@
       line-height: 1.5;
     }
 
-    /* --- Bottom Sheet --- */
+    /* --- Bottom Sheet (rounded-28, pb-16, single menu item) --- */
+    .bottom-sheet-wrapper {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      padding: 32px 12px;
+      border-radius: var(--radius-screen);
+      z-index: 101;
+    }
+
     .bottom-sheet {
-      background: var(--color-bg-normal);
-      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-      padding: 8px 0;
-      padding-bottom: 34px;
+      background: var(--surface_elevated);
+      border-radius: var(--radius-2xl);
+      width: 100%;
+      padding-bottom: 16px;
       flex-direction: column;
     }
 
     .bottom-sheet__handle {
-      width: 36px;
+      width: 40px;
       height: 4px;
-      background: var(--color-outline-secondary);
-      border-radius: 2px;
-      margin: 8px auto 12px;
+      background: var(--icon_quaternary);
+      border-radius: 40px;
+      margin: 8px auto;
     }
 
     .bottom-sheet__item {
       display: flex;
       align-items: center;
-      gap: 16px;
-      padding: 14px 20px;
+      gap: 12px;
+      padding: 16px 20px;
       font-size: 16px;
-      color: var(--color-label-normal);
+      font-weight: 500;
+      line-height: 1.5;
+      color: var(--text_primary);
       cursor: pointer;
       background: none;
       border: none;
@@ -590,42 +633,41 @@
     }
 
     .bottom-sheet__item:active {
-      background: var(--color-fill-neutral);
+      background: var(--surface_secondary);
     }
 
     .bottom-sheet__icon {
-      font-size: 20px;
       width: 24px;
-      text-align: center;
-      color: var(--color-label-secondary);
-    }
-
-    .bottom-sheet__cancel {
-      border-top: 1px solid var(--color-outline-secondary);
-      margin-top: 4px;
-      padding-top: 4px;
-    }
-
-    .bottom-sheet__cancel .bottom-sheet__item {
-      color: var(--color-label-tertiary);
+      height: 24px;
+      display: flex;
+      align-items: center;
       justify-content: center;
+      color: var(--text_primary);
     }
 
-    /* --- Toast --- */
+    .bottom-sheet__icon svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    /* --- Toast (top-40, pill, #171717, SemiBold 14px) --- */
     .toast {
       position: absolute;
-      bottom: 100px;
+      top: 40px;
       left: 50%;
       transform: translateX(-50%);
-      background: #333;
-      color: #fff;
-      padding: 10px 20px;
-      border-radius: var(--radius-sm);
-      font-size: 13px;
-      font-weight: 500;
+      background: var(--surface_secondary_invert);
+      color: var(--text_white);
+      padding: 8px 24px;
+      border-radius: 40px;
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1.4;
       z-index: 200;
       display: none;
       white-space: nowrap;
+      box-shadow: 0px 0px 20px rgba(0,0,0,0.2);
+      text-align: center;
     }
 
     .toast.show {
@@ -634,29 +676,18 @@
     }
 
     @keyframes toastIn {
-      from { opacity: 0; transform: translateX(-50%) translateY(8px); }
+      from { opacity: 0; transform: translateX(-50%) translateY(-8px); }
       to { opacity: 1; transform: translateX(-50%) translateY(0); }
     }
 
-    /* --- Tab Badge (new content indicator) --- */
-    .tab-badge {
-      position: absolute;
-      top: 8px;
-      right: calc(50% - 30px);
-      width: 6px;
-      height: 6px;
-      background: var(--color-brand-primary);
-      border-radius: 50%;
-    }
-
-    /* --- Bottom Nav (for MY profile) --- */
+    /* --- Bottom Nav --- */
     .bottom-nav {
       height: 66px;
       display: flex;
-      border-top: 0.5px solid #f1f1f1;
+      border-top: 0.5px solid var(--outline_primary);
       background: white;
       flex-shrink: 0;
-      padding: 10px 12px 26px;
+      padding: 6px 12px 26px;
     }
 
     .bottom-nav__item {
@@ -666,29 +697,43 @@
       align-items: center;
       justify-content: center;
       gap: 2px;
-      font-size: 10px;
-      color: var(--color-label-tertiary);
       cursor: pointer;
       border: none;
       background: none;
+      color: var(--text_tertiary);
     }
 
     .bottom-nav__item.active {
-      color: var(--color-label-normal);
+      color: var(--text_primary);
     }
 
     .bottom-nav__icon {
-      font-size: 20px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .bottom-nav__label {
+      font-size: 10px;
       font-weight: 500;
+      line-height: 1.0;
+    }
+
+    .bottom-nav__dot {
+      position: absolute;
+      top: -2px;
+      right: -2px;
+      width: 8px;
+      height: 8px;
+      background: var(--color-brand-primary);
+      border-radius: 50%;
     }
 
     /* --- Profile Bio (MY profile only) --- */
     .profile-bio {
       font-size: 14px;
-      color: var(--color-label-secondary);
+      color: var(--text_secondary);
       text-align: center;
       line-height: 1.4;
       padding: 0 32px;
@@ -704,9 +749,12 @@
       <select id="screen-select" onchange="navigateBySelect(this.value)">
         <option value="screen-other-profile">1. Other User Profile (Posts)</option>
         <option value="screen-other-profile-empty">2. Other User Profile (Empty)</option>
-        <option value="screen-more-menu">3. More Menu Bottom Sheet</option>
-        <option value="screen-my-profile-generating">4. MY Profile - Posts (Generating)</option>
-        <option value="screen-my-profile-private">5. MY Profile - Private (New Content)</option>
+        <option value="screen-other-more">3. Other User - More Menu</option>
+        <option value="screen-other-url-copied">4. Other User - URL Copied Toast</option>
+        <option value="screen-my-profile-generating">5. MY Profile - Posts (Generating)</option>
+        <option value="screen-my-profile-failed">6. MY Profile - Posts (Failed)</option>
+        <option value="screen-my-profile-private">7. MY Profile - Private (Generating)</option>
+        <option value="screen-my-profile-private-failed">8. MY Profile - Private (Failed)</option>
       </select>
     </div>
     <div class="control-panel__row">
@@ -714,8 +762,6 @@
       <div class="control-panel__states" id="state-toggles">
         <button class="control-panel__state-btn active" data-state="default" onclick="toggleState('default')">Default</button>
         <button class="control-panel__state-btn" data-state="empty" onclick="toggleState('empty')">Empty</button>
-        <button class="control-panel__state-btn" data-state="more-menu" onclick="toggleState('more-menu')">More Menu</button>
-        <button class="control-panel__state-btn" data-state="generating" onclick="toggleState('generating')">Generating</button>
       </div>
     </div>
     <div class="control-panel__row">
@@ -726,27 +772,29 @@
   <!-- Device Frame -->
   <div class="device-frame" id="device-frame">
 
-    <!-- ===== Screen 1: Other User Profile (Posts) ===== -->
+    <!-- ===== Screen 1: Other User Profile (Posts) — NO TABS ===== -->
     <div class="screen" id="screen-other-profile">
-      <!-- Header: back + user ID centered + verified badge + more "..." -->
+      <!-- Header: back + user ID + emoji_neutral_fill badge + MorehStroke -->
       <div class="header-bar">
-        <button class="header-bar__back" onclick="goBack()">&#x2190;</button>
+        <button class="header-bar__back" onclick="goBack()">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
         <span class="header-bar__title">
           meme_creator_99
-          <span class="verified-badge">
-            <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 0L9.79 2.09L12.4 1.6L12.89 4.21L15.5 4.7L14.51 7.1L16 9.19L13.91 10.68L14.4 13.29L11.79 13.78L10.8 16L8.71 14.51L6.21 15.5L5.22 13.29L2.61 12.8L3.1 10.19L1 8.1L3.09 6.61L2.6 4L5.21 3.51L6.2 1L8 2.49L8 0Z" fill="#4DA6FF"/><path d="M7 10.5L4.5 8L5.91 6.59L7 7.67L10.09 4.59L11.5 6L7 10.5Z" fill="white"/></svg>
+          <span class="emoji-badge">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6.5" fill="#E8E8E8" stroke="#D0D0D0" stroke-width="0.5"/><circle cx="5" cy="5.5" r="1" fill="#666"/><circle cx="9" cy="5.5" r="1" fill="#666"/><line x1="4.5" y1="9" x2="9.5" y2="9" stroke="#666" stroke-width="1" stroke-linecap="round"/></svg>
           </span>
         </span>
-        <button class="header-bar__action" onclick="navigate('screen-more-menu', 'fade')">&#x22EF;</button>
+        <button class="header-bar__action" onclick="openMoreMenu()">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="5" cy="12" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="19" cy="12" r="1.5" fill="currentColor"/></svg>
+        </button>
       </div>
 
-      <!-- Profile Header: 100px avatar, no bio, stats -->
+      <!-- Profile Header: avatar + stats, NO nickname below, NO buttons, NO tabs -->
       <div class="profile-header">
         <div class="profile-avatar">
           <div style="width:100%;height:100%;background:linear-gradient(135deg,#C084FC,#8752FA,#6D28D9);display:flex;align-items:center;justify-content:center;color:#fff;font-size:36px;font-weight:700;">M</div>
         </div>
-        <div class="profile-nickname">meme_creator_99</div>
-        <!-- No bio for other user profile (not in Figma) -->
         <div class="profile-stats">
           <div class="profile-stat">
             <span class="profile-stat__value">42</span>
@@ -763,80 +811,98 @@
         </div>
       </div>
 
-      <!-- NO follow button (follow is PRD 3 scope) -->
-      <!-- NO "프로필 편집" / "프로필 공유" (this is OTHER user) -->
+      <!-- NO follow button (PRD 3 scope) -->
+      <!-- NO tabs -- grid directly after stats -->
 
-      <!-- Single tab: 게시물 with underline -->
-      <div class="profile-tabs">
-        <button class="profile-tab active">게시물</button>
-      </div>
-
-      <!-- Content: 2-column masonry grid with regen count -->
-      <div class="content-grid" data-state="default" id="other-grid-default">
+      <!-- Content: 2-column masonry grid with gradient overlay + regen count -->
+      <div class="content-grid" data-state="default" id="other-grid-default" style="display:flex;flex:1;overflow-y:auto;">
         <div class="masonry">
           <div class="masonry-col">
             <div class="masonry-item">
               <div class="masonry-item__placeholder" style="background:#E8D5F5;height:220px;">&#x1F60E;</div>
-              <div class="masonry-item__regen"><svg viewBox="0 0 12 12"><path d="M1 6a5 5 0 019.33-2.5M11 6a5 5 0 01-9.33 2.5M10.5 1v3h-3M1.5 11V8h3"/></svg> 24</div>
+              <div class="masonry-item__gradient"></div>
+              <div class="masonry-item__regen"><svg viewBox="0 0 14 14"><path d="M1.5 7a5.5 5.5 0 0110.26-2.75M12.5 7a5.5 5.5 0 01-10.26 2.75M11.5 1.5v3h-3M2.5 12.5v-3h3"/></svg> 24</div>
             </div>
             <div class="masonry-item">
               <div class="masonry-item__placeholder" style="background:#F5E8D5;height:180px;">&#x1F525;</div>
-              <div class="masonry-item__regen"><svg viewBox="0 0 12 12"><path d="M1 6a5 5 0 019.33-2.5M11 6a5 5 0 01-9.33 2.5M10.5 1v3h-3M1.5 11V8h3"/></svg> 8</div>
+              <div class="masonry-item__gradient"></div>
+              <div class="masonry-item__regen"><svg viewBox="0 0 14 14"><path d="M1.5 7a5.5 5.5 0 0110.26-2.75M12.5 7a5.5 5.5 0 01-10.26 2.75M11.5 1.5v3h-3M2.5 12.5v-3h3"/></svg> 8</div>
             </div>
             <div class="masonry-item">
               <div class="masonry-item__placeholder" style="background:#F5D5E8;height:200px;">&#x1F47B;</div>
-              <div class="masonry-item__regen"><svg viewBox="0 0 12 12"><path d="M1 6a5 5 0 019.33-2.5M11 6a5 5 0 01-9.33 2.5M10.5 1v3h-3M1.5 11V8h3"/></svg> 15</div>
+              <div class="masonry-item__gradient"></div>
+              <div class="masonry-item__regen"><svg viewBox="0 0 14 14"><path d="M1.5 7a5.5 5.5 0 0110.26-2.75M12.5 7a5.5 5.5 0 01-10.26 2.75M11.5 1.5v3h-3M2.5 12.5v-3h3"/></svg> 15</div>
             </div>
             <div class="masonry-item">
               <div class="masonry-item__placeholder" style="background:#D5D5F5;height:190px;">&#x1F31F;</div>
-              <div class="masonry-item__regen"><svg viewBox="0 0 12 12"><path d="M1 6a5 5 0 019.33-2.5M11 6a5 5 0 01-9.33 2.5M10.5 1v3h-3M1.5 11V8h3"/></svg> 5</div>
+              <div class="masonry-item__gradient"></div>
+              <div class="masonry-item__regen"><svg viewBox="0 0 14 14"><path d="M1.5 7a5.5 5.5 0 0110.26-2.75M12.5 7a5.5 5.5 0 01-10.26 2.75M11.5 1.5v3h-3M2.5 12.5v-3h3"/></svg> 5</div>
             </div>
           </div>
           <div class="masonry-col">
             <div class="masonry-item">
               <div class="masonry-item__placeholder" style="background:#D5E8F5;height:180px;">&#x1F923;</div>
-              <div class="masonry-item__regen"><svg viewBox="0 0 12 12"><path d="M1 6a5 5 0 019.33-2.5M11 6a5 5 0 01-9.33 2.5M10.5 1v3h-3M1.5 11V8h3"/></svg> 42</div>
+              <div class="masonry-item__gradient"></div>
+              <div class="masonry-item__regen"><svg viewBox="0 0 14 14"><path d="M1.5 7a5.5 5.5 0 0110.26-2.75M12.5 7a5.5 5.5 0 01-10.26 2.75M11.5 1.5v3h-3M2.5 12.5v-3h3"/></svg> 42</div>
             </div>
             <div class="masonry-item">
               <div class="masonry-item__placeholder" style="background:#D5F5E8;height:240px;">&#x1F4AF;</div>
-              <div class="masonry-item__regen"><svg viewBox="0 0 12 12"><path d="M1 6a5 5 0 019.33-2.5M11 6a5 5 0 01-9.33 2.5M10.5 1v3h-3M1.5 11V8h3"/></svg> 31</div>
+              <div class="masonry-item__gradient"></div>
+              <div class="masonry-item__regen"><svg viewBox="0 0 14 14"><path d="M1.5 7a5.5 5.5 0 0110.26-2.75M12.5 7a5.5 5.5 0 01-10.26 2.75M11.5 1.5v3h-3M2.5 12.5v-3h3"/></svg> 31</div>
             </div>
             <div class="masonry-item">
               <div class="masonry-item__placeholder" style="background:#E8F5D5;height:160px;">&#x1F916;</div>
-              <div class="masonry-item__regen"><svg viewBox="0 0 12 12"><path d="M1 6a5 5 0 019.33-2.5M11 6a5 5 0 01-9.33 2.5M10.5 1v3h-3M1.5 11V8h3"/></svg> 12</div>
+              <div class="masonry-item__gradient"></div>
+              <div class="masonry-item__regen"><svg viewBox="0 0 14 14"><path d="M1.5 7a5.5 5.5 0 0110.26-2.75M12.5 7a5.5 5.5 0 01-10.26 2.75M11.5 1.5v3h-3M2.5 12.5v-3h3"/></svg> 12</div>
             </div>
             <div class="masonry-item">
               <div class="masonry-item__placeholder" style="background:#F5F5D5;height:210px;">&#x1F3A8;</div>
-              <div class="masonry-item__regen"><svg viewBox="0 0 12 12"><path d="M1 6a5 5 0 019.33-2.5M11 6a5 5 0 01-9.33 2.5M10.5 1v3h-3M1.5 11V8h3"/></svg> 3</div>
+              <div class="masonry-item__gradient"></div>
+              <div class="masonry-item__regen"><svg viewBox="0 0 14 14"><path d="M1.5 7a5.5 5.5 0 0110.26-2.75M12.5 7a5.5 5.5 0 01-10.26 2.75M11.5 1.5v3h-3M2.5 12.5v-3h3"/></svg> 3</div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Content: Empty state -->
-      <div data-state="empty" id="other-grid-empty" style="flex:1;flex-direction:column;">
-        <div class="empty-state">
-          <div class="empty-state__icon">&#x1F4F7;</div>
-          <div class="empty-state__title">아직 게시물이 없습니다</div>
-          <div class="empty-state__desc">이 사용자가 콘텐츠를 공유하면<br>여기에 표시됩니다.</div>
+      <!-- More Menu Bottom Sheet (overlay on same screen) -->
+      <div class="overlay-backdrop" id="other-profile-backdrop" onclick="closeMoreMenu()"></div>
+      <div class="bottom-sheet-wrapper" id="other-profile-sheet" style="display:none;">
+        <div class="bottom-sheet" style="display:flex;">
+          <div class="bottom-sheet__handle"></div>
+          <button class="bottom-sheet__item" onclick="copyProfileUrl()">
+            <span class="bottom-sheet__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+            </span>
+            <span>프로필 URL 복사</span>
+          </button>
         </div>
       </div>
+
+      <!-- Toast -->
+      <div class="toast" id="copy-toast-other">프로필 링크를 클립보드에 복사했어요</div>
     </div>
 
     <!-- ===== Screen 2: Other User Profile (Empty) ===== -->
     <div class="screen" id="screen-other-profile-empty">
       <div class="header-bar">
-        <button class="header-bar__back" onclick="goBack()">&#x2190;</button>
-        <span class="header-bar__title">quiet_user</span>
-        <button class="header-bar__action" onclick="navigate('screen-more-menu', 'fade')">&#x22EF;</button>
+        <button class="header-bar__back" onclick="goBack()">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <span class="header-bar__title">
+          quiet_user
+          <span class="emoji-badge">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6.5" fill="#E8E8E8" stroke="#D0D0D0" stroke-width="0.5"/><circle cx="5" cy="5.5" r="1" fill="#666"/><circle cx="9" cy="5.5" r="1" fill="#666"/><line x1="4.5" y1="9" x2="9.5" y2="9" stroke="#666" stroke-width="1" stroke-linecap="round"/></svg>
+          </span>
+        </span>
+        <button class="header-bar__action" onclick="openMoreMenu()">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="5" cy="12" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="19" cy="12" r="1.5" fill="currentColor"/></svg>
+        </button>
       </div>
 
       <div class="profile-header">
         <div class="profile-avatar">
           <div style="width:100%;height:100%;background:linear-gradient(135deg,#A0AEC0,#718096);display:flex;align-items:center;justify-content:center;color:#fff;font-size:36px;font-weight:700;">Q</div>
         </div>
-        <div class="profile-nickname">quiet_user</div>
-        <!-- No bio for other user profile -->
         <div class="profile-stats">
           <div class="profile-stat">
             <span class="profile-stat__value">3</span>
@@ -853,69 +919,125 @@
         </div>
       </div>
 
-      <!-- NO follow button (PRD 3 scope) -->
-
-      <div class="profile-tabs">
-        <button class="profile-tab active">게시물</button>
-      </div>
-
-      <div class="empty-state" data-state="default">
+      <!-- NO tabs -- empty state directly -->
+      <div class="empty-state" style="flex:1;">
         <div class="empty-state__icon">&#x1F4F7;</div>
         <div class="empty-state__title">아직 게시물이 없습니다</div>
         <div class="empty-state__desc">이 사용자가 콘텐츠를 공유하면<br>여기에 표시됩니다.</div>
       </div>
     </div>
 
-    <!-- ===== Screen 3: More Menu Bottom Sheet ===== -->
-    <div class="screen" id="screen-more-menu">
-      <!-- Show the profile in background dimmed -->
+    <!-- ===== Screen 3: Other User - More Menu (overlay bottom sheet) ===== -->
+    <div class="screen" id="screen-other-more">
+      <!-- Background profile (dimmed) -->
       <div class="header-bar" style="opacity:0.4;">
-        <button class="header-bar__back">&#x2190;</button>
+        <button class="header-bar__back">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
         <span class="header-bar__title">meme_creator_99</span>
-        <button class="header-bar__action">&#x22EF;</button>
+        <button class="header-bar__action">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="5" cy="12" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="19" cy="12" r="1.5" fill="currentColor"/></svg>
+        </button>
       </div>
       <div class="profile-header" style="opacity:0.4;">
         <div class="profile-avatar">
           <div style="width:100%;height:100%;background:linear-gradient(135deg,#C084FC,#8752FA,#6D28D9);display:flex;align-items:center;justify-content:center;color:#fff;font-size:36px;font-weight:700;">M</div>
         </div>
-        <div class="profile-nickname">meme_creator_99</div>
       </div>
 
-      <!-- Overlay Backdrop -->
+      <!-- Dim overlay + bottom sheet -->
       <div class="overlay-backdrop active" onclick="navigate('screen-other-profile', 'fade')"></div>
-
-      <!-- Bottom Sheet -->
-      <div class="overlay-content active bottom-sheet" data-state="default" style="display:flex;">
-        <div class="bottom-sheet__handle"></div>
-        <button class="bottom-sheet__item" onclick="showCopyToast()">
-          <span class="bottom-sheet__icon">&#x1F517;</span>
-          <span>프로필 URL 복사</span>
-        </button>
-        <button class="bottom-sheet__item">
-          <span class="bottom-sheet__icon">&#x1F6AB;</span>
-          <span>사용자 차단</span>
-        </button>
-        <button class="bottom-sheet__item">
-          <span class="bottom-sheet__icon">&#x26A0;</span>
-          <span>신고하기</span>
-        </button>
-        <div class="bottom-sheet__cancel">
-          <button class="bottom-sheet__item" onclick="navigate('screen-other-profile', 'fade')">
-            <span>취소</span>
+      <div class="bottom-sheet-wrapper" style="display:flex;">
+        <div class="bottom-sheet" style="display:flex;">
+          <div class="bottom-sheet__handle"></div>
+          <button class="bottom-sheet__item" onclick="showCopyToastOnMore()">
+            <span class="bottom-sheet__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+            </span>
+            <span>프로필 URL 복사</span>
           </button>
         </div>
       </div>
 
-      <div class="toast" id="copy-toast">프로필 URL이 복사되었습니다</div>
+      <div class="toast" id="copy-toast-more">프로필 링크를 클립보드에 복사했어요</div>
     </div>
 
-    <!-- ===== Screen 4: MY Profile - Posts Tab (Generating) ===== -->
-    <div class="screen" id="screen-my-profile-generating">
-      <!-- Header (MY profile = settings, no back) -->
+    <!-- ===== Screen 4: Other User - URL Copied Toast ===== -->
+    <div class="screen" id="screen-other-url-copied">
       <div class="header-bar">
-        <div style="width:24px;"></div>
+        <button class="header-bar__back" onclick="goBack()">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <span class="header-bar__title">
+          meme_creator_99
+          <span class="emoji-badge">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6.5" fill="#E8E8E8" stroke="#D0D0D0" stroke-width="0.5"/><circle cx="5" cy="5.5" r="1" fill="#666"/><circle cx="9" cy="5.5" r="1" fill="#666"/><line x1="4.5" y1="9" x2="9.5" y2="9" stroke="#666" stroke-width="1" stroke-linecap="round"/></svg>
+          </span>
+        </span>
+        <button class="header-bar__action">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="5" cy="12" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="19" cy="12" r="1.5" fill="currentColor"/></svg>
+        </button>
+      </div>
+      <div class="profile-header">
+        <div class="profile-avatar">
+          <div style="width:100%;height:100%;background:linear-gradient(135deg,#C084FC,#8752FA,#6D28D9);display:flex;align-items:center;justify-content:center;color:#fff;font-size:36px;font-weight:700;">M</div>
+        </div>
+        <div class="profile-stats">
+          <div class="profile-stat">
+            <span class="profile-stat__value">42</span>
+            <span class="profile-stat__label">팔로워</span>
+          </div>
+          <div class="profile-stat">
+            <span class="profile-stat__value">128</span>
+            <span class="profile-stat__label">팔로잉</span>
+          </div>
+          <div class="profile-stat">
+            <span class="profile-stat__value">1.2K</span>
+            <span class="profile-stat__label">재생성된</span>
+          </div>
+        </div>
+      </div>
+      <div class="content-grid" style="flex:1;overflow-y:auto;display:flex;">
+        <div class="masonry">
+          <div class="masonry-col">
+            <div class="masonry-item">
+              <div class="masonry-item__placeholder" style="background:#E8D5F5;height:220px;">&#x1F60E;</div>
+              <div class="masonry-item__gradient"></div>
+              <div class="masonry-item__regen"><svg viewBox="0 0 14 14"><path d="M1.5 7a5.5 5.5 0 0110.26-2.75M12.5 7a5.5 5.5 0 01-10.26 2.75M11.5 1.5v3h-3M2.5 12.5v-3h3"/></svg> 24</div>
+            </div>
+            <div class="masonry-item">
+              <div class="masonry-item__placeholder" style="background:#F5E8D5;height:180px;">&#x1F525;</div>
+              <div class="masonry-item__gradient"></div>
+              <div class="masonry-item__regen"><svg viewBox="0 0 14 14"><path d="M1.5 7a5.5 5.5 0 0110.26-2.75M12.5 7a5.5 5.5 0 01-10.26 2.75M11.5 1.5v3h-3M2.5 12.5v-3h3"/></svg> 8</div>
+            </div>
+          </div>
+          <div class="masonry-col">
+            <div class="masonry-item">
+              <div class="masonry-item__placeholder" style="background:#D5E8F5;height:180px;">&#x1F923;</div>
+              <div class="masonry-item__gradient"></div>
+              <div class="masonry-item__regen"><svg viewBox="0 0 14 14"><path d="M1.5 7a5.5 5.5 0 0110.26-2.75M12.5 7a5.5 5.5 0 01-10.26 2.75M11.5 1.5v3h-3M2.5 12.5v-3h3"/></svg> 42</div>
+            </div>
+            <div class="masonry-item">
+              <div class="masonry-item__placeholder" style="background:#D5F5E8;height:240px;">&#x1F4AF;</div>
+              <div class="masonry-item__gradient"></div>
+              <div class="masonry-item__regen"><svg viewBox="0 0 14 14"><path d="M1.5 7a5.5 5.5 0 0110.26-2.75M12.5 7a5.5 5.5 0 01-10.26 2.75M11.5 1.5v3h-3M2.5 12.5v-3h3"/></svg> 31</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Toast visible by default on this screen -->
+      <div class="toast show" style="display:block;">프로필 링크를 클립보드에 복사했어요</div>
+    </div>
+
+    <!-- ===== Screen 5: MY Profile - Posts Tab (Generating) ===== -->
+    <div class="screen" id="screen-my-profile-generating">
+      <!-- Header (MY profile = SettingStroke, no back) -->
+      <div class="header-bar">
+        <div style="width:32px;"></div>
         <span class="header-bar__title">내 프로필</span>
-        <button class="header-bar__action">&#x2699;</button>
+        <button class="header-bar__action">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        </button>
       </div>
 
       <!-- MY Profile Header -->
@@ -923,8 +1045,6 @@
         <div class="profile-avatar">
           <div style="width:100%;height:100%;background:linear-gradient(135deg,#FCA5A5,#F87171);display:flex;align-items:center;justify-content:center;color:#fff;font-size:36px;font-weight:700;">N</div>
         </div>
-        <div class="profile-nickname">my_nickname</div>
-        <div class="profile-bio">Meme lover & creator</div>
         <div class="profile-stats">
           <div class="profile-stat">
             <span class="profile-stat__value">89</span>
@@ -941,56 +1061,65 @@
         </div>
       </div>
 
-      <!-- Edit Profile Button (MY profile) -->
+      <!-- Two buttons: 프로필 편집 + 프로필 공유 (gap-6) -->
       <div class="profile-actions">
-        <button class="btn-edit-profile">프로필 편집</button>
+        <button class="btn-profile-action">프로필 편집</button>
+        <button class="btn-profile-action">프로필 공유</button>
       </div>
 
-      <!-- MY Profile Tabs (3 tabs) -->
-      <div class="profile-tabs">
-        <button class="profile-tab active" onclick="navigate('screen-my-profile-generating', 'fade')">게시물</button>
-        <button class="profile-tab" onclick="navigate('screen-my-profile-private', 'fade')">비공개</button>
-        <button class="profile-tab">좋아요</button>
+      <!-- MY Profile Tabs: icon-based (MediaFill active, LockFill, HeartFill) -->
+      <div class="profile-tabs-my">
+        <button class="profile-tab-my active" onclick="navigate('screen-my-profile-generating', 'fade')">
+          <svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+          <div class="tab-indicator"></div>
+        </button>
+        <button class="profile-tab-my" onclick="navigate('screen-my-profile-private', 'fade')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>
+          <div class="tab-indicator"></div>
+        </button>
+        <button class="profile-tab-my">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z"/></svg>
+          <div class="tab-indicator"></div>
+        </button>
       </div>
 
       <!-- Posts grid with generating overlay on first card -->
-      <div class="content-grid" data-state="default">
+      <div class="content-grid" style="flex:1;overflow-y:auto;display:flex;">
         <div class="masonry">
           <div class="masonry-col">
-            <!-- First card: generating state with subtle overlay -->
+            <!-- First card: generating state -->
             <div class="masonry-item masonry-item--generating">
-              <div class="masonry-item__placeholder" style="background:linear-gradient(135deg,#E0D0FF,#C8B0F0);height:220px;">&#x2728;</div>
-              <div class="generating-overlay">
-                <div class="generating-overlay__icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="#656565" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10"/>
-                    <path d="M12 6v6l4 2"/>
-                  </svg>
-                </div>
-                <span class="generating-overlay__label">생성중...</span>
+              <span class="generating-label">생성중...</span>
+              <div class="generating-spinner">
+                <svg viewBox="0 0 32 32" fill="none"><path d="M16 2C8.268 2 2 8.268 2 16s6.268 14 14 14 14-6.268 14-14S23.732 2 16 2z" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="3"/><path d="M16 2c7.732 0 14 6.268 14 14" stroke="white" stroke-width="3" stroke-linecap="round"/></svg>
               </div>
             </div>
             <div class="masonry-item">
               <div class="masonry-item__placeholder" style="background:#F5E8D5;height:180px;">&#x1F525;</div>
-              <div class="masonry-item__regen"><svg viewBox="0 0 12 12"><path d="M1 6a5 5 0 019.33-2.5M11 6a5 5 0 01-9.33 2.5M10.5 1v3h-3M1.5 11V8h3"/></svg> 8</div>
+              <div class="masonry-item__gradient"></div>
+              <div class="masonry-item__regen"><svg viewBox="0 0 14 14"><path d="M1.5 7a5.5 5.5 0 0110.26-2.75M12.5 7a5.5 5.5 0 01-10.26 2.75M11.5 1.5v3h-3M2.5 12.5v-3h3"/></svg> 8</div>
             </div>
             <div class="masonry-item">
               <div class="masonry-item__placeholder" style="background:#E8F5D5;height:200px;">&#x1F916;</div>
-              <div class="masonry-item__regen"><svg viewBox="0 0 12 12"><path d="M1 6a5 5 0 019.33-2.5M11 6a5 5 0 01-9.33 2.5M10.5 1v3h-3M1.5 11V8h3"/></svg> 12</div>
+              <div class="masonry-item__gradient"></div>
+              <div class="masonry-item__regen"><svg viewBox="0 0 14 14"><path d="M1.5 7a5.5 5.5 0 0110.26-2.75M12.5 7a5.5 5.5 0 01-10.26 2.75M11.5 1.5v3h-3M2.5 12.5v-3h3"/></svg> 12</div>
             </div>
           </div>
           <div class="masonry-col">
             <div class="masonry-item">
               <div class="masonry-item__placeholder" style="background:#E8D5F5;height:200px;">&#x1F60E;</div>
-              <div class="masonry-item__regen"><svg viewBox="0 0 12 12"><path d="M1 6a5 5 0 019.33-2.5M11 6a5 5 0 01-9.33 2.5M10.5 1v3h-3M1.5 11V8h3"/></svg> 24</div>
+              <div class="masonry-item__gradient"></div>
+              <div class="masonry-item__regen"><svg viewBox="0 0 14 14"><path d="M1.5 7a5.5 5.5 0 0110.26-2.75M12.5 7a5.5 5.5 0 01-10.26 2.75M11.5 1.5v3h-3M2.5 12.5v-3h3"/></svg> 24</div>
             </div>
             <div class="masonry-item">
               <div class="masonry-item__placeholder" style="background:#D5E8F5;height:160px;">&#x1F923;</div>
-              <div class="masonry-item__regen"><svg viewBox="0 0 12 12"><path d="M1 6a5 5 0 019.33-2.5M11 6a5 5 0 01-9.33 2.5M10.5 1v3h-3M1.5 11V8h3"/></svg> 42</div>
+              <div class="masonry-item__gradient"></div>
+              <div class="masonry-item__regen"><svg viewBox="0 0 14 14"><path d="M1.5 7a5.5 5.5 0 0110.26-2.75M12.5 7a5.5 5.5 0 01-10.26 2.75M11.5 1.5v3h-3M2.5 12.5v-3h3"/></svg> 42</div>
             </div>
             <div class="masonry-item">
               <div class="masonry-item__placeholder" style="background:#D5F5E8;height:240px;">&#x1F4AF;</div>
-              <div class="masonry-item__regen"><svg viewBox="0 0 12 12"><path d="M1 6a5 5 0 019.33-2.5M11 6a5 5 0 01-9.33 2.5M10.5 1v3h-3M1.5 11V8h3"/></svg> 31</div>
+              <div class="masonry-item__gradient"></div>
+              <div class="masonry-item__regen"><svg viewBox="0 0 14 14"><path d="M1.5 7a5.5 5.5 0 0110.26-2.75M12.5 7a5.5 5.5 0 01-10.26 2.75M11.5 1.5v3h-3M2.5 12.5v-3h3"/></svg> 31</div>
             </div>
           </div>
         </div>
@@ -998,28 +1127,38 @@
 
       <!-- Bottom Navigation -->
       <div class="bottom-nav">
-        <button class="bottom-nav__item"><span class="bottom-nav__icon"><svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M3.5 25.5V12L14 2.5L24.5 12V25.5" stroke="#262626" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><text x="14" y="20" text-anchor="middle" font-size="7" font-weight="700" fill="#262626">Z</text></svg></span></button>
-        <button class="bottom-nav__item"><span class="bottom-nav__icon"><svg width="28" height="28" viewBox="0 0 28 28" fill="none"><circle cx="12" cy="12" r="8" stroke="#262626" stroke-width="1.8"/><path d="M18 18L24 24" stroke="#262626" stroke-width="1.8" stroke-linecap="round"/></svg></span></button>
-        <button class="bottom-nav__item active"><span class="bottom-nav__icon" style="position:relative;"><svg width="28" height="28" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="10" r="5" stroke="#262626" stroke-width="1.8"/><path d="M4 24c0-5.523 4.477-10 10-10s10 4.477 10 10" stroke="#262626" stroke-width="1.8"/></svg><span style="position:absolute;top:-2px;right:-2px;width:8px;height:8px;background:#8752FA;border-radius:50%;"></span></span></button>
+        <button class="bottom-nav__item">
+          <span class="bottom-nav__icon"><svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M3.5 25.5V12L14 2.5L24.5 12V25.5" stroke="#8a8a8a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span class="bottom-nav__label">Home</span>
+        </button>
+        <button class="bottom-nav__item">
+          <span class="bottom-nav__icon"><svg width="28" height="28" viewBox="0 0 28 28" fill="none"><circle cx="12" cy="12" r="8" stroke="#8a8a8a" stroke-width="1.8"/><path d="M18 18L24 24" stroke="#8a8a8a" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+          <span class="bottom-nav__label">Search</span>
+        </button>
+        <button class="bottom-nav__item active">
+          <span class="bottom-nav__icon">
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="10" r="5" stroke="#262626" stroke-width="1.8"/><path d="M4 24c0-5.523 4.477-10 10-10s10 4.477 10 10" stroke="#262626" stroke-width="1.8"/></svg>
+            <span class="bottom-nav__dot"></span>
+          </span>
+          <span class="bottom-nav__label">My</span>
+        </button>
       </div>
     </div>
 
-    <!-- ===== Screen 5: MY Profile - Private Tab (New Content) ===== -->
-    <div class="screen" id="screen-my-profile-private">
-      <!-- Header -->
+    <!-- ===== Screen 6: MY Profile - Posts Tab (Failed) ===== -->
+    <div class="screen" id="screen-my-profile-failed">
       <div class="header-bar">
-        <div style="width:24px;"></div>
+        <div style="width:32px;"></div>
         <span class="header-bar__title">내 프로필</span>
-        <button class="header-bar__action">&#x2699;</button>
+        <button class="header-bar__action">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        </button>
       </div>
 
-      <!-- MY Profile Header -->
       <div class="profile-header">
         <div class="profile-avatar">
           <div style="width:100%;height:100%;background:linear-gradient(135deg,#FCA5A5,#F87171);display:flex;align-items:center;justify-content:center;color:#fff;font-size:36px;font-weight:700;">N</div>
         </div>
-        <div class="profile-nickname">my_nickname</div>
-        <div class="profile-bio">Meme lover & creator</div>
         <div class="profile-stats">
           <div class="profile-stat">
             <span class="profile-stat__value">89</span>
@@ -1037,63 +1176,182 @@
       </div>
 
       <div class="profile-actions">
-        <button class="btn-edit-profile">프로필 편집</button>
+        <button class="btn-profile-action">프로필 편집</button>
+        <button class="btn-profile-action">프로필 공유</button>
       </div>
 
-      <!-- Tabs: Private active -->
-      <div class="profile-tabs">
-        <button class="profile-tab" onclick="navigate('screen-my-profile-generating', 'fade')">게시물</button>
-        <button class="profile-tab active" onclick="navigate('screen-my-profile-private', 'fade')">
-          비공개
-          <span class="tab-badge"></span>
+      <!-- Tabs: Posts active -->
+      <div class="profile-tabs-my">
+        <button class="profile-tab-my active" onclick="navigate('screen-my-profile-failed', 'fade')">
+          <svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+          <div class="tab-indicator"></div>
         </button>
-        <button class="profile-tab">좋아요</button>
+        <button class="profile-tab-my" onclick="navigate('screen-my-profile-private-failed', 'fade')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>
+          <div class="tab-indicator"></div>
+        </button>
+        <button class="profile-tab-my">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z"/></svg>
+          <div class="tab-indicator"></div>
+        </button>
       </div>
 
-      <!-- Private grid: 2-column masonry with generating overlay on first card -->
-      <div class="content-grid" data-state="default">
+      <!-- Posts grid with FAILED thumbnail -->
+      <div class="content-grid" style="flex:1;overflow-y:auto;display:flex;">
         <div class="masonry">
           <div class="masonry-col">
-            <!-- First card: generating with overlay -->
-            <div class="masonry-item masonry-item--generating">
-              <div class="masonry-item__placeholder" style="background:linear-gradient(135deg,#E0D0FF,#C8B0F0);height:220px;">&#x2728;</div>
-              <div class="generating-overlay">
-                <div class="generating-overlay__icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="#656565" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10"/>
-                    <path d="M12 6v6l4 2"/>
-                  </svg>
-                </div>
-                <span class="generating-overlay__label">생성중...</span>
+            <!-- Failed card -->
+            <div class="masonry-item masonry-item--failed">
+              <div class="failed-header">
+                <span class="failed-label">생성 실패</span>
+                <button class="failed-close">
+                  <svg viewBox="0 0 14 14" fill="none"><path d="M3 3l8 8M11 3l-8 8"/></svg>
+                </button>
               </div>
-              <span class="new-badge">NEW</span>
-              <span class="private-badge">&#x1F512;</span>
+            </div>
+            <div class="masonry-item">
+              <div class="masonry-item__placeholder" style="background:#F5E8D5;height:180px;">&#x1F525;</div>
+              <div class="masonry-item__gradient"></div>
+              <div class="masonry-item__regen"><svg viewBox="0 0 14 14"><path d="M1.5 7a5.5 5.5 0 0110.26-2.75M12.5 7a5.5 5.5 0 01-10.26 2.75M11.5 1.5v3h-3M2.5 12.5v-3h3"/></svg> 8</div>
+            </div>
+            <div class="masonry-item">
+              <div class="masonry-item__placeholder" style="background:#E8F5D5;height:200px;">&#x1F916;</div>
+              <div class="masonry-item__gradient"></div>
+              <div class="masonry-item__regen"><svg viewBox="0 0 14 14"><path d="M1.5 7a5.5 5.5 0 0110.26-2.75M12.5 7a5.5 5.5 0 01-10.26 2.75M11.5 1.5v3h-3M2.5 12.5v-3h3"/></svg> 12</div>
+            </div>
+          </div>
+          <div class="masonry-col">
+            <div class="masonry-item">
+              <div class="masonry-item__placeholder" style="background:#E8D5F5;height:200px;">&#x1F60E;</div>
+              <div class="masonry-item__gradient"></div>
+              <div class="masonry-item__regen"><svg viewBox="0 0 14 14"><path d="M1.5 7a5.5 5.5 0 0110.26-2.75M12.5 7a5.5 5.5 0 01-10.26 2.75M11.5 1.5v3h-3M2.5 12.5v-3h3"/></svg> 24</div>
+            </div>
+            <div class="masonry-item">
+              <div class="masonry-item__placeholder" style="background:#D5E8F5;height:160px;">&#x1F923;</div>
+              <div class="masonry-item__gradient"></div>
+              <div class="masonry-item__regen"><svg viewBox="0 0 14 14"><path d="M1.5 7a5.5 5.5 0 0110.26-2.75M12.5 7a5.5 5.5 0 01-10.26 2.75M11.5 1.5v3h-3M2.5 12.5v-3h3"/></svg> 42</div>
+            </div>
+            <div class="masonry-item">
+              <div class="masonry-item__placeholder" style="background:#D5F5E8;height:240px;">&#x1F4AF;</div>
+              <div class="masonry-item__gradient"></div>
+              <div class="masonry-item__regen"><svg viewBox="0 0 14 14"><path d="M1.5 7a5.5 5.5 0 0110.26-2.75M12.5 7a5.5 5.5 0 01-10.26 2.75M11.5 1.5v3h-3M2.5 12.5v-3h3"/></svg> 31</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Navigation -->
+      <div class="bottom-nav">
+        <button class="bottom-nav__item">
+          <span class="bottom-nav__icon"><svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M3.5 25.5V12L14 2.5L24.5 12V25.5" stroke="#8a8a8a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span class="bottom-nav__label">Home</span>
+        </button>
+        <button class="bottom-nav__item">
+          <span class="bottom-nav__icon"><svg width="28" height="28" viewBox="0 0 28 28" fill="none"><circle cx="12" cy="12" r="8" stroke="#8a8a8a" stroke-width="1.8"/><path d="M18 18L24 24" stroke="#8a8a8a" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+          <span class="bottom-nav__label">Search</span>
+        </button>
+        <button class="bottom-nav__item active">
+          <span class="bottom-nav__icon">
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="10" r="5" stroke="#262626" stroke-width="1.8"/><path d="M4 24c0-5.523 4.477-10 10-10s10 4.477 10 10" stroke="#262626" stroke-width="1.8"/></svg>
+            <span class="bottom-nav__dot"></span>
+          </span>
+          <span class="bottom-nav__label">My</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ===== Screen 7: MY Profile - Private Tab (Generating) ===== -->
+    <div class="screen" id="screen-my-profile-private">
+      <div class="header-bar">
+        <div style="width:32px;"></div>
+        <span class="header-bar__title">내 프로필</span>
+        <button class="header-bar__action">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        </button>
+      </div>
+
+      <div class="profile-header">
+        <div class="profile-avatar">
+          <div style="width:100%;height:100%;background:linear-gradient(135deg,#FCA5A5,#F87171);display:flex;align-items:center;justify-content:center;color:#fff;font-size:36px;font-weight:700;">N</div>
+        </div>
+        <div class="profile-stats">
+          <div class="profile-stat">
+            <span class="profile-stat__value">89</span>
+            <span class="profile-stat__label">팔로워</span>
+          </div>
+          <div class="profile-stat">
+            <span class="profile-stat__value">56</span>
+            <span class="profile-stat__label">팔로잉</span>
+          </div>
+          <div class="profile-stat">
+            <span class="profile-stat__value">234</span>
+            <span class="profile-stat__label">재생성된</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="profile-actions">
+        <button class="btn-profile-action">프로필 편집</button>
+        <button class="btn-profile-action">프로필 공유</button>
+      </div>
+
+      <!-- Tabs: Private (Lock) active -->
+      <div class="profile-tabs-my">
+        <button class="profile-tab-my" onclick="navigate('screen-my-profile-generating', 'fade')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+          <div class="tab-indicator"></div>
+        </button>
+        <button class="profile-tab-my active" onclick="navigate('screen-my-profile-private', 'fade')">
+          <svg viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+          <div class="tab-indicator"></div>
+        </button>
+        <button class="profile-tab-my">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z"/></svg>
+          <div class="tab-indicator"></div>
+        </button>
+      </div>
+
+      <!-- Private grid with generating thumbnail -->
+      <div class="content-grid" style="flex:1;overflow-y:auto;display:flex;">
+        <div class="masonry">
+          <div class="masonry-col">
+            <!-- Generating -->
+            <div class="masonry-item masonry-item--generating">
+              <span class="generating-label">생성중...</span>
+              <div class="generating-spinner">
+                <svg viewBox="0 0 32 32" fill="none"><path d="M16 2C8.268 2 2 8.268 2 16s6.268 14 14 14 14-6.268 14-14S23.732 2 16 2z" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="3"/><path d="M16 2c7.732 0 14 6.268 14 14" stroke="white" stroke-width="3" stroke-linecap="round"/></svg>
+              </div>
             </div>
             <div class="masonry-item">
               <div class="masonry-item__placeholder" style="background:#F0E0F5;height:180px;">&#x1F3AD;</div>
-              <div class="masonry-item__regen"><svg viewBox="0 0 12 12"><path d="M1 6a5 5 0 019.33-2.5M11 6a5 5 0 01-9.33 2.5M10.5 1v3h-3M1.5 11V8h3"/></svg> 6</div>
+              <div class="masonry-item__gradient"></div>
+              <div class="masonry-item__regen"><svg viewBox="0 0 14 14"><path d="M1.5 7a5.5 5.5 0 0110.26-2.75M12.5 7a5.5 5.5 0 01-10.26 2.75M11.5 1.5v3h-3M2.5 12.5v-3h3"/></svg> 6</div>
               <span class="private-badge">&#x1F512;</span>
             </div>
             <div class="masonry-item">
               <div class="masonry-item__placeholder" style="background:#F5E0E0;height:200px;">&#x1F48E;</div>
-              <div class="masonry-item__regen"><svg viewBox="0 0 12 12"><path d="M1 6a5 5 0 019.33-2.5M11 6a5 5 0 01-9.33 2.5M10.5 1v3h-3M1.5 11V8h3"/></svg> 3</div>
+              <div class="masonry-item__gradient"></div>
+              <div class="masonry-item__regen"><svg viewBox="0 0 14 14"><path d="M1.5 7a5.5 5.5 0 0110.26-2.75M12.5 7a5.5 5.5 0 01-10.26 2.75M11.5 1.5v3h-3M2.5 12.5v-3h3"/></svg> 3</div>
               <span class="private-badge">&#x1F512;</span>
             </div>
           </div>
           <div class="masonry-col">
             <div class="masonry-item">
               <div class="masonry-item__placeholder" style="background:#E0E8F5;height:200px;">&#x1F4DD;</div>
-              <div class="masonry-item__regen"><svg viewBox="0 0 12 12"><path d="M1 6a5 5 0 019.33-2.5M11 6a5 5 0 01-9.33 2.5M10.5 1v3h-3M1.5 11V8h3"/></svg> 9</div>
+              <div class="masonry-item__gradient"></div>
+              <div class="masonry-item__regen"><svg viewBox="0 0 14 14"><path d="M1.5 7a5.5 5.5 0 0110.26-2.75M12.5 7a5.5 5.5 0 01-10.26 2.75M11.5 1.5v3h-3M2.5 12.5v-3h3"/></svg> 9</div>
               <span class="private-badge">&#x1F512;</span>
             </div>
             <div class="masonry-item">
               <div class="masonry-item__placeholder" style="background:#E0F5E8;height:160px;">&#x1F308;</div>
-              <div class="masonry-item__regen"><svg viewBox="0 0 12 12"><path d="M1 6a5 5 0 019.33-2.5M11 6a5 5 0 01-9.33 2.5M10.5 1v3h-3M1.5 11V8h3"/></svg> 14</div>
+              <div class="masonry-item__gradient"></div>
+              <div class="masonry-item__regen"><svg viewBox="0 0 14 14"><path d="M1.5 7a5.5 5.5 0 0110.26-2.75M12.5 7a5.5 5.5 0 01-10.26 2.75M11.5 1.5v3h-3M2.5 12.5v-3h3"/></svg> 14</div>
               <span class="private-badge">&#x1F512;</span>
             </div>
             <div class="masonry-item">
               <div class="masonry-item__placeholder" style="background:#F5F0E0;height:240px;">&#x1F30C;</div>
-              <div class="masonry-item__regen"><svg viewBox="0 0 12 12"><path d="M1 6a5 5 0 019.33-2.5M11 6a5 5 0 01-9.33 2.5M10.5 1v3h-3M1.5 11V8h3"/></svg> 7</div>
+              <div class="masonry-item__gradient"></div>
+              <div class="masonry-item__regen"><svg viewBox="0 0 14 14"><path d="M1.5 7a5.5 5.5 0 0110.26-2.75M12.5 7a5.5 5.5 0 01-10.26 2.75M11.5 1.5v3h-3M2.5 12.5v-3h3"/></svg> 7</div>
               <span class="private-badge">&#x1F512;</span>
             </div>
           </div>
@@ -1102,9 +1360,128 @@
 
       <!-- Bottom Navigation -->
       <div class="bottom-nav">
-        <button class="bottom-nav__item"><span class="bottom-nav__icon"><svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M3.5 25.5V12L14 2.5L24.5 12V25.5" stroke="#262626" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><text x="14" y="20" text-anchor="middle" font-size="7" font-weight="700" fill="#262626">Z</text></svg></span></button>
-        <button class="bottom-nav__item"><span class="bottom-nav__icon"><svg width="28" height="28" viewBox="0 0 28 28" fill="none"><circle cx="12" cy="12" r="8" stroke="#262626" stroke-width="1.8"/><path d="M18 18L24 24" stroke="#262626" stroke-width="1.8" stroke-linecap="round"/></svg></span></button>
-        <button class="bottom-nav__item active"><span class="bottom-nav__icon" style="position:relative;"><svg width="28" height="28" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="10" r="5" stroke="#262626" stroke-width="1.8"/><path d="M4 24c0-5.523 4.477-10 10-10s10 4.477 10 10" stroke="#262626" stroke-width="1.8"/></svg><span style="position:absolute;top:-2px;right:-2px;width:8px;height:8px;background:#8752FA;border-radius:50%;"></span></span></button>
+        <button class="bottom-nav__item">
+          <span class="bottom-nav__icon"><svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M3.5 25.5V12L14 2.5L24.5 12V25.5" stroke="#8a8a8a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span class="bottom-nav__label">Home</span>
+        </button>
+        <button class="bottom-nav__item">
+          <span class="bottom-nav__icon"><svg width="28" height="28" viewBox="0 0 28 28" fill="none"><circle cx="12" cy="12" r="8" stroke="#8a8a8a" stroke-width="1.8"/><path d="M18 18L24 24" stroke="#8a8a8a" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+          <span class="bottom-nav__label">Search</span>
+        </button>
+        <button class="bottom-nav__item active">
+          <span class="bottom-nav__icon">
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="10" r="5" stroke="#262626" stroke-width="1.8"/><path d="M4 24c0-5.523 4.477-10 10-10s10 4.477 10 10" stroke="#262626" stroke-width="1.8"/></svg>
+            <span class="bottom-nav__dot"></span>
+          </span>
+          <span class="bottom-nav__label">My</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ===== Screen 8: MY Profile - Private Tab (Failed) ===== -->
+    <div class="screen" id="screen-my-profile-private-failed">
+      <div class="header-bar">
+        <div style="width:32px;"></div>
+        <span class="header-bar__title">내 프로필</span>
+        <button class="header-bar__action">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        </button>
+      </div>
+
+      <div class="profile-header">
+        <div class="profile-avatar">
+          <div style="width:100%;height:100%;background:linear-gradient(135deg,#FCA5A5,#F87171);display:flex;align-items:center;justify-content:center;color:#fff;font-size:36px;font-weight:700;">N</div>
+        </div>
+        <div class="profile-stats">
+          <div class="profile-stat">
+            <span class="profile-stat__value">89</span>
+            <span class="profile-stat__label">팔로워</span>
+          </div>
+          <div class="profile-stat">
+            <span class="profile-stat__value">56</span>
+            <span class="profile-stat__label">팔로잉</span>
+          </div>
+          <div class="profile-stat">
+            <span class="profile-stat__value">234</span>
+            <span class="profile-stat__label">재생성된</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="profile-actions">
+        <button class="btn-profile-action">프로필 편집</button>
+        <button class="btn-profile-action">프로필 공유</button>
+      </div>
+
+      <!-- Tabs: Lock active -->
+      <div class="profile-tabs-my">
+        <button class="profile-tab-my" onclick="navigate('screen-my-profile-failed', 'fade')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+          <div class="tab-indicator"></div>
+        </button>
+        <button class="profile-tab-my active" onclick="navigate('screen-my-profile-private-failed', 'fade')">
+          <svg viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+          <div class="tab-indicator"></div>
+        </button>
+        <button class="profile-tab-my">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z"/></svg>
+          <div class="tab-indicator"></div>
+        </button>
+      </div>
+
+      <!-- Private grid with failed thumbnail -->
+      <div class="content-grid" style="flex:1;overflow-y:auto;display:flex;">
+        <div class="masonry">
+          <div class="masonry-col">
+            <div class="masonry-item masonry-item--failed">
+              <div class="failed-header">
+                <span class="failed-label">생성 실패</span>
+                <button class="failed-close">
+                  <svg viewBox="0 0 14 14" fill="none"><path d="M3 3l8 8M11 3l-8 8"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="masonry-item">
+              <div class="masonry-item__placeholder" style="background:#F0E0F5;height:180px;">&#x1F3AD;</div>
+              <div class="masonry-item__gradient"></div>
+              <div class="masonry-item__regen"><svg viewBox="0 0 14 14"><path d="M1.5 7a5.5 5.5 0 0110.26-2.75M12.5 7a5.5 5.5 0 01-10.26 2.75M11.5 1.5v3h-3M2.5 12.5v-3h3"/></svg> 6</div>
+              <span class="private-badge">&#x1F512;</span>
+            </div>
+          </div>
+          <div class="masonry-col">
+            <div class="masonry-item">
+              <div class="masonry-item__placeholder" style="background:#E0E8F5;height:200px;">&#x1F4DD;</div>
+              <div class="masonry-item__gradient"></div>
+              <div class="masonry-item__regen"><svg viewBox="0 0 14 14"><path d="M1.5 7a5.5 5.5 0 0110.26-2.75M12.5 7a5.5 5.5 0 01-10.26 2.75M11.5 1.5v3h-3M2.5 12.5v-3h3"/></svg> 9</div>
+              <span class="private-badge">&#x1F512;</span>
+            </div>
+            <div class="masonry-item">
+              <div class="masonry-item__placeholder" style="background:#E0F5E8;height:160px;">&#x1F308;</div>
+              <div class="masonry-item__gradient"></div>
+              <div class="masonry-item__regen"><svg viewBox="0 0 14 14"><path d="M1.5 7a5.5 5.5 0 0110.26-2.75M12.5 7a5.5 5.5 0 01-10.26 2.75M11.5 1.5v3h-3M2.5 12.5v-3h3"/></svg> 14</div>
+              <span class="private-badge">&#x1F512;</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Navigation -->
+      <div class="bottom-nav">
+        <button class="bottom-nav__item">
+          <span class="bottom-nav__icon"><svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M3.5 25.5V12L14 2.5L24.5 12V25.5" stroke="#8a8a8a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span class="bottom-nav__label">Home</span>
+        </button>
+        <button class="bottom-nav__item">
+          <span class="bottom-nav__icon"><svg width="28" height="28" viewBox="0 0 28 28" fill="none"><circle cx="12" cy="12" r="8" stroke="#8a8a8a" stroke-width="1.8"/><path d="M18 18L24 24" stroke="#8a8a8a" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+          <span class="bottom-nav__label">Search</span>
+        </button>
+        <button class="bottom-nav__item active">
+          <span class="bottom-nav__icon">
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="10" r="5" stroke="#262626" stroke-width="1.8"/><path d="M4 24c0-5.523 4.477-10 10-10s10 4.477 10 10" stroke="#262626" stroke-width="1.8"/></svg>
+            <span class="bottom-nav__dot"></span>
+          </span>
+          <span class="bottom-nav__label">My</span>
+        </button>
       </div>
     </div>
 
@@ -1209,9 +1586,38 @@
       });
     }
 
-    // === Copy Toast ===
-    function showCopyToast() {
-      var toast = document.getElementById('copy-toast');
+    // === More Menu (overlay on same screen) ===
+    function openMoreMenu() {
+      var backdrop = document.getElementById('other-profile-backdrop');
+      var sheet = document.getElementById('other-profile-sheet');
+      if (backdrop && sheet) {
+        backdrop.classList.add('active');
+        sheet.style.display = 'flex';
+      }
+    }
+
+    function closeMoreMenu() {
+      var backdrop = document.getElementById('other-profile-backdrop');
+      var sheet = document.getElementById('other-profile-sheet');
+      if (backdrop && sheet) {
+        backdrop.classList.remove('active');
+        sheet.style.display = 'none';
+      }
+    }
+
+    function copyProfileUrl() {
+      closeMoreMenu();
+      showToast('copy-toast-other');
+    }
+
+    function showCopyToastOnMore() {
+      showToast('copy-toast-more');
+    }
+
+    // === Toast ===
+    function showToast(toastId) {
+      var toast = document.getElementById(toastId);
+      if (!toast) return;
       toast.classList.add('show');
       setTimeout(function() {
         toast.classList.remove('show');

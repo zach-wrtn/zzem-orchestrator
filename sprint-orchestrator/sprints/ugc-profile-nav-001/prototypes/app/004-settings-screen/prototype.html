@@ -280,8 +280,8 @@
     .nav-bar {
       display: flex;
       align-items: center;
-      height: 56px;
-      padding: 0 16px;
+      height: 48px;
+      padding: 4px 44px 4px 12px;
       background: #FFFFFF;
       flex-shrink: 0;
       position: relative;
@@ -298,17 +298,16 @@
       cursor: pointer;
       font-size: 20px;
       color: #262626;
-      margin-left: -8px;
+      border-radius: 8px;
       z-index: 1;
     }
 
     .nav-bar__title {
-      position: absolute;
-      left: 0;
-      right: 0;
+      flex: 1;
       text-align: center;
       font-size: 18px;
       font-weight: 600;
+      line-height: 1.5;
       color: #262626;
       font-family: 'Pretendard', sans-serif;
       pointer-events: none;
@@ -318,7 +317,10 @@
     .settings-list {
       flex: 1;
       overflow-y: auto;
-      padding: 0;
+      padding-top: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
     }
 
     .settings-section {
@@ -335,10 +337,14 @@
     .settings-item {
       display: flex;
       align-items: center;
-      padding: 12px 16px 12px 20px;
+      padding: 12px 24px 12px 20px;
       cursor: pointer;
       transition: background 0.15s;
       gap: 0;
+    }
+
+    .settings-item--no-chevron {
+      padding-right: 16px;
     }
 
     .settings-item:active {
@@ -350,7 +356,7 @@
       font-size: 16px;
       font-weight: 500;
       color: #262626;
-      line-height: 1.4;
+      line-height: 1.5;
       font-family: 'Pretendard', sans-serif;
     }
 
@@ -361,7 +367,7 @@
       font-family: 'Pretendard', sans-serif;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
     }
 
     .settings-item__value-version {
@@ -385,16 +391,51 @@
     .settings-item__google-icon {
       width: 20px;
       height: 20px;
-      border-radius: 50%;
+      border-radius: 42.5px;
+      flex-shrink: 0;
+      border: 0.833px solid #f1f1f1;
+    }
+
+    /* Toggle Switch */
+    .toggle-switch {
+      width: 48px;
+      height: 28px;
+      background: #a788fd;
+      border-radius: 62.5px;
+      position: relative;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background 0.2s;
+    }
+
+    .toggle-switch__knob {
+      width: 24px;
+      height: 24px;
+      background: #FFFFFF;
+      border-radius: 37.5px;
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      transition: transform 0.2s;
+    }
+
+    .toggle-switch.off {
+      background: #d9d9d9;
+    }
+
+    .toggle-switch.off .toggle-switch__knob {
+      right: auto;
+      left: 2px;
+    }
+
+    /* Logout bottom button area */
+    .settings-logout-area {
+      padding: 16px 16px 32px 16px;
       flex-shrink: 0;
     }
 
-    /* Logout bottom button */
     .settings-logout-btn {
-      position: absolute;
-      bottom: 32px;
-      left: 16px;
-      right: 16px;
+      width: 100%;
       height: 56px;
       background: #f1f1f1;
       border: none;
@@ -523,18 +564,18 @@
 
     /* === SVG Icons === */
     .icon-svg {
-      width: 22px;
-      height: 22px;
+      width: 24px;
+      height: 24px;
       fill: none;
       stroke: currentColor;
-      stroke-width: 1.8;
+      stroke-width: 1.5;
       stroke-linecap: round;
       stroke-linejoin: round;
     }
 
     .icon-svg--small {
-      width: 18px;
-      height: 18px;
+      width: 20px;
+      height: 20px;
     }
   </style>
 </head>
@@ -571,7 +612,7 @@
       <!-- Nav Bar -->
       <div class="nav-bar">
         <button class="nav-bar__back" id="btn-settings-back" aria-label="뒤로가기">
-          <svg class="icon-svg" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg>
+          <svg class="icon-svg" viewBox="0 0 24 24"><path d="M14 17l-5-5 5-5"/></svg>
         </button>
         <span class="nav-bar__title">설정</span>
       </div>
@@ -585,7 +626,7 @@
             <span class="settings-item__label">계정</span>
             <div class="settings-item__value">
               <svg class="settings-item__google-icon" viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="12" fill="#4285F4"/>
+                <circle cx="12" cy="12" r="11" fill="#4285F4"/>
                 <path d="M12 11.2v2.4h3.36c-.15.78-.56 1.44-1.19 1.88v1.56h1.92c1.12-1.04 1.77-2.56 1.77-4.37 0-.42-.04-.83-.11-1.22H12v1.75z" fill="#fff"/>
                 <path d="M12 17.6c1.6 0 2.94-.53 3.92-1.44l-1.92-1.56c-.53.36-1.21.57-2 .57-1.54 0-2.84-1.04-3.3-2.44H6.72v1.6C7.7 16.24 9.68 17.6 12 17.6z" fill="#fff"/>
                 <path d="M8.7 12.73c-.12-.36-.19-.75-.19-1.15s.07-.79.19-1.15V8.83H6.72C6.26 9.73 6 10.78 6 11.88s.26 2.15.72 3.05l1.98-1.6z" fill="#fff"/>
@@ -599,7 +640,7 @@
           <div class="settings-item" id="item-password">
             <span class="settings-item__label">비밀번호</span>
             <div class="settings-item__chevron">
-              <svg class="icon-svg--small icon-svg" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+              <svg class="icon-svg--small icon-svg" viewBox="0 0 24 24"><path d="M10 7l5 5-5 5"/></svg>
             </div>
           </div>
         </div>
@@ -607,35 +648,13 @@
         <!-- Section Divider -->
         <hr class="settings-section__divider">
 
-        <!-- Section 2: Settings -->
-        <div class="settings-section">
-          <!-- 알림 설정 -->
-          <div class="settings-item" id="item-notification">
-            <span class="settings-item__label">알림 설정</span>
-            <div class="settings-item__chevron">
-              <svg class="icon-svg--small icon-svg" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
-            </div>
-          </div>
-
-          <!-- 차단 관리 (PRD required, 준비중) -->
-          <div class="settings-item" id="item-block-management">
-            <span class="settings-item__label">차단 관리</span>
-            <div class="settings-item__chevron">
-              <svg class="icon-svg--small icon-svg" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
-            </div>
-          </div>
-        </div>
-
-        <!-- Section Divider -->
-        <hr class="settings-section__divider">
-
-        <!-- Section 3: Info -->
+        <!-- Section 2: Legal + Notifications (Figma grouping, with PRD items) -->
         <div class="settings-section">
           <!-- 서비스 이용약관 -->
           <div class="settings-item" id="item-terms">
             <span class="settings-item__label">서비스 이용약관</span>
             <div class="settings-item__chevron">
-              <svg class="icon-svg--small icon-svg" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+              <svg class="icon-svg--small icon-svg" viewBox="0 0 24 24"><path d="M10 7l5 5-5 5"/></svg>
             </div>
           </div>
 
@@ -643,15 +662,23 @@
           <div class="settings-item" id="item-privacy">
             <span class="settings-item__label">개인정보 처리방침</span>
             <div class="settings-item__chevron">
-              <svg class="icon-svg--small icon-svg" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+              <svg class="icon-svg--small icon-svg" viewBox="0 0 24 24"><path d="M10 7l5 5-5 5"/></svg>
             </div>
           </div>
 
-          <!-- 고객센터 -->
-          <div class="settings-item" id="item-support">
-            <span class="settings-item__label">고객센터</span>
+          <!-- 차단 관리 (PRD required) -->
+          <div class="settings-item" id="item-block-management">
+            <span class="settings-item__label">차단 관리</span>
             <div class="settings-item__chevron">
-              <svg class="icon-svg--small icon-svg" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+              <svg class="icon-svg--small icon-svg" viewBox="0 0 24 24"><path d="M10 7l5 5-5 5"/></svg>
+            </div>
+          </div>
+
+          <!-- 알림 설정 (PRD: navigation pattern, Figma: toggle visual) -->
+          <div class="settings-item settings-item--no-chevron" id="item-notification" style="padding-right: 20px;">
+            <span class="settings-item__label">알림 설정</span>
+            <div class="toggle-switch" id="toggle-notification">
+              <div class="toggle-switch__knob"></div>
             </div>
           </div>
         </div>
@@ -659,15 +686,15 @@
         <!-- Section Divider -->
         <hr class="settings-section__divider">
 
-        <!-- Section 4: Account Actions -->
+        <!-- Section 3: Account Actions -->
         <div class="settings-section">
           <!-- 탈퇴하기 -->
-          <div class="settings-item" id="item-delete-account">
+          <div class="settings-item settings-item--no-chevron" id="item-delete-account">
             <span class="settings-item__label">탈퇴하기</span>
           </div>
 
           <!-- 앱 버전 -->
-          <div class="settings-item" style="cursor: default;">
+          <div class="settings-item settings-item--no-chevron" style="cursor: default;">
             <span class="settings-item__label">앱 버전</span>
             <span class="settings-item__value-version">1.1.1</span>
           </div>
@@ -675,7 +702,9 @@
       </div>
 
       <!-- Logout Bottom Button -->
-      <button class="settings-logout-btn" id="item-logout">로그아웃</button>
+      <div class="settings-logout-area">
+        <button class="settings-logout-btn" id="item-logout">로그아웃</button>
+      </div>
 
       <!-- Logout Confirmation Dialog (Overlay) -->
       <div class="dialog-overlay" id="logout-dialog">
@@ -697,7 +726,7 @@
       <!-- Nav Bar -->
       <div class="nav-bar">
         <button class="nav-bar__back" id="btn-coming-soon-back" aria-label="뒤로가기">
-          <svg class="icon-svg" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg>
+          <svg class="icon-svg" viewBox="0 0 24 24"><path d="M14 17l-5-5 5-5"/></svg>
         </button>
         <span class="nav-bar__title" id="coming-soon-title">알림 설정</span>
       </div>
@@ -864,16 +893,10 @@
         // Would open WebView
       });
 
-      // 고객센터 -> Coming Soon
-      document.getElementById('item-support').addEventListener('click', () => {
-        document.getElementById('coming-soon-title').textContent = '\uACE0\uAC1D\uC13C\uD130';
-        navigate('screen-coming-soon', 'slide-left');
-      });
-
-      // 알림 설정 -> Coming Soon
-      document.getElementById('item-notification').addEventListener('click', () => {
-        document.getElementById('coming-soon-title').textContent = '\uC54C\uB9BC \uC124\uC815';
-        navigate('screen-coming-soon', 'slide-left');
+      // 알림 설정 toggle
+      document.getElementById('toggle-notification').addEventListener('click', () => {
+        const toggle = document.getElementById('toggle-notification');
+        toggle.classList.toggle('off');
       });
 
       // 차단 관리 -> Coming Soon (PRD required, 준비중)

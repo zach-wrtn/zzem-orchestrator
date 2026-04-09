@@ -169,7 +169,7 @@ const PROTOTYPES = [
       { id: 'screen-home', label: '홈 (Home Tab)', states: ['default', 'empty', 'loading'] },
       { id: 'screen-explore', label: '탐색 (Explore Tab)', states: ['default', 'empty', 'loading'] },
       { id: 'screen-profile', label: 'MY (Profile Tab)', states: ['default', 'empty', 'loading'] },
-      { id: 'screen-vertical-feed', label: '세로 스와이프 피드', states: ['default'] },
+      { id: 'screen-vertical-feed', label: '세로 스와이프 (상세)', states: ['posts-default', 'private-entry', 'liked-other', 'liked-mine'] },
     ]
   },
   {
@@ -180,7 +180,10 @@ const PROTOTYPES = [
     group: 'G2', groupLabel: 'Edit & Settings',
     tags: ['AC 2.3', 'AC 2.4', 'AC 2.6'],
     screens: [
-      { id: 'screen-profile-edit', label: '프로필 편집', states: ['default', 'validation-error', 'saving'] },
+      { id: 'screen-profile-edit', label: '프로필 편집 메인', states: ['default', 'nickname-changed', 'photo-changed'] },
+      { id: 'screen-nickname-keyboard', label: '닉네임 키보드', states: ['default', 'validation-error'] },
+      { id: 'screen-photo-crop', label: '사진 크롭', states: ['default'] },
+      { id: 'screen-album-selection', label: '앨범 선택', states: ['default'] },
       { id: 'screen-share', label: '프로필 공유', states: ['default'] },
     ]
   },
@@ -204,10 +207,11 @@ const PROTOTYPES = [
     group: 'G3', groupLabel: 'Social',
     tags: ['AC 7.1', 'AC 7.5', 'AC 2.7'],
     screens: [
-      { id: 'screen-other-profile', label: '타 유저 프로필 (게시물)', states: ['default'] },
-      { id: 'screen-other-profile-empty', label: '타 유저 프로필 (빈 상태)', states: ['default'] },
+      { id: 'screen-other-profile', label: '타 유저 프로필', states: ['팔로우전', '맞팔로우', '팔로잉'] },
+      { id: 'screen-other-profile-url-copy', label: '프로필 URL 복사', states: ['default'] },
       { id: 'screen-more-menu', label: '더보기 바텀시트', states: ['default'] },
       { id: 'screen-my-profile-generating', label: 'MY 게시물 (생성 중)', states: ['default'] },
+      { id: 'screen-my-profile-failed', label: 'MY 게시물 (생성 실패)', states: ['default'] },
       { id: 'screen-my-profile-private', label: 'MY 비공개 (신규)', states: ['default'] },
     ]
   },
@@ -243,7 +247,7 @@ const FLOWS = [
     phones: [
       { label: '홈 피드', ac: '진입점', protoId: 'nav-profile', screenId: 'screen-home', actions: [{t:'프로필 영역 탭',c:'green'}] },
       { label: '타 유저 프로필', ac: 'AC 7.1', protoId: 'other-profile', screenId: 'screen-other-profile', actions: ['게시물 탭만 노출', {t:'⋯ → 프로필 URL 복사',c:'orange'}, {t:'차단/신고 → PRD 3',c:'red'}] },
-      { label: '세로 스와이프 피드', ac: 'AC 2.5', placeholder: { icon: '📱', title: '세로 스와이프', desc: '해당 유저/탭의 콘텐츠만 노출' } },
+      { label: '세로 스와이프 피드', ac: 'AC 2.5', protoId: 'nav-profile', screenId: 'screen-vertical-feed', actions: ['PostCard + 블러 배경', {t:'사이드 액션 (좋아요/재생성/공유/더보기)',c:'green'}, {t:'공개 토글 + 게시안내 바텀시트',c:'orange'}] },
     ],
     arrows: ['유저 탭', '콘텐츠 탭'],
     note: '<strong>진입점:</strong> 세로 스와이프 피드의 좌측 하단 프로필 영역 / 팔로워·팔로잉 리스트 → 타 유저 프로필.'
