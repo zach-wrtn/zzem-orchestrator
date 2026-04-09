@@ -16,10 +16,10 @@
 |-------|------|--------|
 | **Phase 1: 인프라 셋업** | ✅ 완료 | Maestro config, smoke-test, README, package.json scripts |
 | **Phase 2: 기본 testID + 플로우** | ✅ 완료 | Home/Settings testID 계장, 5개 플로우 YAML, Bitrise CI |
-| **Phase 3: 인증 자동화** | ⬜ 미착수 | 로그인 바이패스 전략 구현 |
-| **Phase 4: 밈 생성 플로우** | ⬜ 미착수 | FilterPreview → MemeCollection → MemeViewer testID + 플로우 |
-| **Phase 5: SwipeFeed + Credit 플로우** | ⬜ 미착수 | SwipeFeed, CreditHistory, CreditPaywall testID + 플로우 |
-| **Phase 6: Android + CI 안정화** | ⬜ 미착수 | Android Emulator CI, pr_check 통합 |
+| **Phase 3: 인증 자동화** | ✅ 완료 | Deeplink 인증 바이패스, login.yaml 헬퍼, settings-authenticated 플로우 |
+| **Phase 4: 밈 생성 플로우** | ✅ 완료 | FilterPreview/MemeCollection/MemeViewer testID + 3개 플로우 |
+| **Phase 5: SwipeFeed + Credit 플로우** | ✅ 완료 | SwipeFeed/Credit testID + swipe-feed/credit-history 플로우 |
+| **Phase 6: Android + CI 안정화** | ✅ 완료 | e2e_check_android, pr_check E2E 통합, e2e_nightly + Slack 알림 |
 
 ---
 
