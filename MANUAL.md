@@ -12,8 +12,8 @@
 # Agent Teams 활성화 (필수)
 export CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1
 
-# Submodule 최신화
-git submodule update --init --recursive
+# 레포지토리 연결 (심볼릭 링크)
+./scripts/setup.sh
 ```
 
 ### 1.2 PRD 준비
