@@ -3,13 +3,20 @@
 
 sprint_id: "{sprint-id}"
 
-# 프로젝트별 base branch 설정
-# PR 생성 시 sprint branch가 이 브랜치를 타겟으로 머지됨
-branches:
+# 레포지토리 참조 (심볼릭 링크 경로 기준)
+repositories:
   backend:
-    base: "apple"          # wrtn-backend PR 타겟
+    path: wrtn-backend
+    url: git@github.wrtn.club:wrtn-tech/wrtn-backend.git
+    base: "apple"
   app:
-    base: "meme-release-1.2.2"             # app-core-packages PR 타겟
+    path: app-core-packages
+    url: git@github.com:wrtn-tech/app-core-packages.git
+    base: "meme-release-1.2.2"
+  tokens:
+    path: wds-tokens
+    url: git@github.wrtn.club:pepper/wds-tokens.git
+    base: "main"
 
 # 미지정 프로젝트의 폴백 base branch
 defaults:
