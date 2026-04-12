@@ -70,11 +70,19 @@ PRD를 **deliverable-focused** 명세로 확장한다.
 > 이후 Phase에서는 원본 PRD 전체를 다시 읽지 않고, 이 checkpoint + 태스크 파일을 참조한다.
 
 ## Output
+
+Gate 통과 시:
+1. Checkpoint 파일 생성 (`checkpoints/phase-2-summary.md`).
+2. **Sprint Status 출력** — `--status` 대시보드를 출력하여 현재 진행 상태를 표시한다.
+3. 다음 Phase 진입.
+
 ```
 Sprint Spec: {sprint-id}
   API Contract: {N} endpoints
   Tasks: Backend {N} + App {N}
   Evaluation Criteria: defined
+
+[Sprint Status Dashboard]
 
 → Proceeding to Phase 3: Prototype
 → Proceeding to Phase 4: Build (no UI tasks — skipping prototype)

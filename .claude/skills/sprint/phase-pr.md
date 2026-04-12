@@ -44,11 +44,20 @@ EOF
 4. **중복 PR 확인**: 동일 head/base PR → 기존 PR URL 안내.
 
 ## Output
+
+Gate 통과 시:
+1. Checkpoint 파일 생성 (`checkpoints/phase-5-summary.md`).
+2. **Sprint Status 출력** — `--status` 대시보드를 출력하여 현재 진행 상태를 표시한다.
+3. 다음 Phase 진입.
+
 ```
 Sprint PR: {sprint-id}
   wrtn-backend:       {url} (zzem/{sprint-id} → {base})
   app-core-packages:  {url} (zzem/{sprint-id} → {base})
 
 Sprint pipeline complete!
+
+[Sprint Status Dashboard]
+
 → Proceeding to Phase 6: Retrospective
 ```

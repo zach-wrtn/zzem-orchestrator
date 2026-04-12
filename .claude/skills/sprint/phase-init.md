@@ -31,11 +31,18 @@
 - [ ] sprint-config.yaml에 base branch 설정 존재
 
 ## Output
+
+Gate 통과 시:
+1. **Sprint Status 출력** — `--status` 대시보드를 출력하여 현재 진행 상태를 표시한다.
+2. 다음 Phase 진입.
+
 ```
 Sprint initialized: {sprint-id}
   Directory: sprint-orchestrator/sprints/{sprint-id}/
   PRD: {prd-file}
   Base branches: backend → {base}, app → {base}
+
+[Sprint Status Dashboard]
 
 → Proceeding to Phase 2: Spec
 ```

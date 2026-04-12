@@ -359,7 +359,20 @@ ISSUES 또는 FAIL 시:
 
 **Partial PR 허용**: `--allow-partial` 플래그 시 ACCEPTED 그룹만으로 PR 생성. FAILED 그룹은 PR body에 명시.
 
+## Group 완료 시 행동
+
+각 Group의 Evaluator PASS/FAIL 판정 후:
+1. Group summary checkpoint 생성 (`checkpoints/group-{N}-summary.md`).
+2. **Sprint Status 출력** — 그룹 진행률, 에이전트 상태, 병목 감지를 표시한다.
+3. 다음 Group 진입 또는 Phase 5 전환.
+
 ## Output
+
+Gate 통과 시:
+1. Checkpoint 파일 생성 (`checkpoints/phase-4-summary.md`).
+2. **Sprint Status 출력** — `--status` 대시보드를 출력하여 현재 진행 상태를 표시한다.
+3. 다음 Phase 진입.
+
 ```
 Sprint Build: {sprint-id}
 
@@ -373,6 +386,8 @@ Sprint Build: {sprint-id}
     eval: pending...
 
   Results: 1/3 groups accepted, 1/3 evaluating
+
+[Sprint Status Dashboard]
 
 → Proceeding to Phase 5: PR (all groups accepted)
 ```

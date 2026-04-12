@@ -441,12 +441,20 @@ PRD Refinement: {sprint-id}
 > 이후 Phase 4에서는 revision 세부 대화를 다시 참조하지 않고, 이 checkpoint + approval-status.yaml + 태스크 파일의 Prototype Reference만 참조한다.
 
 ## Output
+
+Gate 통과 시:
+1. Checkpoint 파일 생성 (`checkpoints/phase-3-summary.md`).
+2. **Sprint Status 출력** — `--status` 대시보드를 출력하여 현재 진행 상태를 표시한다.
+3. 다음 Phase 진입.
+
 ```
 Sprint Prototype: {sprint-id}
   Generated: {N} screens (HTML)
   Approved: {N}, Pending: {N}, Rejected: {N}
   PRD Amendments: {N} applied, {N} deferred, {N} dismissed
   PRD Refinement: {N} new, {N} refined — {accept | partial | review-only}
+
+[Sprint Status Dashboard]
 
 → Proceeding to Phase 4: Build
 ```
