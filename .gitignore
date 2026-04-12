@@ -4,3 +4,8 @@ design-tokens/
 .mcp.json
 .env
 .gstack/
+
+# Repository symlinks
+app-core-packages
+wrtn-backend
+wds-tokens
