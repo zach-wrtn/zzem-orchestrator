@@ -10,29 +10,34 @@ PRD → Task Spec → HTML Prototype → Code → Evaluation → PR 파이프라
 zzem-orchestrator/                     ← 오케스트레이션 레이어
 ├── sprint-orchestrator/               ← 스프린트 관리 (templates, sprints, knowledge-base)
 ├── docs/prds/                         ← PRD 원본
-├── app-core-packages/   [submodule]   ← React Native 프론트엔드
-├── wrtn-backend/        [submodule]   ← NestJS 백엔드
-└── wds-tokens/          [submodule]   ← Figma-synced 디자인 토큰
+├── app-core-packages/   [symlink]     ← React Native 프론트엔드
+├── wrtn-backend/        [symlink]     ← NestJS 백엔드
+└── wds-tokens/          [symlink]     ← Figma-synced 디자인 토큰
 ```
 
-### Submodules
+### Repositories
 
-| Submodule | Repository | 역할 |
-|-----------|-----------|------|
+| Repository | URL | 역할 |
+|-----------|-----|------|
 | `app-core-packages` | `github.com:wrtn-tech/app-core-packages` | Yarn/Lerna 모노레포. MemeApp 등 9개 앱 + 23개 패키지 |
 | `wrtn-backend` | `github.wrtn.club:wrtn-tech/wrtn-backend` | pnpm/Nx 모노레포. meme-api 등 6개 NestJS 서비스 |
 | `wds-tokens` | `github.wrtn.club:pepper/wds-tokens` | Token Studio JSON. primitive → semantic → component 3계층 |
 
+> 심볼릭 링크로 연결. `scripts/setup.sh` 실행으로 셋업.
+
 ## Quick Start
 
 ```bash
-# 1. Clone with submodules
-git clone --recurse-submodules <repo-url>
+# 1. Clone
+git clone <repo-url>
 
-# 2. Agent Teams 환경변수 설정
+# 2. 레포지토리 심볼릭 링크 연결
+./scripts/setup.sh
+
+# 3. Agent Teams 환경변수 설정
 export CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1
 
-# 3. 스프린트 실행
+# 4. 스프린트 실행
 /sprint ugc-profile-nav-001
 ```
 
