@@ -56,6 +56,15 @@ export CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1
 /sprint <sprint-id> --follow-up=<prev-id>    # 후속 스프린트
 ```
 
+## Monitoring
+
+```bash
+# 별도 터미널에서 실시간 대시보드
+./scripts/sprint-monitor.sh <sprint-id>
+
+# Phase 전환 시 자동으로 status 출력됨 (별도 설정 불필요)
+```
+
 ## Directory Layout
 
 ```
