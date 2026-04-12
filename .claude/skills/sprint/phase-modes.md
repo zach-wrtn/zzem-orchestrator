@@ -207,7 +207,42 @@ Sprint Follow-Up Init: {new-sprint-id}
 
 ---
 
-## --status Mode (anytime, read-only)
+## --status Mode (자동 + 수동)
+
+### 자동 출력
+
+모든 Phase Gate 통과 시 `--status` 대시보드가 자동으로 출력된다. Build Phase에서는 각 Group 완료 시에도 출력된다. 별도 호출 불필요.
+
+### 별도 터미널 모니터링
+
+실시간 모니터링이 필요한 경우 별도 터미널에서 sprint-monitor.sh를 실행한다:
+
+```bash
+./scripts/sprint-monitor.sh {sprint-id}
+```
+
+2초 간격으로 Agent Activity, Group 상태, Checkpoint, Hook Event Log를 갱신한다. `Ctrl+C`로 종료.
+
+### 수동 호출
+
+여전히 `--status` 플래그로 수동 호출 가능:
+
+```bash
+/sprint {sprint-id} --status
+```
+
+### Hook 기반 이벤트 수집
+
+`scripts/hook-handler.sh`가 Claude Code Hook을 통해 다음 이벤트를 자동 기록한다:
+
+| Hook Event | 기록 내용 |
+|------------|----------|
+| `SubagentStart` | teammate 활성화 (agent_id, agent_type) |
+| `SubagentStop` | teammate 종료 (agent_id, agent_type) |
+| `TaskCreated` | 태스크 할당 (task_id, subject, teammate) |
+| `TaskCompleted` | 태스크 완료 (task_id, subject, teammate) |
+
+이벤트는 `logs/events.jsonl`에 기록되며, 기존 에이전트 수동 로깅(`logs/{agent}.jsonl`)과 병행한다. Hook 이벤트는 teammate 라이프사이클을, 수동 로깅은 구현 phase 상세를 담당한다.
 
 ### 정보 수집
 
@@ -319,9 +354,14 @@ bar_filled = round(progress / 100 * 12)
 - Retrospective 완료, deferred 존재 → "`--continue` or `--follow-up` recommended"
 - Retrospective 완료, 전체 충족 → "Sprint complete. All AC fulfilled."
 
-### 자동 모니터링 (`/loop` 연계)
+### 자동 모니터링
 
-빌드 중 실시간 모니터링:
-```
+Phase 전환 시 자동 출력 + 별도 터미널 모니터:
+
+```bash
+# 별도 터미널에서 실시간 모니터링 (권장)
+./scripts/sprint-monitor.sh {sprint-id}
+
+# 또는 기존 /loop 방식
 /loop 3m /sprint {sprint-id} --status
 ```
