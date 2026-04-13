@@ -5,6 +5,16 @@ Sprint 브랜치에서 base branch로 PR을 생성한다.
 ## Workflow
 
 1. **사전 확인**: 각 레포 sprint 브랜치 변경사항 확인.
+1.5. **E2E Full-Suite Regression Gate** (app-core-packages 변경 존재 시):
+   - 사용자에게 시뮬레이터/에뮬레이터 준비 상태 확인.
+   - 실행: `cd app-core-packages && yarn workspace MemeApp e2e:auth` (전체 22+ flows, ~3m 15s)
+   - 결과:
+     - **전체 PASS** → PR 생성 진행. PR body `### E2E` 섹션에 "Full suite PASS ({N} flows)" 기록.
+     - **일부 FAIL** → PR 생성 차단. 실패 flow 목록 출력 후 사용자에게 옵션 제시:
+       a) Phase 4로 복귀 (fix loop 추가) — 권장
+       b) `--allow-e2e-fail` 플래그로 강제 진행 (failed flow 목록을 PR body에 명시)
+       c) 환경 문제(토큰/시뮬레이터)면 복구 후 재실행
+   - **Skip 조건**: `--skip-e2e` 플래그 명시 또는 app 변경 없음.
 2. **태스크 상태 수집**: COMPLETED/FAILED 목록.
 3. **App PR**: app-core-packages PR 생성 시 **`/meme-pr-create` 스킬 사용을 권장**한다. 이 스킬은 브랜치에서 과일환경을 자동 추출하고, CodePush 배포 가능 여부를 분석하여 AI 네이티브 PR을 생성한다. 사용하지 않는 경우 아래 수동 워크플로우를 따른다.
 4. **Push + PR 생성** (레포별, **사용자 확인 필수**):

@@ -17,6 +17,7 @@ description: Harness-driven sprint orchestration with Planner-Generator-Evaluato
 6. **File-Based Handoff**: 에이전트 간 상태 전달은 구조화된 파일 아티팩트로.
 7. **Minimal Harness**: 모델이 자체 처리 가능한 부분은 scaffolding 제거.
 8. **Context Checkpoint**: Phase/Group 전환 시 구조화된 요약을 파일로 보존. 자동 압축에 의존하지 않는다.
+9. **Objective Verification via E2E**: Evaluator의 주관적 active evaluation을 Maestro e2e의 객관적 AC 증명으로 보강. Phase 2에서 AC↔flow 매핑, Phase 4에서 그룹 스모크 게이트, Phase 5에서 풀스위트 회귀 게이트.
 
 ## Goal
 
