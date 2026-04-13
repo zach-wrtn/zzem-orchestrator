@@ -13,7 +13,13 @@ knowledge-base/
   design/
     README.md            ← 디자인 패턴 인덱스 (markdown table)
     {category}-{NNN}.yaml ← 개별 디자인 패턴 파일
+  rubrics/               ← Evaluator cross-sprint rubric (versioned)
+    v{N}.md              ← 최신 vN을 Phase 4.4 Evaluator가 자동 로드
+  reflections/           ← Reflexion-style 자연어 회고
+    {sprint-id}.md       ← Phase 2 (Spec) 시작 시 동일 도메인 최근 3개 자동 로드
 ```
+
+상세 스키마는 각 디렉토리의 `README.md` 또는 `v1.md` 참조.
 
 ## Pattern File Schema (YAML)
 

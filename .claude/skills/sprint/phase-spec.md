@@ -10,6 +10,11 @@ PRD를 **deliverable-focused** 명세로 확장한다.
 
 ## Workflow
 
+0. **Cross-Sprint Memory 로드** (Reflexion-style):
+   - `knowledge-base/reflections/` 디렉토리 ls → 같은 도메인 태그 + 최근 3개 파일 선택
+   - 각 reflection의 **Lesson** 섹션만 추출하여 Spec 컨텍스트에 주입
+   - `knowledge-base/patterns/README.md` 인덱스에서 `frequency >= 2` 이고 새 PRD 도메인과 관련된 패턴 식별
+   - 도출된 lesson/pattern은 PRD 분석 후 Spec에 명시적으로 채택/기각 (기각 사유 1줄 기록)
 1. **PRD 분석**: User Story + AC 추출, 비즈니스 목표 파악.
 2. **코드베이스 패턴 파악**:
    - Backend: `wrtn-backend/apps/meme-api/src/`

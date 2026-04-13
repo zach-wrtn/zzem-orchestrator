@@ -201,9 +201,17 @@ gap-analysis 결과에 따라 분기:
 - **갱신 방법**: `/extract-design --update` 실행 → 기존 DESIGN.md와 diff 출력 → 사용자 확인 후 반영
 - **스킵 조건**: 기존 컴포넌트만 사용하고 디자인 시스템 변경이 없으면 스킵
 
-### 6.7 Knowledge Base Write (자동 패턴 누적)
+### 6.7 Knowledge Base Write (3종 승격 의식)
 
-> Ref: Hermes Agent self-improving skills — 스프린트 완료 후 패턴을 KB에 자동 기록.
+> Ref: Hermes / Reflexion / DSPy — 스프린트 완료 후 학습을 다음 스프린트가 실제로 소비하도록 KB에 기록.
+>
+> 6.7은 4개 하위 단계로 구성된다:
+> - **6.7a Rubric 승격**: pattern → Evaluator rubric clause
+> - **6.7b Skill 승격** (placeholder, Phase B에서 구현): pattern → 재사용 코드 skill
+> - **6.7c Rule 승격**: 사용자 피드백 → 영구 rule
+> - **6.7d Reflection 작성**: Reflexion-style 1페이지 자연어 회고
+>
+> 아래 6.7 본문(Pattern KB Write)은 4개 단계의 공통 기반이며, 각 승격 단계는 본문 종료 후 순차 실행된다.
 
 Pattern Digest + Quality Report를 KB에 기록한다.
 
@@ -262,6 +270,82 @@ if any pattern.frequency >= 3:
     Patterns updated: {N} (existing: {M} updated, new: {K} created)
     Design patterns: {N}
     Template nudge: {있으면 표시, 없으면 생략}
+```
+
+### 6.7a Rubric 승격 (Pattern → Evaluator Rubric Clause)
+
+> Ref: ExpeL — cross-task insight를 평가 rubric으로 누적.
+
+**Trigger**: pattern-digest의 패턴 중 `frequency >= 2` 이고 `contract_clause`가 정의된 것.
+
+**Workflow**:
+1. `knowledge-base/rubrics/` 디렉토리 ls → `superseded_by: null` 인 최신 v(N) 파일 찾기
+2. v(N) 파일의 "Promotion Log" 표에 후보 패턴 추가 (Date, Sprint, Clause Added, Source Pattern)
+3. v(N) 파일의 누적 promotion 개수 계산:
+   - 누적 `< 2`: v(N)에 Promotion Log 행 추가만 (clause는 본문에 미반영, 다음 스프린트부터 신규 패턴이면 우선 평가)
+   - 누적 `>= 2`: v(N+1) 파일 신규 생성
+     - 헤더 갱신 (`id: vN+1`, `created_at`, `source_sprint: 현재 sprint-id`)
+     - v(N) 모든 clause + 누적 Promotion Log의 clause를 Clauses 섹션으로 본문화
+     - v(N) 파일 frontmatter의 `superseded_by: vN+1`로 갱신
+4. 사용자 nudge:
+   ```
+   Rubric: v{N} 유지 (promotion log {N}건 누적) | v{N+1} 생성 (clause {N}건 본문화)
+   ```
+
+**Effect**: 다음 스프린트 Phase 4.4에서 Evaluator가 자동으로 최신 vN 로드 → 누적된 평가 기준 적용.
+
+### 6.7b Skill 승격 (Pattern → Reusable Code Skill)
+
+> 본 단계는 **placeholder** 상태. Phase B(스킬 라이브러리 구축)에서 구현된다.
+>
+> 트리거 조건만 정의:
+> - 동일 코드 패턴이 2개 이상 그룹에서 반복 구현됨
+> - Generator가 작성한 코드 중 90%+ 동일한 구조
+
+당분간은 Pattern Digest의 해당 항목에 `skill_candidate: true` 태그만 부여하고 KB 기록 없이 통과.
+
+### 6.7c Rule 승격 (User Feedback → Permanent Rule)
+
+> Ref: Cursor Rules / Claude Code CLAUDE.md auto-promotion.
+
+**Trigger**: 스프린트 중 사용자가 동일 교정을 2회 이상 제공한 경우.
+
+**Workflow**:
+1. `deferred-items.yaml`의 `improvements` 섹션에서 `source: user_feedback` 항목 추출
+2. 동일/유사 피드백이 직전 스프린트 reflection의 "What failed" 또는 KB rule에 이미 있는지 확인
+3. 신규 + frequency 2+ 항목 → `MEMORY.md` 인덱스에 `feedback_*.md` 추가 후보로 사용자에게 제시
+   ```
+   ⚠ User feedback "{summary}" repeated {N} times.
+   → Promote to memory/feedback_{slug}.md? (y/n)
+   ```
+4. 사용자 승인 시 auto-memory 가이드 절차에 따라 frontmatter 포함 파일 작성 + MEMORY.md 인덱스 갱신
+
+### 6.7d Reflection 작성 (Reflexion-style 1페이지 회고)
+
+> Ref: Reflexion (Shinn 2023) — 자연어 self-reflection을 다음 시도에 주입.
+
+**Trigger**: Phase 6 항상 실행 (누락 금지 — 다음 스프린트 Phase 2가 의존).
+
+**Workflow**:
+1. `pattern-digest.yaml` + `gap-analysis.yaml` 읽기
+2. `knowledge-base/reflections/{sprint-id}.md` 작성 (스키마: `knowledge-base/reflections/README.md` 참조)
+   - **What worked**: PASS 그룹의 성공 요인 2~3개 (재사용 가능 형태)
+   - **What failed (with root cause)**: ISSUES/FAIL 항목의 1줄 trace + root_cause
+   - **Lesson (next-sprint actionable)**: 다음 스프린트 Phase 2/4에 반영할 구체 지침
+   - **Pointers**: pattern-digest, gap-analysis, KB pattern id 참조
+3. 직전 스프린트(같은 도메인)의 reflection이 존재하면 마지막에 1줄 추가:
+   ```
+   > 직전 lesson 반영도: {fully | partially | not} — {간단 평가}
+   ```
+4. <= 400단어 유지
+
+**출력 갱신** (Phase 6 Output 블록):
+```
+  Promotions:
+    Rubric: {v(N) 유지 | v(N+1) 생성, clause {K}개 본문화}
+    Skill candidates: {N} (placeholder)
+    Rule promotions: {N}
+    Reflection: knowledge-base/reflections/{sprint-id}.md
 ```
 
 ## Gate

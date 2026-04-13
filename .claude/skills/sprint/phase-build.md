@@ -260,6 +260,11 @@ TaskCreate:
   Owner: Evaluator
 ```
 
+Evaluator는 평가 시작 시 **Cross-sprint rubric을 자동 로드**한다:
+- `knowledge-base/rubrics/` 디렉토리에서 `superseded_by: null`인 최신 `v{N}.md` 로드
+- 본 스프린트의 `evaluation/criteria.md` + 해당 rubric의 Clauses + Promotion Log 후보 clause를 합쳐 평가에 적용
+- 충돌 시 sprint 로컬 criteria가 우선
+
 Evaluator는 **Active Evaluation** 수행:
 - Sprint Contract의 Done Criteria를 코드에서 하나씩 증명
 - Logic tracing으로 실행 흐름 추적
