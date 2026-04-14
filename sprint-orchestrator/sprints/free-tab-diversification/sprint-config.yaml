@@ -26,3 +26,14 @@ team:
   settings:
     eval_retry_limit: 2
     max_parallel_tasks: 4
+
+display:
+  title: "Free Tab Diversification"
+  startDate: "2026-04-09"
+  endDate: "2026-04-14"
+  status: "completed"
+  tags: ["ugc", "free-tab"]
+  prototypes:
+    - id: "app-001"
+      hero: true
+      thumbnail: "screenshots/default.png"
