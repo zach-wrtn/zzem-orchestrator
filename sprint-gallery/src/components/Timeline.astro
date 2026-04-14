@@ -1,0 +1,52 @@
+---
+import type { Sprint } from '@/lib/types';
+interface Props { sprints: Sprint[]; }
+const { sprints } = Astro.props;
+const byYear = new Map<string, Sprint[]>();
+for (const s of sprints) {
+  const y = s.endDate.slice(0, 4);
+  if (!byYear.has(y)) byYear.set(y, []);
+  byYear.get(y)!.push(s);
+}
+---
+<aside class="rail">
+  {[...byYear.entries()].map(([year, list]) => (
+    <div class="year-block">
+      <div class="year">{year}</div>
+      <ul>
+        {list.map((s) => (
+          <li>
+            <a href={`#${s.slug}`}>
+              <span class="dot" data-status={s.status}></span>
+              <span class="date">{s.endDate.slice(5)}</span>
+              <span class="name">{s.title}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  ))}
+</aside>
+
+<style>
+  .rail {
+    position: sticky; top: 72px; align-self: start;
+    width: var(--rail-width);
+    padding-right: 16px; border-right: 1px solid var(--border);
+    font-family: var(--font-mono); font-size: 12px;
+    max-height: calc(100vh - 80px); overflow-y: auto;
+  }
+  .year-block { margin-bottom: 24px; }
+  .year { color: var(--text-faint); margin-bottom: 8px; }
+  ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
+  li a { display: flex; align-items: center; gap: 8px; color: var(--text-dim); }
+  li a:hover { color: var(--text); }
+  .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--text-faint); flex-shrink: 0;
+  }
+  .dot[data-status="completed"] { background: #7AC79A; }
+  .dot[data-status="in-progress"] { background: var(--accent); }
+  .date { color: var(--text-faint); font-size: 11px; width: 44px; }
+  .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+</style>
