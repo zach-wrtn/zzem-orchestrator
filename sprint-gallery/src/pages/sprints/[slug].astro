@@ -1,0 +1,100 @@
+---
+import Layout from '@/components/Layout.astro';
+import PrototypeCard from '@/components/PrototypeCard.astro';
+import PreviewModal from '@/components/PreviewModal.tsx';
+import { collectSprints } from '@/lib/collect-sprints';
+import { SPRINTS_DIR } from '@/lib/paths';
+import { readFile } from 'node:fs/promises';
+import { join } from 'node:path';
+
+export async function getStaticPaths() {
+  const sprints = await collectSprints(SPRINTS_DIR);
+  return sprints.map((sprint) => ({ params: { slug: sprint.slug }, props: { sprint } }));
+}
+
+const { sprint } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const sprintDir = join(SPRINTS_DIR, sprint.slug);
+
+async function readOptional(rel?: string): Promise<string | null> {
+  if (!rel) return null;
+  try { return await readFile(join(sprintDir, rel), 'utf8'); } catch { return null; }
+}
+
+const prd = await readOptional(sprint.docs.prd);
+const report = await readOptional(sprint.docs.report);
+const hero = sprint.prototypes.find((p) => p.hero) ?? sprint.prototypes[0];
+const heroThumb = hero?.thumbnail ? `${base}/${hero.thumbnail}`.replace(/\/+/g, '/') : null;
+---
+<Layout title={`${sprint.title} · ZZEM Sprints`}>
+  <a href={base} class="back">← Timeline</a>
+  <header class="hero-header">
+    <h1>{sprint.title}</h1>
+    <div class="meta">
+      <time>{sprint.startDate} → {sprint.endDate}</time>
+      <span class={`status status-${sprint.status}`}>{sprint.status}</span>
+      {sprint.tags.map((t) => <span class="tag">#{t}</span>)}
+    </div>
+  </header>
+
+  {hero && (
+    <div class="hero-media">
+      {heroThumb
+        ? <img src={heroThumb} alt={hero.title} />
+        : <div class="placeholder">No preview</div>}
+    </div>
+  )}
+
+  {sprint.prototypes.length > 0 && (
+    <section>
+      <h2>Prototypes</h2>
+      <div class="grid">
+        {sprint.prototypes.map((p) => <PrototypeCard sprintSlug={sprint.slug} proto={p} />)}
+      </div>
+    </section>
+  )}
+
+  {prd && (
+    <section>
+      <h2>PRD</h2>
+      <pre class="doc">{prd}</pre>
+    </section>
+  )}
+
+  {report && (
+    <section>
+      <h2>Report</h2>
+      <pre class="doc">{report}</pre>
+    </section>
+  )}
+
+  <PreviewModal client:load />
+</Layout>
+
+<style>
+  .back { font-family: var(--font-mono); font-size: 12px; color: var(--text-dim); }
+  .back:hover { color: var(--accent); }
+  .hero-header { margin: 32px 0 16px; }
+  .hero-header h1 { margin: 0 0 8px; font-size: 40px; letter-spacing: -0.02em; }
+  .meta { display: flex; flex-wrap: wrap; gap: 10px; font-family: var(--font-mono); font-size: 12px; color: var(--text-dim); }
+  .status { padding: 2px 8px; border-radius: 4px; border: 1px solid var(--border); }
+  .status-completed { color: #7AC79A; border-color: #7AC79A44; }
+  .status-in-progress { color: var(--accent); border-color: var(--accent-soft); }
+  .tag { color: var(--text-dim); }
+  .hero-media {
+    margin: 16px 0 32px; aspect-ratio: 16/10;
+    background: var(--surface-hover); border: 1px solid var(--border);
+    border-radius: var(--radius-card); overflow: hidden;
+  }
+  .hero-media img { width: 100%; height: 100%; object-fit: cover; }
+  .placeholder { width: 100%; height: 100%; display: grid; place-items: center; color: var(--text-faint); font-family: var(--font-mono); }
+  section { margin: 40px 0; }
+  h2 { font-size: 18px; letter-spacing: -0.01em; margin: 0 0 16px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+  .doc {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-card); padding: 16px;
+    font-family: var(--font-mono); font-size: 12px; line-height: 1.6;
+    color: var(--text-dim); white-space: pre-wrap; overflow-x: auto;
+  }
+</style>
