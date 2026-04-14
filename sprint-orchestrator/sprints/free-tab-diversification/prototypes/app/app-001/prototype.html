@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>app-001 · Free Tab Grid Prototype</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+<style>
+  :root {
+    --bg: #ffffff;
+    --text-primary: #262626;
+    --text-secondary: #656565;
+    --text-tertiary: #8a8a8a;
+    --divider: #f1f1f1;
+    --surface-secondary: #f7f7f7;
+    --zzem-purple: #8752fa;
+    --red-dot: #ff3b30;
+    --card-radius: 4px;
+    --banner-purple: linear-gradient(135deg, #8752fa 0%, #6b3fd9 100%);
+    --banner-teal: linear-gradient(135deg, #2dd4bf 0%, #0d9488 100%);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Pretendard', -apple-system, 'SF Pro', sans-serif;
+    background: #f0f0f0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 16px;
+    color: var(--text-primary);
+  }
+
+  .control-panel {
+    width: 393px;
+    background: #1a1a2e;
+    color: #e0e0e0;
+    border-radius: 12px 12px 0 0;
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 13px;
+  }
+  .control-panel__row { display: flex; align-items: center; gap: 8px; }
+  .control-panel__label { color: #888; font-size: 11px; min-width: 48px; }
+  .control-panel select {
+    background: #2a2a3e; color: #e0e0e0; border: 1px solid #444;
+    border-radius: 6px; padding: 4px 8px; font-size: 12px; flex: 1;
+  }
+  .control-panel__states { display: flex; gap: 4px; flex-wrap: wrap; flex: 1; }
+  .control-panel__state-btn {
+    background: #2a2a3e; color: #bbb; border: 1px solid #444;
+    border-radius: 6px; padding: 4px 10px; font-size: 11px; cursor: pointer;
+    transition: all 0.15s;
+  }
+  .control-panel__state-btn.active {
+    background: var(--zzem-purple); color: #fff; border-color: var(--zzem-purple);
+  }
+  .control-panel__breadcrumb { color: #666; font-size: 11px; font-family: monospace; }
+
+  .device-frame {
+    width: 393px;
+    height: 852px;
+    background: var(--bg);
+    overflow: hidden;
+    position: relative;
+    border: 1px solid #ddd;
+    border-radius: 0 0 12px 12px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .status-bar {
+    height: 44px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 24px;
+    font-size: 15px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  .status-bar__icons { display: flex; gap: 6px; font-size: 12px; }
+
+  .app-header {
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    flex-shrink: 0;
+  }
+  .app-header__logo { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; color: var(--zzem-purple); }
+  .app-header__actions { display: flex; gap: 12px; align-items: center; }
+  .app-header__credit {
+    background: var(--surface-secondary);
+    border-radius: 999px;
+    padding: 5px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex; gap: 4px; align-items: center;
+  }
+  .app-header__credit::before { content: "◆"; color: var(--zzem-purple); font-size: 10px; }
+  .app-header__bell { font-size: 18px; }
+
+  .home-tabs {
+    display: flex;
+    padding: 0 16px;
+    border-bottom: 1px solid var(--divider);
+    height: 44px;
+    gap: 24px;
+    flex-shrink: 0;
+  }
+  .home-tab {
+    position: relative;
+    display: flex;
+    align-items: center;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-tertiary);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0 2px;
+    font-family: inherit;
+  }
+  .home-tab.active {
+    color: var(--text-primary);
+  }
+  .home-tab.active::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--text-primary);
+  }
+  .home-tab__reddot {
+    position: absolute;
+    top: 12px;
+    right: -8px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--red-dot);
+  }
+
+  .body-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding-bottom: 64px;
+  }
+
+  .banner {
+    margin: 12px 16px 8px;
+    border-radius: 16px;
+    padding: 16px 18px;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+  }
+  .banner--purple { background: var(--banner-purple); }
+  .banner--teal { background: var(--banner-teal); }
+  .banner::after {
+    content: "";
+    position: absolute;
+    right: -20px;
+    top: -20px;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.1);
+  }
+  .banner__title {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    position: relative;
+    z-index: 1;
+  }
+  .banner__desc {
+    font-size: 13px;
+    opacity: 0.92;
+    font-weight: 500;
+    position: relative;
+    z-index: 1;
+  }
+  .banner__caption {
+    display: none;
+    margin-top: 6px;
+    font-size: 11px;
+    opacity: 0.85;
+    font-weight: 500;
+    position: relative;
+    z-index: 1;
+  }
+  .banner.show-caption .banner__caption { display: block; }
+
+  .free-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    padding: 8px 0 0;
+    list-style: none;
+    background: transparent;
+  }
+  .free-card {
+    position: relative;
+    aspect-ratio: 4/5;
+    border-radius: var(--card-radius);
+    overflow: hidden;
+    cursor: pointer;
+  }
+  .free-card__thumb {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.9);
+    text-align: center;
+    padding: 8px;
+    line-height: 1.4;
+  }
+  .free-card__thumb.baby { background: linear-gradient(135deg, #ffd6e0 0%, #ff8fb1 100%); color: #7a2040; }
+  .free-card__thumb.pet { background: linear-gradient(135deg, #c3e8ff 0%, #5aaef0 100%); color: #0b3d66; }
+  .free-card__thumb.studio { background: linear-gradient(135deg, #2a2a3e 0%, #8752fa 100%); color: #fff; }
+  .free-card__overlay {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    padding: 18px 10px 8px;
+    background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.65) 100%);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .free-card__creator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    opacity: 0.9;
+    margin-top: 2px;
+  }
+  .free-card__avatar {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--zzem-purple);
+  }
+  .free-badge {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background: rgba(255,255,255,0.92);
+    color: var(--zzem-purple);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 6px;
+    border-radius: 6px;
+    z-index: 2;
+  }
+
+  .empty-view {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 24px;
+    text-align: center;
+  }
+  .empty-view__icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: var(--surface-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    margin-bottom: 16px;
+  }
+  .empty-view__title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+  }
+  .empty-view__desc {
+    font-size: 13px;
+    color: var(--text-tertiary);
+  }
+
+  .bottom-nav {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 64px;
+    border-top: 0.5px solid var(--divider);
+    background: #fff;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding-bottom: 8px;
+  }
+  .bottom-nav__item {
+    font-size: 22px;
+    color: var(--text-tertiary);
+  }
+  .bottom-nav__item.active { color: var(--text-primary); }
+
+  /* STATE OVERRIDES */
+  .device-frame[data-state="default"] .banner--teal { display: none; }
+  .device-frame[data-state="default"] .banner--purple { display: block; }
+  .device-frame[data-state="default"] .home-tab__reddot { display: block; }
+  .device-frame[data-state="default"] .empty-view { display: none; }
+  .device-frame[data-state="default"] .free-grid { display: grid; }
+
+  .device-frame[data-state="used-today"] .banner--purple { display: none; }
+  .device-frame[data-state="used-today"] .banner--teal { display: block; }
+  .device-frame[data-state="used-today"] .home-tab__reddot { display: none; }
+  .device-frame[data-state="used-today"] .empty-view { display: none; }
+  .device-frame[data-state="used-today"] .free-grid { display: grid; }
+
+  .device-frame[data-state="fallback"] .banner--teal { display: none; }
+  .device-frame[data-state="fallback"] .banner--purple { display: block; }
+  .device-frame[data-state="fallback"] .banner--purple { }
+  .device-frame[data-state="fallback"] .home-tab__reddot { display: block; }
+  .device-frame[data-state="fallback"] .empty-view { display: none; }
+  .device-frame[data-state="fallback"] .free-grid { display: grid; }
+
+  .device-frame[data-state="empty"] .banner--purple { display: block; }
+  .device-frame[data-state="empty"] .banner--teal { display: none; }
+  .device-frame[data-state="empty"] .home-tab__reddot { display: none; }
+  .device-frame[data-state="empty"] .free-grid { display: none; }
+  .device-frame[data-state="empty"] .empty-view { display: flex; }
+
+  .banner--teal { display: none; }
+</style>
+</head>
+<body>
+
+<div class="control-panel">
+  <div class="control-panel__row">
+    <span class="control-panel__label">Screen</span>
+    <select id="screen-select">
+      <option value="free-tab">FreeTabScreen</option>
+    </select>
+  </div>
+  <div class="control-panel__row">
+    <span class="control-panel__label">State</span>
+    <div class="control-panel__states" id="state-toggles">
+      <button class="control-panel__state-btn active" data-state="default">default</button>
+      <button class="control-panel__state-btn" data-state="used-today">used-today</button>
+      <button class="control-panel__state-btn" data-state="fallback">fallback</button>
+      <button class="control-panel__state-btn" data-state="empty">empty</button>
+    </div>
+  </div>
+  <div class="control-panel__row">
+    <span class="control-panel__breadcrumb" id="breadcrumb">free-tab · default</span>
+  </div>
+</div>
+
+<div class="device-frame" id="device-frame" data-state="default">
+
+  <div class="status-bar">
+    <span>9:41</span>
+    <span class="status-bar__icons">● ▲ ◼</span>
+  </div>
+
+  <header class="app-header">
+    <span class="app-header__logo">ZZEM</span>
+    <div class="app-header__actions">
+      <span class="app-header__credit">120</span>
+      <span class="app-header__bell">🔔</span>
+    </div>
+  </header>
+
+  <nav class="home-tabs" id="home-tabs">
+    <button class="home-tab" id="tab-recommended">추천</button>
+    <button class="home-tab active" id="tab-free">
+      무료
+      <span class="home-tab__reddot" id="red-dot"></span>
+    </button>
+  </nav>
+
+  <main class="body-scroll">
+
+    <section class="banner banner--purple" id="banner-purple">
+      <div class="banner__title">오늘만 1개 무료에요</div>
+      <div class="banner__desc">오늘 밤이 지나면 무료 필터가 초기화돼요</div>
+      <div class="banner__caption" id="banner-caption">어제 선정된 무료 필터예요 · 곧 갱신돼요</div>
+    </section>
+
+    <section class="banner banner--teal" id="banner-teal">
+      <div class="banner__title">내일 또 만나요</div>
+      <div class="banner__desc">내일 새로운 필터로 찾아올게요</div>
+    </section>
+
+    <ul class="free-grid" id="free-grid">
+      <li class="free-card">
+        <span class="free-badge">NEW</span>
+        <div class="free-card__thumb baby">아기<br>첫 걸음</div>
+        <div class="free-card__overlay">아기 · 첫 걸음
+          <div class="free-card__creator"><span class="free-card__avatar"></span>studio_a</div>
+        </div>
+      </li>
+      <li class="free-card">
+        <div class="free-card__thumb pet">반려동물<br>산책</div>
+        <div class="free-card__overlay">반려동물 · 산책
+          <div class="free-card__creator"><span class="free-card__avatar"></span>petlab</div>
+        </div>
+      </li>
+      <li class="free-card">
+        <div class="free-card__thumb studio">스튜디오<br>라이트</div>
+        <div class="free-card__overlay">스튜디오 · 라이트
+          <div class="free-card__creator"><span class="free-card__avatar"></span>lumen</div>
+        </div>
+      </li>
+      <li class="free-card">
+        <div class="free-card__thumb baby">아기<br>낮잠</div>
+        <div class="free-card__overlay">아기 · 낮잠
+          <div class="free-card__creator"><span class="free-card__avatar"></span>dreamy</div>
+        </div>
+      </li>
+      <li class="free-card">
+        <span class="free-badge">NEW</span>
+        <div class="free-card__thumb pet">반려동물<br>간식</div>
+        <div class="free-card__overlay">반려동물 · 간식
+          <div class="free-card__creator"><span class="free-card__avatar"></span>snacky</div>
+        </div>
+      </li>
+      <li class="free-card">
+        <div class="free-card__thumb studio">스튜디오<br>그라데이션</div>
+        <div class="free-card__overlay">스튜디오 · 그라데이션
+          <div class="free-card__creator"><span class="free-card__avatar"></span>grad</div>
+        </div>
+      </li>
+      <li class="free-card">
+        <div class="free-card__thumb baby">아기<br>웃음</div>
+        <div class="free-card__overlay">아기 · 웃음
+          <div class="free-card__creator"><span class="free-card__avatar"></span>smile</div>
+        </div>
+      </li>
+      <li class="free-card">
+        <div class="free-card__thumb pet">반려동물<br>점프</div>
+        <div class="free-card__overlay">반려동물 · 점프
+          <div class="free-card__creator"><span class="free-card__avatar"></span>hopper</div>
+        </div>
+      </li>
+      <li class="free-card">
+        <div class="free-card__thumb studio">스튜디오<br>네온</div>
+        <div class="free-card__overlay">스튜디오 · 네온
+          <div class="free-card__creator"><span class="free-card__avatar"></span>neon</div>
+        </div>
+      </li>
+      <li class="free-card">
+        <div class="free-card__thumb baby">아기<br>목욕</div>
+        <div class="free-card__overlay">아기 · 목욕
+          <div class="free-card__creator"><span class="free-card__avatar"></span>bubbles</div>
+        </div>
+      </li>
+    </ul>
+
+    <div class="empty-view" id="empty-view">
+      <div class="empty-view__icon">🔎</div>
+      <div class="empty-view__title">지금은 무료 필터가 없어요</div>
+      <div class="empty-view__desc">곧 새로운 무료 필터로 찾아올게요</div>
+    </div>
+
+  </main>
+
+  <nav class="bottom-nav">
+    <span class="bottom-nav__item active">🏠</span>
+    <span class="bottom-nav__item">🔍</span>
+    <span class="bottom-nav__item">👤</span>
+  </nav>
+
+</div>
+
+<script>
+  const frame = document.getElementById('device-frame');
+  const breadcrumb = document.getElementById('breadcrumb');
+  const purpleBanner = document.getElementById('banner-purple');
+  const stateButtons = document.querySelectorAll('.control-panel__state-btn');
+
+  function setState(state) {
+    frame.setAttribute('data-state', state);
+    stateButtons.forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.state === state);
+    });
+    // fallback: show caption on purple banner
+    purpleBanner.classList.toggle('show-caption', state === 'fallback');
+    breadcrumb.textContent = 'free-tab · ' + state;
+  }
+
+  stateButtons.forEach(btn => {
+    btn.addEventListener('click', () => setState(btn.dataset.state));
+  });
+
+  // Tab toggle (visual only)
+  document.getElementById('tab-recommended').addEventListener('click', () => {
+    document.getElementById('tab-recommended').classList.add('active');
+    document.getElementById('tab-free').classList.remove('active');
+  });
+  document.getElementById('tab-free').addEventListener('click', () => {
+    document.getElementById('tab-free').classList.add('active');
+    document.getElementById('tab-recommended').classList.remove('active');
+  });
+
+  // Init
+  setState('default');
+</script>
+
+</body>
+</html>

@@ -1,0 +1,41 @@
+tasks:
+  app-001:
+    FreeTabScreen:
+      status: approved
+      prototype: "app/app-001/prototype.html"
+      screenshots: "app/app-001/screenshots/"
+      states_captured: [default, used-today, fallback, empty]
+      revision_count: 0
+      last_revision: null
+      reviewed_at: "2026-04-13"
+      notes: ""
+  app-002:
+    SwipeFeedScreenFreeMode:
+      status: approved
+      prototype: "app/app-002/prototype.html"
+      screenshots: "app/app-002/screenshots/"
+      states_captured: [free-cta, paid-cta, last-card-circular]
+      revision_count: 0
+      last_revision: null
+      reviewed_at: "2026-04-13"
+      notes: ""
+  app-003:
+    BottomSheets:
+      status: approved
+      prototype: "app/app-003/prototype.html"
+      screenshots: "app/app-003/screenshots/"
+      states_captured: [free-confirm, credit-confirm, login-prompt, concurrent-toast, error-state]
+      revision_count: 0
+      last_revision: null
+      reviewed_at: "2026-04-13"
+      notes: ""
+  app-004:
+    RecommendTabFeed:
+      status: approved
+      prototype: "app/app-004/prototype.html"
+      screenshots: "app/app-004/screenshots/"
+      states_captured: [algo-feed-default, algo-feed-free-confirm, algo-feed-credit-confirm]
+      revision_count: 0
+      last_revision: null
+      reviewed_at: "2026-04-13"
+      notes: ""

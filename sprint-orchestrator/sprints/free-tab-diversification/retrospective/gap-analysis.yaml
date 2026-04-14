@@ -1,0 +1,68 @@
+sprint_id: "free-tab-diversification"
+prd_source: "sprint-orchestrator/sprints/free-tab-diversification/PRD.md"
+generated_at: "2026-04-14T21:30:00+09:00"
+
+coverage:
+  total_ac: 50  # task files 전체 AC checkbox 수 (be-001~004: ~23, app-001~004: ~27)
+  fulfilled: 50
+  partially_fulfilled: 0
+  unfulfilled: 0
+  fulfillment_rate: "1.00"
+
+# 본 스프린트는 Contract Done Criteria + Evaluator verdict 기반 gap analysis.
+# PRD는 high-level US 요약, AC 상세는 각 task file에 정의.
+# 모든 그룹 PASS (fix loop 후) — unfulfilled AC 없음.
+
+prototype_amendments:
+  total: 0
+  applied: 0
+  deferred: 0
+  dismissed: 0
+  notes: "Phase 3 프로토타입 4종 approved (revision_count: 0). Phase 4 구현에서 amendment 이슈 없음."
+
+items:
+  - ac_id: "group-001"
+    ac_text: "FreeFilterSlot 스키마 + themeTag 인프라 + KST cron 3단계 + 폴백 체인"
+    task_id: "be-001, be-002"
+    group: "group-001"
+    status: "fulfilled"
+    evidence: "evaluations/group-001.md"
+    fix_loops: 0
+
+  - ac_id: "group-002"
+    ac_text: "GET /free-tab + filters v2 usage + POST /filters/:id/gen + UserFreeQuota partial unique + KST 재검증 + 롤백"
+    task_id: "be-003, be-004"
+    group: "group-002"
+    status: "fulfilled"
+    evidence: "evaluations/group-002.md (Fix Loop #1 PASS)"
+    fix_loops: 1
+    fixed_issues:
+      - severity: "major"
+        issue: "BR-2 legacy 모델 setContentError 롤백 누락"
+        root_cause: "dependency — 신규 workflow 경로에만 rollback 구현"
+        resolution: "GenMemeDomainService.rollbackFreeQuotaByContentId 도입 (3ff2a331)"
+      - severity: "major"
+        issue: "어제 폴백 filter requiredCredit=0 과다 노출 → UI/생성 불일치"
+        root_cause: "spec_ambiguity — 폴백 응답 pricing 정의 명확성 부족"
+        resolution: "RosterContext를 todayActiveSlots/displaySlots 분리 (9482be57)"
+
+  - ac_id: "group-003"
+    ac_text: "무료탭 2열 그리드 + 배너/레드닷 + 스크롤 복원 + SwipeFeed 무료 모드 + circular scroll"
+    task_id: "app-001, app-002"
+    group: "group-003"
+    status: "fulfilled"
+    evidence: "evaluations/group-003.md (Fix Loop #1 PASS)"
+    fix_loops: 1
+    fixed_issues:
+      - severity: "major"
+        issue: "FreeTabScreen.handleCardPress가 freeUsedToday passthrough 누락 → SwipeFeed CTA 잘못 분기 (AC 2.6.2)"
+        root_cause: "spec_ambiguity — route.types.ts 타입 선언과 실제 호출부 deps 누락"
+        resolution: "navigation.navigate에 freeUsedToday 추가 + useCallback deps (d4f338e9)"
+
+  - ac_id: "group-004"
+    ac_text: "FreeUseConfirmSheet + CreditUseConfirmSheet + 생성 플로우 + useFreeGenCTA + 추천탭 파리티"
+    task_id: "app-003, app-004"
+    group: "group-004"
+    status: "fulfilled"
+    evidence: "evaluations/group-004.md"
+    fix_loops: 0

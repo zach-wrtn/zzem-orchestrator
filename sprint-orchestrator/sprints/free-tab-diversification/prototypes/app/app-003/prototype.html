@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>app-003 · Confirm Sheets & Flow</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+<style>
+:root {
+  --bg-normal: #FFFFFF;
+  --text-primary: #262626;
+  --text-secondary: #656565;
+  --text-tertiary: #8a8a8a;
+  --surface-button: #f1f1f1;
+  --surface-secondary: #f7f7f7;
+  --surface-primary-invert: #262626;
+  --dim: rgba(0,0,0,0.4);
+  --zzem-purple: #8752fa;
+  --zzem-purple-100: #f1ecfe;
+  --toast-bg: #171717;
+  --radius-sheet: 28px;
+  --radius-btn: 16px;
+  --radius-pill: 9999px;
+  --feed-bg: #090909;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Pretendard', -apple-system, 'SF Pro', sans-serif;
+  background: #f0f0f0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  padding: 16px;
+}
+
+/* Control Panel */
+.control-panel {
+  width: 390px;
+  background: #1a1a2e;
+  color: #e0e0e0;
+  border-radius: 12px 12px 0 0;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13px;
+}
+.control-panel__row { display: flex; align-items: center; gap: 8px; }
+.control-panel__label { color: #888; font-size: 11px; min-width: 48px; }
+.control-panel__states { display: flex; gap: 4px; flex-wrap: wrap; }
+.control-panel__state-btn {
+  background: #2a2a3e; color: #bbb; border: 1px solid #444;
+  border-radius: 6px; padding: 4px 10px; font-size: 11px; cursor: pointer;
+  transition: all 0.15s;
+}
+.control-panel__state-btn.active {
+  background: var(--zzem-purple); color: #fff; border-color: var(--zzem-purple);
+}
+.control-panel__breadcrumb { color: #666; font-size: 11px; font-family: monospace; }
+
+/* Device */
+.device-frame {
+  width: 390px; height: 844px;
+  background: var(--feed-bg);
+  overflow: hidden; position: relative;
+  border: 1px solid #ddd;
+  border-radius: 0 0 12px 12px;
+  font-family: 'Pretendard', sans-serif;
+}
+
+/* === SwipeFeed backdrop === */
+.feed-backdrop {
+  position: absolute; inset: 0;
+  background:
+    linear-gradient(180deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0) 25%, rgba(0,0,0,0) 60%, rgba(0,0,0,0.55) 100%),
+    radial-gradient(120% 80% at 30% 30%, #6b4cff 0%, #2d1a66 45%, #090909 80%);
+  filter: blur(2px);
+}
+.status-bar {
+  position: absolute; top: 0; left: 0; right: 0; height: 44px;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 0 24px; color: white; font-size: 15px; font-weight: 600;
+  z-index: 2;
+}
+.status-bar__right { display: flex; gap: 6px; font-size: 12px; opacity: 0.9; }
+.feed-header {
+  position: absolute; top: 50px; left: 0; right: 0;
+  display: flex; justify-content: space-between; padding: 10px 16px;
+  color: white; z-index: 2;
+}
+.feed-header__logo { font-weight: 800; font-size: 18px; letter-spacing: -0.5px; }
+.feed-header__right { display: flex; gap: 12px; align-items: center; font-size: 13px; }
+.side-actions {
+  position: absolute; right: 12px; bottom: 180px;
+  display: flex; flex-direction: column; gap: 22px;
+  z-index: 2;
+}
+.side-actions__item {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  color: white; font-size: 11px; font-weight: 600;
+}
+.side-actions__icon {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+}
+.creator-info {
+  position: absolute; left: 16px; bottom: 140px; z-index: 2;
+  display: flex; flex-direction: column; gap: 8px; color: white;
+  max-width: 280px;
+}
+.creator-info__row { display: flex; align-items: center; gap: 8px; }
+.creator-info__avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: linear-gradient(135deg, #ffb2d9, #a788fd);
+  border: 1.5px solid white;
+}
+.creator-info__name { font-weight: 600; font-size: 14px; }
+.creator-info__badge { font-size: 11px; color: #7ed7ff; }
+.creator-info__desc { font-size: 13px; line-height: 1.4; opacity: 0.95; }
+.feed-cta-row {
+  position: absolute; left: 16px; right: 16px; bottom: 90px;
+  display: flex; gap: 8px; z-index: 2;
+}
+.feed-cta-primary {
+  flex: 1; height: 48px; border-radius: 14px;
+  background: var(--zzem-purple); color: white;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 15px;
+  box-shadow: 0 4px 20px rgba(135,82,250,0.45);
+  cursor: pointer;
+}
+.feed-cta-toggle {
+  width: 60px; height: 48px; border-radius: 14px;
+  background: rgba(255,255,255,0.15); color: white;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px;
+}
+
+/* === Dim overlay === */
+.dim-overlay {
+  position: absolute; inset: 0;
+  background: var(--dim);
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.22s ease;
+  z-index: 10;
+}
+.dim-overlay.visible { opacity: 1; pointer-events: auto; }
+
+/* === Bottom Sheet === */
+.sheet {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  background: white;
+  border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
+  padding: 10px 20px 34px;
+  transform: translateY(100%);
+  transition: transform 0.28s cubic-bezier(.32,.72,0,1);
+  z-index: 20;
+  box-shadow: 0 -8px 32px rgba(0,0,0,0.12);
+}
+.sheet.visible { transform: translateY(0); }
+.sheet__handle {
+  width: 40px; height: 4px; border-radius: 2px;
+  background: #d5d5d5;
+  margin: 0 auto 18px;
+}
+.sheet__badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--zzem-purple-100);
+  color: var(--zzem-purple);
+  padding: 6px 10px; border-radius: var(--radius-pill);
+  font-size: 12px; font-weight: 600;
+  margin-bottom: 12px;
+}
+.sheet__badge .dot {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--zzem-purple);
+}
+.sheet__title {
+  font-size: 20px; font-weight: 700; color: var(--text-primary);
+  line-height: 1.35; letter-spacing: -0.3px;
+  margin-bottom: 8px;
+}
+.sheet__subtitle {
+  font-size: 14px; color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 24px;
+}
+.sheet__price-row {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--surface-secondary);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 20px;
+}
+.sheet__coin {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: linear-gradient(135deg, #ffd966, #ffb300);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; color: #7a4a00; font-weight: 800;
+}
+.sheet__price-label { flex: 1; font-size: 14px; color: var(--text-secondary); }
+.sheet__price-value { font-size: 16px; font-weight: 700; color: var(--text-primary); }
+.sheet__actions {
+  display: flex; flex-direction: column; gap: 8px;
+}
+.btn {
+  height: 56px; border-radius: var(--radius-btn);
+  font-size: 16px; font-weight: 600;
+  border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  gap: 6px;
+  font-family: inherit;
+  transition: opacity 0.15s, transform 0.05s;
+}
+.btn:active { transform: scale(0.98); }
+.btn--primary {
+  background: var(--surface-primary-invert);
+  color: white;
+}
+.btn--primary-purple {
+  background: var(--zzem-purple);
+  color: white;
+}
+.btn--secondary {
+  background: rgba(0,0,0,0.05);
+  color: var(--text-primary);
+}
+.btn:disabled { opacity: 0.5; pointer-events: none; }
+.btn .coin-mini {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: linear-gradient(135deg, #ffd966, #ffb300);
+  font-size: 10px; color: #7a4a00; font-weight: 800;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+
+/* Login illustration */
+.sheet__illust {
+  width: 72px; height: 72px; border-radius: 50%;
+  background: linear-gradient(135deg, #a788fd, #8752fa);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 34px; margin: 4px 0 14px;
+}
+
+/* Error icon */
+.sheet__error-icon {
+  width: 64px; height: 64px; border-radius: 50%;
+  background: #fff0ee;
+  color: #d92800;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 32px; margin: 4px 0 14px;
+}
+
+/* === Toast === */
+.toast {
+  position: absolute;
+  left: 50%; bottom: 120px;
+  transform: translate(-50%, 20px);
+  background: var(--toast-bg);
+  color: white;
+  padding: 12px 20px;
+  border-radius: var(--radius-pill);
+  font-size: 14px; font-weight: 600;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.2s, transform 0.2s;
+  z-index: 30; white-space: nowrap;
+}
+.toast.visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+/* Home indicator */
+.home-indicator {
+  position: absolute; bottom: 8px; left: 50%;
+  transform: translateX(-50%);
+  width: 134px; height: 5px; border-radius: 3px;
+  background: rgba(255,255,255,0.6);
+  z-index: 5;
+}
+</style>
+</head>
+<body>
+
+<div class="control-panel">
+  <div class="control-panel__row">
+    <span class="control-panel__label">Screen</span>
+    <div class="control-panel__breadcrumb">ConfirmSheetsAndFlow</div>
+  </div>
+  <div class="control-panel__row">
+    <span class="control-panel__label">State</span>
+    <div class="control-panel__states" id="state-toggles">
+      <button class="control-panel__state-btn active" data-state="free-confirm" onclick="setState('free-confirm')">free-confirm</button>
+      <button class="control-panel__state-btn" data-state="credit-confirm" onclick="setState('credit-confirm')">credit-confirm</button>
+      <button class="control-panel__state-btn" data-state="login-prompt" onclick="setState('login-prompt')">login-prompt</button>
+      <button class="control-panel__state-btn" data-state="concurrent-toast" onclick="setState('concurrent-toast')">concurrent-toast</button>
+      <button class="control-panel__state-btn" data-state="error-state" onclick="setState('error-state')">error-state</button>
+    </div>
+  </div>
+  <div class="control-panel__row">
+    <span class="control-panel__breadcrumb" id="breadcrumb">state: free-confirm</span>
+  </div>
+</div>
+
+<div class="device-frame" id="device-frame">
+
+  <!-- SwipeFeed backdrop (dimmed behind sheets) -->
+  <div class="feed-backdrop"></div>
+
+  <div class="status-bar">
+    <span>9:41</span>
+    <div class="status-bar__right">
+      <span>􀙇</span><span>􀛨</span><span>􀛬</span>
+    </div>
+  </div>
+
+  <div class="feed-header">
+    <div class="feed-header__logo">ZZEM</div>
+    <div class="feed-header__right">
+      <span>💎 128</span>
+      <span>🔔</span>
+    </div>
+  </div>
+
+  <div class="side-actions">
+    <div class="side-actions__item"><div class="side-actions__icon">♡</div><span>1.2천</span></div>
+    <div class="side-actions__item"><div class="side-actions__icon">♻︎</div><span>342</span></div>
+    <div class="side-actions__item"><div class="side-actions__icon">↗︎</div><span>공유</span></div>
+    <div class="side-actions__item"><div class="side-actions__icon">⋯</div></div>
+  </div>
+
+  <div class="creator-info">
+    <div class="creator-info__row">
+      <div class="creator-info__avatar"></div>
+      <div>
+        <div class="creator-info__name">쨈 <span class="creator-info__badge">✓</span></div>
+        <div style="font-size:11px;opacity:0.7">AI 템플릿</div>
+      </div>
+    </div>
+    <div class="creator-info__desc">오늘만 무료! 이 템플릿으로 내 사진 밈 만들기 🎨</div>
+  </div>
+
+  <div class="feed-cta-row">
+    <div class="feed-cta-primary" onclick="setState('free-confirm')">무료로 만들기</div>
+    <div class="feed-cta-toggle">공개</div>
+  </div>
+
+  <div class="home-indicator"></div>
+
+  <!-- Dim overlay -->
+  <div class="dim-overlay" id="dim-overlay"></div>
+
+  <!-- FreeUseConfirmSheet -->
+  <div class="sheet" id="sheet-free">
+    <div class="sheet__handle"></div>
+    <div class="sheet__badge"><span class="dot"></span>무료 1회 남음</div>
+    <div class="sheet__title">오늘의 무료 기회를<br>사용할까요?</div>
+    <div class="sheet__subtitle">하루에 1번만 무료로 만들 수 있어요</div>
+    <div class="sheet__actions">
+      <button class="btn btn--primary-purple" id="btn-free-use" onclick="onFreeUse()">무료 사용하기</button>
+      <button class="btn btn--secondary" onclick="closeSheet()">더 둘러볼게요</button>
+    </div>
+  </div>
+
+  <!-- CreditUseConfirmSheet -->
+  <div class="sheet" id="sheet-credit">
+    <div class="sheet__handle"></div>
+    <div class="sheet__title">크레딧을 사용할까요?</div>
+    <div class="sheet__subtitle">오늘의 무료 기회를 이미 사용했어요</div>
+    <div class="sheet__price-row">
+      <div class="sheet__coin">c</div>
+      <div class="sheet__price-label">이 템플릿 생성 비용</div>
+      <div class="sheet__price-value">30 크레딧</div>
+    </div>
+    <div class="sheet__actions">
+      <button class="btn btn--primary" onclick="onCreditUse()">
+        <span class="coin-mini">c</span>
+        크레딧 사용하기 · 30
+      </button>
+      <button class="btn btn--secondary" onclick="closeSheet()">취소</button>
+    </div>
+  </div>
+
+  <!-- LoginPromptSheet -->
+  <div class="sheet" id="sheet-login">
+    <div class="sheet__handle"></div>
+    <div class="sheet__illust">🔐</div>
+    <div class="sheet__title">로그인이 필요해요</div>
+    <div class="sheet__subtitle">로그인하고 오늘의 무료 기회로<br>나만의 밈을 만들어보세요</div>
+    <div class="sheet__actions">
+      <button class="btn btn--primary-purple" onclick="onLogin()">로그인하고 계속하기</button>
+      <button class="btn btn--secondary" onclick="closeSheet()">나중에</button>
+    </div>
+  </div>
+
+  <!-- ErrorSheet -->
+  <div class="sheet" id="sheet-error">
+    <div class="sheet__handle"></div>
+    <div class="sheet__error-icon">!</div>
+    <div class="sheet__title">생성에 실패했어요</div>
+    <div class="sheet__subtitle">잠시 후 다시 시도해주세요.<br>무료 기회는 그대로 보존돼요.</div>
+    <div class="sheet__actions">
+      <button class="btn btn--primary" onclick="onRetry()">다시 시도</button>
+      <button class="btn btn--secondary" onclick="closeSheet()">닫기</button>
+    </div>
+  </div>
+
+  <!-- Concurrent Toast -->
+  <div class="toast" id="toast-concurrent">밈 생성 중에는 다른 밈을 만들 수 없어요!</div>
+
+</div>
+
+<script>
+  const SHEETS = ['sheet-free', 'sheet-credit', 'sheet-login', 'sheet-error'];
+  const STATE_MAP = {
+    'free-confirm': 'sheet-free',
+    'credit-confirm': 'sheet-credit',
+    'login-prompt': 'sheet-login',
+    'error-state': 'sheet-error',
+  };
+
+  let currentState = 'free-confirm';
+  let toastTimer = null;
+
+  function setState(state) {
+    currentState = state;
+    clearTimeout(toastTimer);
+
+    // Hide all sheets
+    SHEETS.forEach(id => document.getElementById(id).classList.remove('visible'));
+    const toast = document.getElementById('toast-concurrent');
+    toast.classList.remove('visible');
+    const dim = document.getElementById('dim-overlay');
+
+    if (state === 'concurrent-toast') {
+      dim.classList.remove('visible');
+      toast.classList.add('visible');
+      toastTimer = setTimeout(() => toast.classList.remove('visible'), 2400);
+    } else if (STATE_MAP[state]) {
+      dim.classList.add('visible');
+      // slight delay for staged entry
+      requestAnimationFrame(() => {
+        document.getElementById(STATE_MAP[state]).classList.add('visible');
+      });
+    } else {
+      dim.classList.remove('visible');
+    }
+
+    // Update control panel
+    document.querySelectorAll('.control-panel__state-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.state === state);
+    });
+    document.getElementById('breadcrumb').textContent = 'state: ' + state;
+  }
+
+  function closeSheet() {
+    SHEETS.forEach(id => document.getElementById(id).classList.remove('visible'));
+    document.getElementById('dim-overlay').classList.remove('visible');
+    currentState = 'closed';
+    document.querySelectorAll('.control-panel__state-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById('breadcrumb').textContent = 'state: closed (SwipeFeed)';
+  }
+
+  // Flow demo handlers — simulate downstream flow without real nav
+  function onFreeUse() {
+    // Demonstrate debounce + concurrent toast path
+    const btn = document.getElementById('btn-free-use');
+    btn.disabled = true;
+    setTimeout(() => { btn.disabled = false; }, 1200);
+    setState('concurrent-toast');
+  }
+  function onCreditUse() {
+    // Simulate server error path for demo
+    setState('error-state');
+  }
+  function onLogin() {
+    // Post-login resume free-confirm
+    setState('free-confirm');
+  }
+  function onRetry() {
+    setState('free-confirm');
+  }
+
+  // Init
+  document.addEventListener('DOMContentLoaded', () => setState('free-confirm'));
+</script>
+
+</body>
+</html>

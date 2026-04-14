@@ -1,0 +1,65 @@
+sprint_id: "free-tab-diversification"
+generated_at: "2026-04-14T21:30:00+09:00"
+
+patterns:
+  - pattern: "Cross-repo 동작 경로 분리 시 한쪽 경로 누락 (legacy vs new workflow)"
+    category: "integration"
+    frequency: 1
+    groups: ["group-002"]
+    severity: "major"
+    contract_clause: "생성 파이프라인에 복수 경로(legacy/new workflow)가 존재하면, 실패 처리(rollback/cleanup) 로직을 양쪽 모두에 구현하거나 공통 helper로 일원화해야 한다."
+    systemic_fix: "rollback 로직을 domain service private helper로 분리하여 모든 진입점이 동일 경로를 호출하도록 구조화"
+    skill_candidate: false
+
+  - pattern: "응답/요청 데이터 shape에 파생 필드(pricing/display)가 있을 때 서버 계산과 UI 렌더 기준이 일치해야 함"
+    category: "integration"
+    frequency: 1
+    groups: ["group-002"]
+    severity: "major"
+    contract_clause: "서버 응답의 pricing 필드(requiredCredit 등)는 실제 생성 시 서버가 계산하는 값과 동일해야 한다. 폴백/스냅샷 응답도 실제 생성 경로의 eligibility와 일치해야 한다."
+    systemic_fix: "RosterContext 패턴 — pricing source와 display source를 명시적으로 분리하여 각각 다른 사용처가 섞이지 않도록"
+
+  - pattern: "route/navigation params 타입 추가 시 호출부 useCallback deps 누락"
+    category: "completeness"
+    frequency: 1
+    groups: ["group-003"]
+    severity: "major"
+    contract_clause: "route.types.ts에 새 param을 추가하면, 모든 navigation.navigate 호출부에서 해당 param을 전달하고 useCallback deps에 포함해야 한다."
+    systemic_fix: "TypeScript required param 또는 전달 강제 helper 도입 고려"
+
+  - pattern: "Pre-existing monorepo module resolution 이슈 (@wrtn/* 패키지)"
+    category: "code_quality"
+    frequency: 1
+    groups: ["group-003", "group-004"]
+    severity: "minor"
+    contract_clause: null
+    systemic_fix: "monorepo 빌드 안정화는 본 스프린트 scope 밖 — 환경 차원 개선 필요"
+
+  - pattern: "Deep link 경로에서 passthrough 없는 상태로 새 UI가 진입할 때 렌더 분기 대응"
+    category: "edge_case"
+    frequency: 2
+    groups: ["group-003", "group-004"]
+    severity: "minor"
+    contract_clause: "새 화면이 navigation params에 의존하는 데이터를 가질 때, deep link 직진입 경로에서도 최소 동작(예: 기본값 렌더 또는 fetch fallback)을 보장해야 한다."
+    systemic_fix: "navigation params 의존 데이터는 params | fetchFallback 패턴으로 양쪽 경로 지원"
+
+  - pattern: "E2E 환경 의존성 (VPN + 토큰 + 시드 데이터)"
+    category: "integration"
+    frequency: 2
+    groups: ["group-003", "group-004"]
+    severity: "minor"
+    contract_clause: "E2E flow는 seed fetch 실패 시 graceful degradation 또는 명확한 env 요건 문서화가 필요하다."
+    systemic_fix: "e2e:auth 래퍼에 오프라인/토큰만료 모드 추가 또는 선택적 assertVisible 사용 가이드 문서화"
+
+metrics:
+  total_groups: 4
+  first_pass_rate: 0.50        # 2/4 (group-001, group-004)
+  avg_fix_cycles: 0.5          # 2 fix loops / 4 groups
+  critical_issues_found: 0
+  major_issues_found: 3
+  minor_issues_found: 11
+  issues_fixed: 3
+  issues_deferred: 11
+  e2e_flows_total: 6            # sprint scope 관련 (home-tabs, free-tab-grid, swipe-feed, swipe-feed-free-circular, free-gen-confirm, external-entry-free-parity)
+  e2e_pass: 4
+  e2e_env_fail: 2               # --allow-e2e-fail 환경 의존
