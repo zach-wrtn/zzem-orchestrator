@@ -1,0 +1,28 @@
+sprint_id: "free-tab-diversification"
+
+repositories:
+  backend:
+    path: wrtn-backend
+    url: git@github.wrtn.club:wrtn-tech/wrtn-backend.git
+    base: "apple"
+  app:
+    path: app-core-packages
+    url: git@github.com:wrtn-tech/app-core-packages.git
+    base: "epic/ugc-platform-final"
+  tokens:
+    path: wds-tokens
+    url: git@github.wrtn.club:pepper/wds-tokens.git
+    base: "main"
+
+defaults:
+  base: "main"
+
+team:
+  teammates:
+    - be-engineer
+    - fe-engineer
+    - design-engineer
+    - evaluator
+  settings:
+    eval_retry_limit: 2
+    max_parallel_tasks: 4

@@ -10,3 +10,6 @@
 | code-quality-001 | Clean Architecture 위반 (domain에서 react-query import) | code_quality | major | 1 | ugc-profile-nav-001 |
 | completeness-001 | 네비게이션 진입점 누락 | completeness | critical | 1 | ugc-profile-nav-001 |
 | completeness-002 | 훅 생성 후 호출부 미구현 | completeness | major | 1 | ugc-profile-nav-001 |
+| integration-002 | Cross-path cleanup/rollback 누락 (legacy vs new workflow) | integration | major | 1 | free-tab-diversification |
+| correctness-003 | Pricing source와 Display source 혼재 | correctness | major | 1 | free-tab-diversification |
+| completeness-003 | Navigation route.types param 추가 시 호출부 전달 누락 | completeness | major | 1 | free-tab-diversification |

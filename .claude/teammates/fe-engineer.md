@@ -42,6 +42,23 @@ git worktree add -b zzem/{sprint-id}/{task-id} \
 
 ### 4. 구현
 
+#### E2E Testability 필수 규칙
+
+태스크 Specification에 "E2E 인증: `flows/{name}.yaml` 작성/확장"이 포함된 경우 구현 중 함께 수행:
+
+1. **testID 추가**: `src/shared/constants/test-ids.ts`의 `TestIds` 상수에 등록. 네이밍 `{screen}.{element}.{variant?}`.
+2. **Maestro 제약 준수**:
+   - 네비게이션은 **딥링크 우선** (Fabric+RNGH tap 미발화 이슈). 새 화면은 `zzem://` 라우트 선언.
+   - `TextInput`에 직접 testID 부여 금지 → 래퍼 `<VStack testID={...}>` 사용.
+   - `RegularButton` 계열은 **버튼 컴포넌트에 직접** testID 부여 (래퍼 금지).
+   - **CTA 검증 타협**: 바텀시트/모달 트리거 등 탭 이벤트 발화가 불안정한 CTA는 `assertVisible`까지만 작성. 탭 후 결과 검증은 Evaluator의 코드 추적에 위임 (flow에 `# tap deferred to evaluator` 주석).
+3. **Flow 작성**: `app-core-packages/apps/MemeApp/e2e/flows/{name}.yaml`
+   - 인증 필요 시 `- runFlow: ../helpers/login.yaml`
+   - 실제 ID 필요 시 시드 fetcher 추가 (`e2e/scripts/fetch-seed-*.mjs`)
+4. **로컬 검증**: 머지 보고 전 최소 1회 `maestro test {flow}` 실행 확인 (시뮬레이터 필요 시 사용자에 실행 요청).
+
+> 상세 규칙·제약·재시도 조건은 `app-core-packages/apps/MemeApp/e2e/README.md` 참조.
+
 #### Architecture (Clean Architecture)
 - **Presentation**: Screen → ViewModel (React Query hooks)
 - **Domain**: Entity (Zod), Repository interface, UseCase

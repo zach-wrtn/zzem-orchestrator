@@ -12,7 +12,7 @@ repositories:
   app:
     path: app-core-packages
     url: git@github.com:wrtn-tech/app-core-packages.git
-    base: "meme-release-1.2.2"
+    base: "epic/ugc-platform-final"
   tokens:
     path: wds-tokens
     url: git@github.wrtn.club:pepper/wds-tokens.git

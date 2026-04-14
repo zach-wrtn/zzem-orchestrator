@@ -1,0 +1,10 @@
+{"ts":"2026-04-14T14:20:00+09:00","task":"Group 002 eval","phase":"started","message":"Group 002 평가 시작 (be-003 + be-004)","detail":null}
+{"ts":"2026-04-14T14:22:00+09:00","task":"Group 002 eval","phase":"context_loaded","message":"Sprint Contract + api-contract.yaml + task specs + rubric v1 로드 완료","detail":null}
+{"ts":"2026-04-14T14:28:00+09:00","task":"Group 002 eval","phase":"build_check","message":"tsc (meme-api) + jest 698/698 통과","detail":null}
+{"ts":"2026-04-14T14:55:00+09:00","task":"Group 002 eval","phase":"evaluating","message":"Logic tracing + edge case probing 수행 — BR-2 레거시 롤백 + 어제 폴백 requiredCredit 이슈 발견","detail":null}
+{"ts":"2026-04-14T15:05:00+09:00","task":"Group 002 eval","phase":"completed","message":"Group 002: ISSUES (Critical 0, Major 2, Minor 4). Report: evaluations/group-002.md","detail":null}
+{"ts":"2026-04-14T09:00:00Z","task":"Group 003 evaluation","phase":"started","message":"Group 003 평가 시작","detail":null}
+{"ts":"2026-04-14T09:05:00Z","task":"Group 003 evaluation","phase":"context_loaded","message":"Contract + task specs + API contract 확인 완료","detail":null}
+{"ts":"2026-04-14T09:10:00Z","task":"Group 003 evaluation","phase":"build_check","message":"Sprint tests 42/42 pass (pre-existing failures만 존재)","detail":null}
+{"ts":"2026-04-14T09:15:00Z","task":"Group 003 evaluation","phase":"evaluating","message":"Logic tracing + edge case probing 수행","detail":null}
+{"ts":"2026-04-14T09:30:00Z","task":"Group 003 evaluation","phase":"completed","message":"Group 003: ISSUES (Critical 0, Major 1, Minor 4)","detail":"freeUsedToday not passed from grid to SwipeFeed navigation params"}

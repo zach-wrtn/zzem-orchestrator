@@ -1,0 +1,195 @@
+openapi: 3.0.3
+info:
+  title: Free Tab Filter Diversification API
+  version: "1.0.0"
+  description: |
+    Expands free filter roster from 1/day to N/day with date-based slot management.
+    KST(UTC+9) boundary. App version gating preserves legacy 1-filter UX (BR-11).
+
+servers:
+  - url: https://meme-api/
+    description: meme-api
+
+paths:
+  /filters:
+    get:
+      summary: List filters (v2 — includes free roster + usage state)
+      parameters:
+        - in: query
+          name: chip
+          schema: { type: string, enum: [free, hot, new, all] }
+          description: Optional tag/chip filter. `free` returns today's roster in fixed order.
+        - in: query
+          name: cursor
+          schema: { type: string }
+        - in: query
+          name: limit
+          schema: { type: integer, default: 40 }
+        - in: header
+          name: X-App-Version
+          schema: { type: string }
+          description: |
+            Semver. BR-11: if below FREE_ROSTER_MIN_VERSION, server returns legacy
+            shape (single free filter via `tags:[free]`) and omits `free` block.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FilterListResponse"
+
+  /free-tab:
+    get:
+      summary: Today's free roster (dedicated endpoint for free tab)
+      description: |
+        Returns today's activated N filters in fixed grid/swipe order (BR-6),
+        banner-relevant usage state, and roster date for debugging.
+        Falls back to yesterday's expired slots if today has none (AC 2.1.2).
+      parameters:
+        - in: header
+          name: X-App-Version
+          schema: { type: string }
+      responses:
+        "200":
+          description: OK (N >= 1) or empty state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FreeTabResponse"
+
+  /filters/{filterId}/gen:
+    post:
+      summary: Generate meme (existing endpoint — free slot auto-mapping added)
+      description: |
+        Server auto-resolves today's free slot by (userId, filterId, KST today).
+        Applies BR-1/3 (DB unique constraint blocks 2nd free gen). App never
+        sends slot identifiers (BR-12). Failure does not consume quota (BR-2).
+      parameters:
+        - in: path
+          name: filterId
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateRequest"
+      responses:
+        "200":
+          description: Generation accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenerateResponse"
+        "409":
+          description: |
+            DB unique constraint hit — user already has a free generation today
+            for any free filter. Response indicates paid fallback is required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FreeAlreadyUsedError"
+
+components:
+  schemas:
+    FilterSummary:
+      type: object
+      required: [filterId, title, thumbnailUrl, type, tags, requiredCredit]
+      properties:
+        filterId: { type: string }
+        title: { type: string }
+        thumbnailUrl: { type: string, format: uri }
+        type:
+          type: string
+          enum: [IMAGE, VIDEO, MIXED_IMAGE_TO_IMAGE, MIXED_IMAGE_TO_VIDEO]
+        tags:
+          type: array
+          items: { type: string }
+        requiredCredit:
+          type: integer
+          description: 0 when this is the user's free eligible filter today.
+        themeTag:
+          type: string
+          enum: [baby, pet, studio]
+          description: BR-5 roster composition key (image-only filters — BR-4).
+
+    FreeUsageState:
+      type: object
+      required: [freeUsedToday, todayKst]
+      properties:
+        freeUsedToday:
+          type: boolean
+          description: |
+            BR-13. Drives banner color (purple vs teal), red dot, and CTA
+            icon/price on client. BR-1/BR-2: in-progress and completed both
+            count as used; failed does not.
+        todayKst:
+          type: string
+          format: date
+          description: "KST date (YYYY-MM-DD). BR-16."
+        rosterDate:
+          type: string
+          format: date
+          description: |
+            Date the returned roster was activated. If != todayKst → fallback
+            to yesterday's expired slots is in effect (AC 2.1.2).
+
+    FreeTabResponse:
+      type: object
+      required: [usage, filters]
+      properties:
+        usage:
+          $ref: "#/components/schemas/FreeUsageState"
+        filters:
+          type: array
+          description: |
+            Today's roster in fixed grid/swipe order (BR-6). 2-column grid
+            order == SwipeFeed scroll order. Empty array triggers AC 2.1.3.
+          items:
+            $ref: "#/components/schemas/FilterSummary"
+
+    FilterListResponse:
+      type: object
+      required: [items, usage]
+      properties:
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/FilterSummary" }
+        nextCursor:
+          type: string
+          nullable: true
+        usage:
+          $ref: "#/components/schemas/FreeUsageState"
+
+    GenerateRequest:
+      type: object
+      required: [imageUrl]
+      properties:
+        imageUrl: { type: string }
+        cropMeta: { type: object }
+
+    GenerateResponse:
+      type: object
+      required: [contentId, priceApplied]
+      properties:
+        contentId: { type: string }
+        priceApplied:
+          type: integer
+          description: 0 when free slot matched, otherwise filter base price.
+        usedFreeQuota:
+          type: boolean
+
+    FreeAlreadyUsedError:
+      type: object
+      required: [error, message, paidPrice]
+      properties:
+        error:
+          type: string
+          enum: [FREE_ALREADY_USED]
+        message:
+          type: string
+          example: "이미 무료 기회를 사용했어요"
+        paidPrice:
+          type: integer

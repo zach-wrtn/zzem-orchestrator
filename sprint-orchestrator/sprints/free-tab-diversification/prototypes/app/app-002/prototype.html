@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>app-002 · SwipeFeed Free Mode</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --color-bg-normal: #FFFFFF;
+      --color-label-normal: #212228;
+      --color-label-alternative: #6B6E76;
+      --color-label-assistive: #8E9199;
+      --color-line-normal: #E4E5E9;
+      --color-fill-neutral: #F0F1F3;
+      --color-brand-primary: #8752FA;
+      --color-brand-primary-soft: rgba(135, 82, 250, 0.92);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-pill: 999px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Pretendard', -apple-system, 'SF Pro', sans-serif;
+      background: #0a0a0f;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 16px;
+      color: #e0e0e0;
+    }
+
+    /* Control Panel */
+    .control-panel {
+      width: 393px;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      border-radius: 12px 12px 0 0;
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 13px;
+    }
+    .control-panel__row { display: flex; align-items: center; gap: 8px; }
+    .control-panel__label { color: #888; font-size: 11px; min-width: 48px; }
+    .control-panel select {
+      background: #2a2a3e; color: #e0e0e0;
+      border: 1px solid #444; border-radius: 6px;
+      padding: 4px 8px; font-size: 12px; flex: 1;
+    }
+    .control-panel__states { display: flex; gap: 4px; flex-wrap: wrap; }
+    .control-panel__state-btn {
+      background: #2a2a3e; color: #888;
+      border: 1px solid #444; border-radius: 6px;
+      padding: 4px 10px; font-size: 11px; cursor: pointer;
+      transition: all 0.15s;
+    }
+    .control-panel__state-btn.active {
+      background: var(--color-brand-primary);
+      color: #fff; border-color: var(--color-brand-primary);
+    }
+    .control-panel__breadcrumb {
+      color: #666; font-size: 11px; font-family: monospace;
+    }
+
+    /* Device Frame — iPhone 14 Pro 393x852 */
+    .device-frame {
+      width: 393px;
+      height: 852px;
+      background: #000;
+      overflow: hidden;
+      position: relative;
+      border: 1px solid #222;
+      border-radius: 0 0 12px 12px;
+    }
+
+    /* Screen */
+    .screen {
+      display: none;
+      flex-direction: column;
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+    .screen.active { display: flex; }
+
+    /* Status Bar (iOS Dynamic Island-style) */
+    .status-bar {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 54px;
+      z-index: 50;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 18px 28px 0;
+      color: #fff;
+      font-size: 15px;
+      font-weight: 600;
+      pointer-events: none;
+    }
+    .status-bar__right {
+      display: flex;
+      gap: 6px;
+      font-size: 14px;
+    }
+
+    /* State Visibility */
+    [data-state] { display: none; }
+    [data-state].state-active { display: flex; }
+
+    /* Feed Pager — vertical snap */
+    .feed-pager {
+      width: 100%;
+      height: 100%;
+      overflow-y: auto;
+      scroll-snap-type: y mandatory;
+      background: #000;
+      scrollbar-width: none;
+    }
+    .feed-pager::-webkit-scrollbar { display: none; }
+
+    .feed-card {
+      position: relative;
+      width: 393px;
+      height: 852px;
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    /* Card Image (mock gradient) */
+    .card-image {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+    }
+    .card-image--1 {
+      background: radial-gradient(circle at 30% 20%, #ff7a59 0%, #ff3d7f 35%, #6d2ae0 75%, #1a0b3d 100%);
+    }
+    .card-image--2 {
+      background: radial-gradient(circle at 70% 30%, #ffd75e 0%, #ff8a3d 40%, #8752FA 85%, #0f0720 100%);
+    }
+    .card-image--last {
+      background: radial-gradient(circle at 50% 60%, #2bd4a4 0%, #1e88e5 40%, #5b2ad9 80%, #0a0522 100%);
+    }
+    /* Decorative pattern overlay */
+    .card-image::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(circle at 80% 80%, rgba(255,255,255,0.15) 0%, transparent 40%),
+        radial-gradient(circle at 10% 90%, rgba(0,0,0,0.25) 0%, transparent 50%);
+    }
+
+    /* Scrims */
+    .scrim-top {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 180px;
+      background: linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0) 100%);
+      z-index: 2;
+      pointer-events: none;
+    }
+    .scrim-bottom {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 340px;
+      background: linear-gradient(0deg, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.35) 55%, rgba(0,0,0,0) 100%);
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    /* Top bar */
+    .card-top {
+      position: absolute;
+      top: 54px; left: 0; right: 0;
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 10;
+    }
+    .icon-btn {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: none;
+      border-radius: var(--radius-pill);
+      color: #fff;
+      cursor: pointer;
+      font-size: 18px;
+    }
+    .mode-badge {
+      background: var(--color-brand-primary-soft);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: var(--radius-pill);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      letter-spacing: -0.2px;
+    }
+    .mode-badge__dot {
+      width: 6px;
+      height: 6px;
+      background: #fff;
+      border-radius: 50%;
+      box-shadow: 0 0 8px rgba(255,255,255,0.8);
+    }
+
+    /* Page indicator */
+    .page-indicator {
+      position: absolute;
+      top: 108px;
+      right: 16px;
+      background: rgba(0,0,0,0.45);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+      z-index: 10;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Circular hint banner (last card) */
+    .circular-hint {
+      position: absolute;
+      top: 112px;
+      left: 16px;
+      right: 16px;
+      background: var(--color-brand-primary-soft);
+      color: #fff;
+      padding: 12px 14px;
+      border-radius: var(--radius-md);
+      z-index: 11;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      font-weight: 500;
+      box-shadow: 0 8px 24px rgba(135, 82, 250, 0.35);
+      animation: hintPulse 2.4s ease-in-out infinite;
+    }
+    .circular-hint__icon {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255,255,255,0.18);
+      border-radius: 50%;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+    .circular-hint__text {
+      flex: 1;
+      line-height: 1.35;
+    }
+    .circular-hint__text strong {
+      display: block;
+      font-weight: 700;
+      font-size: 13px;
+    }
+    .circular-hint__text span {
+      display: block;
+      font-size: 11.5px;
+      opacity: 0.85;
+      margin-top: 2px;
+    }
+    @keyframes hintPulse {
+      0%, 100% { transform: translateY(0); box-shadow: 0 8px 24px rgba(135, 82, 250, 0.35); }
+      50% { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(135, 82, 250, 0.5); }
+    }
+
+    /* Footer (bottom) */
+    .card-footer {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 20px 20px 36px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      z-index: 10;
+    }
+    .card-meta-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: rgba(255,255,255,0.75);
+    }
+    .creator-avatar {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ffb8a1 0%, #ff60a8 100%);
+      border: 1.5px solid rgba(255,255,255,0.9);
+      flex-shrink: 0;
+    }
+    .card-title {
+      color: #fff;
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.6px;
+      line-height: 1.2;
+      text-shadow: 0 2px 12px rgba(0,0,0,0.4);
+    }
+    .card-subtitle {
+      color: rgba(255,255,255,0.8);
+      font-size: 13px;
+      font-weight: 500;
+      line-height: 1.4;
+    }
+
+    /* CTA */
+    .cta {
+      width: 100%;
+      height: 56px;
+      border: none;
+      border-radius: var(--radius-pill);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+      letter-spacing: -0.3px;
+    }
+    .cta:active { transform: scale(0.98); }
+    .cta--free {
+      background: #FFFFFF;
+      color: #121217;
+      box-shadow: 0 8px 22px rgba(0,0,0,0.3);
+    }
+    .cta--paid {
+      background: var(--color-brand-primary);
+      color: #fff;
+      box-shadow: 0 8px 22px rgba(135, 82, 250, 0.5);
+    }
+    .cta__icon {
+      width: 24px;
+      height: 24px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+    .cta--free .cta__icon {
+      background: linear-gradient(135deg, #FFD75E 0%, #FF9F1C 100%);
+      color: #fff;
+      border-radius: 50%;
+      font-size: 13px;
+      box-shadow: inset 0 -2px 0 rgba(0,0,0,0.12);
+    }
+    .cta--paid .cta__icon {
+      background: linear-gradient(135deg, #FFD75E 0%, #F59E0B 100%);
+      color: #5a3500;
+      border-radius: 50%;
+      font-size: 13px;
+      font-weight: 900;
+      box-shadow: inset 0 -2px 0 rgba(0,0,0,0.15);
+    }
+
+    /* Swipe affordance */
+    .swipe-affordance {
+      position: absolute;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: rgba(255,255,255,0.55);
+      font-size: 10px;
+      font-weight: 500;
+      z-index: 5;
+      animation: bounceY 2s ease-in-out infinite;
+      pointer-events: none;
+    }
+    @keyframes bounceY {
+      0%, 100% { transform: translate(-50%, 0); opacity: 0.55; }
+      50% { transform: translate(-50%, -6px); opacity: 0.9; }
+    }
+    .swipe-affordance__arrow {
+      font-size: 16px;
+      line-height: 1;
+    }
+
+    /* Home indicator */
+    .home-indicator {
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 134px;
+      height: 5px;
+      background: rgba(255,255,255,0.85);
+      border-radius: 3px;
+      z-index: 20;
+    }
+
+    /* Loop arrow on last card (visual "wraps to first") */
+    .loop-badge {
+      position: absolute;
+      top: 108px;
+      right: 16px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: #fff;
+      color: var(--color-brand-primary);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+      z-index: 10;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Control Panel -->
+  <div class="control-panel">
+    <div class="control-panel__row">
+      <span class="control-panel__label">Screen</span>
+      <select id="screen-select" onchange="navigateBySelect(this.value)">
+        <option value="swipe-feed-free">SwipeFeedScreenFreeMode</option>
+      </select>
+    </div>
+    <div class="control-panel__row">
+      <span class="control-panel__label">State</span>
+      <div class="control-panel__states" id="state-toggles">
+        <button class="control-panel__state-btn active" data-state="free-cta" onclick="toggleState('free-cta')">free-cta</button>
+        <button class="control-panel__state-btn" data-state="paid-cta" onclick="toggleState('paid-cta')">paid-cta</button>
+        <button class="control-panel__state-btn" data-state="last-card-circular" onclick="toggleState('last-card-circular')">last-card-circular</button>
+      </div>
+    </div>
+    <div class="control-panel__row">
+      <span class="control-panel__breadcrumb" id="breadcrumb">FreeTabGrid → SwipeFeedScreenFreeMode</span>
+    </div>
+  </div>
+
+  <!-- Device Frame -->
+  <div class="device-frame" id="device-frame">
+
+    <div class="screen active" id="swipe-feed-free">
+
+      <!-- Status Bar (overlay on all states) -->
+      <div class="status-bar">
+        <span>9:41</span>
+        <div class="status-bar__right">
+          <span>􀋂</span>
+          <span>􀙇</span>
+          <span>􀛨</span>
+        </div>
+      </div>
+
+      <!-- STATE: free-cta — first card, free ticket CTA -->
+      <div class="feed-pager" data-state="free-cta">
+        <section class="feed-card">
+          <div class="card-image card-image--1"></div>
+          <div class="scrim-top"></div>
+          <div class="scrim-bottom"></div>
+
+          <header class="card-top">
+            <button class="icon-btn" onclick="navBack()" aria-label="뒤로">‹</button>
+            <span class="mode-badge"><span class="mode-badge__dot"></span>오늘의 무료</span>
+            <button class="icon-btn" aria-label="더보기">⋯</button>
+          </header>
+
+          <span class="page-indicator">1 / 8</span>
+
+          <footer class="card-footer">
+            <div class="card-meta-row">
+              <span class="creator-avatar"></span>
+              <span>by @zzem_studio</span>
+              <span style="opacity:0.5">·</span>
+              <span>사용 1.2k</span>
+            </div>
+            <h2 class="card-title">도파민 뿜뿜<br>에너지 밈</h2>
+            <p class="card-subtitle">오늘 하루 무료로 사용할 수 있어요</p>
+            <button class="cta cta--free" onclick="openConfirmSheet()">
+              <span class="cta__icon">🎟</span>
+              <span>무료</span>
+            </button>
+          </footer>
+
+          <div class="swipe-affordance">
+            <span class="swipe-affordance__arrow">⌃</span>
+            <span>위로 스와이프</span>
+          </div>
+        </section>
+      </div>
+
+      <!-- STATE: paid-cta — same card but freeUsedToday=true -->
+      <div class="feed-pager" data-state="paid-cta">
+        <section class="feed-card">
+          <div class="card-image card-image--2"></div>
+          <div class="scrim-top"></div>
+          <div class="scrim-bottom"></div>
+
+          <header class="card-top">
+            <button class="icon-btn" onclick="navBack()" aria-label="뒤로">‹</button>
+            <span class="mode-badge"><span class="mode-badge__dot"></span>오늘의 무료</span>
+            <button class="icon-btn" aria-label="더보기">⋯</button>
+          </header>
+
+          <span class="page-indicator">2 / 8</span>
+
+          <footer class="card-footer">
+            <div class="card-meta-row">
+              <span class="creator-avatar" style="background:linear-gradient(135deg,#ffd75e 0%, #ff8a3d 100%)"></span>
+              <span>by @moody_kim</span>
+              <span style="opacity:0.5">·</span>
+              <span>사용 842</span>
+            </div>
+            <h2 class="card-title">갬성 다크 무드</h2>
+            <p class="card-subtitle">오늘 무료 1회 사용 완료 · 추가 사용은 크레딧</p>
+            <button class="cta cta--paid" onclick="openCreditSheet()">
+              <span class="cta__icon">₡</span>
+              <span>10</span>
+            </button>
+          </footer>
+
+          <div class="swipe-affordance">
+            <span class="swipe-affordance__arrow">⌃</span>
+            <span>위로 스와이프</span>
+          </div>
+        </section>
+      </div>
+
+      <!-- STATE: last-card-circular — last card + circular hint -->
+      <div class="feed-pager" data-state="last-card-circular">
+        <section class="feed-card">
+          <div class="card-image card-image--last"></div>
+          <div class="scrim-top"></div>
+          <div class="scrim-bottom"></div>
+
+          <header class="card-top">
+            <button class="icon-btn" onclick="navBack()" aria-label="뒤로">‹</button>
+            <span class="mode-badge"><span class="mode-badge__dot"></span>오늘의 무료</span>
+            <button class="icon-btn" aria-label="더보기">⋯</button>
+          </header>
+
+          <div class="circular-hint" role="status">
+            <span class="circular-hint__icon">↻</span>
+            <div class="circular-hint__text">
+              <strong>마지막 카드예요</strong>
+              <span>아래로 스와이프하면 처음으로 돌아가요</span>
+            </div>
+          </div>
+
+          <span class="loop-badge">
+            <span>8 / 8</span>
+            <span>↻</span>
+          </span>
+
+          <footer class="card-footer">
+            <div class="card-meta-row">
+              <span class="creator-avatar" style="background:linear-gradient(135deg,#2bd4a4 0%, #1e88e5 100%)"></span>
+              <span>by @weekend_vibes</span>
+              <span style="opacity:0.5">·</span>
+              <span>사용 2.4k</span>
+            </div>
+            <h2 class="card-title">주말 치트키</h2>
+            <p class="card-subtitle">오늘 하루 무료로 사용할 수 있어요</p>
+            <button class="cta cta--free" onclick="openConfirmSheet()">
+              <span class="cta__icon">🎟</span>
+              <span>무료</span>
+            </button>
+          </footer>
+
+          <div class="swipe-affordance" style="color:rgba(255,255,255,0.85)">
+            <span class="swipe-affordance__arrow" style="transform:rotate(180deg)">⌃</span>
+            <span>아래로 스와이프 → 처음 카드로</span>
+          </div>
+        </section>
+      </div>
+
+      <!-- Home Indicator -->
+      <div class="home-indicator"></div>
+
+    </div>
+
+  </div>
+
+  <script>
+    let currentScreen = null;
+    let currentState = 'free-cta';
+
+    function applyState(screenId, stateName) {
+      const screen = document.getElementById(screenId);
+      if (!screen) return;
+      screen.querySelectorAll('[data-state]').forEach(el => {
+        el.classList.toggle('state-active', el.dataset.state === stateName);
+      });
+      currentState = stateName;
+      updateStateButtons();
+    }
+
+    function toggleState(stateName) {
+      if (!currentScreen) return;
+      applyState(currentScreen.id, stateName);
+    }
+
+    function updateStateButtons() {
+      document.querySelectorAll('.control-panel__state-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.state === currentState);
+      });
+    }
+
+    function navigateBySelect(id) {
+      // single screen in this prototype; no-op
+    }
+
+    function navBack() {
+      alert('뒤로가기 → 무료탭 그리드 복귀 (AC 2.3.2)');
+    }
+
+    function openConfirmSheet() {
+      alert('확인 바텀시트 오픈 (app-003 hand-off)');
+    }
+
+    function openCreditSheet() {
+      alert('크레딧 안내 바텀시트 오픈 (app-003 hand-off)');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      currentScreen = document.getElementById('swipe-feed-free');
+      applyState('swipe-feed-free', 'free-cta');
+    });
+  </script>
+</body>
+</html>

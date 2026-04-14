@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>app-004 · External Entry Parity Prototype</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --color-bg-normal: #FFFFFF;
+      --color-bg-alt: #F7F8F9;
+      --color-label-normal: #212228;
+      --color-label-alt: #6B6E76;
+      --color-label-assistive: #8E9199;
+      --color-line-normal: #E4E5E9;
+      --color-fill-neutral: #F0F1F3;
+      --color-brand-primary: #8752FA;
+      --color-brand-soft: #F3EBFF;
+      --color-button-secondary: #F0F1F3;
+      --color-accent-pink: #FF6BA7;
+      --color-accent-teal: #2DD4BF;
+      --color-accent-orange: #FB923C;
+      --color-accent-blue: #60A5FA;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 20px;
+      --radius-full: 999px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Pretendard', -apple-system, 'SF Pro', sans-serif;
+      background: #f0f0f0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 16px;
+      color: var(--color-label-normal);
+    }
+
+    .control-panel {
+      width: 390px;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      border-radius: 12px 12px 0 0;
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 13px;
+    }
+    .control-panel__row { display: flex; align-items: center; gap: 8px; }
+    .control-panel__label { color: #888; font-size: 11px; min-width: 48px; }
+    .control-panel__states { display: flex; gap: 4px; flex-wrap: wrap; }
+    .control-panel__state-btn {
+      background: #2a2a3e; color: #ccc; border: 1px solid #444;
+      border-radius: 6px; padding: 5px 10px; font-size: 11px; cursor: pointer;
+      font-family: inherit;
+    }
+    .control-panel__state-btn.active {
+      background: var(--color-brand-primary); color: #fff; border-color: var(--color-brand-primary);
+    }
+    .control-panel__breadcrumb { color: #888; font-size: 11px; font-family: monospace; }
+
+    .device-frame {
+      width: 390px; height: 844px; background: var(--color-bg-normal);
+      overflow: hidden; position: relative; border: 1px solid #ddd;
+      border-radius: 0 0 12px 12px;
+    }
+
+    .screen {
+      display: flex; flex-direction: column; width: 100%; height: 100%;
+      position: absolute; top: 0; left: 0;
+    }
+
+    /* Status bar */
+    .status-bar {
+      height: 44px; display: flex; justify-content: space-between; align-items: center;
+      padding: 0 20px; font-size: 15px; font-weight: 600; flex-shrink: 0;
+    }
+    .status-bar__icons { display: flex; gap: 5px; font-size: 12px; }
+
+    /* Header — tab bar */
+    .header {
+      padding: 4px 20px 10px; display: flex; flex-direction: column; gap: 8px;
+      border-bottom: 1px solid var(--color-line-normal); flex-shrink: 0;
+      background: var(--color-bg-normal);
+    }
+    .tab-row { display: flex; gap: 20px; align-items: center; }
+    .tab {
+      font-size: 20px; font-weight: 500; color: var(--color-label-assistive);
+      padding-bottom: 4px; position: relative; cursor: pointer;
+    }
+    .tab.active { color: var(--color-label-normal); font-weight: 700; }
+    .tab.active::after {
+      content: ''; position: absolute; bottom: -11px; left: 0; right: 0;
+      height: 2px; background: var(--color-label-normal); border-radius: 2px;
+    }
+    .mode-badge {
+      align-self: flex-start; font-size: 10px; font-family: monospace;
+      background: var(--color-brand-soft); color: var(--color-brand-primary);
+      padding: 3px 8px; border-radius: var(--radius-full); font-weight: 600;
+      letter-spacing: 0.2px;
+    }
+
+    /* Feed area */
+    .feed-area {
+      flex: 1; overflow-y: auto; padding: 16px 20px 100px;
+      display: flex; flex-direction: column; gap: 18px;
+      background: var(--color-bg-normal);
+    }
+
+    /* Algo stripe — makes feed visually distinct from 4-col free grid */
+    .algo-stripe {
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .stripe-label {
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 13px; font-weight: 600;
+    }
+    .stripe-label__hint {
+      font-size: 11px; color: var(--color-label-assistive); font-weight: 400;
+    }
+    .stripe-grid {
+      display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px;
+    }
+    .stripe-thumb {
+      aspect-ratio: 1; border-radius: 10px; position: relative; overflow: hidden;
+      display: flex; align-items: flex-end; padding: 4px;
+      font-size: 8px; font-weight: 600; color: #fff;
+      box-shadow: inset 0 -20px 20px rgba(0,0,0,0.3);
+    }
+    .stripe-thumb.t-free  { background: linear-gradient(135deg, #FFB3D1, #FF6BA7); }
+    .stripe-thumb.t-curated { background: linear-gradient(135deg, #FCD34D, #FB923C); }
+    .stripe-thumb.t-creator { background: linear-gradient(135deg, #60A5FA, #8B5CF6); }
+    .stripe-thumb.t-trend { background: linear-gradient(135deg, #34D399, #0EA5E9); }
+    .stripe-thumb.t-paid { background: linear-gradient(135deg, #9CA3AF, #4B5563); }
+
+    .stripe-thumb .free-tag {
+      position: absolute; top: 4px; left: 4px; font-size: 8px; font-weight: 700;
+      background: var(--color-brand-primary); color: #fff;
+      padding: 2px 5px; border-radius: var(--radius-full);
+    }
+
+    /* Swipe card stack */
+    .swipe-stack {
+      position: relative; height: 440px; display: flex; justify-content: center;
+    }
+    .swipe-card {
+      position: absolute; width: 280px; border-radius: var(--radius-lg);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.12); overflow: hidden;
+      background: #fff;
+    }
+    .swipe-card__thumb {
+      height: 340px; display: flex; align-items: flex-start; justify-content: space-between;
+      padding: 12px; position: relative;
+    }
+    .swipe-card__meta {
+      padding: 12px 14px; display: flex; flex-direction: column; gap: 8px;
+    }
+    .swipe-card__title { font-size: 15px; font-weight: 700; }
+    .swipe-card__sub { font-size: 12px; color: var(--color-label-alt); }
+    .swipe-card__cta {
+      margin-top: 4px; background: var(--color-brand-primary); color: #fff;
+      border: none; padding: 12px; font-size: 14px; font-weight: 700;
+      border-radius: var(--radius-md); cursor: pointer; font-family: inherit;
+      width: 100%;
+    }
+
+    /* Card positions — faked stack */
+    .card-behind-2 {
+      top: 20px; transform: scale(0.88) rotate(-4deg); opacity: 0.55;
+      z-index: 1;
+    }
+    .card-behind-2 .swipe-card__thumb {
+      background: linear-gradient(135deg, #9CA3AF, #4B5563);
+    }
+    .card-behind-1 {
+      top: 10px; transform: scale(0.94) rotate(3deg); opacity: 0.75;
+      z-index: 2;
+    }
+    .card-behind-1 .swipe-card__thumb {
+      background: linear-gradient(135deg, #FCD34D, #FB923C);
+    }
+    .card-front {
+      top: 0; z-index: 3;
+    }
+    .card-front .swipe-card__thumb {
+      background: linear-gradient(135deg, #FFB3D1 0%, #FF6BA7 50%, #8752FA 100%);
+    }
+
+    .free-badge-pill {
+      background: var(--color-brand-primary); color: #fff;
+      padding: 5px 10px; border-radius: var(--radius-full);
+      font-size: 11px; font-weight: 700;
+      box-shadow: 0 2px 6px rgba(135,82,250,0.4);
+    }
+    .heart-btn {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: rgba(255,255,255,0.9);
+      display: flex; align-items: center; justify-content: center; font-size: 14px;
+    }
+
+    .swipe-hint {
+      text-align: center; font-size: 12px; color: var(--color-label-assistive);
+      margin-top: -8px;
+    }
+
+    /* Bottom nav */
+    .bottom-nav {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      height: 83px; background: var(--color-bg-normal);
+      border-top: 1px solid var(--color-line-normal);
+      display: flex; padding: 8px 0 24px; z-index: 50;
+    }
+    .nav-item {
+      flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px;
+      font-size: 10px; color: var(--color-label-assistive);
+      cursor: pointer;
+    }
+    .nav-item__icon { font-size: 20px; }
+    .nav-item.active { color: var(--color-brand-primary); font-weight: 700; }
+
+    /* Overlay */
+    .overlay-backdrop {
+      display: none; position: absolute; inset: 0;
+      background: rgba(0,0,0,0.45); z-index: 100;
+    }
+    .overlay-backdrop.active { display: block; }
+
+    .sheet {
+      display: none; position: absolute; left: 0; right: 0; bottom: 0;
+      background: #fff; border-radius: 20px 20px 0 0;
+      padding: 14px 20px 32px; z-index: 101;
+      flex-direction: column; gap: 16px;
+    }
+    .sheet.active { display: flex; }
+    .sheet.active { animation: slideUp 0.28s ease-out; }
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+
+    .sheet__handle {
+      width: 40px; height: 4px; background: var(--color-line-normal);
+      border-radius: 2px; align-self: center;
+    }
+    .sheet__title { font-size: 18px; font-weight: 700; text-align: center; margin-top: 4px; }
+    .sheet__desc { font-size: 13px; color: var(--color-label-alt); text-align: center; line-height: 1.5; }
+
+    .sheet__preview {
+      display: flex; align-items: center; gap: 12px;
+      background: var(--color-bg-alt); padding: 12px; border-radius: var(--radius-md);
+    }
+    .sheet__preview-thumb {
+      width: 48px; height: 48px; border-radius: 10px;
+      background: linear-gradient(135deg, #FFB3D1, #FF6BA7);
+      flex-shrink: 0;
+    }
+    .sheet__preview-info { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+    .sheet__preview-title { font-size: 14px; font-weight: 600; }
+    .sheet__preview-sub { font-size: 11px; color: var(--color-label-alt); }
+    .sheet__price {
+      font-size: 13px; font-weight: 700; color: var(--color-brand-primary);
+    }
+
+    .sheet__actions { display: flex; flex-direction: column; gap: 8px; }
+    .btn-primary {
+      background: var(--color-brand-primary); color: #fff;
+      border: none; padding: 15px; font-size: 15px; font-weight: 700;
+      border-radius: var(--radius-md); cursor: pointer; font-family: inherit;
+    }
+    .btn-secondary {
+      background: var(--color-button-secondary); color: var(--color-label-normal);
+      border: none; padding: 15px; font-size: 15px; font-weight: 600;
+      border-radius: var(--radius-md); cursor: pointer; font-family: inherit;
+    }
+
+    /* Explanation strip above feed when sheet is open — shows parity intent */
+    .parity-hint {
+      display: none; position: absolute; top: 140px; left: 20px; right: 20px;
+      z-index: 99; background: rgba(33,34,40,0.9); color: #fff;
+      padding: 8px 12px; border-radius: 8px; font-size: 11px;
+      font-family: monospace;
+    }
+    .parity-hint.active { display: block; }
+  </style>
+</head>
+<body>
+
+  <div class="control-panel">
+    <div class="control-panel__row">
+      <span class="control-panel__label">Screen</span>
+      <span style="font-size:12px;color:#ccc;">RecommendTabFeed (app-004)</span>
+    </div>
+    <div class="control-panel__row">
+      <span class="control-panel__label">State</span>
+      <div class="control-panel__states" id="state-toggles">
+        <button class="control-panel__state-btn active" data-state="algo-feed-default" onclick="setState('algo-feed-default')">algo-feed-default</button>
+        <button class="control-panel__state-btn" data-state="algo-feed-free-confirm" onclick="setState('algo-feed-free-confirm')">algo-feed-free-confirm</button>
+        <button class="control-panel__state-btn" data-state="algo-feed-credit-confirm" onclick="setState('algo-feed-credit-confirm')">algo-feed-credit-confirm</button>
+      </div>
+    </div>
+    <div class="control-panel__row">
+      <span class="control-panel__breadcrumb" id="breadcrumb">home/recommend → swipe-feed(mode=algo, entry=recommend)</span>
+    </div>
+  </div>
+
+  <div class="device-frame">
+    <div class="screen" id="recommend-tab-feed">
+
+      <div class="status-bar">
+        <span>9:41</span>
+        <span class="status-bar__icons">•••• 5G 100%</span>
+      </div>
+
+      <div class="header">
+        <div class="tab-row">
+          <div class="tab active">추천</div>
+          <div class="tab">무료</div>
+          <div class="tab">팔로잉</div>
+          <div class="tab">기획전</div>
+        </div>
+        <span class="mode-badge">mode: algo · entry: recommend</span>
+      </div>
+
+      <div class="parity-hint" id="parity-hint">
+        AC 2.7.2 — 시트 닫혀도 mode=algo 유지 (무료탭 피드로 전환 금지)
+      </div>
+
+      <div class="feed-area">
+
+        <!-- Algo stripe — visually proves this is mixed recommend feed, not free-only grid -->
+        <div class="algo-stripe">
+          <div class="stripe-label">
+            <span>오늘의 추천</span>
+            <span class="stripe-label__hint">혼합 알고리즘</span>
+          </div>
+          <div class="stripe-grid">
+            <div class="stripe-thumb t-free">
+              <span class="free-tag">무료</span>
+              벚꽃
+            </div>
+            <div class="stripe-thumb t-curated">기획전</div>
+            <div class="stripe-thumb t-creator">크리에이터</div>
+            <div class="stripe-thumb t-trend">트렌딩</div>
+            <div class="stripe-thumb t-paid">유료</div>
+          </div>
+        </div>
+
+        <!-- Swipe card stack -->
+        <div class="swipe-stack">
+
+          <div class="swipe-card card-behind-2">
+            <div class="swipe-card__thumb"></div>
+            <div class="swipe-card__meta">
+              <div class="swipe-card__title">유료 · 파스텔 드림</div>
+              <div class="swipe-card__sub">150 크레딧</div>
+            </div>
+          </div>
+
+          <div class="swipe-card card-behind-1">
+            <div class="swipe-card__thumb"></div>
+            <div class="swipe-card__meta">
+              <div class="swipe-card__title">기획전 · 레트로 필름</div>
+              <div class="swipe-card__sub">이벤트 필터</div>
+            </div>
+          </div>
+
+          <div class="swipe-card card-front">
+            <div class="swipe-card__thumb">
+              <span class="free-badge-pill">오늘 무료</span>
+              <span class="heart-btn">♡</span>
+            </div>
+            <div class="swipe-card__meta">
+              <div class="swipe-card__title">오늘의 무료 · 벚꽃 프리셋</div>
+              <div class="swipe-card__sub">@studio.zzem · 24,593 생성</div>
+              <button class="swipe-card__cta" onclick="ctaTap()">이 필터로 만들기</button>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="swipe-hint">← 넘기면 다음 추천</div>
+
+      </div>
+
+      <div class="bottom-nav">
+        <div class="nav-item active"><span class="nav-item__icon">⌂</span><span>홈</span></div>
+        <div class="nav-item"><span class="nav-item__icon">★</span><span>무료</span></div>
+        <div class="nav-item"><span class="nav-item__icon">＋</span><span>만들기</span></div>
+        <div class="nav-item"><span class="nav-item__icon">♡</span><span>알림</span></div>
+        <div class="nav-item"><span class="nav-item__icon">☺</span><span>MY</span></div>
+      </div>
+
+      <!-- Overlay backdrop -->
+      <div class="overlay-backdrop" id="backdrop" onclick="setState('algo-feed-default')"></div>
+
+      <!-- FreeUseConfirmSheet -->
+      <div class="sheet" id="free-sheet">
+        <div class="sheet__handle"></div>
+        <div class="sheet__title">오늘의 무료 기회를 사용할까요?</div>
+        <div class="sheet__desc">하루에 1번만 무료로 만들 수 있어요</div>
+        <div class="sheet__preview">
+          <div class="sheet__preview-thumb"></div>
+          <div class="sheet__preview-info">
+            <div class="sheet__preview-title">벚꽃 프리셋</div>
+            <div class="sheet__preview-sub">추천탭 · 오늘 무료</div>
+          </div>
+          <div class="sheet__price">무료</div>
+        </div>
+        <div class="sheet__actions">
+          <button class="btn-primary">무료 사용하기</button>
+          <button class="btn-secondary" onclick="setState('algo-feed-default')">더 둘러볼게요</button>
+        </div>
+      </div>
+
+      <!-- CreditUseConfirmSheet -->
+      <div class="sheet" id="credit-sheet">
+        <div class="sheet__handle"></div>
+        <div class="sheet__title">크레딧을 사용할까요?</div>
+        <div class="sheet__desc">오늘의 무료 기회를 이미 사용했어요</div>
+        <div class="sheet__preview">
+          <div class="sheet__preview-thumb"></div>
+          <div class="sheet__preview-info">
+            <div class="sheet__preview-title">벚꽃 프리셋</div>
+            <div class="sheet__preview-sub">추천탭 · 유료 전환</div>
+          </div>
+          <div class="sheet__price">150 크레딧</div>
+        </div>
+        <div class="sheet__actions">
+          <button class="btn-primary">크레딧 사용하기</button>
+          <button class="btn-secondary" onclick="setState('algo-feed-default')">취소</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // Toggle which sheet shows when CTA tapped based on user-selected "freeUsedToday"
+    // For prototype simplicity, CTA opens the free confirm sheet by default.
+    // Reviewers use the state buttons to switch between free/credit variants.
+
+    let currentState = 'algo-feed-default';
+
+    function setState(state) {
+      currentState = state;
+      const backdrop = document.getElementById('backdrop');
+      const freeSheet = document.getElementById('free-sheet');
+      const creditSheet = document.getElementById('credit-sheet');
+      const parityHint = document.getElementById('parity-hint');
+
+      freeSheet.classList.remove('active');
+      creditSheet.classList.remove('active');
+      backdrop.classList.remove('active');
+      parityHint.classList.remove('active');
+
+      if (state === 'algo-feed-free-confirm') {
+        backdrop.classList.add('active');
+        freeSheet.classList.add('active');
+        parityHint.classList.add('active');
+      } else if (state === 'algo-feed-credit-confirm') {
+        backdrop.classList.add('active');
+        creditSheet.classList.add('active');
+        parityHint.classList.add('active');
+      }
+
+      document.querySelectorAll('.control-panel__state-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.state === state);
+      });
+
+      const bc = document.getElementById('breadcrumb');
+      const suffix = state === 'algo-feed-free-confirm'
+        ? ' → FreeUseConfirmSheet'
+        : state === 'algo-feed-credit-confirm'
+          ? ' → CreditUseConfirmSheet'
+          : '';
+      bc.textContent = 'home/recommend → swipe-feed(mode=algo, entry=recommend)' + suffix;
+    }
+
+    function ctaTap() {
+      // Default to free confirm; reviewers can toggle to credit via state buttons
+      setState('algo-feed-free-confirm');
+    }
+  </script>
+
+</body>
+</html>

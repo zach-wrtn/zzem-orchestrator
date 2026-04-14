@@ -1,0 +1,93 @@
+sprint_id: "free-tab-diversification"
+generated_at: "2026-04-14T21:30:00+09:00"
+
+deferred: []  # 미충족 AC 없음 — 모든 Contract Done Criteria 충족
+
+improvements:
+  # Backend minors
+  - description: "computeFreeUsedToday를 UserFreeQuota 기반으로 통합 (현재 content 테이블 기반 임시 구현)"
+    source: "evaluator_suggestion"
+    group: "group-002"
+    priority: "medium"
+    estimated_complexity: "small"
+
+  - description: "user-free-quota.schema Mongoose duplicate index warning 해소 (index: true + schema.index() 중복)"
+    source: "evaluator_suggestion"
+    group: "group-002"
+    priority: "low"
+    estimated_complexity: "small"
+
+  - description: "/free-tab 응답 조립 중 hasFreeUsedToday + slot 조회 race window 문서화 또는 단일 트랜잭션으로 묶기"
+    source: "evaluator_suggestion"
+    group: "group-002"
+    priority: "low"
+    estimated_complexity: "medium"
+
+  - description: "roster scheduler의 findByDate N+1 쿼리 통합 (Step 1+2 단일 조회)"
+    source: "evaluator_suggestion"
+    group: "group-001"
+    priority: "low"
+    estimated_complexity: "small"
+
+  # App minors
+  - description: "FREE_ROSTER_MIN_VERSION 상수 참조 처리 (선언만 존재)"
+    source: "evaluator_suggestion"
+    group: "group-003"
+    priority: "medium"
+    estimated_complexity: "small"
+
+  - description: "click_meme_filter/imp_meme_filter payload에 imp_id 필드 추가 (pre-existing home 모듈 패턴)"
+    source: "evaluator_suggestion"
+    group: "group-003"
+    priority: "low"
+    estimated_complexity: "small"
+
+  - description: "zzem://swipe-feed/free 직진입 후 뒤로가기 → recommend tab fallback (AC 2.3.2 edge case)"
+    source: "evaluator_suggestion"
+    group: "group-003"
+    priority: "low"
+    estimated_complexity: "medium"
+
+  - description: "filters.findIndex 인상/탭마다 호출 (perf) — Map 캐싱"
+    source: "evaluator_suggestion"
+    group: "group-003"
+    priority: "low"
+    estimated_complexity: "small"
+
+  - description: "동시생성 상한 도달 시 시트가 선행 오픈되는 edge case (토스트 vs 시트 순서)"
+    source: "evaluator_suggestion"
+    group: "group-004"
+    priority: "low"
+    estimated_complexity: "small"
+
+  # Infra
+  - description: "monorepo @wrtn/* 패키지 module resolution 오류 안정화 (feedback_monorepo_precommit.md 이력)"
+    source: "pattern_digest"
+    priority: "medium"
+    estimated_complexity: "large"
+
+  - description: "e2e:auth 래퍼의 VPN/토큰 오프라인 대응 또는 seed fetch graceful degradation"
+    source: "pattern_digest"
+    priority: "medium"
+    estimated_complexity: "medium"
+
+  # Server-injection deferred (spec-accepted)
+  - description: "isFree 필드 server injection — BE 통합 테스트로 대체 (현재는 feed-item.entity.ts에 optional)"
+    source: "user_feedback"
+    group: "group-004"
+    priority: "medium"
+    estimated_complexity: "medium"
+    note: "spec-accepted deferred — task file에 명시"
+
+  # Harness / Phase 3 워크플로우 갭
+  - description: "Phase 3 Prototype 단계에서 prototypes/quality-report.yaml 자동 생성 누락 (Design Engineer 워크플로우에 fabrication_risk / quality_score 기록 추가)"
+    source: "user_feedback"
+    scope: "harness"
+    priority: "medium"
+    estimated_complexity: "small"
+    note: |
+      현재 approval-status.yaml만 생성되어 Phase 6.7 Design KB 승격 트리거를
+      판정할 수 없다. quality-report.yaml 스키마는 knowledge-base/design/
+      README.md에 정의되어 있으나 실제 산출물이 없어 patterns/design KB 기록 불가.
+      .claude/skills/sprint/phase-prototype.md 또는 design-engineer teammate 정의에
+      quality-report 산출 의무를 추가해야 한다.
