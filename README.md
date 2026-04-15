@@ -4,6 +4,17 @@ ZZEM 앱의 에이전틱 스프린트 오케스트레이션 시스템.
 
 PRD → Task Spec → HTML Prototype → Code → Evaluation → PR 파이프라인을 Claude Code Agent Teams로 자동화한다.
 
+## Sprint Gallery
+
+Historical, browsable view of every sprint's prototypes:
+**https://zach-wrtn.github.io/zzem-orchestrator/**
+
+Source: `sprint-gallery/`. The gallery auto-rebuilds on every merge to `main`
+when `sprint-orchestrator/sprints/**` or `sprint-gallery/**` changes.
+
+To add a new sprint to the gallery, populate the optional `display:` block
+in the sprint's `sprint-config.yaml` (see `sprint-orchestrator/templates/sprint-config-template.yaml`).
+
 ## Architecture
 
 ```

@@ -1,0 +1,11 @@
+sprint_id: "demo-sprint"
+display:
+  title: "Demo Sprint"
+  startDate: "2026-01-01"
+  endDate: "2026-01-07"
+  status: "completed"
+  tags: ["demo"]
+  prototypes:
+    - id: "demo-001"
+      hero: true
+      thumbnail: "screenshots/default.png"

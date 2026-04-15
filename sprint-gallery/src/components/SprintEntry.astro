@@ -1,0 +1,97 @@
+---
+import type { Sprint } from '@/lib/types';
+import PrototypeCard from './PrototypeCard.astro';
+import { marked } from 'marked';
+interface Props { sprint: Sprint; }
+const { sprint } = Astro.props;
+const hero = sprint.prototypes.find((p) => p.hero) ?? sprint.prototypes[0];
+const base = import.meta.env.BASE_URL;
+const heroThumb = hero?.thumbnail ? `${base}/${hero.thumbnail}`.replace(/\/+/g, '/') : null;
+const detailHref = `${base}/sprints/${sprint.slug}/`.replace(/\/+/g, '/');
+const summaryHtml = sprint.summary ? await marked.parseInline(sprint.summary) : null;
+---
+<section class="entry" id={sprint.slug}>
+  <header>
+    <h2><a href={detailHref}>{sprint.title}</a></h2>
+    <div class="meta">
+      <time>{sprint.startDate} → {sprint.endDate}</time>
+      <span class={`status status-${sprint.status}`}>{sprint.status}</span>
+    </div>
+  </header>
+
+  {hero && (
+    <a class="hero" href={detailHref} aria-label={`${sprint.title} hero`}>
+      {heroThumb
+        ? <img src={heroThumb} alt={hero.title} loading="lazy" />
+        : <div class="placeholder">No preview</div>}
+    </a>
+  )}
+
+  {summaryHtml && <p class="summary" set:html={summaryHtml} />}
+
+  {sprint.tags.length > 0 && (
+    <div class="tags">
+      {sprint.tags.map((t) => <span class="tag">#{t}</span>)}
+    </div>
+  )}
+
+  {sprint.prototypes.length > 1 && (
+    <div class="grid">
+      {sprint.prototypes.filter((p) => p !== hero).map((p) => (
+        <PrototypeCard sprintSlug={sprint.slug} proto={p} />
+      ))}
+    </div>
+  )}
+
+  <nav class="docs">
+    {sprint.docs.prd && <a href={detailHref}>PRD</a>}
+    {sprint.docs.report && <a href={detailHref}>Report</a>}
+    {sprint.docs.retrospective && <a href={detailHref}>Retrospective</a>}
+  </nav>
+</section>
+
+<style>
+  .entry { padding: 48px 0; border-bottom: 1px solid var(--border); }
+  .entry:last-child { border-bottom: none; }
+  header h2 { margin: 0 0 6px; font-size: 28px; letter-spacing: -0.02em; }
+  header h2 a:hover { color: var(--accent); }
+  .meta { display: flex; gap: 12px; font-family: var(--font-mono); font-size: 12px; color: var(--text-dim); }
+  .status {
+    padding: 2px 8px; border-radius: 4px; border: 1px solid var(--border);
+    text-transform: lowercase;
+  }
+  .status-completed { color: #7AC79A; border-color: #7AC79A44; }
+  .status-in-progress { color: var(--accent); border-color: var(--accent-soft); }
+  .status-archived { color: var(--text-faint); }
+  .hero {
+    display: block; margin: 20px 0;
+    aspect-ratio: 16/10; background: var(--surface-hover);
+    border: 1px solid var(--border); border-radius: var(--radius-card); overflow: hidden;
+  }
+  .hero img { width: 100%; height: 100%; object-fit: cover; }
+  .hero:hover { border-color: var(--accent); }
+  .placeholder { width: 100%; height: 100%; display: grid; place-items: center; color: var(--text-faint); font-family: var(--font-mono); }
+  .summary {
+    color: var(--text-dim); line-height: 1.7; max-width: 70ch;
+    font-size: 14px; margin: 16px 0 12px;
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .summary :global(a) {
+    color: var(--text); text-decoration: underline;
+    text-decoration-color: var(--border); text-underline-offset: 3px;
+  }
+  .summary :global(a:hover) { color: var(--accent); text-decoration-color: var(--accent); }
+  .summary :global(strong) { color: var(--text); font-weight: 600; }
+  .summary :global(code) {
+    font-family: var(--font-mono); font-size: 0.88em;
+    background: var(--surface); border: 1px solid var(--border);
+    padding: 1px 5px; border-radius: 4px;
+  }
+  .tags { display: flex; gap: 8px; margin: 12px 0; }
+  .tag { font-family: var(--font-mono); font-size: 11px; color: var(--text-dim); background: var(--surface); border: 1px solid var(--border); padding: 2px 8px; border-radius: 4px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; margin: 20px 0; }
+  .docs { display: flex; gap: 16px; margin-top: 20px; font-family: var(--font-mono); font-size: 12px; }
+  .docs a { color: var(--text-dim); }
+  .docs a:hover { color: var(--accent); }
+</style>

@@ -32,3 +32,19 @@ team:
   settings:
     eval_retry_limit: 2        # Evaluation fix loop 최대 반복
     max_parallel_tasks: 4      # 동시 실행 최대 태스크 수
+
+# Gallery display metadata (optional — consumed by sprint-gallery)
+display:
+  title: "Human-readable sprint title"
+  startDate: "YYYY-MM-DD"
+  endDate: "YYYY-MM-DD"
+  status: "in-progress"  # in-progress | completed | archived
+  tags: []
+  summary: ""            # optional 1–2 line override; if empty, PRD.md first paragraph is used
+  prototypes:
+    # Optional per-prototype overrides. Entries match folder names under prototypes/app/.
+    # Example:
+    # - id: "app-001"
+    #   title: "Main flow"
+    #   hero: true
+    #   thumbnail: "screenshots/default.png"  # path relative to prototype folder

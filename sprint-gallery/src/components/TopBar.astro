@@ -1,0 +1,37 @@
+---
+import ThemeToggle from './ThemeToggle.tsx';
+---
+<header class="topbar">
+  <a href={import.meta.env.BASE_URL} class="brand">ZZEM Sprints</a>
+  <div class="spacer"></div>
+  <button id="open-search" class="search-btn" aria-label="Search">
+    <span>Search</span>
+    <kbd>⌘K</kbd>
+  </button>
+  <ThemeToggle client:load />
+</header>
+
+<style>
+  .topbar {
+    position: sticky; top: 0; z-index: 10;
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 24px;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border);
+  }
+  .brand { font-weight: 600; letter-spacing: -0.01em; }
+  .spacer { flex: 1; }
+  .search-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--surface); color: var(--text-dim);
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: 6px 10px; font-size: 12px; font-family: var(--font-mono);
+    cursor: pointer;
+  }
+  .search-btn:hover { background: var(--surface-hover); }
+  kbd {
+    border: 1px solid var(--border); border-radius: 4px;
+    padding: 0 4px; font-size: 11px; color: var(--text-faint);
+  }
+</style>

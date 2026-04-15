@@ -1,0 +1,29 @@
+---
+import '../styles/tokens.css';
+import TopBar from './TopBar.astro';
+const { title = 'ZZEM Sprints' } = Astro.props;
+---
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <link rel="preconnect" href="https://rsms.me" />
+    <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
+    <script is:inline>
+      (function () {
+        var t = localStorage.getItem('theme');
+        if (!t) t = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+  </head>
+  <body>
+    <TopBar />
+    <main><slot /></main>
+    <style>
+      main { max-width: var(--max-width); margin: 0 auto; padding: 32px 24px 120px; }
+    </style>
+  </body>
+</html>
