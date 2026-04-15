@@ -440,6 +440,18 @@
       border-radius: var(--radius-pill);
       z-index: 10;
     }
+
+    @media (max-width: 480px) {
+      body { padding: 0; align-items: stretch; min-height: 100dvh; }
+      .control-panel { display: none; }
+      .device-frame {
+        width: 100dvw;
+        height: 100dvh;
+        border: none;
+        border-radius: 0;
+      }
+      .feed-card { width: 100dvw; height: 100dvh; }
+    }
   </style>
 </head>
 <body>
