@@ -2,6 +2,13 @@
 import type { Sprint } from '@/lib/types';
 interface Props { sprints: Sprint[]; }
 const { sprints } = Astro.props;
+
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function formatMonthDay(iso: string): string {
+  const [, m, d] = iso.split('-');
+  return `${MONTHS[Number(m) - 1]} ${Number(d)}`;
+}
+
 const byYear = new Map<string, Sprint[]>();
 for (const s of sprints) {
   const y = s.endDate.slice(0, 4);
@@ -18,8 +25,10 @@ for (const s of sprints) {
           <li>
             <a href={`#${s.slug}`}>
               <span class="dot" data-status={s.status}></span>
-              <span class="date">{s.endDate.slice(5)}</span>
-              <span class="name">{s.title}</span>
+              <span class="labels">
+                <span class="name">{s.title}</span>
+                <span class="date">{formatMonthDay(s.endDate)}</span>
+              </span>
             </a>
           </li>
         ))}
@@ -33,20 +42,40 @@ for (const s of sprints) {
     position: sticky; top: 72px; align-self: start;
     width: var(--rail-width);
     padding-right: 16px; border-right: 1px solid var(--border);
-    font-family: var(--font-mono); font-size: 12px;
+    font-family: var(--font-ui); font-size: 13px;
     max-height: calc(100vh - 80px); overflow-y: auto;
   }
-  .year-block { margin-bottom: 24px; }
-  .year { color: var(--text-faint); margin-bottom: 8px; }
-  ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
-  li a { display: flex; align-items: center; gap: 8px; color: var(--text-dim); }
-  li a:hover { color: var(--text); }
+  .year-block { margin-bottom: 28px; }
+  .year {
+    font-family: var(--font-mono);
+    color: var(--text-faint);
+    font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 2px; }
+  li a {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 6px 8px; margin-left: -8px;
+    border-radius: 6px;
+    color: var(--text-dim);
+    transition: background 120ms ease, color 120ms ease;
+  }
+  li a:hover { background: var(--surface); color: var(--text); }
   .dot {
-    width: 8px; height: 8px; border-radius: 50%;
+    width: 7px; height: 7px; border-radius: 50%;
     background: var(--text-faint); flex-shrink: 0;
+    margin-top: 7px;
   }
   .dot[data-status="completed"] { background: #7AC79A; }
   .dot[data-status="in-progress"] { background: var(--accent); }
-  .date { color: var(--text-faint); font-size: 11px; width: 44px; }
-  .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .labels { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+  .name {
+    font-size: 13px; line-height: 1.3;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .date {
+    font-family: var(--font-mono);
+    font-size: 10.5px; color: var(--text-faint);
+    margin-top: 2px; letter-spacing: 0.02em;
+  }
 </style>

@@ -1,12 +1,14 @@
 ---
 import type { Sprint } from '@/lib/types';
 import PrototypeCard from './PrototypeCard.astro';
+import { marked } from 'marked';
 interface Props { sprint: Sprint; }
 const { sprint } = Astro.props;
 const hero = sprint.prototypes.find((p) => p.hero) ?? sprint.prototypes[0];
 const base = import.meta.env.BASE_URL;
 const heroThumb = hero?.thumbnail ? `${base}/${hero.thumbnail}`.replace(/\/+/g, '/') : null;
 const detailHref = `${base}/sprints/${sprint.slug}/`.replace(/\/+/g, '/');
+const summaryHtml = sprint.summary ? await marked.parseInline(sprint.summary) : null;
 ---
 <section class="entry" id={sprint.slug}>
   <header>
@@ -25,7 +27,7 @@ const detailHref = `${base}/sprints/${sprint.slug}/`.replace(/\/+/g, '/');
     </a>
   )}
 
-  {sprint.summary && <p class="summary">{sprint.summary}</p>}
+  {summaryHtml && <p class="summary" set:html={summaryHtml} />}
 
   {sprint.tags.length > 0 && (
     <div class="tags">
@@ -69,7 +71,23 @@ const detailHref = `${base}/sprints/${sprint.slug}/`.replace(/\/+/g, '/');
   .hero img { width: 100%; height: 100%; object-fit: cover; }
   .hero:hover { border-color: var(--accent); }
   .placeholder { width: 100%; height: 100%; display: grid; place-items: center; color: var(--text-faint); font-family: var(--font-mono); }
-  .summary { color: var(--text-dim); line-height: 1.6; max-width: 70ch; }
+  .summary {
+    color: var(--text-dim); line-height: 1.7; max-width: 70ch;
+    font-size: 14px; margin: 16px 0 12px;
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .summary :global(a) {
+    color: var(--text); text-decoration: underline;
+    text-decoration-color: var(--border); text-underline-offset: 3px;
+  }
+  .summary :global(a:hover) { color: var(--accent); text-decoration-color: var(--accent); }
+  .summary :global(strong) { color: var(--text); font-weight: 600; }
+  .summary :global(code) {
+    font-family: var(--font-mono); font-size: 0.88em;
+    background: var(--surface); border: 1px solid var(--border);
+    padding: 1px 5px; border-radius: 4px;
+  }
   .tags { display: flex; gap: 8px; margin: 12px 0; }
   .tag { font-family: var(--font-mono); font-size: 11px; color: var(--text-dim); background: var(--surface); border: 1px solid var(--border); padding: 2px 8px; border-radius: 4px; }
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; margin: 20px 0; }
