@@ -1,0 +1,39 @@
+# Sprint Configuration — ai-webtoon (smoke test fixture)
+
+sprint_id: "ai-webtoon"
+branch_prefix: "sprint"
+
+repositories:
+  backend:
+    source: ~/dev/work/wrtn-backend
+    base: "apple"
+    mode: worktree
+  app:
+    source: ~/dev/work/app-core-packages
+    base: "epic/ugc-platform-final"
+    mode: worktree
+  tokens:
+    source: ~/dev/work/wds-tokens
+    base: "main"
+    mode: symlink
+
+defaults:
+  base: "main"
+
+team:
+  teammates:
+    - be-engineer
+    - fe-engineer
+    - design-engineer
+    - evaluator
+  settings:
+    eval_retry_limit: 2
+    max_parallel_tasks: 4
+
+display:
+  title: "AI Webtoon Sprint"
+  startDate: "2026-04-15"
+  endDate: "2026-04-30"
+  status: "in-progress"
+  tags: []
+  summary: ""

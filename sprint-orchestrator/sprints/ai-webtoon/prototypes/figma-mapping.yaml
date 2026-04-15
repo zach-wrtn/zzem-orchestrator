@@ -1,0 +1,374 @@
+# Figma-PRD Mapping: ai-webtoon
+#
+# Root frame: https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37289-168285
+# fileKey: 7hozJ6Pvs09q98BxvChj08  |  root node-id: 37289-168285 (37289:168285)
+#
+# 각 AC의 figma[] 배열에 구체적 하위 프레임 URL을 채워주세요.
+#   - 단일 프레임: figma: [{url: "...", note: "..."}]
+#   - 여러 프레임: figma 배열에 여러 항목 추가
+#   - 미제공:      figma: []
+#
+# URL이 채워지면 `/figma-map ai-webtoon --extract`로 디자인 컨텍스트를 추출합니다.
+
+meta:
+  sprint: ai-webtoon
+  prd: docs/prds/PRD-ai-webtoon-v1.2.md
+  figma_file: "7hozJ6Pvs09q98BxvChj08"
+  figma_root_url: "https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37289-168285"
+  figma_root_node: "37289:168285"
+
+# ─────────────────────────────────────────────────────────
+# US-1: 웹툰 탭 템플릿 탐색
+# ─────────────────────────────────────────────────────────
+
+AC_2.1.1_홈_탭_구조:
+  summary: "홈 [추천/웹툰/무료] 3탭 구조 + 플로팅 '내 웹툰'"
+  prototype: app/app-001
+  screens:
+    - screen: HomeTabsHeader
+      label: "홈 상단 3탭 헤더"
+      state: default
+      figma:
+        - url: "https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37289-168295"
+          note: "홈_추천탭 (figma node 37289:168295)"
+        - url: "https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37289-168393"
+          note: "홈_웹툰탭 (figma node 37289:168393)"
+    - screen: WebtoonFloatingButton
+      label: "웹툰 탭 전용 플로팅 버튼"
+      state: default
+      figma:
+        - url: "https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37289-168393"
+          note: "홈_웹툰탭 - 플로팅 '내 웹툰' 버튼 포함 (figma node 37289:168393)"
+
+AC_2.1.2_웹툰_탭_콘텐츠:
+  summary: "웹툰 탭 콘텐츠 노출 (로테이션 헤더 + 템플릿 카드 리스트)"
+  prototype: app/app-001
+  screens:
+    - screen: WebtoonTabScreen
+      label: "웹툰 탭 기본 상태 (2열 템플릿 카드)"
+      state: default
+      figma:
+        - url: "https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37289-168393"
+          note: "홈_웹툰탭 (figma node 37289:168393)"
+    - screen: WebtoonRotatingHeader
+      label: "로테이션 헤더"
+      state: default
+      figma:
+        - url: "https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37399-12939"
+          note: "서브카피 로테이션 (figma node 37399:12939)"
+    - screen: TemplateCardList
+      label: "템플릿 카드 리스트 (PERSON + ANIMAL)"
+      state: default
+      figma:
+        - url: "https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37298-170660"
+          note: "밈리스트_상단 - 템플릿 카드 리스트 영역 (figma node 37298:170660)"
+
+AC_2.1.3_템플릿_노데이터:
+  summary: "템플릿 빈 상태 처리"
+  prototype: app/app-001
+  resolution: "dev-pattern — Figma 미제공. design-engineer가 component-patterns.md 기반 프로토타입 구현. 컴포넌트 패턴: 빈 상태 일러스트 + 안내 문구"
+  screens:
+    - screen: WebtoonEmptyView
+      label: "템플릿 없음 빈 상태"
+      state: empty
+      figma: []
+
+# ─────────────────────────────────────────────────────────
+# US-2: 템플릿 상세 미리보기
+# ─────────────────────────────────────────────────────────
+
+AC_2.2.1_템플릿_상세:
+  summary: "템플릿 상세 페이지 + 세로 프리뷰 + 만들기 CTA"
+  prototype: app/app-001
+  screens:
+    - screen: WebtoonTemplateDetailScreen
+      label: "템플릿 상세 (PERSON) - 진입"
+      state: default
+      figma:
+        - url: "https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37298-171152"
+          note: "웹툰_상세_진입 (figma node 37298:171152)"
+    - screen: WebtoonTemplateDetailScreen
+      label: "템플릿 상세 (ANIMAL) - 스크롤"
+      state: default
+      figma:
+        - url: "https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37298-171084"
+          note: "웹툰_상세_스크롤 (figma node 37298:171084)"
+
+# ─────────────────────────────────────────────────────────
+# US-3: 사진 업로드 → 1화 생성
+# ─────────────────────────────────────────────────────────
+
+AC_2.3.1_입력_화면:
+  summary: "캐릭터+줄거리 입력 화면"
+  prototype: app/app-002
+  screens:
+    - screen: WebtoonGenerateScreen
+      label: "입력 화면 기본 (사진 empty)"
+      state: photo_empty
+      figma:
+        - url: "https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37298-171221"
+          note: "웹툰_만들기_1화_사진1개_미입력 (figma node 37298:171221)"
+    - screen: WebtoonGenerateScreen
+      label: "입력 화면 (사진 filled)"
+      state: photo_filled
+      figma:
+        - url: "https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37399-8315"
+          note: "웹툰_만들기_1화_사진1개_입력완료 (figma node 37399:8315)"
+
+AC_2.3.2_CTA_비활성:
+  summary: "사진 미선택 시 CTA disabled"
+  prototype: app/app-002
+  screens:
+    - screen: GenerateCTA
+      label: "CTA 비활성 상태"
+      state: disabled
+      figma:
+        - url: "https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37298-171221"
+          note: "웹툰_만들기_1화_사진1개_미입력 - CTA disabled 상태 (figma node 37298:171221)"
+
+AC_2.3.3_1화_생성_요청:
+  summary: "만들기 CTA 탭 → 단일 로딩 화면 (Figma resolution: 1단계/2단계 UI 분리 없음)"
+  prototype: app/app-002
+  resolution: "figma-wins — PRD의 '2단계 생성'은 BE 처리 단계 서술일 뿐, UI는 단일 로딩 프레임 (웹툰_결과물_로딩)으로 통일"
+  screens:
+    - screen: WebtoonGenerateScreen
+      label: "CTA 탭 후 즉시 disabled + 요청 접수"
+      state: submitting
+      figma:
+        - url: "https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37399-8315"
+          note: "웹툰_만들기_1화_사진1개_입력완료 - submit 상태 (figma node 37399:8315)"
+
+AC_2.3.4_AI_생성:
+  summary: "비동기 생성 로딩 + 결과 분기 (단일 로딩 UI)"
+  prototype: app/app-002
+  resolution: "figma-wins — 로딩은 단일 WebtoonGeneratingScreen. 내부적으로 폴링 진행"
+  screens:
+    - screen: WebtoonGeneratingScreen
+      label: "생성 중 (단일 로딩 — 업로드+AI 모두 포함)"
+      state: generating
+      figma:
+        - url: "https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37403-13346"
+          note: "웹툰_결과물_로딩 (figma node 37403:13346)"
+    - screen: WebtoonResultScreen
+      label: "생성 완료 결과"
+      state: completed
+      figma:
+        - url: "https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37298-171575"
+          note: "웹툰_결과물_완료_진입 (figma node 37298:171575)"
+        - url: "https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37298-171799"
+          note: "웹툰_결과물_완료_스크롤 (figma node 37298:171799)"
+    - screen: WebtoonGenerateFailedScreen
+      label: "생성 실패 (재시도/홈 CTA)"
+      state: failed
+      figma:
+        - url: "https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37405-13976"
+          note: "웹툰_결과물_실패 (figma node 37405:13976)"
+
+AC_2.3.5_크레딧_부족:
+  summary: "402 INSUFFICIENT_CREDIT → 바텀시트"
+  prototype: app/app-002
+  screens:
+    - screen: InsufficientCreditSheet
+      label: "크레딧 부족 바텀시트 (기존 재사용)"
+      state: default
+      figma:
+        - url: "https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37405-13809"
+          note: "공통_바텀시트_크레딧부족 (figma node 37405:13809)"
+
+AC_2.3.6_유해_이미지:
+  summary: "유해 이미지 감지 → 바텀시트 (sync 422 + async PROHIBITED 공통)"
+  prototype: app/app-002
+  screens:
+    - screen: ProhibitedImageSheet
+      label: "유해 이미지 바텀시트"
+      state: default
+      figma:
+        - url: "https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37405-13766"
+          note: "공통_바텀시트_유해이미지감지 (figma node 37405:13766)"
+
+AC_2.3.7_서버_에러:
+  summary: "서버 에러 토스트"
+  prototype: app/app-002
+  resolution: "dev-pattern — Figma 섹션 label만 있고 프레임 없음. 기존 Toast 시스템 재사용"
+  screens:
+    - screen: ServerErrorToast
+      label: "500 서버 에러 토스트"
+      state: default
+      figma: []
+
+AC_2.3.8_Timeout:
+  summary: "생성 timeout 처리"
+  prototype: app/app-002
+  resolution: "dev-pattern — Figma 섹션 label만 있고 프레임 없음. 바텀시트는 공통_바텀시트 패턴(크레딧/유해) 참조"
+  screens:
+    - screen: TimeoutSheet
+      label: "Timeout 바텀시트 (경과 시간 chip)"
+      state: default
+      figma: []
+
+# ─────────────────────────────────────────────────────────
+# US-3 부가: 동시성 제한
+# ─────────────────────────────────────────────────────────
+
+AC_BR3_동시성_제한:
+  summary: "BR-3 동시 생성 최대 5개"
+  prototype: app/app-002
+  resolution: "dev-pattern — Figma 미제공. 공통_바텀시트 패턴 재사용"
+  screens:
+    - screen: ConcurrencyLimitSheet
+      label: "동시성 제한 안내 (태스크 스펙은 Toast, 프로토타입은 Sheet)"
+      state: default
+      figma: []
+
+# ─────────────────────────────────────────────────────────
+# US-4/5: 이어가기 + 시리즈 상세
+# ─────────────────────────────────────────────────────────
+
+AC_2.4.1_결과물_상세:
+  summary: "결과물 상세 상태 분기 (completed/pending/failed/prohibited)"
+  prototype: app/app-003
+  screens:
+    - screen: SeriesDetailScreen
+      label: "시리즈 상세 기본 (1화 완료)"
+      state: default
+      figma:
+        - url: "https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37298-171575"
+          note: "웹툰_결과물_완료_진입 (figma node 37298:171575)"
+        - url: "https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37298-171799"
+          note: "웹툰_결과물_완료_스크롤 (figma node 37298:171799)"
+    - screen: SeriesDetailScreen
+      label: "생성 중 (스켈레톤 인라인)"
+      state: episode_generating
+      figma:
+        - url: "https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37403-13346"
+          note: "웹툰_결과물_로딩 - 인라인 스켈레톤 (figma node 37403:13346)"
+    - screen: InlineEpisodeError
+      label: "회차 실패 인라인 에러"
+      state: failed
+      resolution: "dev-pattern — Figma에는 full-screen 웹툰_결과물_실패만 있음. 회차별 인라인 에러 UI는 개발 패턴으로 구현 (공통 에러 블록 재사용)"
+      figma: []
+
+AC_2.4.2_이어가기_CTA:
+  summary: "이어가기 CTA 노출 (마지막 회차 COMPLETED)"
+  prototype: app/app-003
+  screens:
+    - screen: ContinuationCtaBar
+      label: "자동 이어가기 + 직접 이어가기 버튼"
+      state: default
+      figma:
+        - url: "https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37298-172327"
+          note: "웹툰_결과물_완료_진입 (이어가기 CTA 포함, figma node 37298:172327)"
+        - url: "https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37298-172378"
+          note: "웹툰_결과물_완료_스크롤 (이어가기 CTA 스크롤 상태, figma node 37298:172378)"
+
+AC_2.5.1_자동_이어가기:
+  summary: "AUTO 이어가기 플로우"
+  prototype: app/app-003
+  screens:
+    - screen: SeriesDetailScreen
+      label: "자동 이어가기 탭 → 새 회차 append + 폴링"
+      state: auto_continuing
+      figma:
+        - url: "https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37405-13400"
+          note: "웹툰_이어가기_자동_로딩 (figma node 37405:13400)"
+
+AC_2.5.2_직접_이어가기:
+  summary: "MANUAL 줄거리 입력 화면"
+  prototype: app/app-003
+  screens:
+    - screen: ManualContinueInputScreen
+      label: "직접 이어가기 입력 (보라 배너 + textarea)"
+      state: default
+      figma:
+        - url: "https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37298-172036"
+          note: "웹툰_이어가기_직접_미입력 (figma node 37298:172036)"
+    - screen: ManualContinueInputScreen
+      label: "500자 제한 도달"
+      state: limit_reached
+      figma:
+        - url: "https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37298-172258"
+          note: "웹툰_이어가기_직접_입력완료 (figma node 37298:172258)"
+
+# ─────────────────────────────────────────────────────────
+# US-6: MY 웹툰
+# ─────────────────────────────────────────────────────────
+
+AC_2.6.1_MY_웹툰_진입:
+  summary: "플로팅 버튼 → MY 웹툰 리스트"
+  prototype: app/app-001
+  screens:
+    - screen: MyWebtoonScreen
+      label: "MY 웹툰 리스트 (N뱃지 포함)"
+      state: default
+      figma:
+        - url: "https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37298-171488"
+          note: "웹툰_MY목록 (figma node 37298:171488)"
+
+AC_2.6.2_N뱃지_제거:
+  summary: "시리즈 상세 진입 시 N뱃지 제거"
+  prototype: app/app-001
+  screens:
+    - screen: NBadge
+      label: "N뱃지 컴포넌트"
+      state: default
+      figma:
+        - url: "https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37298-171488"
+          note: "웹툰_MY목록 - N뱃지 표시 상태 참고 (figma node 37298:171488)"
+
+AC_2.6.3_시리즈_카드_탭:
+  summary: "시리즈 카드 body 탭 → focus=FIRST"
+  prototype: app/app-001
+  screens:
+    - screen: SeriesRow
+      label: "시리즈 로우 (body hit-box)"
+      state: default
+      figma:
+        - url: "https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37298-171488"
+          note: "웹툰_MY목록 - 시리즈 로우 구조 참고 (figma node 37298:171488)"
+
+AC_2.6.4_이어가기_버튼_탭:
+  summary: "시리즈 로우 우측 '이어가기' 버튼 → focus=LAST_CONTINUE"
+  prototype: app/app-001
+  screens:
+    - screen: SeriesRow
+      label: "시리즈 로우 (이어가기 버튼 hit-box)"
+      state: continue_button
+      figma:
+        - url: "https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37298-171488"
+          note: "웹툰_MY목록 - 로우 우측 이어가기 버튼 참고 (figma node 37298:171488)"
+
+AC_2.6.5_MY_웹툰_노데이터:
+  summary: "MY 웹툰 빈 상태"
+  prototype: app/app-001
+  screens:
+    - screen: MyWebtoonEmptyView
+      label: "MY 웹툰 빈 상태"
+      state: empty
+      figma:
+        - url: "https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37306-172513"
+          note: "웹툰_MY목록_노데이터 (figma node 37306:172513)"
+
+AC_2.6.6_이어가기_사진_정책:
+  summary: "이어가기 시 사진 입력 미필수 (BR-12 자동 참조 주입)"
+  prototype: app/app-003
+  screens:
+    - screen: ManualContinueInputScreen
+      label: "사진 업로드 UI 없음 확인"
+      state: default
+      figma:
+        - url: "https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37298-172036"
+          note: "웹툰_이어가기_직접_미입력 - 사진 업로드 UI 없음 (figma node 37298:172036)"
+
+# ─────────────────────────────────────────────────────────
+# 에러 & 시스템 상태
+# ─────────────────────────────────────────────────────────
+
+NO_REFERENCE_EPISODE:
+  summary: "참조 회차 없음 에러 바텀시트 (이어가기 전용)"
+  prototype: app/app-003
+  resolution: "dev-pattern — Figma 미제공. 공통_바텀시트 패턴 재사용"
+  screens:
+    - screen: NoReferenceEpisodeSheet
+      label: "참조 회차 없음 안내"
+      state: default
+      figma: []
