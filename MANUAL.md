@@ -251,12 +251,21 @@ App PR은 `/meme-pr-create` 스킬 사용 권장 (과일환경 추출 + CodePush
 
 ```yaml
 sprint_id: "{sprint-id}"
+branch_prefix: "sprint"      # 브랜치 네임스페이스 (기본 "sprint")
 
-branches:
+repositories:
   backend:
-    base: "apple"              # wrtn-backend PR 타겟
+    source: "git@github.com:org/backend-repo.git"
+    base: "main"
+    mode: "worktree"
   app:
-    base: "meme-release-1.2.2" # app-core-packages PR 타겟
+    source: "git@github.com:org/app-repo.git"
+    base: "release/1.2.2"
+    mode: "worktree"
+  tokens:
+    source: "git@github.com:org/design-tokens.git"
+    base: "main"
+    mode: "symlink"          # 읽기 전용, 브랜치 불필요
 
 defaults:
   base: "main"
@@ -271,6 +280,9 @@ team:
     eval_retry_limit: 2
     max_parallel_tasks: 4
 ```
+
+> Role key(`backend`, `app`, `tokens`)가 디렉토리 이름이자 태스크 경로 prefix로 쓰인다. Role은
+> 프로젝트별로 자유롭게 추가/제거할 수 있다.
 
 ### 태스크 파일 구조
 
@@ -346,15 +358,15 @@ Machine-readable 화면 명세 (`screen-spec-template.md` 참조):
 ```bash
 git worktree list                              # 전체 worktree 확인
 git worktree remove --force .worktrees/{name}  # 강제 삭제
-git branch -D zzem/{sprint-id}/{task-id}       # 잔여 브랜치 삭제
+git branch -D {branch_prefix}/{sprint-id}/{task-id}  # 잔여 브랜치 삭제
 ```
 
 ### 스프린트 브랜치 복구
 
 ```bash
-cd wrtn-backend
-git log --oneline zzem/{sprint-id}             # 현재 상태 확인
-git checkout zzem/{sprint-id}                  # 브랜치 전환
+cd backend    # 또는 app/tokens 등 역할 디렉토리
+git log --oneline {branch_prefix}/{sprint-id}  # 현재 상태 확인
+git checkout {branch_prefix}/{sprint-id}       # 브랜치 전환
 ```
 
 ### 중간 재시작
@@ -401,7 +413,7 @@ git commit -m "sprint: {sprint-id} group-{N} accepted"
 ### 토큰 계층
 
 ```
-wds-tokens/
+tokens/           # (role key — 실제 디렉토리명은 sprint-config.yaml에서 결정)
 ├── primitive/     → 기본값 (color.json, typography.json, spacing.json, ...)
 ├── semantic/      → 의미 기반 (light.json, dark.json, typography.json)
 └── component/     → 컴포넌트별 (button.json, card.json, input.json, ...)

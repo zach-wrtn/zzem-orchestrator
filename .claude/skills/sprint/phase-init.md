@@ -22,19 +22,22 @@
    ```
 4. **PRD.md**: 원본 링크 + 스코프 요약 자동 생성.
 5. **sprint-config.yaml**: 사용자에게 base branch 질문 후 생성.
-6. **레포지토리 동기화**: `./scripts/sync-repos.sh --config sprint-orchestrator/sprints/{sprint-id}/sprint-config.yaml` 실행. `wrtn-backend`, `app-core-packages`, `wds-tokens` 세 레포의 base 브랜치를 remote와 동기화한다. 각 레포는 다음 규칙으로 처리:
-   - Clean + on base branch → 자동 `git pull` (fast-forward)
-   - Clean + 다른 브랜치 → 경고만 표시, 자동 전환 금지
-   - Dirty working tree → 경고만 표시, 자동 pull 금지
-   스크립트 출력을 사용자에게 보여준다. 경고가 있으면 사용자에게 해결 여부 확인 후 계속 진행할지 묻는다. `--skip-sync` 플래그로 이 단계를 생략 가능.
+6. **레포지토리 Worktree 생성**: `./scripts/setup-sprint.sh --config sprint-orchestrator/sprints/{sprint-id}/sprint-config.yaml` 실행. sprint-config의 `repositories` map을 loop하여 각 role에 대해:
+   - `mode: worktree` → `{role}/`에 git worktree 생성 + `{branch_prefix}/{sprint-id}` 브랜치 체크아웃 (`origin/{base}`에서 분기).
+   - `mode: symlink` → `{role}/`에 source 경로로 심볼릭 링크 생성.
+
+   각 source repo의 메인 체크아웃은 HEAD/working tree가 변경되지 않는다. 스크립트 출력을 사용자에게 보여주고, 에러 시 원인(예: source 경로 누락)을 해결한 뒤 재실행.
+
+7. **레포지토리 동기화 (선택)**: `./scripts/sync-repos.sh --config sprint-orchestrator/sprints/{sprint-id}/sprint-config.yaml` 실행. 각 source repo에서 `git fetch origin {base}`만 수행 (sprint 브랜치는 건드리지 않음). 네트워크 문제 또는 읽기 전용 환경이면 생략 가능.
 
 ## Gate → Phase 2
 
 다음 조건 **모두** 충족 시 Phase 2 진입:
 - [ ] `sprints/{sprint-id}/` 디렉토리 구조 완전 (PRD.md, sprint-config.yaml, tasks/, contracts/, evaluations/, checkpoints/, logs/)
 - [ ] PRD.md에 원본 PRD 링크 + 스코프 요약 존재
-- [ ] sprint-config.yaml에 base branch 설정 존재
-- [ ] 레포지토리 동기화 결과 확인 (경고 해결 또는 `--skip-sync`)
+- [ ] sprint-config.yaml에 `repositories` (role → {source, base, mode}) + `branch_prefix` 설정 존재
+- [ ] `setup-sprint.sh`가 성공적으로 실행되어 각 role 디렉토리가 생성됨 (`{role}/.git` 또는 symlink)
+- [ ] (선택) 레포지토리 fetch 완료
 
 ## Output
 
@@ -46,7 +49,10 @@ Gate 통과 시:
 Sprint initialized: {sprint-id}
   Directory: sprint-orchestrator/sprints/{sprint-id}/
   PRD: {prd-file}
-  Base branches: backend → {base}, app → {base}
+  Repositories: (role → branch)
+    backend → {branch_prefix}/{sprint-id} (base: {base})
+    app     → {branch_prefix}/{sprint-id} (base: {base})
+    tokens  → symlink (read-only)
 
 [Sprint Status Dashboard]
 

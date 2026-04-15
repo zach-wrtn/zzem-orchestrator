@@ -68,7 +68,7 @@ Phase 6: Retro       Gap Analysis + Pattern Digest + Deferred Index → REPORT.m
     │  BE Engineer  │ │ FE Engineer  │ │   Design    │  Generators
     │  (Teammate)   │ │ (Teammate)   │ │  Engineer   │
     │               │ │              │ │ (Teammate)  │
-    │  wrtn-backend │ │ MemeApp      │ │ HTML Proto  │
+    │  backend/     │ │ app/         │ │ HTML Proto  │
     │  worktree     │ │ worktree     │ │             │
     └───────────────┘ └──────────────┘ └─────────────┘
             │               │
@@ -85,8 +85,8 @@ Phase 6: Retro       Gap Analysis + Pattern Digest + Deferred Index → REPORT.m
 
 | Agent | 파일 | 역할 |
 |-------|------|------|
-| BE Engineer | `.claude/teammates/be-engineer.md` | wrtn-backend meme-api 구현 |
-| FE Engineer | `.claude/teammates/fe-engineer.md` | app-core-packages MemeApp 구현 |
+| BE Engineer | `.claude/teammates/be-engineer.md` | Backend role 태스크 구현 (config로 대상 레포 지정) |
+| FE Engineer | `.claude/teammates/fe-engineer.md` | App role 태스크 구현 (config로 대상 레포 지정) |
 | Design Engineer | `.claude/teammates/design-engineer.md` | Context Engine → Screen Spec → HTML Prototype |
 | Evaluator | `.claude/teammates/evaluator.md` | Active Evaluation (Logic Tracing, Edge Case Probing) |
 
@@ -272,19 +272,21 @@ TaskCreate:
 ```
                     origin/{base-branch}
                          │
-                         ├── zzem/{sprint-id}              ← Sprint 브랜치
-                         │      ├── zzem/{sprint-id}/001   ← Task worktree
-                         │      ├── zzem/{sprint-id}/002
+                         ├── {branch_prefix}/{sprint-id}              ← Sprint 브랜치
+                         │      ├── {branch_prefix}/{sprint-id}/001   ← Task worktree
+                         │      ├── {branch_prefix}/{sprint-id}/002
                          │      └── ...
                          │
-                         └── PR: zzem/{sprint-id} → {base}
+                         └── PR: {branch_prefix}/{sprint-id} → {base}
 ```
+
+`branch_prefix`는 `sprint-config.yaml`의 최상위 필드로 정의하며 기본값은 `sprint`.
 
 | 항목 | Backend | App |
 |------|---------|-----|
-| Base branch | `sprint-config.yaml` → `branches.backend.base` | `sprint-config.yaml` → `branches.app.base` |
-| Sprint branch | `zzem/{sprint-id}` | `zzem/{sprint-id}` |
-| Task branch | `zzem/{sprint-id}/{task-id}` | `zzem/{sprint-id}/{task-id}` |
+| Base branch | `sprint-config.yaml` → `repositories.backend.base` | `sprint-config.yaml` → `repositories.app.base` |
+| Sprint branch | `{branch_prefix}/{sprint-id}` | `{branch_prefix}/{sprint-id}` |
+| Task branch | `{branch_prefix}/{sprint-id}/{task-id}` | `{branch_prefix}/{sprint-id}/{task-id}` |
 | Worktree 경로 | `.worktrees/backend_{task-id}` | `.worktrees/app_{task-id}` |
 
 ---

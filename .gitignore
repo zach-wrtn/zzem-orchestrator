@@ -5,7 +5,13 @@ design-tokens/
 .env
 .gstack/
 
-# Repository symlinks
+# Source repo worktrees / symlinks (role-keyed, defined per sprint-config.yaml)
+# Generic role directories used by the reference projects:
+backend/
+app/
+tokens/
+
+# Legacy role directories (kept for migration; remove once no sprint references them)
 app-core-packages
 wrtn-backend
 wds-tokens

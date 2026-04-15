@@ -307,8 +307,8 @@ Sprint Follow-Up Init: {new-sprint-id}
     002-follow-ui         FollowerListScreen approved
 
   PRs:
-    wrtn-backend:       not created
-    app-core-packages:  not created
+    backend:  not created
+    app:      not created
 
   ─── Checkpoints ────────────────────────────────────
   phase-2-summary.md    ✓

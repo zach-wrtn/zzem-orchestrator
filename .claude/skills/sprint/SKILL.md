@@ -225,7 +225,7 @@ Phase 파일 경로: .claude/skills/sprint/{phase-file}
 - **이전 그룹 PASS 전 다음 그룹 구현(4.2) 시작 금지** (계약 선행 작업만 허용)
 - Phase 전환 시 Gate 조건 미충족이면 진행 차단 (`--force`로 오버라이드 가능)
 - Fix loop 최대 2회, 3회차 실패 시 FAILED + 사용자 개입
-- Backend-only 스프린트 시 Phase 3 자동 스킵, app-core-packages 브랜치 미생성
+- Backend-only 스프린트 시 Phase 3 자동 스킵, app role의 sprint 브랜치 미생성
 - **`--continue`는 retrospective/ 완료 후에만 사용 가능**
 - **`--follow-up`은 이전 스프린트의 retrospective/ 존재 필수**
 - **Regression Guard**: follow-up 스프린트에서 이전 충족 AC의 회귀 검증 필수

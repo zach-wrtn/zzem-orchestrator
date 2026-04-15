@@ -107,23 +107,19 @@ if fix_loop_count >= 2 OR total_issues_in_group >= 5:
 
 **핵심 제약**: 이전 그룹이 PASS 되기 전에 다음 그룹 구현을 시작하지 않는다. 이전 그룹의 fix가 다음 그룹 spec에 영향을 줄 수 있기 때문.
 
-## 4.0 Sprint 브랜치 생성 (첫 그룹 시)
+## 4.0 Sprint 브랜치 확인 (첫 그룹 시)
 
-**관련 레포만 브랜치 생성**: backend 태스크만 있으면 wrtn-backend만, app 태스크만 있으면 app-core-packages만 생성.
+Phase 1의 `setup-sprint.sh`에서 이미 각 role 디렉토리가 `{branch_prefix}/{sprint-id}` 브랜치로 체크아웃되어 있다. 별도 브랜치 생성 단계는 불필요.
 
 ```bash
-# wrtn-backend (backend 태스크 존재 시)
-cd wrtn-backend
-git fetch origin {backend-base}
-git checkout -b zzem/{sprint-id} origin/{backend-base}
-
-# app-core-packages (app 태스크 존재 시)
-cd app-core-packages
-git fetch origin {app-base}
-git checkout -b zzem/{sprint-id} origin/{app-base}
+# 확인만:
+git -C backend branch --show-current   # → {branch_prefix}/{sprint-id}
+git -C app branch --show-current       # → {branch_prefix}/{sprint-id}
 ```
 
-Base branch 우선순위: `sprint-config.yaml` → `defaults.base` → `"main"`
+Base branch 우선순위: `sprint-config.yaml` `repositories.<role>.base` → `defaults.base` → `"main"`.
+
+해당 role에 대한 태스크가 전혀 없으면 그 role worktree는 그대로 두고 머지·PR 단계에서 제외한다.
 
 ## 4.1 Sprint Contract (per group)
 
@@ -231,8 +227,8 @@ BE/FE Engineer가 worktree에서 구현 후 완료 보고.
 completed 태스크를 순차 머지:
 
 ```
-1. git checkout zzem/{sprint-id}
-2. git merge zzem/{sprint-id}/{task-id} --no-ff -m "merge: {task-id}"
+1. git checkout {branch_prefix}/{sprint-id}
+2. git merge {branch_prefix}/{sprint-id}/{task-id} --no-ff -m "merge: {task-id}"
 3. 충돌 시: 스프린트 중단, 사용자 개입 요청
 4. 성공 시: worktree 정리 (git worktree remove + branch delete)
 ```
@@ -259,7 +255,7 @@ App 태스크 머지 + QA Pattern Check PASS 후, Evaluator 할당 **전**에 Sp
 
 **실행**:
 ```bash
-cd app-core-packages
+cd app
 # 개별 flow 실행 (인증 필요 시 e2e:auth 래퍼 사용)
 yarn workspace MemeApp e2e:auth -- {flow-file-relative-path}
 ```
@@ -369,8 +365,8 @@ ISSUES 또는 FAIL 시:
 ```
 1. git worktree list로 전체 worktree 상태 확인
 2. 잔여 worktree: git worktree remove --force {path}
-3. 잔여 branch: git branch -D zzem/{sprint-id}/{task-id}
-4. sprint 브랜치 무결성 확인: git log --oneline zzem/{sprint-id}
+3. 잔여 branch: git branch -D {branch_prefix}/{sprint-id}/{task-id}
+4. sprint 브랜치 무결성 확인: git log --oneline {branch_prefix}/{sprint-id}
 5. 재시도
 ```
 

@@ -18,9 +18,9 @@ description: >
 
 | # | Source | Path | 추출 대상 |
 |---|--------|------|----------|
-| 1 | **WDS Token JSON** | `wds-tokens/` | Color, Typography, Spacing, Elevation, Motion |
-| 2 | **app-design-guide** | `app-core-packages/packages/app-design-guide/lib/` | Semantic color, Component styling, Layout utility |
-| 3 | **MemeApp 구현체** | `app-core-packages/apps/MemeApp/src/` | 실제 사용 패턴 → Atmosphere, Do's/Don'ts |
+| 1 | **WDS Token JSON** | `tokens/` | Color, Typography, Spacing, Elevation, Motion |
+| 2 | **app-design-guide** | `app/packages/app-design-guide/lib/` | Semantic color, Component styling, Layout utility |
+| 3 | **MemeApp 구현체** | `app/apps/MemeApp/src/` | 실제 사용 패턴 → Atmosphere, Do's/Don'ts |
 
 ## 산출물
 
@@ -38,30 +38,30 @@ docs/designs/preview.html        ← 시각적 카탈로그 (색상, 타이포, 
 **1-A. WDS Tokens** (결정론적 추출)
 
 다음 파일을 Read:
-- `wds-tokens/primitive/color.json` → 전체 팔레트
-- `wds-tokens/primitive/typography.json` → 폰트 계층
-- `wds-tokens/primitive/spacing.json` → 간격 스케일
-- `wds-tokens/primitive/elevation.json` → 그림자 시스템
-- `wds-tokens/primitive/motion.json` → 모션 토큰
-- `wds-tokens/semantic/light.json` → 시맨틱 색상 (light)
-- `wds-tokens/semantic/dark.json` → 시맨틱 색상 (dark)
-- `wds-tokens/component/*.json` → 컴포넌트 토큰 (button, card, input 등)
+- `tokens/primitive/color.json` → 전체 팔레트
+- `tokens/primitive/typography.json` → 폰트 계층
+- `tokens/primitive/spacing.json` → 간격 스케일
+- `tokens/primitive/elevation.json` → 그림자 시스템
+- `tokens/primitive/motion.json` → 모션 토큰
+- `tokens/semantic/light.json` → 시맨틱 색상 (light)
+- `tokens/semantic/dark.json` → 시맨틱 색상 (dark)
+- `tokens/component/*.json` → 컴포넌트 토큰 (button, card, input 등)
 
 **1-B. app-design-guide** (시맨틱 매핑 추출)
 
 다음 파일을 Read:
-- `app-core-packages/packages/app-design-guide/lib/theme/color/palette.ts` → 확장 팔레트
-- `app-core-packages/packages/app-design-guide/lib/theme/color/grayscale-color.ts` → 시맨틱 그레이스케일
-- `app-core-packages/packages/app-design-guide/lib/theme/color/zzem-semantic-color.ts` → ZZEM 바이올렛
-- `app-core-packages/packages/app-design-guide/lib/theme/color/function-color.ts` → 기능 색상
-- `app-core-packages/packages/app-design-guide/lib/stylev2/typographyV2.ts` → 타이포그래피 스케일
-- `app-core-packages/packages/app-design-guide/lib/stylev2/stylesV2.ts` → 레이아웃 유틸리티
+- `app/packages/app-design-guide/lib/theme/color/palette.ts` → 확장 팔레트
+- `app/packages/app-design-guide/lib/theme/color/grayscale-color.ts` → 시맨틱 그레이스케일
+- `app/packages/app-design-guide/lib/theme/color/zzem-semantic-color.ts` → ZZEM 바이올렛
+- `app/packages/app-design-guide/lib/theme/color/function-color.ts` → 기능 색상
+- `app/packages/app-design-guide/lib/stylev2/typographyV2.ts` → 타이포그래피 스케일
+- `app/packages/app-design-guide/lib/stylev2/stylesV2.ts` → 레이아웃 유틸리티
 
 **1-C. MemeApp 패턴 분석** (관찰 기반 추출)
 
 다음을 분석:
-- `app-core-packages/apps/MemeApp/src/shared/ui/styles/useShadow.ts` → 그림자 사용 패턴
-- `app-core-packages/apps/MemeApp/src/shared/ui/` 하위 `*.styles.ts` 3~5개 → 컴포넌트 스타일 패턴
+- `app/apps/MemeApp/src/shared/ui/styles/useShadow.ts` → 그림자 사용 패턴
+- `app/apps/MemeApp/src/shared/ui/` 하위 `*.styles.ts` 3~5개 → 컴포넌트 스타일 패턴
 - Grep: `borderRadius`, `gap`, `padding`, `zzem_violet`, `surface_`, `text_` → 빈도 기반 패턴
 
 ### Step 2: 9개 섹션 작성
@@ -135,7 +135,7 @@ DESIGN.md 생성 후, Design Engineer가 자동 참조하도록 연결한다:
 
 ### Step 7: 검증
 
-- [ ] DESIGN.md의 모든 hex 값이 `wds-tokens/` 또는 `app-design-guide`에 실재하는지 확인
+- [ ] DESIGN.md의 모든 hex 값이 `tokens/` 또는 `app-design-guide`에 실재하는지 확인
 - [ ] Do's 항목이 실제 코드에서 3회+ 관찰되는지 Grep으로 검증
 - [ ] Don'ts 항목이 실제 코드에서 사용되지 않는지 확인
 - [ ] preview.html이 브라우저에서 정상 렌더링되는지 확인
