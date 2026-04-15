@@ -3,20 +3,34 @@
 
 sprint_id: "{sprint-id}"
 
-# 레포지토리 참조 (심볼릭 링크 경로 기준)
+# Branch prefix for sprint work branches. Optional (default: "sprint").
+# 예: branch_prefix="sprint" + sprint_id="ai-webtoon" → 브랜치명 "sprint/ai-webtoon"
+branch_prefix: "sprint"
+
+# Repository role map.
+# Key = role name (backend, app, tokens, ...). Also used as directory name
+# under the orchestrator root and as tasks/{role}/ path.
+#
+# Fields:
+#   source: absolute path (또는 ~) to the main checkout of the repo.
+#           setup-sprint.sh가 git worktree add 대상으로 사용.
+#   base:   base branch to branch off (신규 sprint 브랜치 생성 시 사용).
+#   mode:   "worktree" (기본) | "symlink".
+#           worktree = git worktree로 독립 HEAD. 편집 가능.
+#           symlink  = read-only/공유 레포 (예: design tokens).
 repositories:
   backend:
-    path: wrtn-backend
-    url: git@github.wrtn.club:wrtn-tech/wrtn-backend.git
+    source: ~/dev/work/wrtn-backend
     base: "apple"
+    mode: worktree
   app:
-    path: app-core-packages
-    url: git@github.com:wrtn-tech/app-core-packages.git
+    source: ~/dev/work/app-core-packages
     base: "epic/ugc-platform-final"
+    mode: worktree
   tokens:
-    path: wds-tokens
-    url: git@github.wrtn.club:pepper/wds-tokens.git
+    source: ~/dev/work/wds-tokens
     base: "main"
+    mode: symlink
 
 # 미지정 프로젝트의 폴백 base branch
 defaults:

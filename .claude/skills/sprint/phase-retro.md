@@ -348,6 +348,17 @@ if any pattern.frequency >= 3:
     Reflection: knowledge-base/reflections/{sprint-id}.md
 ```
 
+## Cleanup (optional, 사용자 수동 실행)
+
+Sprint가 완전히 종료되고 모든 PR이 머지된 후, worktree와 sprint 브랜치를 정리한다. **자동 실행되지 않는다** — 사용자가 PR 머지 완료를 확인한 뒤 직접 실행.
+
+```bash
+./scripts/cleanup-sprint.sh --config sprint-orchestrator/sprints/{sprint-id}/sprint-config.yaml --delete-branch
+```
+
+- `repositories` map을 loop하여 각 role 디렉토리(worktree/symlink) 제거.
+- `--delete-branch` 지정 시 머지된 `{branch_prefix}/{sprint-id}` 브랜치도 source repo에서 삭제 (fast-forward 확인만 통과하는 `git branch -d` 사용).
+
 ## Gate
 
 Phase 6는 최종 단계이므로 별도 gate 없음. 산출물 생성 완료 시 종료.

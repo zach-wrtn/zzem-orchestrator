@@ -17,8 +17,8 @@ PRD를 **deliverable-focused** 명세로 확장한다.
    - 도출된 lesson/pattern은 PRD 분석 후 Spec에 명시적으로 채택/기각 (기각 사유 1줄 기록)
 1. **PRD 분석**: User Story + AC 추출, 비즈니스 목표 파악.
 2. **코드베이스 패턴 파악**:
-   - Backend: `wrtn-backend/apps/meme-api/src/`
-   - App: `app-core-packages/apps/MemeApp/src/`
+   - Backend: `backend/apps/meme-api/src/`
+   - App: `app/apps/MemeApp/src/`
 3. **API Contract 생성**: `api-contract.yaml` (OpenAPI 3.0) — SSOT.
 4. **태스크 분해**: `tasks/backend/*.md`, `tasks/app/*.md`
    - 필수 섹션: Target, Context, Objective, Specification, Acceptance Criteria
@@ -27,7 +27,7 @@ PRD를 **deliverable-focused** 명세로 확장한다.
 5. **Evaluation Criteria**: `evaluation/criteria.md` 생성.
    - 그룹별 평가 기준 + Evaluator 캘리브레이션 가이드
 6. **E2E Flow 매핑** (app 태스크 존재 시): `contracts/e2e-flow-plan.md` 생성.
-   - 기존 flow 목록: `app-core-packages/apps/MemeApp/e2e/flows/*.yaml` 확인
+   - 기존 flow 목록: `app/apps/MemeApp/e2e/flows/*.yaml` 확인
    - 각 AC에 대해 네 분류 중 하나 지정:
      - **Covered**: 기존 flow로 충족 (flow 파일명 명시)
      - **Extend**: 기존 flow에 step 추가 (대상 flow + 추가 step 요약)

@@ -18,23 +18,27 @@ in the sprint's `sprint-config.yaml` (see `sprint-orchestrator/templates/sprint-
 ## Architecture
 
 ```
-zzem-orchestrator/                     ← 오케스트레이션 레이어
+orchestrator/                          ← 오케스트레이션 레이어
 ├── sprint-orchestrator/               ← 스프린트 관리 (templates, sprints, knowledge-base)
 ├── docs/prds/                         ← PRD 원본
-├── app-core-packages/   [symlink]     ← React Native 프론트엔드
-├── wrtn-backend/        [symlink]     ← NestJS 백엔드
-└── wds-tokens/          [symlink]     ← Figma-synced 디자인 토큰
+├── {role1}/             [worktree]    ← 역할별 소스 레포 (config로 정의)
+├── {role2}/             [worktree]    ← 예: backend/, app/, tokens/
+└── ...
 ```
 
 ### Repositories
 
-| Repository | URL | 역할 |
-|-----------|-----|------|
-| `app-core-packages` | `github.com:wrtn-tech/app-core-packages` | Yarn/Lerna 모노레포. MemeApp 등 9개 앱 + 23개 패키지 |
-| `wrtn-backend` | `github.wrtn.club:wrtn-tech/wrtn-backend` | pnpm/Nx 모노레포. meme-api 등 6개 NestJS 서비스 |
-| `wds-tokens` | `github.wrtn.club:pepper/wds-tokens` | Token Studio JSON. primitive → semantic → component 3계층 |
+각 스프린트의 `sprint-config.yaml`에서 `repositories` 블록으로 정의한다. 기본 제공 예시
+(`sprint-orchestrator/templates/sprint-config-template.yaml`):
 
-> 심볼릭 링크로 연결. `scripts/setup.sh` 실행으로 셋업.
+| Role key | Source | Mode | 용도 |
+|---------|--------|------|------|
+| `backend` | 프로젝트별 설정 | `worktree` | 백엔드 API 구현 |
+| `app` | 프로젝트별 설정 | `worktree` | 프론트엔드/앱 구현 |
+| `tokens` | 프로젝트별 설정 | `symlink` | 디자인 토큰 (읽기 전용) |
+
+> Role key가 디렉토리 이름이자 태스크 경로(`tasks/{role}/...`). `scripts/setup-sprint.sh`가
+> `git worktree`로 격리된 체크아웃을 만든다 — 사용자의 main 체크아웃 HEAD는 건드리지 않는다.
 
 ## Quick Start
 
@@ -42,14 +46,18 @@ zzem-orchestrator/                     ← 오케스트레이션 레이어
 # 1. Clone
 git clone <repo-url>
 
-# 2. 레포지토리 심볼릭 링크 연결
-./scripts/setup.sh
+# 2. 스프린트 config 작성 (templates/sprint-config-template.yaml 복사)
+cp sprint-orchestrator/templates/sprint-config-template.yaml \
+   sprint-orchestrator/sprints/my-sprint-001/sprint-config.yaml
 
-# 3. Agent Teams 환경변수 설정
+# 3. 역할별 worktree/symlink 생성
+./scripts/setup-sprint.sh --config sprint-orchestrator/sprints/my-sprint-001/sprint-config.yaml
+
+# 4. Agent Teams 환경변수 설정
 export CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1
 
-# 4. 스프린트 실행
-/sprint ugc-profile-nav-001
+# 5. 스프린트 실행
+/sprint my-sprint-001
 ```
 
 ## Sprint Commands
