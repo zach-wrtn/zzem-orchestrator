@@ -1,0 +1,34 @@
+sprint: ai-webtoon
+phase: 3
+reviewed_at: 2026-04-15
+reviewer: zach
+
+approvals:
+  app-001:
+    status: approved
+    prototype: prototypes/app/app-001/prototype.html
+    note: "웹툰 탭 + 템플릿 상세 + MY 웹툰. Figma 매핑 커버. 별도 revision 없음."
+  app-002:
+    status: approved
+    prototype: prototypes/app/app-002/prototype.html
+    note: "로딩 단일화 반영 완료 (conflicts-resolved.md #1). 12 프레임 최종본."
+  app-003:
+    status: approved
+    prototype: prototypes/app/app-003/prototype.html
+    note: "시리즈 상세 + 이어가기 AUTO/MANUAL. InlineEpisodeError는 dev-pattern 커버."
+
+conflicts_resolution:
+  source: prototypes/conflicts-resolved.md
+  decisions_count: 8
+  summary:
+    - "#1 로딩 단계 분리 제거 (figma-wins)"
+    - "#2 SeriesDetailScreen 네이밍 유지 (prd-wins)"
+    - "#3~#8 Figma 미제공 UI 6종 전부 dev-pattern 커버"
+
+figma_mapping:
+  source: prototypes/figma-mapping.yaml
+  matched_rows: 21
+  dev_pattern_rows: 6
+  total_rows: 27
+
+ready_for_phase_4: true

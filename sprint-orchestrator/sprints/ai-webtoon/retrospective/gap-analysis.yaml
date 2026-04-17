@@ -1,0 +1,257 @@
+sprint_id: "ai-webtoon"
+prd_source: "docs/prds/PRD-ai-webtoon-v1.2.md"
+generated_at: "2026-04-15T00:00:00Z"
+
+coverage:
+  total_ac: 22
+  fulfilled: 18
+  partially_fulfilled: 4
+  unfulfilled: 0
+  fulfillment_rate: "0.82"
+
+# Note: All 3 groups PASS on first evaluation (0 fix loops).
+# The 4 "partially_fulfilled" entries trace to 4 Major follow-ups flagged as
+# non-blocking / self-healing and deferred (see deferred-items.yaml).
+
+items:
+  - ac_id: "AC-2.1.1"
+    ac_text: "홈 탭 구조: [추천][웹툰][무료] 3개 탭 + 디폴트 [추천] 활성"
+    task_id: "app-001"
+    group: "group-001"
+    status: "fulfilled"
+    reason: "home.screen.tsx defaults to recommend; home-header.tsx renders webtoon tab under feature flag"
+    evidence: "evaluations/group-001.md#app-001-done-criteria"
+    root_cause: null
+    recommendation: null
+    priority: "low"
+
+  - ac_id: "AC-2.1.2"
+    ac_text: "웹툰 탭 콘텐츠: 헤더/서브카피/2 템플릿/MY 플로팅 버튼"
+    task_id: "app-001"
+    group: "group-001"
+    status: "fulfilled"
+    reason: "webtoon-tab.screen.tsx renders 2 template cards + WebtoonFloatingButton"
+    evidence: "evaluations/group-001.md#app-001-done-criteria"
+    root_cause: null
+    recommendation: null
+    priority: "low"
+
+  - ac_id: "AC-2.1.3"
+    ac_text: "템플릿 노데이터 → 빈 상태 화면"
+    task_id: "app-001"
+    group: "group-001"
+    status: "fulfilled"
+    reason: "webtoon-tab.screen.tsx branches on isEmpty → WebtoonEmptyView"
+    evidence: "evaluations/group-001.md#app-001-done-criteria"
+    root_cause: null
+    recommendation: null
+    priority: "low"
+
+  - ac_id: "AC-2.2.1"
+    ac_text: "템플릿 상세: 헤더 제목/프리뷰 이미지/고정 CTA"
+    task_id: "app-001"
+    group: "group-001"
+    status: "fulfilled"
+    reason: "webtoon-template-detail.screen.tsx HeaderBar + FastImage + bottom-fixed RegularButton"
+    evidence: "evaluations/group-001.md#app-001-done-criteria"
+    root_cause: null
+    recommendation: null
+    priority: "low"
+
+  - ac_id: "AC-2.3.1"
+    ac_text: "입력 화면: 캐릭터 유형 칩(읽기 전용) + 사진 슬롯 + 읽기 전용 줄거리"
+    task_id: "app-002"
+    group: "group-002"
+    status: "fulfilled"
+    reason: "CharacterTypeChip has no onPress; SynopsisReadOnly uses Typo.Body6 (no TextInput)"
+    evidence: "evaluations/group-002.md#app-002-ac-verification"
+    root_cause: null
+    recommendation: null
+    priority: "low"
+
+  - ac_id: "AC-2.3.2"
+    ac_text: "사진 미선택 시 CTA 비활성"
+    task_id: "app-002"
+    group: "group-002"
+    status: "fulfilled"
+    reason: "isCtaDisabled = !hasPhoto || isPending || submitLocked"
+    evidence: "evaluations/group-002.md#app-002-ac-verification"
+    root_cause: null
+    recommendation: null
+    priority: "low"
+
+  - ac_id: "AC-2.3.3"
+    ac_text: "1화 생성 요청 → 202 PENDING, 크레딧 미차감, 5-cap 동시 생성 제한(BR-3)"
+    task_id: "be-002/app-002"
+    group: "group-002"
+    status: "partially_fulfilled"
+    reason: "202 + no-deduct verified. 5-cap enforced via DB-sum for webtoon, but meme path uses Redis slot — the two pipelines share a cap but not the counter source (G002-M1 drift)"
+    evidence: "evaluations/group-002.md#major-issues-m1"
+    root_cause: "dependency"
+    recommendation: "Unify webtoon submit into reserveGenerationSlotOrThrow (shared Redis atomic slot)"
+    priority: "medium"
+
+  - ac_id: "AC-2.3.4"
+    ac_text: "2단계 비동기 생성: 완료 시 크레딧 차감 / 실패 시 차감 없음"
+    task_id: "be-002/app-002"
+    group: "group-002"
+    status: "fulfilled"
+    reason: "completeEpisode deducts 500 inside @Transactional; failEpisode sets creditDeducted=0. Double idempotency (isTerminal guard + contentId-based dedup in deductCredit)"
+    evidence: "evaluations/group-002.md#be-002-ac-verification"
+    root_cause: null
+    recommendation: null
+    priority: "low"
+
+  - ac_id: "AC-2.3.5"
+    ac_text: "크레딧 부족 → 바텀시트"
+    task_id: "app-002"
+    group: "group-002"
+    status: "partially_fulfilled"
+    reason: "402 handled via Toast + navigate CreditPaywall. Behaviourally equivalent (paywall surfaced, no skeleton entry) but not the InsufficientCreditSheet component named in task spec"
+    evidence: "evaluations/group-002.md#minor-observations"
+    root_cause: "spec_ambiguity"
+    recommendation: "Align to InsufficientCreditSheet per task hint, or update task spec to reflect toast+paywall"
+    priority: "low"
+
+  - ac_id: "AC-2.3.6"
+    ac_text: "유해 이미지 감지 처리: 안내 시트 + 크레딧 미차감"
+    task_id: "be-002/app-002"
+    group: "group-002"
+    status: "fulfilled"
+    reason: "Callback PROHIBITED → failureReason=PROHIBITED_IMAGE, creditDeducted=0; app useBottomConfirmSheet w/ MemeErrorSheetContent → returnToInput"
+    evidence: "evaluations/group-002.md#be-002-ac-verification"
+    root_cause: null
+    recommendation: null
+    priority: "low"
+
+  - ac_id: "AC-2.3.7"
+    ac_text: "서버 에러 처리: 토스트 + 크레딧 미차감"
+    task_id: "app-002"
+    group: "group-002"
+    status: "fulfilled"
+    reason: "Toast.show error preset on 500; no client-side credit mutation"
+    evidence: "evaluations/group-002.md#app-002-ac-verification"
+    root_cause: null
+    recommendation: null
+    priority: "low"
+
+  - ac_id: "AC-2.3.8"
+    ac_text: "생성 Timeout → 실패 화면 + 차감 없음"
+    task_id: "be-002/app-002"
+    group: "group-002"
+    status: "fulfilled"
+    reason: "Server scheduler sweeps stale PENDING every minute with @Lock ttl 45; client 240s setTimeout transitions to FAILED"
+    evidence: "evaluations/group-002.md#be-002-ac-verification"
+    root_cause: null
+    recommendation: null
+    priority: "low"
+
+  - ac_id: "AC-2.4.1"
+    ac_text: "결과물 상세 상태 분기 (진행중 skeleton/완료 image/실패 inline error)"
+    task_id: "app-003"
+    group: "group-003"
+    status: "fulfilled"
+    reason: "webtoon-episode-section.tsx switches on effective status via per-episode polling"
+    evidence: "evaluations/group-003.md#app-003-ac-verification"
+    root_cause: null
+    recommendation: null
+    priority: "low"
+
+  - ac_id: "AC-2.4.2"
+    ac_text: "이어가기 CTA 노출 (Primary 자동 / Secondary 직접)"
+    task_id: "app-003"
+    group: "group-003"
+    status: "fulfilled"
+    reason: "ContinuationCtaBar gated on lastEpisode.status === COMPLETED with 2 CTAs"
+    evidence: "evaluations/group-003.md#app-003-ac-verification"
+    root_cause: null
+    recommendation: null
+    priority: "low"
+
+  - ac_id: "AC-2.5.1"
+    ac_text: "자동 이어가기: 이전 화 참조 주입 + 크레딧 차감 + 새 화수 추가"
+    task_id: "be-003/app-003"
+    group: "group-003"
+    status: "fulfilled"
+    reason: "falAiService.generateV2 called with image_urls=[prev.outputImageUrl]; appendEpisode race-safe; submit reuses shared credit/concurrency helpers"
+    evidence: "evaluations/group-003.md#be-003-ac-verification"
+    root_cause: null
+    recommendation: null
+    priority: "low"
+
+  - ac_id: "AC-2.5.2"
+    ac_text: "직접 이어가기: story beat 입력 + AC 2.5.1 흐름 + 재시도 동일 continuationType"
+    task_id: "be-003/app-003"
+    group: "group-003"
+    status: "partially_fulfilled"
+    reason: "MANUAL submit flow + [유저 story beat] prompt marker verified. But retry CTA (webtoon-series-detail.screen.tsx:168-172) hardcodes AUTO — MANUAL failure retry silently becomes AUTO (G003-M1)"
+    evidence: "evaluations/group-003.md#major-issues-1"
+    root_cause: "scope_creep"
+    recommendation: "Track originating continuationType on episode; MANUAL retry navigates back to ManualContinueInputScreen (optionally prefill beat)"
+    priority: "medium"
+
+  - ac_id: "AC-2.6.1"
+    ac_text: "MY 웹툰 진입: 시리즈 리스트 + N뱃지"
+    task_id: "app-001"
+    group: "group-001"
+    status: "fulfilled"
+    reason: "my-webtoon.screen.tsx + SeriesRow conditional NBadge on hasUnseenEpisode"
+    evidence: "evaluations/group-001.md#app-001-done-criteria"
+    root_cause: null
+    recommendation: null
+    priority: "low"
+
+  - ac_id: "AC-2.6.2"
+    ac_text: "N뱃지 제거: 결과물 상세 1회 진입 후 재진입 미노출 (BR-7)"
+    task_id: "be-001/be-003/app-003"
+    group: "group-003"
+    status: "partially_fulfilled"
+    reason: "POST /seen idempotent; useSeenMark clears on detail mount. But hasUnseenEpisode=true is also written by incrementLastEpisode (PENDING append) → dual write path; PENDING→FAILED leaves false-positive badge (G003-M2)"
+    evidence: "evaluations/group-003.md#major-issues-2"
+    root_cause: "code_quality"
+    recommendation: "Remove hasUnseenEpisode:true from incrementLastEpisode $set; single flip via completeEpisode → markHasUnseenTrue only"
+    priority: "medium"
+
+  - ac_id: "AC-2.6.3"
+    ac_text: "시리즈 카드 탭 → 1화 이동"
+    task_id: "app-001"
+    group: "group-001"
+    status: "fulfilled"
+    reason: "series-row.tsx split VStack.Pressable — onPressCard (card area) separate from onPressContinue (right button)"
+    evidence: "evaluations/group-001.md#app-001-done-criteria"
+    root_cause: null
+    recommendation: null
+    priority: "low"
+
+  - ac_id: "AC-2.6.4"
+    ac_text: "이어가기 버튼 탭 → 마지막 회차 CTA 자동 스크롤"
+    task_id: "app-003"
+    group: "group-003"
+    status: "fulfilled"
+    reason: "webtoon-series-detail.screen.tsx auto-scroll effect on focus=LAST_CONTINUE with CTA yRef + 300ms layout-miss retry (1 attempt)"
+    evidence: "evaluations/group-003.md#app-003-ac-verification"
+    root_cause: null
+    recommendation: null
+    priority: "low"
+
+  - ac_id: "AC-2.6.5"
+    ac_text: "MY 웹툰 노데이터 빈 상태"
+    task_id: "app-001"
+    group: "group-001"
+    status: "fulfilled"
+    reason: "my-webtoon.screen.tsx renders MyWebtoonEmptyView when list empty"
+    evidence: "evaluations/group-001.md#app-001-done-criteria"
+    root_cause: null
+    recommendation: null
+    priority: "low"
+
+  - ac_id: "AC-2.6.6"
+    ac_text: "이어가기 시 사진 입력 정책: 추가 사진 없이 이전 화 참조 자동 주입"
+    task_id: "be-003/app-003"
+    group: "group-003"
+    status: "fulfilled"
+    reason: "Continuation submit passes inputImageUrl=null and injects prev.outputImageUrl into image_urls[]. No photo slot in SeriesDetail or ManualContinueScreen"
+    evidence: "evaluations/group-003.md#app-003-ac-verification"
+    root_cause: null
+    recommendation: null
+    priority: "low"

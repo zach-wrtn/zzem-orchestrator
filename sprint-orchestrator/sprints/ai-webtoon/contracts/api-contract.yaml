@@ -1,0 +1,516 @@
+openapi: 3.0.3
+info:
+  title: AI Webtoon API
+  version: "1.0.0"
+  description: |
+    AI webtoon generation: photo → 1st episode → auto/manual continuation.
+    Model: fal-ai/nano-banana-2/edit (i2i). Credits deducted on callback success only (BR-2).
+    Polling interval 5s (BR-11). Per-generation cost 500 credits (BR-1).
+
+servers:
+  - url: https://meme-api/
+    description: meme-api (mobile app entry points)
+  - url: https://meme-api/internal/
+    description: meme-api internal (webhook, not exposed to app)
+
+tags:
+  - name: Webtoon Templates
+  - name: Webtoon Generation
+  - name: Webtoon Series
+  - name: Webhook (internal)
+  - name: Test Seed (test-only)
+
+paths:
+  /webtoon/templates:
+    get:
+      tags: [Webtoon Templates]
+      summary: List webtoon templates (US-1, AC 2.1.2)
+      description: |
+        Returns hardcoded template list (BR-8). Order is fixed in app code.
+        Empty array triggers AC 2.1.3 (app empty state). Two templates this sprint:
+        one person-photo + one animal-photo.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TemplateListResponse"
+
+  /webtoon/templates/{templateId}:
+    get:
+      tags: [Webtoon Templates]
+      summary: Template detail with preview (US-2, AC 2.2.1)
+      parameters:
+        - in: path
+          name: templateId
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TemplateDetailResponse"
+        "404":
+          description: Template not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /webtoon/generations:
+    post:
+      tags: [Webtoon Generation]
+      summary: Submit 1st episode generation request (US-3, AC 2.3.3)
+      description: |
+        Two-stage: (1) request accepted (no credit deduction — BR-2),
+        (2) async fal-ai callback → deduct + publish result.
+        Concurrency gate (BR-3) shared with meme generation pool (max 5).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WebtoonEpisode1Request"
+      responses:
+        "202":
+          description: Accepted — generation enqueued
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenerationAcceptedResponse"
+        "400":
+          description: Invalid input (missing imageUrl, unknown templateId)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "402":
+          description: Insufficient credit (AC 2.3.5, BR-1)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InsufficientCreditError"
+        "409":
+          description: Concurrency cap reached (BR-3, max 5 in-flight)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConcurrencyCapError"
+        "422":
+          description: Prohibited image detected synchronously (AC 2.3.6)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProhibitedImageError"
+        "500":
+          description: Server error (AC 2.3.7)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /webtoon/series/{seriesId}/episodes:
+    post:
+      tags: [Webtoon Generation]
+      summary: Continue series — auto or manual (US-5, AC 2.5.1/2.5.2)
+      description: |
+        Server auto-injects previous episode image_url into image_urls[] (BR-12).
+        `continuationType: AUTO` → no user prompt; `MANUAL` → requires `userStoryBeat`.
+        Credit deduction/concurrency/error semantics identical to /webtoon/generations.
+      parameters:
+        - in: path
+          name: seriesId
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WebtoonContinuationRequest"
+      responses:
+        "202":
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenerationAcceptedResponse"
+        "400": { description: Invalid input, content: { application/json: { schema: { $ref: "#/components/schemas/ApiError" } } } }
+        "402": { description: Insufficient credit, content: { application/json: { schema: { $ref: "#/components/schemas/InsufficientCreditError" } } } }
+        "404": { description: Series not found or not owned by user, content: { application/json: { schema: { $ref: "#/components/schemas/ApiError" } } } }
+        "409": { description: Concurrency cap reached, content: { application/json: { schema: { $ref: "#/components/schemas/ConcurrencyCapError" } } } }
+        "422": { description: Prohibited content, content: { application/json: { schema: { $ref: "#/components/schemas/ProhibitedImageError" } } } }
+
+  /webtoon/generations/{generationId}:
+    get:
+      tags: [Webtoon Generation]
+      summary: Poll generation status (AC 2.3.4, BR-11 — 5s interval)
+      parameters:
+        - in: path
+          name: generationId
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenerationStatusResponse"
+        "404":
+          description: Not found / not owned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /webtoon/series:
+    get:
+      tags: [Webtoon Series]
+      summary: MY webtoon list (US-6, AC 2.6.1)
+      description: |
+        Returns all series for authenticated user, sorted by lastEpisodeCreatedAt desc.
+        `hasUnseenEpisode` drives N-badge (BR-7).
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SeriesListResponse"
+
+  /webtoon/series/{seriesId}:
+    get:
+      tags: [Webtoon Series]
+      summary: Series detail with all episodes (AC 2.4.1, 2.6.3, 2.6.4)
+      parameters:
+        - in: path
+          name: seriesId
+          required: true
+          schema: { type: string }
+        - in: query
+          name: focus
+          required: false
+          schema: { type: string, enum: [FIRST, LAST_CONTINUE] }
+          description: |
+            `FIRST` (default) for AC 2.6.3 — returns episodes ordered 1..N.
+            `LAST_CONTINUE` for AC 2.6.4 — hints client to auto-scroll to
+            last completed episode's bottom (continuation CTA).
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SeriesDetailResponse"
+        "404": { description: Not found, content: { application/json: { schema: { $ref: "#/components/schemas/ApiError" } } } }
+
+  /webtoon/series/{seriesId}/seen:
+    post:
+      tags: [Webtoon Series]
+      summary: Mark series as seen — clears N-badge (AC 2.6.2, BR-7)
+      description: |
+        Idempotent. Called once when user enters series detail. Server clears
+        `hasUnseenEpisode` for the latest viewed episode.
+      parameters:
+        - in: path
+          name: seriesId
+          required: true
+          schema: { type: string }
+      responses:
+        "204": { description: Cleared }
+        "404": { description: Not found, content: { application/json: { schema: { $ref: "#/components/schemas/ApiError" } } } }
+
+  /internal/webtoon/generations/callback:
+    post:
+      tags: [Webhook (internal)]
+      summary: fal-ai completion webhook (internal only)
+      description: |
+        Receives fal-ai completion for a webtoon generation. On success,
+        persists output image + deducts credit + emits status change.
+        On failure (including prohibited / timeout-class), marks failed and
+        does NOT deduct (BR-2).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FalCallbackPayload"
+      responses:
+        "200": { description: Accepted }
+        "400": { description: Malformed payload, content: { application/json: { schema: { $ref: "#/components/schemas/ApiError" } } } }
+
+  /__test__/webtoon/series/seed:
+    post:
+      tags: [Test Seed (test-only)]
+      summary: Seed series + episodes (e2e/QA only; disabled in prod)
+      description: Test-only endpoint gated by NODE_ENV != production.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TestSeedSeriesRequest"
+      responses:
+        "200": { description: Seeded, content: { application/json: { schema: { $ref: "#/components/schemas/TestSeedSeriesResponse" } } } }
+
+  /__test__/webtoon/series/clear:
+    post:
+      tags: [Test Seed (test-only)]
+      summary: Clear current user's seeded series (e2e/QA only)
+      responses:
+        "204": { description: Cleared }
+
+components:
+  schemas:
+    CharacterType:
+      type: string
+      enum: [PERSON, ANIMAL]
+      description: Template-decided (BR-5). Users cannot override.
+
+    TemplateSummary:
+      type: object
+      required: [templateId, name, characterType, thumbnailUrl, requiredCredit]
+      properties:
+        templateId: { type: string, example: "tpl_person_romance" }
+        name: { type: string, example: "두근거림 로맨스" }
+        characterType: { $ref: "#/components/schemas/CharacterType" }
+        thumbnailUrl: { type: string, format: uri }
+        previewImageUrl:
+          type: string
+          format: uri
+          description: Long preview image shown on template detail (AC 2.2.1).
+        requiredCredit:
+          type: integer
+          description: "500 (BR-1). Exposed for future tunability."
+          example: 500
+        synopsis:
+          type: string
+          description: Read-only storyline shown on input screen (BR-6).
+
+    TemplateListResponse:
+      type: object
+      required: [templates]
+      properties:
+        templates:
+          type: array
+          items: { $ref: "#/components/schemas/TemplateSummary" }
+
+    TemplateDetailResponse:
+      type: object
+      required: [template]
+      properties:
+        template: { $ref: "#/components/schemas/TemplateSummary" }
+
+    WebtoonEpisode1Request:
+      type: object
+      required: [templateId, imageUrl]
+      properties:
+        templateId: { type: string, example: "tpl_person_romance" }
+        imageUrl:
+          type: string
+          format: uri
+          description: User-uploaded photo (single). AC 2.3.1.
+
+    WebtoonContinuationRequest:
+      type: object
+      required: [continuationType]
+      properties:
+        continuationType:
+          type: string
+          enum: [AUTO, MANUAL]
+          description: AC 2.5.1 / AC 2.5.2.
+        userStoryBeat:
+          type: string
+          maxLength: 500
+          description: Required when `continuationType=MANUAL` (AC 2.5.2, BR-6).
+
+    GenerationAcceptedResponse:
+      type: object
+      required: [generationId, seriesId, episodeNumber, status]
+      properties:
+        generationId: { type: string, example: "gen_01JABC..." }
+        seriesId:
+          type: string
+          description: New for episode 1, existing for continuation.
+        episodeNumber:
+          type: integer
+          minimum: 1
+        status:
+          type: string
+          enum: [PENDING]
+          description: AC 2.3.3 — accepted, no credit deducted yet.
+
+    GenerationStatus:
+      type: string
+      enum: [PENDING, IN_PROGRESS, COMPLETED, FAILED, PROHIBITED, TIMEOUT]
+      description: |
+        PENDING/IN_PROGRESS → skeleton (AC 2.3.4).
+        COMPLETED → deduct + image visible (BR-2).
+        FAILED/TIMEOUT → no deduction (BR-2), inline error CTA (AC 2.4.1).
+        PROHIBITED → AC 2.3.6 bottom sheet.
+
+    GenerationStatusResponse:
+      type: object
+      required: [generationId, seriesId, episodeNumber, status, creditDeducted]
+      properties:
+        generationId: { type: string }
+        seriesId: { type: string }
+        episodeNumber: { type: integer }
+        status: { $ref: "#/components/schemas/GenerationStatus" }
+        imageUrl:
+          type: string
+          format: uri
+          nullable: true
+          description: Present iff `status=COMPLETED`.
+        creditDeducted:
+          type: integer
+          description: 500 when COMPLETED, 0 otherwise (BR-2).
+        failureReason:
+          type: string
+          nullable: true
+          enum: [null, PROHIBITED_IMAGE, MODEL_ERROR, TIMEOUT, INTERNAL_ERROR]
+
+    EpisodeSummary:
+      type: object
+      required: [episodeNumber, status, createdAt]
+      properties:
+        episodeNumber: { type: integer, minimum: 1 }
+        status: { $ref: "#/components/schemas/GenerationStatus" }
+        imageUrl:
+          type: string
+          format: uri
+          nullable: true
+        createdAt: { type: string, format: date-time }
+        generationId: { type: string }
+        hasUnseen:
+          type: boolean
+          description: "Per-episode unseen flag (BR-7)."
+
+    SeriesSummary:
+      type: object
+      required: [seriesId, templateId, templateName, thumbnailUrl, episodeCount, hasUnseenEpisode, lastEpisodeCreatedAt]
+      properties:
+        seriesId: { type: string }
+        templateId: { type: string }
+        templateName: { type: string }
+        thumbnailUrl:
+          type: string
+          format: uri
+          description: First episode's image; fallback to template thumb if episode 1 still pending.
+        episodeCount: { type: integer, minimum: 1 }
+        hasUnseenEpisode:
+          type: boolean
+          description: Drives N-badge (AC 2.6.1, BR-7).
+        lastEpisodeCreatedAt: { type: string, format: date-time }
+        lastEpisodeStatus: { $ref: "#/components/schemas/GenerationStatus" }
+
+    SeriesListResponse:
+      type: object
+      required: [series]
+      properties:
+        series:
+          type: array
+          description: Sorted by `lastEpisodeCreatedAt` desc. Empty → AC 2.6.5.
+          items: { $ref: "#/components/schemas/SeriesSummary" }
+
+    SeriesDetailResponse:
+      type: object
+      required: [series, episodes]
+      properties:
+        series: { $ref: "#/components/schemas/SeriesSummary" }
+        episodes:
+          type: array
+          description: Ordered by episodeNumber asc.
+          items: { $ref: "#/components/schemas/EpisodeSummary" }
+        focusEpisodeNumber:
+          type: integer
+          nullable: true
+          description: |
+            When request `focus=LAST_CONTINUE`, server returns the last COMPLETED
+            episode number so client can auto-scroll to its bottom continuation
+            CTA (AC 2.6.4). Null otherwise.
+
+    FalCallbackPayload:
+      type: object
+      required: [generationId, outcome]
+      properties:
+        generationId: { type: string }
+        outcome:
+          type: string
+          enum: [SUCCESS, PROHIBITED, MODEL_ERROR, TIMEOUT]
+        imageUrl:
+          type: string
+          format: uri
+          nullable: true
+          description: Required when `outcome=SUCCESS`.
+        signature:
+          type: string
+          description: HMAC signature of payload (rejected if invalid).
+
+    ApiError:
+      type: object
+      required: [error, message]
+      properties:
+        error: { type: string, example: "INTERNAL_ERROR" }
+        message: { type: string, example: "생성에 실패했어요" }
+
+    InsufficientCreditError:
+      allOf:
+        - $ref: "#/components/schemas/ApiError"
+        - type: object
+          required: [requiredCredit, currentCredit]
+          properties:
+            error:
+              type: string
+              enum: [INSUFFICIENT_CREDIT]
+            requiredCredit: { type: integer, example: 500 }
+            currentCredit: { type: integer, example: 120 }
+
+    ConcurrencyCapError:
+      allOf:
+        - $ref: "#/components/schemas/ApiError"
+        - type: object
+          required: [maxConcurrent, currentInFlight]
+          properties:
+            error:
+              type: string
+              enum: [CONCURRENCY_CAP_REACHED]
+            maxConcurrent: { type: integer, example: 5 }
+            currentInFlight: { type: integer }
+            message:
+              type: string
+              example: "동시 생성은 최대 5개까지 가능해요"
+
+    ProhibitedImageError:
+      allOf:
+        - $ref: "#/components/schemas/ApiError"
+        - type: object
+          properties:
+            error:
+              type: string
+              enum: [PROHIBITED_IMAGE]
+            message:
+              type: string
+              example: "적절하지 않은 이미지를 감지했어요"
+
+    TestSeedSeriesRequest:
+      type: object
+      required: [templateId, episodeCount]
+      properties:
+        templateId: { type: string }
+        episodeCount: { type: integer, minimum: 1, maximum: 5 }
+        allCompleted: { type: boolean, default: true }
+        hasUnseen: { type: boolean, default: false }
+
+    TestSeedSeriesResponse:
+      type: object
+      required: [seriesId, episodes]
+      properties:
+        seriesId: { type: string }
+        episodes:
+          type: array
+          items: { $ref: "#/components/schemas/EpisodeSummary" }

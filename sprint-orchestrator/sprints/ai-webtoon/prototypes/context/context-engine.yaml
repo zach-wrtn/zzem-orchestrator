@@ -1,0 +1,675 @@
+# Context Engine — Sprint: ai-webtoon
+# 3-layer context (WHY / WHAT / HOW) assembled for Design Engineer HTML prototypes.
+# Scoped to app-001 (webtoon tab + template detail + MY webtoon floating entry).
+# If other parallel design-engineers append their task scopes below, keep this header.
+
+meta:
+  sprint_id: ai-webtoon
+  prd_source: sprint-orchestrator/sprints/ai-webtoon/PRD.md
+  prd_extract: docs/prds/PRD-ai-webtoon-v1.2.md
+  api_contract: sprint-orchestrator/sprints/ai-webtoon/contracts/api-contract.yaml
+  design_system_reference: docs/designs/component-patterns.md
+  tokens_source: tokens/ (symlink → wds-tokens)
+  scope_tasks:
+    - app-001
+    - app-002
+    - app-003
+
+# -----------------------------------------------------------------------------
+# Layer 1 — WHY (Business Intent from PRD)
+# -----------------------------------------------------------------------------
+why:
+  product_intent: >
+    사진 1장으로 나만의 AI 웹툰 1화를 생성하고, 자동/직접 이어가기로 연재
+    구조를 형성해 크레딧 재소비·재방문을 유도한다.
+  target_user: "AI 밈/이미지 생성을 이미 경험한 ZZEM 모바일 유저 (크레딧 보유)"
+  success_metric: >
+    웹툰 생성 비중 ≥ 10%, 리텐션 커브 플래토 형성, 크레딧 재구매 발생 여부.
+  core_hypothesis: >
+    이어가기 구조를 제공하면 유저가 다음 화 궁금증으로 재방문해 크레딧을
+    재소비한다.
+
+  # app-001 범위에 해당하는 User Stories
+  user_stories:
+    - id: US-1
+      as_a: ZZEM 유저
+      i_want: 홈의 [웹툰] 탭에서 사용 가능한 템플릿을 둘러보고 싶다
+      so_that: 어떤 웹툰 스타일을 만들 수 있는지 이해하고 고를 수 있다
+      scope: app-001
+
+    - id: US-2
+      as_a: ZZEM 유저
+      i_want: 선택한 템플릿의 미리보기와 설명을 자세히 보고 싶다
+      so_that: 만들기 전에 결과물 분위기를 확신할 수 있다
+      scope: app-001
+
+    - id: US-6
+      as_a: 이미 웹툰을 한 번 만들어본 유저
+      i_want: 내가 만든 웹툰(시리즈) 리스트를 한눈에 보고, 새 화가 있으면 빠르게 진입하고 싶다
+      so_that: 이어가기와 재감상을 끊김 없이 반복할 수 있다
+      scope: app-001
+
+  # app-001 범위에 해당하는 Acceptance Criteria (task spec + PRD 교차)
+  acceptance_criteria:
+    - id: AC-2.1.1
+      given: 홈 화면에 진입했다
+      when: 화면이 로드된다
+      then: "[추천][웹툰][무료] 3탭이 노출되며 기본 활성 탭은 [추천]"
+      ui_impact: HomeTabsHeader가 3탭을 렌더, [추천] 탭 기본 활성
+
+    - id: AC-2.1.2
+      given: 홈에서 [웹툰] 탭을 선택했다
+      when: 서버 /webtoon/templates 응답이 돌아온다
+      then: 2개의 템플릿 카드가 2열 그리드로 렌더된다
+      ui_impact: WebtoonTabScreen에 TemplateCardList(2열) 렌더
+
+    - id: AC-2.1.3
+      given: /webtoon/templates 응답이 빈 배열이다
+      when: 탭 바디가 렌더된다
+      then: WebtoonEmptyView가 렌더된다 ("지금은 준비된 웹툰 템플릿이 없어요")
+      ui_impact: empty 상태 일러스트 + 안내 문구
+
+    - id: AC-2.2.1
+      given: 웹툰 탭에서 템플릿 카드를 탭했다
+      when: 상세 화면이 열린다
+      then: 템플릿명 헤더 + 세로 스크롤 프리뷰 이미지 1장 + 고정 CTA "내 사진으로 만들기"
+      ui_impact: WebtoonTemplateDetailScreen layout 고정
+
+    - id: AC-2.6.1
+      given: 웹툰 탭에 머물러 있다
+      when: 우하단 플로팅 "내 웹툰" 버튼을 탭한다
+      then: MyWebtoonScreen 으로 네비게이트한다
+      ui_impact: WebtoonFloatingButton 노출 + 탭 이동 시 숨김
+
+    - id: AC-2.6.2
+      given: MY 웹툰 리스트에서 N뱃지가 있는 시리즈에 진입했다
+      when: SeriesDetailScreen 이 마운트된다
+      then: POST /webtoon/series/{id}/seen 호출 → 다음 진입 시 뱃지 미노출
+      ui_impact: N뱃지 옵티미스틱 제거 (카드 재진입 시 미표시)
+
+    - id: AC-2.6.3
+      given: MY 웹툰 리스트에서 시리즈 카드 "몸체" 영역을 탭했다
+      when: 네비게이션이 일어난다
+      then: SeriesDetailScreen focus=FIRST
+      ui_impact: 카드 body 히트박스가 "이어가기" 버튼과 분리
+
+    - id: AC-2.6.4
+      given: MY 웹툰 리스트에서 시리즈 카드의 "이어가기" 버튼을 탭했다
+      when: 네비게이션이 일어난다
+      then: SeriesDetailScreen focus=LAST_CONTINUE
+      ui_impact: "이어가기" 버튼은 카드 우측에 별도 히트박스
+
+    - id: AC-2.6.5
+      given: 유저가 한 번도 웹툰을 만든 적 없다
+      when: MyWebtoonScreen 이 렌더된다
+      then: MyWebtoonEmptyView 노출 ("아직 만든 웹툰이 없어요")
+      ui_impact: 빈 상태 일러스트 + 설명 + (옵션) 템플릿으로 이동 CTA
+
+  business_rules_ui_relevant:
+    - id: BR-7
+      rule: hasUnseenEpisode=true 시리즈에만 NBadge 노출
+      ui_impact: 시리즈 카드 우상단 N뱃지 (빨강 원형)
+    - id: BR-8
+      rule: 이번 스프린트는 템플릿 2개 하드코딩 (서버 응답 기반)
+      ui_impact: 프로토타입에서 2개 템플릿 (PERSON · ANIMAL) 카드 예시
+    - id: BR-12
+      rule: 템플릿 타입은 PERSON / ANIMAL 이며 유저 오버라이드 불가
+      ui_impact: 카드 부 라벨에 characterType 시각 단서 (아이콘 or 메타)
+
+# -----------------------------------------------------------------------------
+# Layer 2 — WHAT (Design System / Tokens / Components needed)
+# -----------------------------------------------------------------------------
+what:
+  tokens_needed:
+    colors:
+      - semantic.background.normal          # #FFFFFF
+      - semantic.surface.secondary          # #F7F8F9
+      - semantic.label.normal               # #212228
+      - semantic.label.alternative          # #6B6E76
+      - semantic.label.assistive            # #8E9199
+      - semantic.label.inverse              # #FFFFFF
+      - semantic.line.normal                # #E4E5E9
+      - semantic.line.alternative           # #F0F1F3
+      - semantic.fill.brand-primary         # #8752FA (purple.500)
+      - semantic.fill.brand-weak            # #F5F0FF (purple.50)
+      - semantic.status.error               # #FF3B30 (N-badge, red dot)
+      - semantic.fill.neutral-secondary     # #F0F1F3 (chip/skeleton fill)
+    typography:
+      - typo.heading.h3                     # 18px SemiBold — screen titles
+      - typo.body.body1                     # 16px Medium — template name
+      - typo.body.body2                     # 14px Medium — meta, row copy
+      - typo.caption                        # 12px Medium — episode meta
+      - typo.label.button                   # 16px SemiBold — CTA
+    spacing: [0, 4, 8, 12, 16, 20, 24, 32, 48, 64]
+    radius:
+      - sm (8)
+      - md (12)
+      - lg (16)
+      - xl (20)
+      - 2xl (24)
+      - full (9999)
+
+  components_needed:
+    - name: StatusBar
+      category: layout
+      source: ZZEM mobile shell
+    - name: AppHeader
+      category: navigation
+      variant: logo + credit + bell (홈용)
+    - name: HomeTabsHeader
+      category: navigation
+      variant: 3-tab with underline indicator (extend 기존 2탭)
+    - name: WebtoonRotatingHeader
+      category: content
+      variant: 웹툰 탭 진입 시 헤드카피 ("오늘의 웹툰 템플릿") — placeholder
+    - name: TemplateCard
+      category: content
+      variant: 2열 그리드용 카드 (thumbnail + name + characterType 메타)
+    - name: WebtoonEmptyView
+      category: feedback
+      variant: 빈 상태 (일러스트 + 문구)
+    - name: WebtoonFloatingButton
+      category: navigation
+      variant: 우하단 플로팅 "내 웹툰" (pill, 아이콘+텍스트)
+    - name: BottomNav
+      category: navigation
+      variant: 3탭 (홈·탐색·MY)
+    - name: TemplateDetailHeader
+      category: navigation
+      variant: back + 템플릿명 중앙 (X 없음)
+    - name: PreviewImageScroller
+      category: content
+      variant: 세로 스크롤 1-image (긴 이미지)
+    - name: FixedCTA
+      category: input
+      variant: 하단 고정 primary button "내 사진으로 만들기"
+    - name: SeriesRow
+      category: content
+      variant: "썸네일 + 제목/메타 + NBadge + '이어가기' 버튼 (좌 카드영역 / 우 버튼 히트박스 분리)"
+    - name: MyWebtoonEmptyView
+      category: feedback
+      variant: 시리즈 빈 상태 ("아직 만든 웹툰이 없어요")
+    - name: NBadge
+      category: badge
+      variant: 빨강 원형, 우상단 오버레이 "N"
+
+  patterns_needed:
+    - name: Tabbed Home Content Switch
+      description: 상단 탭 3개로 body swap (AC 2.1.1)
+    - name: 2-Column Template Grid
+      description: 2열 그리드 + 16px gap + 카드 내부 썸네일 4:5
+    - name: Long Preview Image Scroll + Fixed CTA
+      description: 바디는 세로 스크롤 이미지 1장, 하단 CTA sticky-bottom (AC 2.2.1)
+    - name: Hit-box Split Row
+      description: 시리즈 카드 몸체와 우측 '이어가기' 버튼이 별도 네비게이트 히트박스 (AC 2.6.3/4)
+    - name: Floating FAB on Tab
+      description: 탭 컨텍스트에 바인딩된 우하단 FAB (다른 탭 이동 시 숨김, AC 2.6.1)
+    - name: Optimistic Badge Clear
+      description: N뱃지는 진입과 동시에 로컬 상태에서 제거 (POST /seen 결과와 무관, AC 2.6.2)
+
+# -----------------------------------------------------------------------------
+# Layer 3 — HOW (Orchestration rules — composition & constraints)
+# -----------------------------------------------------------------------------
+how:
+  composition_rules:
+    - rule: 홈 상단 탭은 고정 3개 (추천·웹툰·무료). [추천]이 기본 활성.
+      applies_to: [HomeTabsHeader]
+    - rule: 웹툰 탭 body는 2열 그리드 (gap 16, card radius 16, aspect 4:5).
+      applies_to: [WebtoonTabScreen]
+    - rule: 템플릿 상세는 바디 = 세로 스크롤 이미지 1장, 하단 = sticky safe-area CTA.
+      applies_to: [WebtoonTemplateDetailScreen]
+    - rule: MY 웹툰 시리즈 row는 좌 카드영역 + 우 별도 버튼 히트박스로 분리.
+      applies_to: [MyWebtoonScreen, SeriesRow]
+    - rule: N뱃지는 시리즈 썸네일 우상단 absolute overlay (radius full, status.error fill).
+      applies_to: [SeriesRow, NBadge]
+    - rule: 플로팅 "내 웹툰" 버튼은 WebtoonTabScreen 위에만 노출. 다른 탭 선택 시 숨김.
+      applies_to: [WebtoonFloatingButton]
+
+  conditional_rendering:
+    - condition: templates 응답 배열 길이 0
+      variant_a: "TemplateCardList 노출"
+      variant_b: "WebtoonEmptyView 노출"
+      default: variant_a (길이 > 0)
+    - condition: /webtoon/series 응답 배열 길이 0
+      variant_a: "SeriesRowList 노출"
+      variant_b: "MyWebtoonEmptyView 노출"
+      default: variant_b (첫 사용자 가정)
+    - condition: series.hasUnseenEpisode === true
+      variant_a: "NBadge 노출"
+      variant_b: "NBadge 미노출"
+
+  constraints:
+    - CTA는 항상 safe-area-inset-bottom 위에 고정 (padding-bottom 34px mock)
+    - 플로팅 FAB는 bottom-nav 위로 16px 간격, 우측 16px 간격
+    - 카드 탭 타겟 최소 44x44
+    - 템플릿 카드 썸네일은 aspect 4:5, 오버레이 그라데이션으로 텍스트 가독 확보
+    - N뱃지는 썸네일 우상단 -6px, -6px offset + 2px white border (카드와 분리 시각)
+    - 빈 상태 일러스트는 PRD 미지정 → emoji placeholder (🗂️ / 📚) + 문구 강조
+
+  priority_order:
+    - HomeTabsHeader 3탭 구조 (기존 회귀 방지)
+    - WebtoonTabScreen 템플릿 그리드 + 플로팅 FAB
+    - WebtoonTemplateDetailScreen 프리뷰 + CTA
+    - MyWebtoonScreen 시리즈 리스트 (N뱃지 + 히트박스 분리)
+    - 빈 상태 (웹툰 탭 empty / MY 빈 상태)
+
+  anti_patterns:
+    - 탭 3개를 좌우 스크롤 가능하게 만들지 않는다 (고정 3탭, 균등 분할 아님 — start-aligned gap 24)
+    - 템플릿 상세의 CTA는 스크롤과 함께 떠다니지 않는다 (sticky-bottom만)
+    - N뱃지는 흰 배경·파란 점이 아니라 빨강 원형에 흰 "N" (BR-7 톤)
+    - MY 리스트에서 "이어가기" 버튼 히트박스가 카드 전체와 겹치면 안 됨 (탭 충돌)
+
+# -----------------------------------------------------------------------------
+# Deep-link Map (app-001 scope)
+# -----------------------------------------------------------------------------
+deep_links:
+  - path: "zzem://webtoon"
+    destination: WebtoonTabScreen
+  - path: "zzem://webtoon/template/{templateId}"
+    destination: WebtoonTemplateDetailScreen
+  - path: "zzem://webtoon/my"
+    destination: MyWebtoonScreen
+  - path: "zzem://webtoon/series/{seriesId}"
+    destination: SeriesDetailScreen
+    note: focus=FIRST (app-003)
+  - path: "zzem://webtoon/series/{seriesId}/continue"
+    destination: SeriesDetailScreen
+    note: focus=LAST_CONTINUE (app-003)
+
+# -----------------------------------------------------------------------------
+# API surface referenced by app-001
+# -----------------------------------------------------------------------------
+api_endpoints:
+  - GET /webtoon/templates
+  - GET /webtoon/templates/{templateId}
+  - GET /webtoon/series
+  - POST /webtoon/series/{seriesId}/seen
+
+# =============================================================================
+# app-003 SCOPE APPEND — Continuation (AUTO/MANUAL) + Series Detail + Focus Scroll
+# Contributor: design-engineer (app-003)
+# =============================================================================
+app_003_scope:
+  # -------- Layer 1: WHY (scope additions) --------
+  user_stories:
+    - id: US-4
+      as_a: AI 웹툰 1화를 만든 유저
+      i_want: 결과물 화면에서 바로 다음 화를 자동으로 이어가고 싶다
+      so_that: 스토리 궁금증을 빠르게 해소하고 크레딧을 재소비한다
+      scope: app-003
+    - id: US-5
+      as_a: 직접 스토리를 쓰고 싶은 유저
+      i_want: 줄거리를 입력해 다음 화를 내가 원하는 방향으로 이어가고 싶다
+      so_that: 창작 주도권을 가지고 시리즈를 확장한다
+      scope: app-003
+
+  acceptance_criteria:
+    - id: AC-2.4.1
+      given: 시리즈 상세 진입
+      when: 각 회차의 generation status 가 다르다
+      then: 회차별 인라인 렌더 분기 (스켈레톤/이미지/에러)
+      ui_impact: 같은 회차 컨테이너에서 status 에 따른 content swap
+      scope: app-003
+    - id: AC-2.4.2
+      given: 마지막 회차 COMPLETED
+      when: 스크롤 하단 도달
+      then: "ContinuationCtaBar 노출: '자동으로 이어가기 🪙 500' + '내가 직접 이어가기'"
+      ui_impact: Primary + Secondary 2단 CTA, 인라인(시리즈 상세 콘텐츠 꼬리)
+      scope: app-003
+    - id: AC-2.5.1
+      given: 이어가기 CTA 노출 상태
+      when: '자동으로 이어가기' 탭
+      then: 즉시 disabled + 202 후 새 회차 섹션/탭 추가 + 인라인 스켈레톤 + 해당 회차로 스크롤
+      ui_impact: CTA disabled, EpisodeTabs append, 새 회차 skeleton, scroll-to
+      scope: app-003
+    - id: AC-2.5.2
+      given: 이어가기 CTA 노출 상태
+      when: '내가 직접 이어가기' 탭
+      then: "보라색 배너('이전 화에서 이어지는 이야기를 적어보세요.') + 줄거리 TextInput(최대 500자) + disabled CTA. 텍스트 입력 시 CTA 활성, 탭하면 AC 2.5.1 와 동일 흐름"
+      ui_impact: ManualContinueInputScreen 신규 — 보라 배너/입력/카운터/CTA
+      scope: app-003
+    - id: AC-2.6.6
+      given: 이어가기 요청 준비
+      when: 이어가기 화면 진입/요청 구성
+      then: 사진 입력 UI 노출 없음 (서버가 이전 화 이미지 자동 주입)
+      ui_impact: 이어가기 플로우 전역에서 PhotoUpload 컴포넌트 렌더 금지
+      scope: app-003
+
+  business_rules_ui_relevant:
+    - id: BR-4
+      rule: CTA 탭 후 응답 수신 전까지 재탭 방지
+      ui_impact: AutoContinueCTA / ManualGenerateCTA 탭 즉시 disabled + spinner
+      scope: app-003
+    - id: BR-12
+      rule: 이어가기 요청은 이전 화 이미지를 서버가 자동 주입 → 사진 입력 UI 금지
+      ui_impact: 이어가기 화면 어디에도 photo upload 금지 (AC 2.6.6)
+      scope: app-003
+
+  error_semantics:
+    - code: NO_REFERENCE_EPISODE
+      http: 400
+      ui_impact: 바텀시트 "참조할 이전 회차가 없어요. 1화를 먼저 완성해 주세요." + 확인 CTA
+      trigger: COMPLETED 회차 0개에서 이어가기 요청 (e.g. 1화 FAILED 상태)
+    - code: INSUFFICIENT_CREDIT
+      http: 402
+      ui_impact: 공용 크레딧 부족 시트 (app-002 재사용)
+    - code: CONCURRENCY_CAP_REACHED
+      http: 409
+      ui_impact: 공용 동시생성 시트 (app-002 재사용)
+    - code: PROHIBITED_IMAGE
+      http: 422
+      ui_impact: 해당 회차 InlineEpisodeError "적절하지 않은 이미지예요"
+    - code: INTERNAL_ERROR
+      http: 500
+      ui_impact: 해당 회차 InlineEpisodeError + 재시도/홈 CTA
+
+  # -------- Layer 2: WHAT (scope additions) --------
+  components_added:
+    - name: SeriesDetailScreen
+      category: container
+      notes: 상단 헤더 + 화수탭(sticky) + 회차별 본문(긴 세로 이미지) + ContinuationCtaBar(꼬리)
+    - name: EpisodeTabs
+      category: navigation
+      variant: horizontal-scroll, underline on active, 1..N 에피소드
+    - name: WebtoonImage
+      category: content
+      notes: full-bleed 세로 긴 이미지 (4:7 정도)
+    - name: WebtoonSkeleton (inline)
+      category: feedback
+    - name: InlineEpisodeError
+      category: feedback
+      parts: [messageText, retryButton, goHomeLinkButton]
+    - name: ContinuationCtaBar
+      category: input
+      parts: [AutoContinueCTA(primary, '🪙 500'), ManualContinueCTA(secondary)]
+    - name: ManualContinueInputScreen
+      category: container
+      parts: [PurpleBanner, StoryBeatInput(multiline, 500자), CharCounter, GenerateCTA(sticky bottom)]
+    - name: NoReferenceEpisodeSheet
+      category: feedback
+
+  patterns_added:
+    - name: inline-status-swap
+      description: 같은 회차 컨테이너에서 status 별 content swap
+    - name: sticky-episode-tabs
+      description: 헤더 아래 sticky top 의 화수 탭
+    - name: focus-scroll
+      description: onLayout 후 smooth scrollTo(offset), 1회 retry
+    - name: deeplink-fallback
+      description: 직진입 시 back stack 비어있으면 WebtoonTabScreen 또는 MyWebtoonScreen 으로 fallback push
+
+  # -------- Layer 3: HOW (scope additions) --------
+  composition_rules:
+    - rule: SeriesDetailScreen = Header(sticky) + EpisodeTabs(sticky) + EpisodeList(scroll) + ContinuationCtaBar(inline at tail)
+      applies_to: [SeriesDetailScreen]
+    - rule: ContinuationCtaBar 는 마지막 회차 COMPLETED 일 때만 렌더 (AC 2.4.2)
+      applies_to: [SeriesDetailScreen, ContinuationCtaBar]
+    - rule: ManualContinueInputScreen = Header + PurpleBanner + StoryBeatInput(+counter) + GenerateCTA(sticky-bottom)
+      applies_to: [ManualContinueInputScreen]
+    - rule: 이어가기 플로우에서 PhotoUpload 컴포넌트 import/render 금지 (AC 2.6.6, BR-12)
+      applies_to: [AutoContinueCTA, ManualContinueCTA, ManualContinueInputScreen]
+
+  conditional_rendering:
+    - condition: episode.status
+      variants:
+        PENDING: WebtoonSkeleton inline
+        IN_PROGRESS: WebtoonSkeleton inline
+        COMPLETED: WebtoonImage
+        FAILED: "InlineEpisodeError '생성에 실패했어요' + 재시도/홈"
+        TIMEOUT: "InlineEpisodeError '생성이 오래 걸려요' + 재시도"
+        PROHIBITED: "InlineEpisodeError '적절하지 않은 이미지예요'"
+    - condition: series.episodes[last].status
+      variants:
+        COMPLETED: ContinuationCtaBar 노출
+        other: ContinuationCtaBar 미노출
+    - condition: focus(query)
+      variants:
+        FIRST: initialScroll=top (1화 상단)
+        LAST_CONTINUE: onLayout 후 ContinuationCtaBar 위치까지 smooth scroll
+    - condition: StoryBeatInput.value.length
+      variants:
+        "0": GenerateCTA disabled
+        "1..500": GenerateCTA enabled
+        ">500": 입력이 500 에서 컷 (grapheme)
+
+  constraints:
+    - 배너 문구 고정 "이전 화에서 이어지는 이야기를 적어보세요."
+    - Primary CTA 우측에 '🪙 500' 크레딧 수치 표기
+    - EpisodeTabs active indicator 2px brand-primary underline
+    - WebtoonImage 폭 = device content-width (padding 좌우 16 제외)
+    - StoryBeatInput multiline, min-height 140px, max-height 240px, CharCounter 우하단
+    - 이어가기 CTA 탭 즉시 disabled (BR-4)
+    - 딥링크 직진입(continue) 시 back stack 비면 MyWebtoonScreen 을 루트로 push
+    - 이어가기 플로우 전역 PhotoUpload UI 금지 (AC 2.6.6)
+
+  priority_order:
+    - SeriesDetailScreen (헤더+탭+본문+CTA bar)
+    - status 별 인라인 분기 렌더
+    - LAST_CONTINUE focus 스크롤
+    - ManualContinueInputScreen (보라 배너+입력+CTA)
+    - NO_REFERENCE_EPISODE 에러 시트
+    - 딥링크 fallback
+
+  anti_patterns:
+    - 이어가기 플로우에 사진 업로드 UI 를 노출하지 않는다 (AC 2.6.6)
+    - ContinuationCtaBar 는 sticky-bottom 이 아니라 '인라인 꼬리' 로 배치 (스크롤 도달 UX)
+    - 회차 탭은 화면 밖으로 스크롤되어 사라지지 않게 sticky top
+    - StoryBeat 입력 비어있을 때 CTA 활성 금지
+
+  deep_links:
+    - path: "zzem://webtoon/series/{seriesId}"
+      destination: SeriesDetailScreen
+      note: focus=FIRST (app-003)
+    - path: "zzem://webtoon/series/{seriesId}/continue"
+      destination: SeriesDetailScreen
+      note: focus=LAST_CONTINUE (app-003), back stack fallback=MyWebtoonScreen
+    - path: "zzem://webtoon/series/{seriesId}/continue/manual"
+      destination: ManualContinueInputScreen
+      note: 직접 이어가기 입력 화면 직진입 (E2E series-continue-manual-entry.yaml), fallback=SeriesDetailScreen
+
+  api_endpoints:
+    - GET /webtoon/series/{seriesId}?focus=FIRST|LAST_CONTINUE
+    - POST /webtoon/series/{seriesId}/episodes  # continuationType=AUTO|MANUAL
+    - GET /webtoon/generations/{generationId}   # polling (5s, BR-11)
+    - POST /webtoon/series/{seriesId}/seen      # 진입 시 N뱃지 제거
+
+# =============================================================================
+# app-002 SCOPE APPEND — Generate Flow (Input → 2-stage Loading → Result + Error sheets)
+# Contributor: design-engineer (app-002)
+# =============================================================================
+app_002_scope:
+  # -------- Layer 1: WHY --------
+  user_stories:
+    - id: US-3
+      as_a: 크레딧을 보유한 ZZEM 유저
+      i_want: 템플릿에 내 사진을 넣어 1화를 만든다
+      so_that: 내 캐릭터가 등장하는 웹툰을 가질 수 있다
+      scope: app-002
+    - id: US-4-partial
+      as_a: 1화 생성을 요청한 유저
+      i_want: 결과 화면에서 상태(진행/완료/실패) 분기를 이해하고 적절한 액션을 취한다
+      so_that: 에러/timeout 상황에도 재시도하거나 웹툰 홈으로 돌아갈 수 있다
+      scope: app-002
+
+  acceptance_criteria:
+    - id: AC-2.3.1
+      given: 템플릿 상세에서 만들기 CTA를 탭했다
+      when: 입력 화면이 로딩된다
+      then: CharacterTypeChip(read-only) + PhotoSlot(1장) + SynopsisReadOnly 노출
+      ui_impact: WebtoonGenerateScreen 기본 레이아웃 고정
+    - id: AC-2.3.2
+      given: 사진 미입력 상태다
+      when: 화면 확인
+      then: GenerateCTA disabled
+      ui_impact: CTA는 PhotoSlot filled 전까지 비활성
+    - id: AC-2.3.3
+      given: 사진 1장 + 크레딧/동시생성 충족
+      when: 만들기 CTA 탭
+      then: POST /webtoon/generations → 202 → 스켈레톤 전환, 크레딧 미차감
+      ui_impact: CTA 즉시 disabled (BR-4) + route replace to WebtoonGeneratingScreen
+    - id: AC-2.3.4
+      given: 스켈레톤 로딩 중
+      when: 클라이언트 5초 폴링 (BR-11)
+      then: COMPLETED → 결과 + 500 차감 / FAILED·TIMEOUT → 실패 화면 (차감 없음)
+      ui_impact: GeneratingScreen polling UX cue + state branch to Result / Failed
+    - id: AC-2.3.5
+      given: 크레딧 잔액 < 단가
+      when: CTA 탭 또는 서버 402
+      then: InsufficientCreditSheet 노출
+      ui_impact: 입력 화면 유지 + 바텀시트 overlay
+    - id: AC-2.3.6
+      given: 업로드된 사진이 유해 판정
+      when: 서버 유해 응답 (sync 422 또는 async PROHIBITED)
+      then: ProhibitedImageSheet + "다른 사진 선택하기" CTA, 차감 없음
+      ui_impact: sync/async 두 경로가 동일 시트로 수렴
+    - id: AC-2.3.7
+      given: 1단계 요청 중 예기치 못한 오류
+      when: 서버 500
+      then: ServerErrorToast 노출, 차감 없음
+      ui_impact: 입력 화면 유지 + top toast
+    - id: AC-2.3.8
+      given: 2단계 생성이 정상 소요 시간 초과
+      when: 클라 timeout 감지 (240s 방어 가드)
+      then: 차감 없이 실패 화면 전환
+      ui_impact: GeneratingScreen → TimeoutSheet → WebtoonGenerateFailedScreen
+    - id: AC-2.4.1
+      given: 결과물 상세 진입 (app-002는 완료 직후 뷰만 담당)
+      when: 화면 로딩
+      then: 상단 프로필/제목/화수탭 + 이미지 바디
+      ui_impact: WebtoonResultScreen SeriesHeader + 1화 탭 + 세로 이미지
+
+  business_rules_ui_relevant:
+    - id: BR-2
+      rule: 크레딧 차감은 콜백 성공 시점에만 발생
+      ui_impact: 성공 외 모든 분기에서 차감 표시 금지
+    - id: BR-3
+      rule: 동시 생성 최대 5개 (409)
+      ui_impact: ConcurrencyLimitSheet
+    - id: BR-4
+      rule: CTA 탭 즉시 비활성 (중복 요청 0)
+      ui_impact: GenerateCTA → pending spinner 즉시 전환
+    - id: BR-5
+      rule: 캐릭터 유형 칩 read-only
+      ui_impact: CharacterTypeChip tap=false
+    - id: BR-6
+      rule: 1화 줄거리 편집 불가
+      ui_impact: SynopsisReadOnly (textarea readonly)
+    - id: BR-11
+      rule: 폴링 주기 5초
+      ui_impact: GeneratingScreen status dot 5s pulse
+
+  # -------- Layer 2: WHAT --------
+  components_needed:
+    - { name: WebtoonGenerateScreen,       category: content }
+    - { name: CharacterTypeChip,           category: chip }
+    - { name: PhotoSlot,                   category: input }
+    - { name: SynopsisReadOnly,            category: input }
+    - { name: GenerateCTA,                 category: button }
+    - { name: WebtoonGeneratingScreen,     category: feedback }
+    - { name: WebtoonSkeleton,             category: skeleton }
+    - { name: GeneratingCopy,              category: content }
+    - { name: AppKillSafetyNote,           category: feedback }
+    - { name: TimeoutGuardHint,            category: feedback }
+    - { name: WebtoonResultScreen,         category: content }
+    - { name: SeriesHeader,                category: navigation }
+    - { name: EpisodeTabBar,               category: tabs }
+    - { name: WebtoonImage,                category: image }
+    - { name: ContinuationCtaBar,          category: button-placeholder }
+    - { name: WebtoonGenerateFailedScreen, category: feedback }
+    - { name: ProhibitedImageSheet,        category: bottom-sheet }
+    - { name: InsufficientCreditSheet,     category: bottom-sheet }
+    - { name: ConcurrencyLimitSheet,       category: bottom-sheet }
+    - { name: TimeoutSheet,                category: bottom-sheet }
+    - { name: GenericErrorSheet,           category: bottom-sheet }
+    - { name: ServerErrorToast,            category: toast }
+
+  patterns_needed:
+    - name: Full-width Primary CTA (disabled/loading/enabled states)
+      description: 하단 고정 CTA. disabled=fill neutral-tertiary, loading=spinner + label dim
+    - name: Bottom Sheet Error Family
+      description: radius-28 상단, handle 40x4, dim 0.4, 단일/듀얼 CTA variants
+    - name: Webtoon Skeleton Shimmer
+      description: 세로 4블록 shimmer. CSS linear 1.5s infinite
+    - name: Polling Status Ring
+      description: 원형 진행 + 5초 pulse + 경과시간 라벨
+
+  # -------- Layer 3: HOW --------
+  composition_rules:
+    - rule: PhotoSlot 1:1 정사각 (max 200px). empty=dashed border + plus icon / filled=thumbnail + 우상단 X
+      applies_to: [WebtoonGenerateScreen]
+    - rule: GenerateCTA disabled → fill #F0F1F3, label #8E9199. enabled → fill #262626, label #FFFFFF
+      applies_to: [GenerateCTA]
+    - rule: 입력 화면 Header = back + "웹툰 만들기" 중앙 + 크레딧 우측
+      applies_to: [WebtoonGenerateScreen]
+    - rule: Generating 화면은 back button 없음 (탈출 방지 / 탈출 시 확인 sheet 필요 — app 이후 범위)
+      applies_to: [WebtoonGeneratingScreen]
+    - rule: sync 422 + async PROHIBITED → 동일 ProhibitedImageSheet
+      applies_to: [WebtoonGenerateScreen, WebtoonGeneratingScreen]
+    - rule: 실패 화면 dual CTA — primary "다시 시도하기" + secondary "웹툰 홈으로 이동하기"
+      applies_to: [WebtoonGenerateFailedScreen]
+
+  conditional_rendering:
+    - condition: PhotoSlot.filled
+      variant_a: empty dashed slot + plus icon + "사진 1장을 올려주세요"
+      variant_b: thumbnail + 우상단 X 삭제 버튼 + CTA 활성
+    - condition: generation.status
+      PENDING_or_IN_PROGRESS: WebtoonSkeleton + GeneratingCopy
+      COMPLETED: WebtoonResultScreen (route replace)
+      FAILED_or_TIMEOUT: WebtoonGenerateFailedScreen
+      PROHIBITED: ProhibitedImageSheet + 입력 화면 복귀
+    - condition: client_timeout_reached
+      variant_a: TimeoutSheet (안내) → 탭 시 WebtoonGenerateFailedScreen
+
+  constraints:
+    - PhotoSlot 최대 200x200px
+    - 바텀시트 상단 핸들바 40x4 #a7a7a7
+    - 바텀시트 최대 높이 80vh
+    - CTA는 safe-area 고정 (padding-bottom 34px iOS mock)
+    - Skeleton shimmer CSS linear 1.5s infinite
+    - "240초" 숫자 UI 노출 금지 — "너무 오래 걸리고 있어요"로 대체
+    - 토스트/시트 내 크레딧 차감 문구 노출 금지 (BR-2)
+
+  priority_order:
+    - WebtoonGenerateScreen
+    - WebtoonGeneratingScreen
+    - WebtoonResultScreen
+    - WebtoonGenerateFailedScreen
+    - ProhibitedImageSheet
+    - InsufficientCreditSheet
+    - ConcurrencyLimitSheet
+    - TimeoutSheet
+    - GenericErrorSheet
+
+  anti_patterns:
+    - 스켈레톤 화면 back 버튼 무분별 탈출 허용 금지
+    - 실패 화면 단일 CTA로 축소 금지
+    - 유해 이미지 sync/async를 서로 다른 UI로 분기 금지 — 동일 Sheet 수렴
+    - 시트/토스트 내 크레딧 차감 문구 노출 금지 (BR-2)
+    - Generating 화면에서 경과 "240초" 같은 내부 가드 값 노출 금지
+
+  api_endpoints:
+    - POST /webtoon/generations
+    - GET  /webtoon/generations/{generationId}
+    - GET  /webtoon/templates/{templateId}
+
+  error_code_mapping:
+    - { http: 202, status: accepted,                     ui: "route → WebtoonGeneratingScreen" }
+    - { http: 402, error_code: INSUFFICIENT_CREDIT,      ui: InsufficientCreditSheet }
+    - { http: 409, error_code: CONCURRENCY_CAP_REACHED,  ui: ConcurrencyLimitSheet }
+    - { http: 422, error_code: PROHIBITED_IMAGE,         ui: ProhibitedImageSheet }
+    - { http: 500, error_code: INTERNAL_ERROR,           ui: "ServerErrorToast (+ GenericErrorSheet defensive)" }
+    - { async_status: COMPLETED,  ui: WebtoonResultScreen }
+    - { async_status: FAILED,     ui: WebtoonGenerateFailedScreen }
+    - { async_status: TIMEOUT,    ui: "TimeoutSheet → WebtoonGenerateFailedScreen" }
+    - { async_status: PROHIBITED, ui: "ProhibitedImageSheet → 입력 화면 복귀" }
+    - { client_timeout: 240s,     ui: "TimeoutSheet → WebtoonGenerateFailedScreen" }
+
+  quality:
+    zero_contamination:
+      why_from: "docs/prds/PRD-ai-webtoon-v1.2.md §2.3.1–2.3.8, §2.4.1, BR-2/3/4/5/6/11"
+      what_from: "tokens/semantic/*.json, tokens/component/*.json, docs/designs/component-patterns.md"
+      how_from: ".claude/teammates/design-engineer.md + tasks/app/002-generate-flow-input-loading-result.md"
+    coverage:
+      ac_with_ui_impact: 9
+      ac_total: 9
+      components_covered: 22

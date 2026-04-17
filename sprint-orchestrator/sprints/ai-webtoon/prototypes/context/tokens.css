@@ -1,0 +1,127 @@
+/* Design Tokens — ai-webtoon sprint
+ * Source: tokens/semantic/light.json + tokens/component/*.json + tokens/primitive/*.json
+ * Zero-contamination: values should trace back to tokens/ JSON. Missing token values
+ * fall back to project-wide defaults documented in .claude/teammates/design-engineer.md.
+ */
+:root {
+  /* Color — Brand */
+  --color-brand-primary: #8752FA;
+  --color-brand-primary-dark: #A17BFF;
+  --color-brand-primary-subtle: #F3EDFF;   /* 보라색 배너 배경 */
+  --color-brand-primary-border: #D7C6FF;
+
+  /* Color — Background */
+  --color-bg-normal: #FFFFFF;
+  --color-bg-alternative: #F7F8F9;
+  --color-bg-elevated: #FFFFFF;
+
+  /* Color — Label */
+  --color-label-normal: #212228;
+  --color-label-strong: #0B0B0F;
+  --color-label-alternative: #6B6E76;
+  --color-label-assistive: #8E9199;
+  --color-label-disable: #BDBFC5;
+  --color-label-on-brand: #FFFFFF;
+
+  /* Color — Line */
+  --color-line-normal: #E4E5E9;
+  --color-line-alternative: #F0F1F3;
+
+  /* Color — Fill */
+  --color-fill-neutral: #F0F1F3;
+  --color-fill-neutral-strong: #E4E5E9;
+  --color-fill-brand-primary: #8752FA;
+  --color-fill-brand-primary-subtle: #F3EDFF;
+
+  /* Color — Status */
+  --color-status-negative: #E5484D;
+  --color-status-negative-subtle: #FDEAEA;
+  --color-status-caution: #E69A17;
+  --color-status-positive: #2BA471;
+
+  /* Typography */
+  --font-family-default: 'Pretendard', -apple-system, 'SF Pro', sans-serif;
+  --font-size-heading1: 24px;
+  --font-size-heading2: 20px;
+  --font-size-heading3: 18px;
+  --font-size-body1: 16px;
+  --font-size-body2: 14px;
+  --font-size-caption: 12px;
+  --font-size-caption-small: 11px;
+  --line-height-heading2: 28px;
+  --line-height-heading3: 26px;
+  --line-height-body1: 24px;
+  --line-height-body2: 20px;
+  --line-height-caption: 16px;
+  --font-weight-bold: 700;
+  --font-weight-semibold: 600;
+  --font-weight-medium: 500;
+  --font-weight-regular: 400;
+
+  /* Spacing (4px grid) */
+  --spacing-0: 0px;
+  --spacing-1: 4px;
+  --spacing-2: 8px;
+  --spacing-3: 12px;
+  --spacing-4: 16px;
+  --spacing-5: 20px;
+  --spacing-6: 24px;
+  --spacing-7: 28px;
+  --spacing-8: 32px;
+  --spacing-10: 40px;
+  --spacing-12: 48px;
+
+  /* Radius */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+  --radius-full: 9999px;
+
+  /* Component — Button */
+  --component-button-primary-fill: #8752FA;
+  --component-button-primary-fill-pressed: #6F3CE8;
+  --component-button-primary-fill-disabled: #C6B3F8;
+  --component-button-primary-label: #FFFFFF;
+  --component-button-secondary-fill: #F0F1F3;
+  --component-button-secondary-label: #212228;
+  --component-button-height-lg: 52px;
+  --component-button-height-md: 44px;
+
+  /* Component — Card */
+  --component-card-fill: #FFFFFF;
+  --component-card-radius: 16px;
+
+  /* Component — Input */
+  --component-input-fill: #F7F8F9;
+  --component-input-fill-focus: #FFFFFF;
+  --component-input-border: #E4E5E9;
+  --component-input-border-focus: #8752FA;
+  --component-input-radius: 12px;
+
+  /* Component — Tab */
+  --component-tab-active: #212228;
+  --component-tab-inactive: #8E9199;
+  --component-tab-indicator: #8752FA;
+
+  /* Component — Navigation */
+  --component-nav-active: #8752FA;
+  --component-nav-inactive: #8E9199;
+
+  /* Component — Badge */
+  --component-badge-new-fill: #8752FA;
+  --component-badge-new-label: #FFFFFF;
+  --component-badge-unseen-dot: #8752FA;
+
+  /* Elevation */
+  --elevation-1: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --elevation-2: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --elevation-sheet: 0 -6px 24px rgba(0, 0, 0, 0.12);
+
+  /* Motion */
+  --motion-duration-fast: 150ms;
+  --motion-duration-base: 240ms;
+  --motion-easing-standard: cubic-bezier(0.2, 0, 0, 1);
+}

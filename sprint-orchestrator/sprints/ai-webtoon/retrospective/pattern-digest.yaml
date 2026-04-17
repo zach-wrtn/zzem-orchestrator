@@ -1,0 +1,76 @@
+sprint_id: "ai-webtoon"
+generated_at: "2026-04-15T00:00:00Z"
+
+patterns:
+  - pattern: "Concurrency cap source divergence between two generation pipelines (webtoon DB-sum vs meme Redis slot)"
+    category: "integration"
+    frequency: 1
+    groups: ["group-002"]
+    severity: "major"
+    systemic_fix: "Webtoon submit must call the shared reserveGenerationSlotOrThrow (Redis atomic INCR). Release listener already handles both status sources; incrementing on submit closes the drift."
+    contract_clause: "Two generation pipelines sharing a single concurrency cap must use the same atomic counter source. DB-sum preflight alone is insufficient when the sibling pipeline uses a Redis slot."
+    skill_candidate: false
+
+  - pattern: "2-step atomic sequence ($inc counter then insert row) leaves counter gaps on insert failure"
+    category: "edge_case"
+    frequency: 1
+    groups: ["group-002"]
+    severity: "major"
+    systemic_fix: "Add compensating $dec on insert catch in appendEpisode, or explicitly document 'episodeNumber is a label, not a dense index' in schema comment + Contract Done Criteria."
+    contract_clause: "When a monotonic counter $inc precedes a separate insert, the spec must declare whether gaps are permitted; if not, compensation must be implemented."
+    skill_candidate: false
+
+  - pattern: "Retry CTA silently downgrades request intent (continuationType) to a default path"
+    category: "completeness"
+    frequency: 1
+    groups: ["group-003"]
+    severity: "major"
+    systemic_fix: "Persist originType(AUTO|MANUAL) on the episode. Retry handler branches on the failed episode's originType; MANUAL retry navigates to ManualContinueInputScreen (optionally with beat prefill)."
+    contract_clause: "Retry CTA must preserve the originating request's mode/payload. Silent fallback to a default mode (e.g. AUTO) is forbidden."
+    skill_candidate: false
+
+  - pattern: "Domain state flag flipped from multiple write paths (repository $inc + domain helper) violating single-source-of-truth"
+    category: "code_quality"
+    frequency: 1
+    groups: ["group-003"]
+    severity: "major"
+    systemic_fix: "Remove hasUnseenEpisode:true from incrementLastEpisode $set. Flip exclusively through completeEpisode → markHasUnseenTrue. Promote 'single domain helper' from Contract Hint to Done Criteria."
+    contract_clause: "Domain state flags (e.g. hasUnseenEpisode) must be flipped from a single domain-service helper. Setting them as a side effect of a repository $inc/$set is forbidden."
+    skill_candidate: false
+
+  - pattern: "Shared helper reuse across submit and continuation pipelines (credit/concurrency/HMAC) prevents logic forking"
+    category: "integration"
+    frequency: 3
+    groups: ["group-001", "group-002", "group-003"]
+    severity: "minor"
+    systemic_fix: "Already applied — be-003 submitContinuation reuses CreditDomainService.deductCredit, countAllInProgressByUser, countInFlightByUser, hmac.util. Encode as a positive contract clause for future submit-like endpoints."
+    contract_clause: "New entry points in an existing domain MUST reuse existing credit/concurrency/HMAC helpers — forking these primitives is forbidden."
+    skill_candidate: false
+
+  - pattern: "Race-safe sequence append via atomic $inc + unique compound index backstop"
+    category: "correctness"
+    frequency: 2
+    groups: ["group-001", "group-002"]
+    severity: "minor"
+    systemic_fix: "Already applied — appendEpisode uses findOneAndUpdate $inc paired with unique (seriesId, episodeNumber) index; 5-parallel spec test asserts [1..5] monotone no-dup."
+    contract_clause: "Monotonic sequence numbers must be produced by atomic $inc AND protected by a unique compound index as backstop — neither alone is sufficient."
+    skill_candidate: false
+
+  - pattern: "Per-generationId polling hook unified for submit + continuation + resume consumers"
+    category: "code_quality"
+    frequency: 2
+    groups: ["group-002", "group-003"]
+    severity: "minor"
+    systemic_fix: "Already applied — useWebtoonGenerationPolling(generationId) consumed by app-002 generate screen and app-003 inline episode section. AppState listener + 240s timeout shared."
+    contract_clause: "Per-resource polling must be implemented in a single hook parameterized by the resource id; duplicate hooks per screen are forbidden."
+    skill_candidate: false
+
+metrics:
+  total_groups: 3
+  first_pass_rate: 1.0
+  avg_fix_cycles: 0.0
+  critical_issues_found: 0
+  major_issues_found: 4
+  minor_issues_found: 6
+  issues_fixed: 0
+  issues_deferred: 10

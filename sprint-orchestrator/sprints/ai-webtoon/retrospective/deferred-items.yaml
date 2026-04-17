@@ -1,0 +1,104 @@
+sprint_id: "ai-webtoon"
+generated_at: "2026-04-15T00:00:00Z"
+
+deferred:
+  - ac_id: "AC-2.3.3"
+    original_task: "be-002"
+    group: "group-002"
+    status: "partially_fulfilled"
+    reason: "Concurrency 5-cap enforced, but webtoon uses DB-sum (countAllInProgressByUser + countInFlightByUser) while meme path uses atomic Redis slot (reserveGenerationSlotOrThrow). Under concurrent submits, two requests can pass DB precheck simultaneously; meme-side Redis counter drifts (DECR without matching INCR) — self-healed by <0 guard but leaves a transient cap-breach window."
+    root_cause: "integration — two pipelines share a cap but not the counter source"
+    prior_attempts: 1
+    evaluator_notes: "evaluations/group-002.md#major-issues-m1"
+    suggested_approach: "Call reserveGenerationSlotOrThrow on webtoon submit. Existing release listener already handles webtoon status-change events; incrementing on submit closes the drift symmetrically."
+    priority: "medium"
+    estimated_complexity: "small"
+
+  - ac_id: "AC-2.3.3"
+    original_task: "be-002"
+    group: "group-002"
+    status: "partially_fulfilled"
+    reason: "appendEpisode does $inc series counter then inserts episode row in two steps. If insert fails (duplicate generationId, DB hiccup), counter is advanced but no row exists → episodeNumber gap. Unique (seriesId, episodeNumber) index still prevents duplicates, so contract-safe, but spec expectation of 'no gap' is weakly violated."
+    root_cause: "edge_case — 2-step atomic sequence with a failure window between $inc and insert"
+    prior_attempts: 1
+    evaluator_notes: "evaluations/group-002.md#major-issues-m2"
+    suggested_approach: "Wrap insert in try/catch → on failure, issue compensating $dec of series.lastEpisodeNumber. OR: document 'episodeNumber is a label, gaps permitted' in schema + Contract."
+    priority: "medium"
+    estimated_complexity: "small"
+
+  - ac_id: "AC-2.5.2"
+    original_task: "app-003"
+    group: "group-003"
+    status: "partially_fulfilled"
+    reason: "Retry CTA (webtoon-series-detail.screen.tsx:168-172) hardcodes continuationType=AUTO. MANUAL failure retry silently becomes AUTO, losing user's story beat intent. Agent's inline comment acknowledges this is an out-of-AC simplification."
+    root_cause: "scope_creep — agent simplification inline-acknowledged but not deferred to task spec review"
+    prior_attempts: 1
+    evaluator_notes: "evaluations/group-003.md#major-issues-1"
+    suggested_approach: "Persist originType(AUTO|MANUAL) on episode (BE) or on a retry-context ref (FE-only). Retry handler branches on originType; MANUAL retry navigates to ManualContinueInputScreen (optionally prefilled with last beat)."
+    priority: "medium"
+    estimated_complexity: "small"
+
+  - ac_id: "AC-2.6.2"
+    original_task: "be-003"
+    group: "group-003"
+    status: "partially_fulfilled"
+    reason: "incrementLastEpisode repository method sets hasUnseenEpisode=true on PENDING insert alongside $inc, creating a 2nd write path to the unseen flag (violates 'single domain helper' Contract Hint). Side effect: PENDING → FAILED leaves a false-positive N-badge on MY list."
+    root_cause: "code_quality — state-transition side-effect placed on repository write instead of domain service helper"
+    prior_attempts: 1
+    evaluator_notes: "evaluations/group-003.md#major-issues-2"
+    suggested_approach: "Drop hasUnseenEpisode:true from incrementLastEpisode $set. Rely solely on completeEpisode → markHasUnseenTrue (COMPLETED-path) for N-badge flip."
+    priority: "medium"
+    estimated_complexity: "small"
+
+  - ac_id: "AC-2.3.5"
+    original_task: "app-002"
+    group: "group-002"
+    status: "partially_fulfilled"
+    reason: "402 flow uses Toast + navigate(CreditPaywall) instead of the reusable InsufficientCreditSheet component named in task spec hint."
+    root_cause: "spec_ambiguity — task hint said 'reuse InsufficientCreditSheet' but didn't mandate vs alternative behaviourally-equivalent UX"
+    prior_attempts: 1
+    evaluator_notes: "evaluations/group-002.md#minor-observations"
+    suggested_approach: "Decide with product: align to InsufficientCreditSheet for consistency, or update task spec to bless toast+paywall as the new canonical 402 UX for webtoon."
+    priority: "low"
+    estimated_complexity: "small"
+
+improvements:
+  - description: "Extract duplicated handleContinuationError / handleManualSubmitError mapping (webtoon-series-detail.screen.tsx:233-270 vs webtoon-manual-continue.screen.tsx:122-156) into a shared util."
+    source: "evaluator_suggestion"
+    priority: "low"
+
+  - description: "After MANUAL submit + goBack from ManualContinueScreen, series-detail does not auto-scroll to the new (PENDING) episode. Currently only refetch + skeleton fire; scroll-to-new-slot not implemented on pop-back path."
+    source: "evaluator_suggestion"
+    priority: "low"
+
+  - description: "N+1 series query: webtoon-app.service.ts buildSeriesSummary calls findEpisodesBySeries for each row. Acceptable for ≤20 series today; batch or aggregate lookup for scale."
+    source: "evaluator_suggestion"
+    priority: "low"
+
+  - description: "Clear client 240s setTimeout on terminal status arrival to eliminate rare post-COMPLETED flip to FAILED race window."
+    source: "evaluator_suggestion"
+    priority: "low"
+
+  - description: "buildCallbackUrl double-includes generationId (query param + signed body); drop the query param since server reads from body."
+    source: "evaluator_suggestion"
+    priority: "low"
+
+  - description: "isError from useWebtoonGenerationPolling is returned but never consumed in the screen — wire to retry UI or remove."
+    source: "evaluator_suggestion"
+    priority: "low"
+
+  - description: "webtoon-stub.screen.tsx left as dead code after app-002 real screen wiring; clean up in Phase 5 PR polish."
+    source: "evaluator_suggestion"
+    priority: "low"
+
+  - description: "Execute the 8 authored Maestro flows in a simulator (home-tabs, webtoon-tab-browse, my-webtoon-empty, my-webtoon-seeded, webtoon-generate-entry, series-detail-first, series-detail-last-continue, series-continue-manual-entry) — deferred from Phase 4 per known-gap."
+    source: "pattern_digest"
+    priority: "medium"
+
+  - description: "Fill jest coverage gap for webtoon domain/data/presentation on FE side (be-002/003 unit specs exist; FE unit tests still absent)."
+    source: "pattern_digest"
+    priority: "low"
+
+  - description: "Add behavioural test covering 'PENDING→FAILED leaves no false-positive N-badge' scenario — would have caught G003-M2 earlier."
+    source: "evaluator_suggestion"
+    priority: "low"
