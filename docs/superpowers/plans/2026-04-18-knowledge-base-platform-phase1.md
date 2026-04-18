@@ -511,10 +511,17 @@ const cases = [
   { schema: "reflection",  fixture: "valid-reflection.md",                    expect: "valid", loader: loadFrontmatter },
 ];
 
+const validators = {};
+function getValidator(name) {
+  if (!validators[name]) {
+    validators[name] = ajv.compile(loadSchema(name));
+  }
+  return validators[name];
+}
+
 let failed = 0;
 for (const c of cases) {
-  const schema = loadSchema(c.schema);
-  const validate = ajv.compile(schema);
+  const validate = getValidator(c.schema);
   const data = c.loader(c.fixture);
 
   let ok;
