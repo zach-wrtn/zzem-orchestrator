@@ -330,21 +330,24 @@ TaskCreate:
 
 ## Knowledge Base System
 
-> Ref: Hermes Agent self-improving skills + cross-session memory
+> Ref: Hermes Agent self-improving skills + cross-session memory. 2026-04-18 Phase 1 마이그레이션: 파일 기반 → 표준 리포 `zach-wrtn/knowledge-base` + `zzem-kb:*` 스킬.
 
-스프린트 간 발견된 패턴을 구조화된 YAML 파일로 누적하는 지식 관리 시스템.
+스프린트 간 발견된 패턴/rubric/reflection을 구조화된 콘텐츠로 누적하는 지식 관리 시스템. 오케스트레이터 외부에 분리된 표준 리포(state-independent, 팀 공유)에 저장되며, 모든 접근은 스킬 경유.
 
 ### 구조
 
+- **Source of truth**: `git@github.com:zach-wrtn/knowledge-base.git`
+- **Local clone**: `$ZZEM_KB_PATH` (기본 `~/.zzem/kb`) — `.claude/settings.json`의 SessionStart 훅이 `scripts/kb-bootstrap.sh`로 clone/pull + `install-skills.sh` 실행
+- **Content layout**:
+
 ```
-sprint-orchestrator/knowledge-base/
-├── patterns/                    # Evaluator 발견 코드 패턴
-│   ├── README.md                # 인덱스 (검색용)
-│   └── {category}-{NNN}.yaml   # 개별 패턴
-└── design/                      # Design Engineer 프로토타입 패턴
-    ├── README.md                # 인덱스 (검색용)
-    └── {category}-{NNN}.yaml   # 개별 패턴
+content/
+├── patterns/{category}-{NNN}.yaml     # 코드 패턴
+├── rubrics/*.md                        # 평가 기준 (frontmatter + 본문)
+└── reflections/*.md                    # 스프린트 retrospective (frontmatter + 본문)
 ```
+
+스키마는 `$ZZEM_KB_PATH/schemas/`(draft-2020-12)에서 관리되며 CI(`validate.yml`)가 모든 푸시를 검증한다. `schemas/`, `skills/`, `scripts/`, `.github/`는 CODEOWNERS + classic branch protection으로 PR 경유 변경만 허용 (Free tier 제약으로 path-scoped ruleset은 CI tripwire `guard-sensitive-paths.yml`로 보완).
 
 ### 패턴 스키마
 
@@ -359,17 +362,27 @@ contract_clause: |           # Sprint Contract에 자동 주입할 조항
   {조항 내용}
 ```
 
+### Skills
+
+| Skill | 용도 |
+|-------|------|
+| `zzem-kb:sync` | 세션 시작 시 fast-forward pull |
+| `zzem-kb:read` | 조회 (type + category/domain/status/limit 필터) |
+| `zzem-kb:write-pattern` | 신규 패턴 (ID 자동 채번 + 스키마 검증 + push) |
+| `zzem-kb:update-pattern` | frequency/severity 갱신 (rebase-retry) |
+| `zzem-kb:write-reflection` | 스프린트 retrospective |
+
 ### 라이프사이클
 
-| Phase | 동작 | 설명 |
-|-------|------|------|
-| Phase 2 Spec | KB Search | 태스크 분해 시 관련 패턴 참조 |
-| Phase 4.1 Contract | KB Search → 자동 주입 | critical 패턴의 contract_clause를 Done Criteria에 추가 |
-| Phase 4.4 Evaluate | KB Search | Evaluator 체크리스트에 기존 패턴 반영 |
-| Phase 6 Retro | KB Write | pattern-digest → KB 기록 (기존 갱신 or 신규 생성) |
+| Phase | 동작 | Skill |
+|-------|------|-------|
+| Phase 2 Spec | KB Search | `zzem-kb:read type=pattern category=...`, `type=reflection domain=...` |
+| Phase 4.1 Contract | KB Search → 자동 주입 | `zzem-kb:read` — critical 패턴의 contract_clause를 Done Criteria에 추가 |
+| Phase 4.4 Evaluate | KB Search | `zzem-kb:read type=rubric status=active` + 관련 패턴 |
+| Phase 6 Retro | KB Write | pattern-digest → `zzem-kb:write-pattern` / `update-pattern`; 도메인 학습 → `zzem-kb:write-reflection` |
 
 ### Self-Improving Nudge
 
 - `frequency >= 3`인 패턴 → Sprint Contract 템플릿에 영구 반영 권장
-- `last_seen`이 3개 스프린트 미갱신 → `archived` 마킹
-- Design Engineer의 fabrication_risk 이상 → Design KB에 자동 기록
+- `last_seen`이 3개 스프린트 미갱신 → `status: archived` 마킹
+- Design Engineer의 fabrication_risk 이상 → `zzem-kb:write-pattern category=design_proto`
