@@ -56,8 +56,8 @@ _Evaluator 리뷰 완료: {날짜} / {합의 여부}_
 
 ## KB Pattern Clauses (자동 주입)
 
-> Sprint Lead가 Contract 작성 시, `knowledge-base/patterns/README.md`에서
-> 관련 패턴의 `contract_clause`를 Done Criteria에 자동 추가한다.
+> Sprint Lead가 Contract 작성 시, Skill `zzem-kb:read` (type=pattern, category=관련 카테고리)로
+> 반환된 파일들의 `contract_clause`를 Done Criteria에 자동 추가한다. KB 접근은 `zzem-kb:*` 스킬로만 수행.
 >
 > 형식: `- [ ] {clause 내용} (KB: {pattern-id})`
 >
