@@ -1,16 +1,26 @@
 # Knowledge Base Search/Write Protocol
 
 > Sprint Lead가 스프린트 각 Phase에서 Knowledge Base를 참조하고 갱신하는 프로토콜.
+>
+> **KB 접근은 반드시 `zzem-kb:*` 스킬로만 수행한다.** 파일시스템 직접 읽기/쓰기 금지.
 
 ## KB Location
 
-```
-sprint-orchestrator/knowledge-base/
-  patterns/README.md    ← 코드 패턴 인덱스
-  patterns/*.yaml       ← 개별 코드 패턴
-  design/README.md      ← 디자인 패턴 인덱스
-  design/*.yaml         ← 개별 디자인 패턴
-```
+- **Source of truth**: `git@github.com:zach-wrtn/knowledge-base.git`
+- **Local clone**: `$ZZEM_KB_PATH` (기본 `~/.zzem/kb`) — SessionStart 훅이 자동으로 clone/pull
+- **Content layout**: `content/patterns/*.yaml`, `content/rubrics/*.md`, `content/reflections/*.md`
+
+---
+
+## Skills
+
+| Skill | 용도 |
+|-------|------|
+| `zzem-kb:sync` | 세션 시작 시 fast-forward pull |
+| `zzem-kb:read` | 조회 (type=pattern\|rubric\|reflection, 필터: category/domain/status/limit) |
+| `zzem-kb:write-pattern` | 신규 패턴 생성 |
+| `zzem-kb:update-pattern` | 기존 패턴 frequency/severity 갱신 |
+| `zzem-kb:write-reflection` | 스프린트 말미 retrospective 기록 |
 
 ---
 
@@ -18,21 +28,13 @@ sprint-orchestrator/knowledge-base/
 
 ### When to Search
 
-| Phase | Trigger | 목적 |
-|-------|---------|------|
-| Phase 2 (Spec) | API/DTO 설계 시작 | correctness, integration 패턴으로 스펙 보강 |
-| Phase 3 (Prototype) | 프로토타입 제작 시작 | design_proto, design_spec 패턴으로 품질 향상 |
-| Phase 4.1 (Contract) | Done Criteria 작성 | 모든 패턴의 contract_clause를 Criteria에 반영 |
-| Phase 4.4 (Evaluate) | 평가 기준 수립 | 기존 패턴의 detection 방법을 평가 체크리스트에 포함 |
-
-### How to Search
-
-```
-1. Read index → patterns/README.md 또는 design/README.md의 테이블 확인
-2. Filter → 현재 태스크와 관련된 category/severity로 필터링
-3. Read details → 관련 패턴의 .yaml 파일에서 detection/prevention/contract_clause 참조
-4. Apply → contract_clause를 Sprint Contract Done Criteria에 추가
-```
+| Phase | Trigger | 목적 | Skill 호출 |
+|-------|---------|------|-----------|
+| Phase 2 (Spec) | 스펙 설계 시작 | correctness, integration 패턴으로 스펙 보강 | `zzem-kb:read type=pattern category=correctness` (및 integration) |
+| Phase 2 (Spec) | 도메인 학습 | 과거 retrospective 참조 | `zzem-kb:read type=reflection domain=<domain> limit=3` |
+| Phase 3 (Prototype) | 프로토타입 제작 시작 | design_proto, design_spec 패턴 | `zzem-kb:read type=pattern category=design_proto` |
+| Phase 4.1 (Contract) | Done Criteria 작성 | 모든 관련 패턴의 contract_clause를 Criteria에 반영 | `zzem-kb:read type=pattern category=<관련 카테고리>` |
+| Phase 4.4 (Evaluate) | 평가 기준 수립 | 최신 rubric 로드 + 패턴의 detection 기준 포함 | `zzem-kb:read type=rubric status=active`, `zzem-kb:read type=pattern ...` |
 
 ### Relevance Mapping (태스크 유형 → 카테고리)
 
@@ -61,48 +63,42 @@ KB 검색 결과를 Contract에 반영할 때:
   ...
 ```
 
+주입 기준 (sprint-contract-template.md와 일치):
+- `severity: critical` → 항상 주입
+- `severity: major` + `frequency >= 2` → 주입
+- `severity: minor` → 주입하지 않음
+
 ---
 
 ## KB Write Protocol
 
 ### When to Write
 
-| Phase | Trigger | 기록 대상 |
-|-------|---------|-----------|
-| Phase 6 (Retro) | pattern-digest.yaml 생성 후 | 코드 패턴 (patterns/) |
-| Phase 6 (Retro) | quality-report fabrication_risk 분석 후 | 디자인 패턴 (design/) |
+| Phase | Trigger | 기록 대상 | Skill |
+|-------|---------|-----------|-------|
+| Phase 6 (Retro) | pattern-digest.yaml 생성 후 | 신규 코드 패턴 | `zzem-kb:write-pattern` |
+| Phase 6 (Retro) | 기존 패턴 재발견 | frequency/severity 갱신 | `zzem-kb:update-pattern` |
+| Phase 6 (Retro) | 스프린트 종료 | 도메인 학습 기록 | `zzem-kb:write-reflection` |
+| Phase 6 (Retro) | quality-report fabrication_risk 감지 | 디자인 패턴 | `zzem-kb:write-pattern category=design_proto` |
 
 ### How to Write
 
 #### Step 1: Match Existing
 
 ```
-1. Read patterns/README.md (또는 design/README.md) 인덱스
+1. zzem-kb:read type=pattern category=<해당 카테고리>
 2. 새 패턴의 title/description과 기존 패턴 비교
-3. 동일 패턴이면 → Update (Step 2a)
-4. 신규 패턴이면 → Create (Step 2b)
+3. 동일 패턴이면 → zzem-kb:update-pattern (Step 2a)
+4. 신규 패턴이면 → zzem-kb:write-pattern (Step 2b)
 ```
 
 #### Step 2a: Update Existing Pattern
 
-```yaml
-# 기존 .yaml 파일에서:
-frequency: {기존값 + 1}
-last_seen: "{현재 sprint-id}"
-```
-
-```markdown
-# 인덱스 README.md 테이블에서:
-Freq 컬럼 +1, Last Seen 컬럼을 현재 sprint-id로 갱신
-```
+`zzem-kb:update-pattern id=<pattern-id>` 호출. 스킬이 frequency+1, last_seen=<현재 sprint-id>를 rebase-retry로 반영.
 
 #### Step 2b: Create New Pattern
 
-```
-1. ID 채번: {category}-{NNN} (해당 카테고리 최대 번호 + 1)
-2. .yaml 파일 생성 (스키마는 KB README.md 참조)
-3. 인덱스 README.md 테이블에 새 행 추가 (최신순 = 테이블 최상단)
-```
+`zzem-kb:write-pattern` 호출 시 category만 지정하면 스킬이 자동으로 다음 ID({category}-{NNN+1}) 채번 + 스키마 검증 + 커밋/푸시 처리. 충돌 시 rebase-retry.
 
 ### Design Pattern Recording
 
@@ -121,17 +117,25 @@ prevention: |
 
 ## Auto-Cleanup Rules
 
-Phase 6에서 KB Write 후 다음 규칙을 적용:
+Phase 6에서 KB Write 후 다음 규칙을 적용 (Phase 2+ 자동화 대상; 현재는 Sprint Lead가 주기적 수동 점검):
 
-| 조건 | 액션 | 구현 |
-|------|------|------|
-| frequency >= 3 | Sprint Contract 템플릿 반영 후보 | templates/sprint-contract.md에 TODO 코멘트 추가 |
-| frequency >= 5 | Contract 템플릿 필수 조항 승격 | templates/sprint-contract.md에 항목 추가 |
-| 3+ 스프린트 연속 미발견 | 아카이브 | .yaml을 archived/로 이동, 인덱스에서 제거 |
+| 조건 | 액션 |
+|------|------|
+| frequency >= 3 | Sprint Contract 템플릿 반영 후보 |
+| frequency >= 5 | Contract 템플릿 필수 조항 승격 |
+| 3+ 스프린트 연속 미발견 | status=archived로 변경 |
 
 ### Cleanup Check Method
 
 ```
 현재 sprint 번호에서 last_seen sprint 번호를 빼서 3 이상이면 아카이브 대상.
-예: 현재 sprint-005, last_seen sprint-001 → 4 스프린트 미발견 → 아카이브
+예: 현재 sprint-005, last_seen sprint-001 → 4 스프린트 미발견 → archived
 ```
+
+---
+
+## Failure Handling
+
+- **CI 거부**: `zzem-kb:*` 스킬은 push 실패 시 에러를 바로 반환. 스키마 위반 내용을 확인해 수정 후 재시도.
+- **Concurrent write 충돌**: rebase-retry 내장. 재시도 후에도 실패하면 수동 조사 필요.
+- **Bootstrap 실패**: `$ZZEM_KB_PATH`가 없으면 SessionStart 훅(`scripts/kb-bootstrap.sh`)을 수동 실행.
