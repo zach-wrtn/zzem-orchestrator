@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Move the orchestrator's knowledge base out of `sprint-orchestrator/knowledge-base/` into a standalone, state-independent GitHub repository (`zzem-org/knowledge-base`) with skill-driven read/write and JSON Schema validation in CI.
+**Goal:** Move the orchestrator's knowledge base out of `sprint-orchestrator/knowledge-base/` into a standalone, state-independent GitHub repository (`zach-wrtn/knowledge-base`) with skill-driven read/write and JSON Schema validation in CI.
 
 **Architecture:** Independent private GitHub repo holds `schemas/`, `content/`, and `skills/`. Consumers keep a git clone at `$ZZEM_KB_PATH` (default `~/.zzem/kb`) and interact via five Claude Code skills (`zzem-kb:sync|read|write-pattern|update-pattern|write-reflection`). GitHub Actions runs JSON Schema + convention checks on every push; GitHub Rulesets require a PR with CODEOWNERS review for anything outside `content/`.
 
@@ -18,7 +18,7 @@ Two repos are touched. Tasks state the working directory up front.
 
 | Alias | Absolute path | Repo |
 |-------|---------------|------|
-| `$KB` | `$HOME/dev/zzem-knowledge-base` | NEW repo `zzem-org/knowledge-base` (created in Task 1) |
+| `$KB` | `$HOME/dev/zzem-knowledge-base` | NEW repo `zach-wrtn/knowledge-base` (created in Task 1) |
 | `$ORCH` | `/Users/zachryu/.superset/worktrees/zzem-orchestrator/chore/knowledge-base` | current orchestrator worktree |
 | `$OLD_KB` | `$ORCH/sprint-orchestrator/knowledge-base` | pre-migration source |
 
@@ -121,19 +121,19 @@ Tasks 29–30 execute *after* one dogfood sprint. Everything before is pre-dogfo
 Working dir: anywhere.
 
 ```bash
-gh repo create zzem-org/knowledge-base \
+gh repo create zach-wrtn/knowledge-base \
   --private \
   --description "Machine-readable team knowledge base (patterns, rubrics, reflections)." \
   --clone=false
 ```
 
-Expected: `https://github.com/zzem-org/knowledge-base` printed. If `zzem-org` is not the correct org, substitute and **update `$KB` and all references** accordingly before proceeding.
+Expected: `https://github.com/zach-wrtn/knowledge-base` printed.
 
 - [ ] **Step 1.2: Clone into `$KB`**
 
 ```bash
 mkdir -p "$(dirname "$KB")"
-git clone git@github.com:zzem-org/knowledge-base.git "$KB"
+git clone git@github.com:zach-wrtn/knowledge-base.git "$KB"
 cd "$KB"
 ```
 
@@ -173,7 +173,7 @@ File: `$KB/package.json`
 
 ```json
 {
-  "name": "@zzem-org/knowledge-base",
+  "name": "@zach-wrtn/knowledge-base",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -228,7 +228,7 @@ File: `$KB/schemas/pattern.schema.json`
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://zzem-org.github.io/knowledge-base/schemas/pattern.schema.json",
+  "$id": "https://zach-wrtn.github.io/knowledge-base/schemas/pattern.schema.json",
   "title": "Pattern",
   "type": "object",
   "additionalProperties": false,
@@ -345,7 +345,7 @@ File: `$KB/schemas/rubric.schema.json`
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://zzem-org.github.io/knowledge-base/schemas/rubric.schema.json",
+  "$id": "https://zach-wrtn.github.io/knowledge-base/schemas/rubric.schema.json",
   "title": "Rubric (frontmatter only)",
   "type": "object",
   "additionalProperties": false,
@@ -411,7 +411,7 @@ File: `$KB/schemas/reflection.schema.json`
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://zzem-org.github.io/knowledge-base/schemas/reflection.schema.json",
+  "$id": "https://zach-wrtn.github.io/knowledge-base/schemas/reflection.schema.json",
   "title": "Reflection (frontmatter only)",
   "type": "object",
   "additionalProperties": false,
@@ -1149,7 +1149,7 @@ description: Pull the latest state of the team knowledge base into the local clo
 # zzem-kb:sync
 
 ## Preconditions
-- Environment variable `$ZZEM_KB_PATH` is set (default `~/.zzem/kb`) and is a git clone of `zzem-org/knowledge-base`.
+- Environment variable `$ZZEM_KB_PATH` is set (default `~/.zzem/kb`) and is a git clone of `zach-wrtn/knowledge-base`.
 - Working tree at `$ZZEM_KB_PATH` is clean (or has only tracked staged changes the caller is about to commit).
 
 ## Steps
@@ -1576,7 +1576,7 @@ Machine-readable team knowledge base consumed by orchestrator agents.
 
 ```bash
 # First-time setup
-git clone git@github.com:zzem-org/knowledge-base.git ~/.zzem/kb
+git clone git@github.com:zach-wrtn/knowledge-base.git ~/.zzem/kb
 ~/.zzem/kb/scripts/install-skills.sh
 ```
 
@@ -1620,7 +1620,7 @@ npm run validate   # run all validators locally
 
 ## License
 
-Private — zzem-org internal.
+Private — zach-wrtn internal.
 ````
 
 - [ ] **Step 21.2: Commit and push**
@@ -1805,7 +1805,7 @@ File: `$ORCH/scripts/kb-bootstrap.sh`
 set -euo pipefail
 
 KB_PATH="${ZZEM_KB_PATH:-$HOME/.zzem/kb}"
-KB_URL="git@github.com:zzem-org/knowledge-base.git"
+KB_URL="git@github.com:zach-wrtn/knowledge-base.git"
 
 if [ ! -d "$KB_PATH/.git" ]; then
   mkdir -p "$(dirname "$KB_PATH")"
@@ -1930,7 +1930,7 @@ Rulesets are the **authoritative** enforcement of path-scoped PR requirement (Sp
 - [ ] **Step 27.1: Enable classic branch protection first (defense in depth)**
 
 ```bash
-gh api -X PUT repos/zzem-org/knowledge-base/branches/main/protection \
+gh api -X PUT repos/zach-wrtn/knowledge-base/branches/main/protection \
   --input - <<'JSON'
 {
   "required_status_checks": { "strict": true, "contexts": ["validate", "guard-sensitive-paths"] },
@@ -1948,7 +1948,7 @@ Expected: JSON response confirming protection. No required reviews (content path
 - [ ] **Step 27.2: Create the ruleset enforcing PR for sensitive paths**
 
 ```bash
-gh api -X POST repos/zzem-org/knowledge-base/rulesets --input - <<'JSON'
+gh api -X POST repos/zach-wrtn/knowledge-base/rulesets --input - <<'JSON'
 {
   "name": "protected-paths",
   "target": "branch",
@@ -1982,14 +1982,14 @@ gh api -X POST repos/zzem-org/knowledge-base/rulesets --input - <<'JSON'
 JSON
 ```
 
-Note: the exact `file_path_restriction` parameter shape may differ across API versions. If `gh api` returns a 422, open repo Settings → Rules → New ruleset, set the same intent via UI, then re-run `gh api -X GET repos/zzem-org/knowledge-base/rulesets` to document the resulting id.
+Note: the exact `file_path_restriction` parameter shape may differ across API versions. If `gh api` returns a 422, open repo Settings → Rules → New ruleset, set the same intent via UI, then re-run `gh api -X GET repos/zach-wrtn/knowledge-base/rulesets` to document the resulting id.
 
 - [ ] **Step 27.3: Verify**
 
 From a fresh throwaway clone:
 
 ```bash
-cd /tmp && rm -rf kb-probe && git clone git@github.com:zzem-org/knowledge-base.git kb-probe
+cd /tmp && rm -rf kb-probe && git clone git@github.com:zach-wrtn/knowledge-base.git kb-probe
 cd kb-probe
 echo "# probe" >> schemas/pattern.schema.json
 git add schemas/pattern.schema.json
@@ -2008,7 +2008,7 @@ cd - && rm -rf /tmp/kb-probe
 Also verify content push still works:
 
 ```bash
-cd /tmp && rm -rf kb-probe && git clone git@github.com:zzem-org/knowledge-base.git kb-probe
+cd /tmp && rm -rf kb-probe && git clone git@github.com:zach-wrtn/knowledge-base.git kb-probe
 cd kb-probe
 echo "" >> content/patterns/correctness-001.yaml  # trivial whitespace change
 git add content/patterns/correctness-001.yaml
@@ -2113,7 +2113,7 @@ For `reference_knowledge_base.md`, rewrite the pointer to reference the new repo
 ```bash
 cd "$ORCH"
 git add -A
-git commit -m "chore: remove file-based KB (migrated to zzem-org/knowledge-base)"
+git commit -m "chore: remove file-based KB (migrated to zach-wrtn/knowledge-base)"
 ```
 
 - [ ] **Step 29.5: Verify no stale references**
@@ -2143,7 +2143,7 @@ git push origin v1.0.0
 
 ```bash
 gh release create v1.0.0 \
-  --repo zzem-org/knowledge-base \
+  --repo zach-wrtn/knowledge-base \
   --title "v1.0.0 — Phase 1" \
   --notes "Initial release. Contents: 13 patterns, 2 rubrics, 3 reflections seeded from sprint-orchestrator. Five skills (sync, read, write-pattern, update-pattern, write-reflection). CI validates all content on push; GitHub Ruleset requires PR + CODEOWNERS review for schemas/, skills/, scripts/, .github/."
 ```
@@ -2193,5 +2193,5 @@ Cross-reference to confirm the plan implements every requirement in the spec.
 | Task 22 migration | Bad seed data | Fix the script, re-run (target dir is overwritten), re-commit |
 | Task 23 push | CI red | Fix forward — edit the offending file, push again |
 | Tasks 24–26 orchestrator | Session hook breaks | Revert the three integration commits; KB repo unaffected |
-| Task 27 ruleset | Over-restrictive | Disable ruleset via `gh api -X DELETE repos/zzem-org/knowledge-base/rulesets/<id>`, redo |
+| Task 27 ruleset | Over-restrictive | Disable ruleset via `gh api -X DELETE repos/zach-wrtn/knowledge-base/rulesets/<id>`, redo |
 | Task 29 cleanup | Agents fail reading KB | Revert `git rm` commit; sprint-orchestrator/knowledge-base/ is restored; fix skills; retry |
