@@ -14,12 +14,17 @@ system — they are not Phase 2 features. This spec covers those two only;
 the remaining four (ruleset, observability, auto-cleanup, domain enum) are
 deferred to Phase 2 proper.
 
-### Gap #2 — content YAML/MD not validated against its own JSON Schema
+### Gap #2 — pattern YAML files not schema-validated
 
-`scripts/validate-fixtures.mjs` exercises only `tests/fixtures/*`, not the
-real content under `content/`. A pattern with a missing required field or an
-invalid enum value can be committed and pass CI. During dogfood, new patterns
-were manually piped through `ajv.compile + validate` as a workaround.
+`validate-markdown-frontmatter.mjs` already schema-validates every
+`content/rubrics/**/*.md` and `content/reflections/*.md` against its
+respective JSON Schema. For patterns, the pipeline only runs
+`validate-filename-id-match.mjs` (id equals filename stem) and
+`validate-unique-ids.mjs` (no id collisions) — neither loads
+`schemas/pattern.schema.json`. A pattern with a missing required field, an
+invalid `category`/`severity` enum, or a bad `discovered_at` format can be
+committed and pass CI. During dogfood, new patterns were manually piped
+through `ajv.compile + validate` as a workaround.
 
 ### Gap #3 — `install-skills.sh` silently re-links `~/.claude/skills/zzem-kb`
 
@@ -33,10 +38,9 @@ silently. Restored manually during dogfood.
 
 **In scope**
 
-1. Schema-validate every file under `content/` against its declared schema:
-   - `content/patterns/*.yaml` vs. `schemas/pattern.schema.json`
-   - `content/rubrics/**/*.md` (frontmatter) vs. `schemas/rubric.schema.json`
-   - `content/reflections/*.md` (frontmatter) vs. `schemas/reflection.schema.json`
+1. Schema-validate `content/patterns/*.yaml` against
+   `schemas/pattern.schema.json`. Rubrics and reflections are already
+   validated by `validate-markdown-frontmatter.mjs` — not re-implemented.
 2. Make `scripts/install-skills.sh` idempotent and refuse to silently clobber
    an existing symlink pointing elsewhere.
 
@@ -52,39 +56,38 @@ silently. Restored manually during dogfood.
 
 ## Design
 
-### 1. Content schema validation
+### 1. Pattern YAML schema validation
 
-**New file:** `scripts/validate-content-schemas.mjs`
+**New file:** `scripts/validate-pattern-schemas.mjs`
 
-Walks the three content roots, parses each file with the appropriate parser,
-and validates against the matching schema. Uses AJV draft-2020-12 with
-`ajv-formats`. Caches compiled validators by schema name to avoid the
-`schema with key or id already exists` bug captured in KB pattern
+Walks `content/patterns/*.yaml`, loads each via `js-yaml`, and validates
+against `schemas/pattern.schema.json`. Uses AJV draft-2020-12 with
+`ajv-formats`. Compiles the pattern validator once (not in a loop) to avoid
+the `schema with key or id already exists` bug captured in KB pattern
 `code_quality-003`.
 
 Output format on failure (example):
 
 ```
-FAIL content/patterns/example-001.yaml
-  /severity must be equal to one of the allowed values
-  allowedValues: ["critical","major","minor","info"]
-FAIL content/reflections/some-sprint.md (frontmatter)
-  must have required property 'domain'
+FAIL  content/patterns/example-001.yaml: /severity must be equal to one of the allowed values
+FAIL  content/patterns/other-002.yaml: must have required property 'contract_clause'
 
-2 content files failed schema validation.
+2 pattern file(s) failed schema validation
 ```
 
-The script collects all failures before exiting so one bad file does not hide
-another. Exits `0` on all-pass, `1` on any failure.
+Match the existing validator style (`FAIL  <path>: <message>` per line,
+summary line at the end). Collect all failures before exiting so one bad
+file does not hide another. Exits `0` on all-pass, `1` on any failure.
 
-**Package wiring:** the `validate:content` npm script gains this step.
-`validate:content` is what CI runs and what `zzem-kb:write-pattern`,
-`zzem-kb:update-pattern`, `zzem-kb:write-reflection` run before commit —
-adding the step there means both CI and client-side skills benefit.
+**Package wiring:** the `validate:content` npm script gains this script in
+sequence with the existing validators. `validate:content` is what CI runs
+and what `zzem-kb:write-pattern` / `zzem-kb:update-pattern` /
+`zzem-kb:write-reflection` run before commit — adding the step there means
+both CI and client-side skills benefit.
 
-Order within `validate:content`: run `validate-content-schemas` **before**
-`validate-fixtures`. Rationale: if real content is broken, the fixture
-runner's "13/13 passed" line should not bury the actual failure.
+Order within `validate:content`: run **after** `validate-unique-ids` and
+**before** `validate-markdown-frontmatter`. Rationale: id-level checks first,
+then structural checks on YAML content, then frontmatter for MD.
 
 **CI:** `.github/workflows/validate.yml` already invokes
 `npm run validate:content`, so no workflow edit is required.
@@ -136,15 +139,15 @@ use the canonical clone, or explicitly force-relink.
 
 ### Testing
 
-**`validate-content-schemas.mjs`**
+**`validate-pattern-schemas.mjs`**
 
-- Unit fixtures at `tests/fixtures/content-schemas/`:
-  - `invalid-pattern-missing-severity.yaml`
-  - `invalid-rubric-bad-status.md`
-  - `invalid-reflection-missing-domain.md`
-- One `scripts/validate-content-schemas.test.mjs` runs the validator against
-  a fixture dir and asserts expected failure messages per file.
-- Real-content integration: running the validator on `content/` exits 0.
+- Reuse existing fixtures. `tests/fixtures/invalid-pattern-missing-field.yaml`
+  and `tests/fixtures/invalid-pattern-bad-id.yaml` already cover the negative
+  cases and are used by `validate-fixtures.mjs`. Running
+  `validate-pattern-schemas.mjs` with `tests/fixtures` as its content dir
+  must report both as invalid and exit 1.
+- Real-content integration: running the validator on `content/patterns` in
+  the repo exits 0.
 
 **`install-skills.sh`**
 
@@ -175,12 +178,13 @@ use the canonical clone, or explicitly force-relink.
 
 ## Success criteria
 
-1. A hand-crafted YAML missing a required field is rejected by
-   `npm run validate:content` locally and by CI on push.
-2. A hand-crafted reflection with an unknown `outcome` value is rejected by
-   the same pipeline.
-3. Every file currently in `content/` passes the new validator unmodified
-   (or is fixed in the same PR; schemas not weakened).
+1. A hand-crafted pattern YAML missing a required field (e.g.
+   `contract_clause`) is rejected by `npm run validate:content` locally and
+   by CI on push.
+2. A hand-crafted pattern with a bad enum value (e.g. `severity: huge`) is
+   rejected by the same pipeline.
+3. Every file currently in `content/patterns/` passes the new validator
+   unmodified (or is fixed in the same PR; schemas not weakened).
 4. Bootstrapping the KB at a second path without `ZZEM_KB_FORCE_LINK=1`
    exits non-zero at the install-skills step, prints a warning naming both
    paths, and leaves the existing symlink intact.
