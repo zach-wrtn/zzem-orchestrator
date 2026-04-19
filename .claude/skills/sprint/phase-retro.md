@@ -219,25 +219,33 @@ Pattern Digest + Quality Report를 KB에 기록한다.
 
 ```
 1. pattern-digest.yaml 읽기
-2. knowledge-base/patterns/README.md 인덱스 읽기
-3. For each pattern in pattern-digest:
-   a. 인덱스에서 동일 title/category 매칭 검색
+2. For each pattern in pattern-digest:
+   a. 매칭 검색: `zzem-kb:read type=pattern category={카테고리}` → 반환된 파일들을 Read하여
+      title/description 유사도로 기존 패턴과 매칭 여부 판정
    b. 매칭 발견:
-      - 해당 .yaml 파일 Read
-      - frequency += 1
-      - last_seen = current sprint-id
-      - groups 배열에 현재 그룹 추가
-      - Write (갱신)
-      - README.md 인덱스의 Freq, Last Seen 갱신
+      - `zzem-kb:update-pattern id={기존-id} source_sprint={현재-sprint-id}`
+        (스킬이 frequency+1 + last_seen 업데이트 + rebase-retry push 자동 처리)
    c. 매칭 없음 (신규):
-      - 새 .yaml 파일 생성 (스키마: knowledge-base/README.md 참조)
-      - pattern-digest의 systemic_fix → prevention 필드로 변환
-      - pattern-digest의 pattern → description 필드로 변환
-      - contract_clause: systemic_fix에서 Contract 조항 도출 (없으면 null)
-      - README.md 인덱스에 행 추가
-4. prototypes/quality-report.yaml 읽기 (존재 시)
-5. fabrication_risk: medium 항목을 design/ KB에 동일 절차로 기록
+      - `zzem-kb:write-pattern` 호출, 필드 매핑:
+        - category: pattern-digest의 category 그대로
+        - severity: pattern-digest의 severity
+        - title: pattern-digest의 pattern 요약 (≤120자)
+        - source_sprint: 현재 sprint-id
+        - source_group: pattern-digest.groups[0] (최초 관측 그룹)
+        - description: pattern-digest의 pattern 필드
+        - detection: 이번 스프린트에서 해당 패턴이 어떻게 드러났는지 서술 (≥10자)
+        - prevention: pattern-digest의 systemic_fix → 예방 문장 (≥10자)
+        - contract_clause: systemic_fix에서 Contract 조항 도출 (≥10자; 불명확하면 minimum description)
+        (스킬이 다음 ID 자동 채번 + 스키마 검증 + commit/push)
+3. prototypes/quality-report.yaml 읽기 (존재 시)
+4. fabrication_risk: medium 항목은 동일 절차로 `category: design_proto` 또는
+   `design_spec`으로 기록 (별도 저장소 없음 — axis-1 `learning/patterns/` 공통)
 ```
+
+> **주의**: standalone KB에는 별도의 패턴 인덱스 README가 없다. 매칭은 `zzem-kb:read`
+> 결과를 직접 Read하여 수행한다. `groups` 배열 필드는 current pattern 스키마에 존재하지
+> 않으므로(schemas/learning/pattern.schema.json 참조) 누적하지 않는다. 반복 관측은
+> `frequency` 카운터로만 표현한다.
 
 **Design Engineer 패턴 기록**:
 
@@ -279,20 +287,27 @@ if any pattern.frequency >= 3:
 **Trigger**: pattern-digest의 패턴 중 `frequency >= 2` 이고 `contract_clause`가 정의된 것.
 
 **Workflow**:
-1. `knowledge-base/rubrics/` 디렉토리 ls → `superseded_by: null` 인 최신 v(N) 파일 찾기
-2. v(N) 파일의 "Promotion Log" 표에 후보 패턴 추가 (Date, Sprint, Clause Added, Source Pattern)
+1. `zzem-kb:read type=rubric status=active` → 최신 v(N) 파일 경로 획득 → Read
+2. **Rubric write는 direct file op** (→ 아래 주의 참조). `$ZZEM_KB_PATH/learning/rubrics/v{N}.md`를 Edit:
+   "Promotion Log" 표에 후보 패턴 추가 (Date, Sprint, Clause Added, Source Pattern)
 3. v(N) 파일의 누적 promotion 개수 계산:
    - 누적 `< 2`: v(N)에 Promotion Log 행 추가만 (clause는 본문에 미반영, 다음 스프린트부터 신규 패턴이면 우선 평가)
-   - 누적 `>= 2`: v(N+1) 파일 신규 생성
+   - 누적 `>= 2`: v(N+1) 파일 신규 생성 (`$ZZEM_KB_PATH/learning/rubrics/v{N+1}.md`)
      - 헤더 갱신 (`id: vN+1`, `created_at`, `source_sprint: 현재 sprint-id`)
      - v(N) 모든 clause + 누적 Promotion Log의 clause를 Clauses 섹션으로 본문화
      - v(N) 파일 frontmatter의 `superseded_by: vN+1`로 갱신
+   변경 후: `cd $ZZEM_KB_PATH && git add learning/rubrics/ && git commit -m "rubric: promote ..." && git pull --rebase origin main && git push`
 4. 사용자 nudge:
    ```
    Rubric: v{N} 유지 (promotion log {N}건 누적) | v{N+1} 생성 (clause {N}건 본문화)
    ```
 
 **Effect**: 다음 스프린트 Phase 4.4에서 Evaluator가 자동으로 최신 vN 로드 → 누적된 평가 기준 적용.
+
+> **주의 (rubric write exception)**: standalone KB의 `zzem-kb:*` 스킬은 현재 write-pattern /
+> update-pattern / write-reflection만 제공한다. rubric 파일 쓰기는 skill 없이 direct git op로
+> 수행한다. 향후 `zzem-kb:promote-rubric` 등 전용 스킬 신설 검토 (self-improving-roadmap #E2 후보).
+> direct op 수행 시 rebase-retry 필수.
 
 ### 6.7b Skill 승격 (Pattern → Reusable Code Skill)
 
@@ -328,16 +343,23 @@ if any pattern.frequency >= 3:
 
 **Workflow**:
 1. `pattern-digest.yaml` + `gap-analysis.yaml` 읽기
-2. `knowledge-base/reflections/{sprint-id}.md` 작성 (스키마: `knowledge-base/reflections/README.md` 참조)
-   - **What worked**: PASS 그룹의 성공 요인 2~3개 (재사용 가능 형태)
-   - **What failed (with root cause)**: ISSUES/FAIL 항목의 1줄 trace + root_cause
-   - **Lesson (next-sprint actionable)**: 다음 스프린트 Phase 2/4에 반영할 구체 지침
-   - **Pointers**: pattern-digest, gap-analysis, KB pattern id 참조
-3. 직전 스프린트(같은 도메인)의 reflection이 존재하면 마지막에 1줄 추가:
-   ```
-   > 직전 lesson 반영도: {fully | partially | not} — {간단 평가}
-   ```
-4. <= 400단어 유지
+2. 직전 스프린트(같은 도메인)의 reflection 확인: `zzem-kb:read type=reflection domain=<도메인> limit=1`
+   (존재하면 3번 단계의 반영도 라인을 위해 Read 결과 보관)
+3. `zzem-kb:write-reflection` 호출 (스키마: `$ZZEM_KB_PATH/schemas/learning/reflection.schema.json`):
+   - `sprint_id`: 현재 sprint-id
+   - `domain`: `ai-webtoon | free-tab | ugc-platform | infra` 중 하나 (enum; 스키마 강제)
+   - `completed_at`: 현재 ISO 8601 with offset
+   - `outcome`: `pass | fail | partial` — gap-analysis의 fulfillment_rate 기반
+     (`= 1.0` → pass / `>= 0.7` → partial / `< 0.7` → fail 기준 적용. 팀 컨벤션 확인 권장)
+   - `related_patterns`: 이번 스프린트에서 write/update한 pattern id 배열
+   - `body` (≤ 400단어, 마크다운):
+     - **What worked**: PASS 그룹의 성공 요인 2~3개 (재사용 가능 형태)
+     - **What failed (with root cause)**: ISSUES/FAIL 항목의 1줄 trace + root_cause
+     - **Lesson (next-sprint actionable)**: 다음 스프린트 Phase 2/4에 반영할 구체 지침
+     - **Pointers**: pattern-digest, gap-analysis, KB pattern id 참조
+     - (step 2에서 직전 reflection이 있었다면) 마지막 1줄:
+       `> 직전 lesson 반영도: {fully | partially | not} — {간단 평가}`
+   (스킬이 스키마 검증 + rebase-retry push 자동 처리)
 
 **출력 갱신** (Phase 6 Output 블록):
 ```
@@ -345,7 +367,7 @@ if any pattern.frequency >= 3:
     Rubric: {v(N) 유지 | v(N+1) 생성, clause {K}개 본문화}
     Skill candidates: {N} (placeholder)
     Rule promotions: {N}
-    Reflection: knowledge-base/reflections/{sprint-id}.md
+    Reflection: $ZZEM_KB_PATH/learning/reflections/{sprint-id}.md
 ```
 
 ## Cleanup (optional, 사용자 수동 실행)
