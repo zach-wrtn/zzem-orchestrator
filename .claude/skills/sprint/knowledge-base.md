@@ -8,7 +8,9 @@
 
 - **Source of truth**: `git@github.com:zach-wrtn/knowledge-base.git`
 - **Local clone**: `$ZZEM_KB_PATH` (기본 `~/.zzem/kb`) — SessionStart 훅이 자동으로 clone/pull
-- **Content layout**: `content/patterns/*.yaml`, `content/rubrics/*.md`, `content/reflections/*.md`
+- **Content layout** (two axes):
+  - Axis 1 (self-improving): `learning/patterns/*.yaml`, `learning/rubrics/*.md`, `learning/reflections/*.md`
+  - Axis 2 (product specs): `products/{ai-webtoon,free-tab,ugc-platform}/prd.md` + `events.yaml`
 
 ---
 
@@ -17,7 +19,7 @@
 | Skill | 용도 |
 |-------|------|
 | `zzem-kb:sync` | 세션 시작 시 fast-forward pull |
-| `zzem-kb:read` | 조회 (type=pattern\|rubric\|reflection, 필터: category/domain/status/limit) |
+| `zzem-kb:read` | 조회 (type=pattern\|rubric\|reflection\|prd\|events, 필터: category/domain/status/limit/product) |
 | `zzem-kb:write-pattern` | 신규 패턴 생성 |
 | `zzem-kb:update-pattern` | 기존 패턴 frequency/severity 갱신 |
 | `zzem-kb:write-reflection` | 스프린트 말미 retrospective 기록 |
