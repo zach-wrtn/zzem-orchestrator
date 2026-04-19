@@ -287,16 +287,19 @@ if any pattern.frequency >= 3:
 **Trigger**: pattern-digest의 패턴 중 `frequency >= 2` 이고 `contract_clause`가 정의된 것.
 
 **Workflow**:
-1. `zzem-kb:read type=rubric status=active` → 최신 v(N) 파일 경로 획득 → Read
-2. **Rubric write는 direct file op** (→ 아래 주의 참조). `$ZZEM_KB_PATH/learning/rubrics/v{N}.md`를 Edit:
-   "Promotion Log" 표에 후보 패턴 추가 (Date, Sprint, Clause Added, Source Pattern)
-3. v(N) 파일의 누적 promotion 개수 계산:
-   - 누적 `< 2`: v(N)에 Promotion Log 행 추가만 (clause는 본문에 미반영, 다음 스프린트부터 신규 패턴이면 우선 평가)
-   - 누적 `>= 2`: v(N+1) 파일 신규 생성 (`$ZZEM_KB_PATH/learning/rubrics/v{N+1}.md`)
-     - 헤더 갱신 (`id: vN+1`, `created_at`, `source_sprint: 현재 sprint-id`)
-     - v(N) 모든 clause + 누적 Promotion Log의 clause를 Clauses 섹션으로 본문화
-     - v(N) 파일 frontmatter의 `superseded_by: vN+1`로 갱신
-   변경 후: `cd $ZZEM_KB_PATH && git add learning/rubrics/ && git commit -m "rubric: promote ..." && git pull --rebase origin main && git push`
+1. 활성 rubric 확인: `zzem-kb:read type=rubric status=active` (최신 v(N) 경로만 — 내용 읽기는 step 2의 스킬이 처리)
+2. **Promotion Log 행 추가 (skill):**
+   `zzem-kb:promote-rubric source_sprint=<현재-sprint-id> source_pattern=<pattern-id> clause_id=C<다음번호> clause_title="<짧은 제목>"`
+   (스킬이 행 추가 + `validate:content` + rebase-retry push + 누적 카운트 nudge 자동 처리)
+3. 스킬 nudge 결과에 따라 분기:
+   - **누적 `< 2`**: 추가만 수행. clause는 본문에 미반영, 다음 스프린트부터 신규 패턴이면 우선 평가.
+   - **누적 `>= 2`**: v(N+1) 파일 신규 생성 (**현재는 manual direct op** — 아래 주의 참조).
+     `$ZZEM_KB_PATH/learning/rubrics/v{N+1}.md` 작성:
+     - 프런트매터: `version: N+1`, `status: active`, `superseded_by: null`, `schema_version: 1`
+     - Body: v(N) 모든 clause + 누적 Promotion Log의 clause를 Clauses 섹션으로 본문화
+     - Promotion Log: 베이스라인 행만 남긴 빈 표
+     - v(N) 파일 frontmatter를 `status: superseded` + `superseded_by: N+1`로 갱신
+     - `cd $ZZEM_KB_PATH && git add learning/rubrics/ && git commit -m "rubric: bump to vN+1 ({sprint-id})" && git pull --rebase origin main && git push`
 4. 사용자 nudge:
    ```
    Rubric: v{N} 유지 (promotion log {N}건 누적) | v{N+1} 생성 (clause {N}건 본문화)
@@ -304,10 +307,11 @@ if any pattern.frequency >= 3:
 
 **Effect**: 다음 스프린트 Phase 4.4에서 Evaluator가 자동으로 최신 vN 로드 → 누적된 평가 기준 적용.
 
-> **주의 (rubric write exception)**: standalone KB의 `zzem-kb:*` 스킬은 현재 write-pattern /
-> update-pattern / write-reflection만 제공한다. rubric 파일 쓰기는 skill 없이 direct git op로
-> 수행한다. 향후 `zzem-kb:promote-rubric` 등 전용 스킬 신설 검토 (self-improving-roadmap #E2 후보).
-> direct op 수행 시 rebase-retry 필수.
+> **주의 (rubric version bump는 skill 미제공)**: `zzem-kb:promote-rubric`은 Promotion Log 행
+> 추가까지만 커버한다(`clause_title` 짧은 텍스트만 기록). v(N) → v(N+1) 승격은 clause 본문
+> 전체가 필요해 아직 스킬이 없으며, 위 step 3의 누적 `>= 2` 분기에서 direct git op로 수행한다.
+> 향후 `zzem-kb:bump-rubric`(clauses array 입력으로 본문 migration 수행) 추가 검토. direct op
+> 수행 시 rebase-retry 필수.
 
 ### 6.7b Skill 승격 (Pattern → Reusable Code Skill)
 
