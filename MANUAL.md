@@ -77,7 +77,7 @@ Sprint Lead(Planner)가 수행하는 작업:
 3. `api-contract.yaml` 생성 (OpenAPI 3.0)
 4. 태스크 분해 → `tasks/backend/*.md`, `tasks/app/*.md`
 5. `evaluations/criteria.md` 생성
-6. **KB 패턴 조회**: `knowledge-base/patterns/README.md`에서 관련 패턴을 검색하여 태스크 spec과 evaluation criteria에 반영
+6. **KB 패턴 조회**: `zzem-kb:read type=pattern category=<관련>`으로 관련 패턴을 검색하여 태스크 spec과 evaluation criteria에 반영
 
 **태스크 필수 섹션**: Target, Context, Objective, Specification, Acceptance Criteria
 

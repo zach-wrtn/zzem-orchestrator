@@ -287,7 +287,7 @@ TaskCreate:
 ```
 
 Evaluator는 평가 시작 시 **Cross-sprint rubric을 자동 로드**한다:
-- `knowledge-base/rubrics/` 디렉토리에서 `superseded_by: null`인 최신 `v{N}.md` 로드
+- `zzem-kb:read type=rubric status=active` → 최신 rubric 파일 경로 리턴 → Read로 로드
 - 본 스프린트의 `evaluation/criteria.md` + 해당 rubric의 Clauses + Promotion Log 후보 clause를 합쳐 평가에 적용
 - 충돌 시 sprint 로컬 criteria가 우선
 
