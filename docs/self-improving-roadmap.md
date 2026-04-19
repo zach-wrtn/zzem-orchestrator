@@ -32,7 +32,7 @@ self-improving 개선 작업을 시작하기 전에 **반드시 아래 데이터
 
 **검증 절차** (개선 요청 수신 시):
 1. `sprints/` 디렉토리에서 완주된 스프린트 수 확인
-2. 해당 항목별 데이터 누적량을 KB(`knowledge-base/patterns/`, `design/`, `reflections/`)에서 확인
+2. 해당 항목별 데이터 누적량을 standalone KB에서 확인 (`zzem-kb:read type=pattern` / `type=reflection`; design 패턴은 `category=design_proto|design_spec`로 필터)
 3. 미달이면: "현재 {N} 스프린트 누적, {항목}은 최소 {M} 스프린트 필요. 먼저 스프린트 진행을 권장합니다." 안내
 4. 충족이면: 착수 진행
 
@@ -56,15 +56,15 @@ self-improving 개선 작업을 시작하기 전에 **반드시 아래 데이터
 **문제**: `phase-retro.md:241-242` design KB 경로 incomplete. Design Engineer 학습 병목.
 
 **작업**
-- `knowledge-base/design/` 스키마 파일 (이미 부분 존재) 완성
-- Phase 3 (`phase-prototype.md`)에서 동일 도메인 design pattern 자동 참조 단계 추가
+- Standalone KB의 design 패턴 분류 정비 — `learning/patterns/` 내 `category=design_proto|design_spec` 규약 정착 (별도 디렉토리 불필요; category로 필터)
+- Phase 3 (`phase-prototype.md`)에서 동일 도메인 design pattern 자동 참조 단계 추가 (`zzem-kb:read type=pattern category=design_proto` 활용)
 - `quality-report.yaml` → `design-proto-{NNN}.yaml` 변환 로직 명문화
 
 ### #5 Skill Library (플랜 B)
 **현황**: 6.7b는 placeholder만 존재 (skill_candidate 태깅).
 
 **작업**
-- `knowledge-base/skills/` 디렉토리 + 스키마 (재사용 코드 템플릿, ID, 적용 trigger)
+- Standalone KB에 `learning/skills/` 신규 content type + `schemas/learning/skill.schema.json` 추가 (재사용 코드 템플릿, ID, 적용 trigger)
 - 동일 패턴 2그룹+ 반복 시 skill 후보 자동 추출
 - Phase 4.2 Implement 시작 시 관련 skill 사용자 승인 gate (Generator 오염 방지)
 - 우선 후보: MemeApp 컴포넌트 생성기, API contract 스니펫, Zod 스키마 패턴

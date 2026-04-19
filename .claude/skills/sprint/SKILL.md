@@ -124,8 +124,8 @@ Sprint Lead가 Engineer/Evaluator에게 태스크를 할당할 때,
 |------|------|--------|
 | Design System | `docs/designs/DESIGN.md` | Design Engineer |
 | Component Patterns | `docs/designs/component-patterns.md` | Design Engineer |
-| Design KB | `knowledge-base/design/README.md` + 관련 .yaml | Design Engineer |
-| Code KB | `knowledge-base/patterns/README.md` + 관련 .yaml | Evaluator, Engineers |
+| Design KB | `zzem-kb:read type=pattern category=design_proto` (+ `design_spec`) 결과 | Design Engineer |
+| Code KB | `zzem-kb:read type=pattern category=<관련>` 결과 | Evaluator, Engineers |
 | API Contract (그룹 범위) | `contracts/api-contract.yaml` (현재 그룹 endpoints) | Engineers, Evaluator |
 
 **적용 방식**:

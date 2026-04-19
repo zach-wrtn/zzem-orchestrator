@@ -151,9 +151,9 @@ previous_metrics:
 KB의 pattern 인덱스를 조회하여 evaluation criteria를 자동 보강한다.
 
 ```
-1. knowledge-base/patterns/README.md 읽기
+1. `zzem-kb:read type=pattern` 으로 전체 패턴 로드 (또는 category 필터로 좁힘)
 2. severity: critical 또는 (severity: major AND frequency >= 2) 패턴 필터
-3. 필터된 패턴의 .yaml 파일 Read
+3. 각 패턴의 .yaml 파일을 해당 경로로 Read
 4. 각 패턴의 detection + contract_clause를 evaluation/criteria.md에 추가:
 
 ## KB-Calibrated Checks (from {prev-sprint-id} + accumulated KB)
