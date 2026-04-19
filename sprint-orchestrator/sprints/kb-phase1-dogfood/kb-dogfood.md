@@ -34,9 +34,9 @@ Completed: 2026-04-19T04:45:00+09:00. Outcome: **pass** (6 gaps identified, all 
 
 4. **Cross-path cleanup found in docs** — `integration-002` re-triggered because initial KB deletion missed references in `MANUAL.md`, `ARCHITECTURE.md`, `.claude/skills/sprint/knowledge-base.md`. Caught via grep post-commit; all updated in PR #9.
 
-5. **Content YAML not validated against `pattern.schema.json`** — `validate:schemas` only runs the fixture runner; no step validates `content/patterns/*.yaml` against its JSON Schema. A pattern with missing required fields or invalid enum could pass CI. Worked around during dogfood by manually running `ajv.compile()` on the new pattern. **Phase 1.1 patch** — add a step to `validate:content` that loads each YAML under `content/patterns/` and validates against `pattern.schema.json`.
+5. **Content YAML not validated against `pattern.schema.json`** — `validate:schemas` only runs the fixture runner; no step validates `content/patterns/*.yaml` against its JSON Schema. A pattern with missing required fields or invalid enum could pass CI. Worked around during dogfood by manually running `ajv.compile()` on the new pattern. **Resolved in Phase 1.1 hotfix** — [knowledge-base#2](https://github.com/zach-wrtn/knowledge-base/pull/2) added `scripts/validate-pattern-schemas.mjs` into `validate:content`.
 
-6. **Bootstrap `install-skills.sh` clobbers skill symlink when `ZZEM_KB_PATH` differs from default** — the install script unconditionally does `rm + ln -s`, so bootstrapping with a custom `ZZEM_KB_PATH` repoints `~/.claude/skills/zzem-kb` to the new path and silently breaks the previous clone's link. Restored manually during dogfood. **Phase 2 fix** — either idempotent check (only re-link if target differs from desired) or scope the symlink name by path hash.
+6. **Bootstrap `install-skills.sh` clobbers skill symlink when `ZZEM_KB_PATH` differs from default** — the install script unconditionally does `rm + ln -s`, so bootstrapping with a custom `ZZEM_KB_PATH` repoints `~/.claude/skills/zzem-kb` to the new path and silently breaks the previous clone's link. Restored manually during dogfood. **Resolved in Phase 1.1 hotfix** — [knowledge-base#2](https://github.com/zach-wrtn/knowledge-base/pull/2) made the installer idempotent; mismatched targets now warn + exit 1 unless `ZZEM_KB_FORCE_LINK=1`.
 
 ### Real-SDLC scope
 
