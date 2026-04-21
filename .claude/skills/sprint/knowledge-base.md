@@ -18,11 +18,16 @@
 
 | Skill | 용도 |
 |-------|------|
-| `zzem-kb:sync` | 세션 시작 시 fast-forward pull |
+| `zzem-kb:sync` | 각 Phase 진입 시 fast-forward pull (Phase 2/3/4 첫 KB 접근 전, Phase 6 write 전) |
 | `zzem-kb:read` | 조회 (type=pattern\|rubric\|reflection\|prd\|events, 필터: category/domain/status/limit/product) |
 | `zzem-kb:write-pattern` | 신규 패턴 생성 |
 | `zzem-kb:update-pattern` | 기존 패턴 frequency/severity 갱신 |
 | `zzem-kb:write-reflection` | 스프린트 말미 retrospective 기록 |
+| `zzem-kb:promote-rubric` | pattern → evaluator rubric clause 승격 (Phase 6 §6.7a) |
+| `zzem-kb:sync-prds-from-notion` | Notion 데이터베이스 → `products/notion-prds.yaml` 동기화 |
+| `zzem-kb:sync-active-prds` | 진행 중 feature PRD 본문 → `products/active-prds/{notion-id}.md` 미러링 |
+
+> **Sync 타이밍**: SessionStart 훅(`scripts/kb-bootstrap.sh`)이 bootstrap 시점에 ff-only를 시도하나, long-running 스프린트 중 upstream이 갱신될 수 있다. 각 Phase 첫 KB 접근 전에 `zzem-kb:sync`를 호출해 최신 상태를 보장한다.
 
 ---
 

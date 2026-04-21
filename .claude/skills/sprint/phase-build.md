@@ -107,6 +107,10 @@ if fix_loop_count >= 2 OR total_issues_in_group >= 5:
 
 **핵심 제약**: 이전 그룹이 PASS 되기 전에 다음 그룹 구현을 시작하지 않는다. 이전 그룹의 fix가 다음 그룹 spec에 영향을 줄 수 있기 때문.
 
+## 4.0a KB 동기화
+
+첫 그룹 진입 시 `zzem-kb:sync` 1회 호출 (fast-forward pull). 이후 §4.1 Contract 생성·§4.4 Evaluate 단계의 `zzem-kb:read` 결과 최신성 보장. 재시작(`--resume`) 시에도 재호출 권장.
+
 ## 4.0 Sprint 브랜치 확인 (첫 그룹 시)
 
 Phase 1의 `setup-sprint.sh`에서 이미 각 role 디렉토리가 `{branch_prefix}/{sprint-id}` 브랜치로 체크아웃되어 있다. 별도 브랜치 생성 단계는 불필요.

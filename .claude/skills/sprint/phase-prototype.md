@@ -17,6 +17,10 @@ Phase 3 skipped: no prototypable UI tasks found
 
 ## Workflow
 
+### 3.0 KB 동기화
+
+Design KB 참조 전에 `zzem-kb:sync` 1회 호출 (fast-forward pull). Phase 2에서 sync를 수행했다면 스킵 가능하나, Phase 2 없이 Phase 3 직행 시 필수.
+
 ### 3.1 태스크 필터
 
 app 태스크 중 `### Screens / Components` 섹션이 있는 태스크만 대상.

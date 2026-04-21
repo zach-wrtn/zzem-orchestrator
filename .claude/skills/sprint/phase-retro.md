@@ -8,6 +8,10 @@ Phase 5 완료 후 자동 실행. `--phase=retro`로 독립 실행도 가능.
 
 ## Workflow
 
+### 6.0 KB 동기화
+
+Phase 6은 KB에 대량 쓰기(pattern write/update, reflection, promote-rubric)를 수행하므로, 첫 write 전에 `zzem-kb:sync`를 호출하여 origin/main에 fast-forward한다. push 충돌 방지 목적. 이미 Phase 4에서 sync했더라도 long-running 스프린트는 재호출 권장.
+
 ### 6.1 Gap Analysis (PRD AC 달성 여부)
 
 PRD.md의 모든 Acceptance Criteria를 순회하며, Evaluator 보고서와 태스크 상태를 대조한다.

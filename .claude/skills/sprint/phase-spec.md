@@ -10,7 +10,8 @@ PRD를 **deliverable-focused** 명세로 확장한다.
 
 ## Workflow
 
-0. **Cross-Sprint Memory 로드** (Reflexion-style):
+0. **KB 동기화**: 첫 KB 접근 전에 `zzem-kb:sync` 1회 호출 (fast-forward pull). 이후 단계의 `zzem-kb:read` 결과 최신성 보장. SessionStart 훅이 bootstrap 시점에 ff-only를 시도하지만, 런타임 중 upstream 갱신을 반영하려면 여기서 명시 호출 필요.
+0.5. **Cross-Sprint Memory 로드** (Reflexion-style):
    - `zzem-kb:read type=reflection domain=<도메인> limit=3` → 같은 도메인 최근 3개 reflection 로드
    - 각 reflection의 **Lesson** 섹션만 추출하여 Spec 컨텍스트에 주입
    - `zzem-kb:read type=pattern min_frequency=2` → 새 PRD 도메인과 관련된 패턴 식별 (category 필터 병행 권장)
