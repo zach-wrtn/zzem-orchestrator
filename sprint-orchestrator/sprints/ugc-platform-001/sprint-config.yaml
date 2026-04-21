@@ -1,0 +1,42 @@
+# Sprint Configuration — ugc-platform-001 (Phase 1: 프로필 & 네비게이션)
+
+sprint_id: "ugc-platform-001"
+branch_prefix: "sprint"
+
+repositories:
+  backend:
+    source: ~/dev/work/wrtn-backend
+    base: "apple"
+    mode: worktree
+  app:
+    source: ~/dev/work/app-core-packages
+    base: "epic/ugc-platform-final"
+    mode: worktree
+  tokens:
+    source: ~/dev/work/wds-tokens
+    base: "main"
+    mode: symlink
+
+defaults:
+  base: "main"
+
+team:
+  teammates:
+    - be-engineer
+    - fe-engineer
+    - design-engineer
+    - evaluator
+  settings:
+    eval_retry_limit: 2
+    max_parallel_tasks: 4
+
+display:
+  title: "UGC Platform 001 — 프로필 & 네비게이션"
+  startDate: "2026-04-21"
+  endDate: ""
+  status: "in-progress"
+  tags:
+    - ugc-platform
+    - phase-1
+    - profile-navigation
+  summary: "앱 골격(하단 3탭 탭바)과 프로필 시스템(MY 3탭, 프로필 편집, 타유저 프로필, 설정 진입점) 구축. Phase 2/3의 선행 조건."
