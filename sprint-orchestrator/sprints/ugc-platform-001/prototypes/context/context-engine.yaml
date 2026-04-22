@@ -1,0 +1,320 @@
+# Context Engine — ZZEM UGC Platform Sprint (ugc-platform-001)
+# 3-Layer Model: WHY (Business Intent) / WHAT (Design System) / HOW (Orchestration)
+# Shared across all proto/app/* tasks.
+
+sprint_id: ugc-platform-001
+generated_at: 2026-04-21
+design_system_source:
+  - docs/designs/component-patterns.md
+  - tokens/semantic/light.json
+  - tokens/primitive/color.json
+  - tokens/primitive/spacing.json
+  - tokens/primitive/typography.json
+
+# =====================================================================
+# Layer 1: WHY (Business Intent)
+# Extracted from: docs/prds/ugc-platform-{1,2,3}.md (MY 프로필 + UGC 소비/노출)
+# =====================================================================
+why:
+  product_intent: >-
+    사용자가 생성한 밈 콘텐츠(UGC)를 플랫폼 내에서 공개/비공개로 관리하고,
+    타 유저의 콘텐츠를 탐색·팔로우·재생성하며 소비 경험을 형성한다.
+  target_user: "10~30대 밈 소비/생성 사용자"
+  success_metric:
+    - "프로필 진입 후 공개 탭 활성 비율"
+    - "재생성(remix) 행위 전환율"
+    - "설정 진입점 톱니바퀴 노출률"
+
+  user_stories:
+    - id: US-APP-003-1
+      as_a: "콘텐츠를 만든 사용자"
+      i_want: "내가 만든 밈을 공개/비공개/좋아요 탭으로 구분해서 보고 싶다"
+      so_that: "나의 창작물을 관리하고 공개 여부를 결정할 수 있다"
+    - id: US-APP-003-2
+      as_a: "프로필에 진입하는 사용자"
+      i_want: "내 콘텐츠 보유 상황에 맞는 탭이 기본으로 활성화되길 바란다"
+      so_that: "불필요한 빈 상태를 거치지 않고 바로 내 콘텐츠를 확인한다"
+    - id: US-APP-003-3
+      as_a: "앱을 사용하는 사용자"
+      i_want: "프로필에서 설정 화면으로 빠르게 진입하고 싶다"
+      so_that: "계정/알림/약관 등 설정을 필요할 때 즉시 조정한다"
+
+  acceptance_criteria:
+    - id: AC-2.1
+      given: "프로필 탭에 진입한 로그인 사용자"
+      when: "카운트 조회가 완료된 시점"
+      then: "public > 0 → 공개 탭, public=0 && private > 0 → 비공개 탭, 둘 다 0 → 공개 탭(빈 상태)로 랜딩"
+      ui_impact: "탭 초기 활성 index가 분기. 빈 상태 컴포넌트 렌더 조건."
+    - id: AC-2.7
+      given: "필터/커스텀 프롬프트 기반 생성 완료"
+      when: "사용자가 생성 완료 흐름에서 돌아올 때"
+      then: "필터 생성 → 공개 탭, 커스텀 프롬프트 생성 → 비공개 탭으로 직진"
+      ui_impact: "landingTab route param 기반 탭 pre-select."
+    - id: AC-2.profile-header
+      given: "프로필 탭 진입"
+      when: "초기 렌더"
+      then: "프로필 이미지 + 닉네임 + 팔로워/팔로잉/재생성된 3열 카운트 + 편집/공유 듀얼 버튼이 표시"
+      ui_impact: "ProfileHeader 컴포넌트 배치."
+    - id: AC-2.liked-phase1
+      given: "좋아요 탭 진입 (Phase 1)"
+      when: "탭 전환"
+      then: "빈 상태 안내 문구만 고정 표시 (실데이터 fetch 없음)"
+      ui_impact: "liked 탭 컨텐츠는 empty state 컴포넌트 고정."
+    - id: AC-2.settings-entry
+      given: "프로필 헤더 우상단"
+      when: "톱니바퀴 아이콘 탭"
+      then: "Settings 라우트로 네비게이션"
+      ui_impact: "헤더 우상단 IconButton + navigate action."
+    - id: AC-2.count-format
+      given: "카운트 숫자 렌더"
+      when: "8,600 / 10,000 / 12,345 / 0 등 모든 값"
+      then: "한국어 축약 포맷 통과 (8.6천 / 1만 / 1.2만 / 0)"
+      ui_impact: "CountTile value 렌더 시 유틸 경유."
+
+# =====================================================================
+# Layer 2: WHAT (Design System)
+# Extracted from: tokens/* + docs/designs/component-patterns.md §1/§3/§10
+# =====================================================================
+what:
+  tokens_needed:
+    colors:
+      - semantic.background.normal
+      - semantic.surface.button            # #F1F1F1 (gray dual button)
+      - semantic.surface.secondary
+      - semantic.label.normal              # #212228
+      - semantic.label.alternative         # #6B6E76
+      - semantic.label.assistive           # #8E9199
+      - semantic.label.inverse
+      - semantic.fill.brand-primary        # #8752FA (purple/500)
+      - semantic.fill.brand-weak
+      - semantic.line.normal
+      - semantic.line.alternative
+      - primitive.text.primary             # #262626 (§3 active tab underline)
+      - primitive.background.dimmed        # rgba(0,0,0,0.4)
+    typography:
+      - heading.h3                  # 닉네임
+      - subtitle.subtitle2          # 카운트 숫자
+      - body.body3                  # 카운트 라벨
+      - label.label1                # 버튼
+      - label.label2                # empty tag
+      - caption.caption1            # 빈 상태 sub
+    spacing: ["4", "8", "12", "16", "20", "24", "32"]
+    radius: ["sm", "md", "lg", "xl", "2xl", "28", "full"]
+
+  components_needed:
+    - name: ProfileHeader
+      category: layout
+      source: component-patterns.md §3
+    - name: AvatarCircle100
+      category: content
+      source: component-patterns.md §3
+    - name: CountTile
+      category: content
+    - name: DualButtonGray
+      category: input
+      source: component-patterns.md §3
+    - name: IconOnlyTabBar
+      category: navigation
+      source: component-patterns.md §3
+    - name: FeedGrid2Col
+      category: content
+      source: component-patterns.md §1
+    - name: RegeneratedCountPill
+      category: content
+      source: component-patterns.md §1
+    - name: EmptyState
+      category: feedback
+    - name: HeaderBarGear
+      category: navigation
+
+  patterns_needed:
+    - name: "Conditional Tab Landing"
+      description: "카운트 기반 초기 활성 탭 분기 (public-first → private-fallback → public-empty)"
+    - name: "Icon-Only 3-Tab Switch"
+      description: "grid/lock/heart 아이콘만, 하단 2px 밑줄 active marker"
+    - name: "Magazine 2-Col Grid"
+      description: "1px 간격, 1:1 / 4:5 교차 비율, rounded-4"
+
+# =====================================================================
+# Layer 3: HOW (Orchestration Rules)
+# =====================================================================
+how:
+  composition_rules:
+    - rule: "프로필 이미지 원형 100x100, 중앙 정렬"
+      applies_to: [MyProfileScreen, OtherProfileScreen]
+    - rule: "카운트 3열 균등 분할, 구분선 없음, 숫자-라벨 세로 2줄"
+      applies_to: [MyProfileScreen]
+    - rule: "듀얼 버튼 회색 배경(#F1F1F1), radius 12, 2열 gap 8, 라벨 label1 semibold"
+      applies_to: [MyProfileScreen]
+    - rule: "탭바는 아이콘만 60px 고정 폭, active 하단 2px 밑줄 #262626"
+      applies_to: [MyProfileScreen]
+    - rule: "피드 그리드는 2열 1px gap, 1:1과 4:5 비율 교차"
+      applies_to: [MyProfileScreen, OtherProfileScreen, FeedScreen]
+
+  conditional_rendering:
+    - condition: "counts.public > 0"
+      variant_a: "activeTab = public, 그리드 렌더"
+      variant_b: null
+    - condition: "counts.public === 0 && counts.private > 0"
+      variant_a: "activeTab = private, 그리드 렌더"
+      variant_b: null
+    - condition: "counts.public === 0 && counts.private === 0"
+      variant_a: "activeTab = public, empty state"
+      variant_b: null
+    - condition: "route.landingTab === 'public'"
+      variant_a: "필터 생성 완료 직후 진입 → 공개 탭 pre-select"
+      variant_b: null
+    - condition: "route.landingTab === 'private'"
+      variant_a: "커스텀 프롬프트 생성 완료 직후 진입 → 비공개 탭 pre-select"
+      variant_b: null
+    - condition: "activeTab === 'liked'"
+      variant_a: "Phase 1 고정 empty state"
+      variant_b: null
+
+  constraints:
+    - "탭바는 sticky 아래, 바텀 네비게이션 위. 카운트 버튼 영역은 scroll 안에 포함"
+    - "빈 상태는 에러/로딩과 시각적으로 구분되어야 함 (아이콘 + 주/부 텍스트)"
+    - "카운트 값은 반드시 formatKoreanCount 유틸 경유 (0도 포맷팅 통과)"
+    - "Phase 1 liked 탭은 실제 fetch 호출 금지 — 고정 empty"
+    - "설정 진입 아이콘은 헤더 우상단 고정, 44x44 터치 영역"
+    - "프로필 편집/공유 버튼은 본 태스크에서 배치만, 클릭 시 placeholder 네비게이션"
+
+  priority_order:
+    - ProfileHeader (카운트 + 듀얼 버튼)
+    - IconOnlyTabBar
+    - FeedGrid2Col (활성 탭 콘텐츠)
+    - 설정 진입 아이콘 (헤더)
+    - Empty/Loading/Error 상태
+
+# =====================================================================
+# APP-005 — Profile Edit (이미지 + 닉네임)
+# Source: sprints/ugc-platform-001/tasks/app/005-profile-edit.md + §5
+# Extends the shared why/what/how above with task-specific additions.
+# =====================================================================
+app_005_profile_edit:
+  screens:
+    - ProfileEditScreen
+    - ImageSourceSheet
+    - CropScreen
+    - AlbumPickerScreen
+    - ExitConfirmSheet
+
+  why:
+    user_stories:
+      - id: US-APP-005-1
+        as_a: "MY 프로필 소유자"
+        i_want: "프로필 이미지를 카메라 또는 앨범에서 교체하고 크롭할 수 있다"
+        so_that: "자기 정체성을 최신 상태로 표현한다"
+      - id: US-APP-005-2
+        as_a: "MY 프로필 소유자"
+        i_want: "닉네임을 2~20자 범위에서 자유롭게 수정할 수 있다"
+        so_that: "원하는 이름으로 계정을 식별시킨다"
+      - id: US-APP-005-3
+        as_a: "MY 프로필 소유자"
+        i_want: "dirty 상태가 아니면 저장 버튼이 비활성화되어 실수 저장을 방지한다"
+        so_that: "의도치 않은 변경을 피한다"
+
+    acceptance_criteria:
+      - id: AC-APP-005-1
+        given: "MY 프로필 화면"
+        when: "'프로필 편집' 버튼 탭 또는 zzem://profile/edit 딥링크"
+        then: "ProfileEditScreen 오픈"
+        ui_impact: "ProfileEditScreen 라우트 + 헤더"
+      - id: AC-APP-005-2
+        given: "ProfileEditScreen"
+        when: "프로필 이미지 영역 또는 카메라 배지 탭"
+        then: "ImageSourceSheet open (카메라/앨범/사진 삭제)"
+        ui_impact: "바텀시트 트리거 + destructive 항목"
+      - id: AC-APP-005-3
+        given: "ImageSourceSheet"
+        when: "'앨범' 탭"
+        then: "AlbumPickerScreen open (3-col grid)"
+        ui_impact: "앨범 드롭다운 헤더 + 그리드 + 선택 체크박스"
+      - id: AC-APP-005-4
+        given: "이미지 선택 후"
+        when: "크롭 흐름 진입"
+        then: "CropScreen open (4 corner handles + dark bottom bar)"
+        ui_impact: "크롭 overlay + 완료 버튼"
+      - id: AC-APP-005-5
+        given: "닉네임 인풋"
+        when: "1자 또는 21자 이상"
+        then: "저장 비활성 + 인라인 에러 (2자 미만일 때)"
+        ui_impact: "저장 버튼 disabled style + 카운터 n/20"
+      - id: AC-APP-005-6
+        given: "닉네임 2~20자 + dirty"
+        when: "저장 탭"
+        then: "PATCH /v2/me/profile + 토스트 '프로필이 업데이트 되었어요' + back"
+        ui_impact: "저장 버튼 활성(#262626) → 업로딩 → success 토스트"
+      - id: AC-APP-005-7
+        given: "dirty 상태"
+        when: "뒤로가기 탭"
+        then: "ExitConfirmSheet open"
+        ui_impact: "듀얼 버튼 시트 (취소 / 확인 #262626)"
+
+  what:
+    tokens_added:
+      - pe-input-fill (#F7F7F7)
+      - pe-input-border (#F1F1F1)
+      - pe-save-disabled (#F1F1F1)
+      - pe-save-active (#262626)
+      - pe-camera-badge-fill (#E2E2E2)
+      - pe-sheet-handle (#A7A7A7)
+      - pe-destructive-text (#D92800)
+    components_added:
+      - { name: AvatarWithCameraBadge, category: content, source: "§5" }
+      - { name: FilledInputField, category: input, source: "§5" }
+      - { name: CharacterCounter, category: feedback }
+      - { name: PrimarySaveButton, category: input, source: "§5" }
+      - { name: BottomSheet, category: layout, source: "§5" }
+      - { name: BottomSheetItem, category: content, source: "§5" }
+      - { name: CropHandleOverlay, category: feedback, source: "§5" }
+      - { name: AlbumGridCell, category: content, source: "§5" }
+      - { name: AlbumDropdown, category: navigation, source: "§5" }
+      - { name: CheckboxFilled, category: input, source: "§5" }
+      - { name: Toast, category: feedback }
+    patterns_added:
+      - { name: FilledRoundedInput, description: "fill + radius만 사용. 아웃라인 없음" }
+      - { name: DirtyStateCta, description: "변경 감지 후에만 primary CTA 활성" }
+      - { name: BottomSheetWithHandle, description: "40x4 핸들 + top radius 20 + slide-up" }
+      - { name: ThreeColumnAlbumGrid, description: "3-col 120px row 2px gap, 카메라 첫 셀, 선택 시 purple border" }
+      - { name: ImageCropCornerHandles, description: "4 corner L-shape handles + dimmed overlay" }
+
+  how:
+    composition_rules:
+      - rule: "헤더 h-48, 타이틀 SemiBold 18px 중앙, 좌측 back"
+        applies_to: [ProfileEditScreen]
+      - rule: "닉네임 filled rounded box (#F7F7F7 bg, 1px #F1F1F1, radius 16, padding 16x12)"
+        applies_to: [ProfileEditScreen]
+      - rule: "저장 버튼 하단 고정 h-56, radius 16, 비활성 #F1F1F1 / 활성 #262626 + white"
+        applies_to: [ProfileEditScreen]
+      - rule: "바텀시트 핸들 40x4 #A7A7A7 + top radius 20"
+        applies_to: [ImageSourceSheet, ExitConfirmSheet]
+      - rule: "이미지 소스 시트 아이콘 인라인(서클 래퍼 없음) + 텍스트 gap-12"
+        applies_to: [ImageSourceSheet]
+      - rule: "나가기 확인 시트 듀얼 버튼 (취소 #F1F1F1 / 확인 #262626)"
+        applies_to: [ExitConfirmSheet]
+      - rule: "크롭 화면 dark bottom bar + 완료 버튼 + 4 corner 27x27 handles"
+        applies_to: [CropScreen]
+      - rule: "앨범 그리드 3-col 120px row 2px gap, 첫 셀 카메라, 선택 시 #8752FA border + filled checkbox"
+        applies_to: [AlbumPickerScreen]
+
+    conditional_rendering:
+      - condition: "닉네임 길이 2~20 AND (닉네임 OR 이미지 dirty)"
+        variant_a: "저장 버튼 활성 (#262626)"
+        variant_b: "저장 버튼 비활성 (#F1F1F1)"
+      - condition: "이미지 업로드 진행 중"
+        variant_a: "저장 버튼 spinner + disabled"
+        variant_b: "일반 저장 버튼"
+      - condition: "dirty 상태에서 back 탭"
+        variant_a: "ExitConfirmSheet open"
+        variant_b: "바로 navigate back"
+      - condition: "닉네임 길이 < 2 AND 사용자가 입력함"
+        variant_a: "인라인 에러 '닉네임은 2자 이상이어야 해요'"
+        variant_b: "에러 없이 카운터만"
+
+    constraints:
+      - "닉네임 max length 20자"
+      - "바텀시트 콘텐츠 높이 (이미지 소스 ~240, 나가기 확인 ~200)"
+      - "저장 버튼 safe area 위에 bottom 24 고정"
+      - "앨범 그리드 세로 스크롤 + 상단 sticky 드롭다운"
+      - "크롭 overlay 전체 dimmed + 중앙 크롭 박스"

@@ -1,0 +1,73 @@
+sprint_id: "ugc-platform-001"
+generated_at: "2026-04-22T17:30:00+09:00"
+
+patterns:
+  - pattern: "Cursor pagination 쿼리에서 `$lt` 사용 — CursorResponseDto 규약(extra item id 를 cursor 로 인코딩)과 불일치하여 페이지 2 마지막 항목 누락"
+    category: "correctness"
+    frequency: 2
+    groups: ["group-001"]
+    severity: "major"
+    systemic_fix: "Repository 커서 쿼리는 `$lte` 사용이 규약 (filter.repository.ts:35,69 선례). Sprint Contract V-method grep 에 `rg '_id:\\s*\\{\\s*\\$lt\\s*:' repository/` → 0 hit 추가"
+    detection: "be-003/004 cursor 테스트가 E2E harness 활성화 후 page 2 에서 list.length mismatch 로 fail"
+    source_sprint: "ugc-platform-001"
+    source_group: "group-001"
+    contract_clause: "Cursor repository 쿼리는 반드시 `$lte`. CursorResponseDto 규약(extra item id 인코딩)과 정합 필수"
+    skill_candidate: false
+
+  - pattern: "E2E / Jest 테스트 파일이 nx testMatch 에 매치되지 않아 실제로 실행되지 않음 — 파일 존재 + 코드만 있으면 green 으로 착시"
+    category: "completeness"
+    frequency: 1
+    groups: ["group-001"]
+    severity: "major"
+    systemic_fix: "Contract §공통빌드품질 bullet 4 (E2E) 에 '테스트가 실제로 실행되었는지 nx 출력 확인' 명시. jest-e2e.json moduleNameMapper + project.json test-e2e target 존재 체크를 V-method 에 포함"
+    detection: "me-contents/me-profile/users-public e2e suite 3개 파일 생성되었으나 `nx test meme-api --listTests` 에서 0 포함"
+    source_sprint: "ugc-platform-001"
+    source_group: "group-001"
+    contract_clause: "신규 e2e-spec.ts 추가 시 nx project.json 의 test-e2e target + jest-e2e.json moduleNameMapper 검증 필수. `nx test --listTests | grep e2e-spec` 로 discovery 확인"
+    skill_candidate: false
+
+  - pattern: "Route param 타입 변경 시 legacy callsite 일부 누락 — TypeScript 에러로 빌드 red 되나 pre-existing @wrtn/* cascade 와 섞여 간과"
+    category: "completeness"
+    frequency: 2
+    groups: ["group-002"]
+    severity: "major"
+    systemic_fix: "Contract KB completeness-003 ('신규 param 추가 시 모든 navigate 호출부 점검') 의 V-method grep scope 를 src/ 전체로 widening. FE typecheck 결과를 `grep -v '@wrtn/'` 로 clean 측정 의무화"
+    detection: "generating-failed.screen.tsx:45 `tag:'all'` + screen-params.ts:45 generic incompat 2건이 Evaluator V3 단계에서 발견"
+    source_sprint: "ugc-platform-001"
+    source_group: "group-002"
+    contract_clause: "Route types / NavigatorScreenParams 변경 시 전수 callsite 체크 필수. `yarn typescript | grep -v '@wrtn/'` 출력을 본 그룹 신규 에러 0 으로 확인"
+    skill_candidate: false
+
+  - pattern: "React-query hook 이 conditional path 에서 unconditional fire — variant 별 enabled 가드 부재로 네트워크 낭비"
+    category: "completeness"
+    frequency: 2
+    groups: ["group-003"]
+    severity: "major"
+    systemic_fix: "Contract KB completeness-002 에 'conditional data-fetch 는 반드시 `enabled` option 으로 gate' 명시. Evaluator active evaluation 에서 쿼리 실행 경로 trace 의무화"
+    detection: "SwipeFeed 양쪽 queryFn 무조건 fire (Major #1) + OtherUserProfile contents query profile 미도착 시에도 fire (Minor #2) — 동일 class 이슈 2건"
+    source_sprint: "ugc-platform-001"
+    source_group: "group-003"
+    contract_clause: "Discriminated union params / parent-dependent query 는 `enabled` 가드 필수. Hooks-rule 준수 위해 hook 은 unconditional 호출하되 내부 `enabled` option 으로 fire 제어"
+    skill_candidate: true
+
+  - pattern: "Prop drilling 없이 parent context 추정 — ProfileContentItem 이 현재 탭(public/private/liked) 을 모른 채 navigate payload 조립"
+    category: "completeness"
+    frequency: 1
+    groups: ["group-003"]
+    severity: "major"
+    systemic_fix: "Sprint Lead Planner 가 route param / SwipeFeed source 설계 시 '상위 컨텍스트 필요 여부' 를 Ground Rule 로 명시. Evaluator contract review 에서 Prop flow 를 수동 trace"
+    detection: "Round 1 review 에서 app-008 Done Criterion 이 `visibility: currentTab` 요구하나 ProfileContentItem 시그니처에 tab prop 부재 — Major #2"
+    source_sprint: "ugc-platform-001"
+    source_group: "group-003"
+    contract_clause: "Navigate payload 가 parent context (현재 탭, 선택된 아이템 등) 에 의존할 때, 해당 state 가 callsite 컴포넌트까지 prop threading 되는지 Done Criterion 에 명시"
+    skill_candidate: false
+
+metrics:
+  total_groups: 3
+  first_pass_rate: 0.0       # 3/3 모두 Round 1 에서 issue 발견 (PASS with follow-ups 포함)
+  avg_fix_cycles: 1.67       # G1: 3 (R1+R2+inline), G2: 1, G3: 1
+  critical_issues_found: 0
+  major_issues_found: 5      # G1: 2 (E2E not running + cursor anyjunk), G2: 2 (TS regressions), G3: 1 (SwipeFeed queryFn)
+  minor_issues_found: 6      # G1: 0 (minor 없음), G2: 3 (home gear dual, useEffect race, domain RQ), G3: 3 (OtherUser enable guard, Clipboard deprecated, initialContentId fallback)
+  issues_fixed: 8            # G1: 3 all fixed, G2: 2 Major fixed (3 Minor deferred), G3: 1 Major + 1 Minor fixed (2 Minor deferred)
+  issues_deferred: 5         # G2: 3 Minor + G3: 2 Minor

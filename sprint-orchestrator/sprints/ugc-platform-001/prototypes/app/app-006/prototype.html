@@ -1,0 +1,1261 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>app-006 · OtherUserProfile Prototype</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+  <style>
+    /* ==================================================
+     * Design Tokens (inlined from prototypes/context/tokens.css)
+     * ================================================== */
+    :root {
+      /* PRIMITIVE - Purple (Brand) */
+      --wds-color-purple-50: #F5F0FF;
+      --wds-color-purple-100: #EBE1FF;
+      --wds-color-purple-500: #8752FA;
+      --wds-color-purple-600: #7040E0;
+
+      /* PRIMITIVE - Neutral */
+      --wds-color-neutral-0: #FFFFFF;
+      --wds-color-neutral-50: #F7F8F9;
+      --wds-color-neutral-100: #F0F1F3;
+      --wds-color-neutral-200: #E4E5E9;
+      --wds-color-neutral-300: #D1D3D8;
+      --wds-color-neutral-400: #B5B8BF;
+      --wds-color-neutral-500: #8E9199;
+      --wds-color-neutral-600: #6B6E76;
+      --wds-color-neutral-700: #4D5058;
+      --wds-color-neutral-800: #35373E;
+      --wds-color-neutral-900: #212228;
+      --wds-color-neutral-1000: #000000;
+
+      /* PRIMITIVE - Status */
+      --wds-color-red-500: #FF3B30;
+      --wds-color-green-500: #34C759;
+
+      /* SEMANTIC - Background */
+      --wds-background-normal: #FFFFFF;
+      --wds-background-dimmed: rgba(0, 0, 0, 0.40);
+
+      /* SEMANTIC - Surface */
+      --wds-surface-primary: #FFFFFF;
+      --wds-surface-secondary: #F7F8F9;
+      --wds-surface-tertiary: #F0F1F3;
+      --wds-surface-button: #F1F1F1;
+
+      /* SEMANTIC - Fill */
+      --wds-fill-brand-primary: #8752FA;
+      --wds-fill-brand-weak: #F5F0FF;
+      --wds-fill-neutral-primary: #212228;
+      --wds-fill-neutral-secondary: #F0F1F3;
+      --wds-fill-neutral-tertiary: #F7F8F9;
+
+      /* SEMANTIC - Label */
+      --wds-label-normal: #212228;
+      --wds-label-strong: #000000;
+      --wds-label-alternative: #6B6E76;
+      --wds-label-assistive: #8E9199;
+      --wds-label-disabled: #D1D3D8;
+      --wds-label-inverse: #FFFFFF;
+      --wds-label-brand: #8752FA;
+      --wds-text-primary: #262626;
+
+      /* SEMANTIC - Line */
+      --wds-line-normal: #E4E5E9;
+      --wds-line-alternative: #F0F1F3;
+      --wds-line-strong: #D1D3D8;
+      --wds-line-brand: #8752FA;
+      --wds-line-sheet-divider: #F1F1F1;
+
+      /* SEMANTIC - Status */
+      --wds-status-error: #FF3B30;
+      --wds-status-success: #34C759;
+
+      /* SHEET */
+      --sheet-handle: #a7a7a7;
+
+      /* AVATAR BORDER (Figma: rgba(136,136,136,0.2)) */
+      --wds-avatar-border: rgba(136, 136, 136, 0.2);
+      --wds-avatar-bg: #f5f3ff;
+
+      /* SPACING (4px grid) */
+      --wds-spacing-4: 4px;
+      --wds-spacing-8: 8px;
+      --wds-spacing-12: 12px;
+      --wds-spacing-16: 16px;
+      --wds-spacing-20: 20px;
+      --wds-spacing-24: 24px;
+      --wds-spacing-32: 32px;
+      --wds-spacing-40: 40px;
+      --wds-spacing-48: 48px;
+
+      /* RADIUS */
+      --wds-radius-xs: 4px;
+      --wds-radius-sm: 8px;
+      --wds-radius-md: 12px;
+      --wds-radius-lg: 16px;
+      --wds-radius-xl: 20px;
+      --wds-radius-2xl: 24px;
+      --wds-radius-28: 28px;
+      --wds-radius-full: 9999px;
+
+      /* TYPOGRAPHY */
+      --wds-font-family-primary: 'Pretendard', -apple-system, 'SF Pro Display', 'Apple SD Gothic Neo', sans-serif;
+      --wds-font-weight-regular: 400;
+      --wds-font-weight-medium: 500;
+      --wds-font-weight-semibold: 600;
+      --wds-font-weight-bold: 700;
+    }
+
+    /* ================================================== */
+    /* Reset */
+    /* ================================================== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    button { background: none; border: none; cursor: pointer; font-family: inherit; }
+    ul { list-style: none; }
+
+    body {
+      font-family: var(--wds-font-family-primary);
+      background: #E7E8EB;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 16px;
+      color: var(--wds-label-normal);
+      gap: 0;
+    }
+
+    /* ================================================== */
+    /* Control Panel */
+    /* ================================================== */
+    .control-panel {
+      width: 390px;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      border-radius: 12px 12px 0 0;
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 13px;
+    }
+    .control-panel__row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .control-panel__label {
+      color: #888;
+      font-size: 11px;
+      min-width: 48px;
+    }
+    .control-panel select {
+      background: #2a2a3e;
+      color: #e0e0e0;
+      border: 1px solid #444;
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 12px;
+      flex: 1;
+      font-family: inherit;
+    }
+    .control-panel__states {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+    .control-panel__state-btn {
+      background: #2a2a3e;
+      color: #aaa;
+      border: 1px solid #444;
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .control-panel__state-btn.active {
+      background: var(--wds-color-purple-500);
+      color: #fff;
+      border-color: var(--wds-color-purple-500);
+    }
+    .control-panel__breadcrumb {
+      color: #888;
+      font-size: 11px;
+      font-family: monospace;
+    }
+
+    /* ================================================== */
+    /* Device Frame */
+    /* ================================================== */
+    .device-frame {
+      width: 390px;
+      height: 844px;
+      background: var(--wds-background-normal);
+      overflow: hidden;
+      position: relative;
+      border: 1px solid #ddd;
+      border-radius: 0 0 12px 12px;
+    }
+
+    .screen {
+      display: none;
+      flex-direction: column;
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0; left: 0;
+    }
+    .screen.active { display: flex; }
+
+    /* ================================================== */
+    /* Animations */
+    /* ================================================== */
+    @keyframes slideLeftIn {
+      from { transform: translateX(100%); }
+      to { transform: translateX(0); }
+    }
+    @keyframes slideRightIn {
+      from { transform: translateX(-100%); }
+      to { transform: translateX(0); }
+    }
+    @keyframes slideUpIn {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+    @keyframes slideDownOut {
+      from { transform: translateY(0); }
+      to { transform: translateY(100%); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    .transition-slide-left { animation: slideLeftIn 0.3s ease-out; }
+    .transition-slide-right { animation: slideRightIn 0.3s ease-out; }
+    .transition-slide-up { animation: slideUpIn 0.28s ease-out; }
+    .transition-slide-down { animation: slideDownOut 0.22s ease-in; }
+    .transition-fade { animation: fadeIn 0.2s ease-out; }
+
+    /* ================================================== */
+    /* State Visibility */
+    /* ================================================== */
+    [data-state] { display: none; }
+    [data-state].state-active { display: flex; }
+    section.feed-grid[data-state].state-active { display: grid; }
+
+    /* ================================================== */
+    /* StatusBar */
+    /* ================================================== */
+    .status-bar {
+      height: 44px;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 15px;
+      font-weight: var(--wds-font-weight-semibold);
+      color: var(--wds-label-normal);
+      background: var(--wds-background-normal);
+      flex-shrink: 0;
+    }
+    .status-bar__icons {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      font-size: 14px;
+    }
+
+    /* ================================================== */
+    /* HeaderBar (Figma: h-48, px-12, py-4) */
+    /* ================================================== */
+    .header-bar {
+      height: 48px;
+      padding: 4px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4px;
+      background: var(--wds-background-normal);
+      flex-shrink: 0;
+      position: relative;
+    }
+    .header-bar__side {
+      width: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .header-bar__title-wrap {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      min-width: 0;
+    }
+    .header-bar__title {
+      font-size: 16px;
+      font-weight: var(--wds-font-weight-semibold);
+      color: var(--wds-label-normal);
+      letter-spacing: -0.2px;
+      line-height: 1.4;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .header-bar__title-emoji {
+      width: 14px;
+      height: 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    /* Figma IconButton: size-32, p-4, rounded-8 */
+    .icon-btn {
+      width: 32px;
+      height: 32px;
+      padding: 4px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--wds-label-normal);
+      background: transparent;
+      transition: background 0.15s;
+    }
+    .icon-btn:active { background: rgba(0,0,0,0.05); }
+    .icon-btn svg { width: 24px; height: 24px; }
+
+    /* Empty placeholder preserves layout width (Figma) */
+    .icon-btn--placeholder {
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    /* ================================================== */
+    /* Body / Scroll */
+    /* ================================================== */
+    .body-scroll {
+      flex: 1;
+      overflow-y: auto;
+      background: var(--wds-background-normal);
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 64px; /* bottom nav */
+    }
+    .body-scroll::-webkit-scrollbar { width: 0; display: none; }
+
+    /* ================================================== */
+    /* Profile Section (gap-16, pt-12 pb-24 px-16) */
+    /* ================================================== */
+    .profile-section {
+      padding: 12px 16px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+    .avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: var(--wds-radius-full);
+      background: var(--wds-avatar-bg);
+      border: 1px solid var(--wds-avatar-border);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      color: var(--wds-label-brand);
+      font-weight: var(--wds-font-weight-bold);
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .count-row {
+      width: 100%;
+      display: flex;
+      align-items: stretch;
+      gap: 0;
+      padding: 0;
+    }
+    .count-tile {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      min-height: 48px;
+    }
+    .count-tile__value {
+      font-size: 16px;
+      font-weight: var(--wds-font-weight-semibold);
+      color: var(--wds-label-normal);
+      line-height: 1.4;
+      letter-spacing: -0.2px;
+    }
+    .count-tile__label {
+      font-size: 12px;
+      font-weight: var(--wds-font-weight-medium);
+      color: var(--wds-label-alternative);
+      line-height: 1.4;
+    }
+
+    /* ================================================== */
+    /* Feed Grid (same pattern as MY profile) */
+    /* ================================================== */
+    .feed-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: var(--wds-background-normal);
+      padding: 0;
+    }
+    .feed-item {
+      position: relative;
+      background: var(--wds-fill-neutral-secondary);
+      overflow: hidden;
+      border-radius: 0;
+      display: block;
+      width: 100%;
+      padding: 0;
+    }
+    .feed-item.aspect-1-1 { aspect-ratio: 187 / 187; }
+    .feed-item.aspect-4-5 { aspect-ratio: 187 / 234; }
+    .feed-item__thumb {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      color: rgba(255, 255, 255, 0.9);
+      font-weight: var(--wds-font-weight-bold);
+    }
+    /* Dark gradient overlay (bottom → transparent top) to match Figma */
+    .feed-item__overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(0,0,0,0) 50%, rgba(0,0,0,0.45) 100%);
+      pointer-events: none;
+    }
+    .thumb-grad-1 { background: linear-gradient(135deg, #FFB8B0 0%, #FF6B63 100%); }
+    .thumb-grad-2 { background: linear-gradient(135deg, #B899FF 0%, #7040E0 100%); }
+    .thumb-grad-3 { background: linear-gradient(135deg, #FFE480 0%, #FFB800 100%); }
+    .thumb-grad-4 { background: linear-gradient(135deg, #7DE596 0%, #28A745 100%); }
+    .thumb-grad-5 { background: linear-gradient(135deg, #80BFFF 0%, #007AFF 100%); }
+    .thumb-grad-6 { background: linear-gradient(135deg, #FFC5C2 0%, #D93025 100%); }
+    .thumb-grad-7 { background: linear-gradient(135deg, #EBE1FF 0%, #8752FA 100%); }
+    .thumb-grad-8 { background: linear-gradient(135deg, #35373E 0%, #000000 100%); }
+
+    /* Regenerate count pill (bottom-left) */
+    .regen-pill {
+      position: absolute;
+      left: 8px;
+      bottom: 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      background: rgba(0, 0, 0, 0.55);
+      color: #fff;
+      font-size: 11px;
+      font-weight: var(--wds-font-weight-semibold);
+      border-radius: var(--wds-radius-full);
+      letter-spacing: -0.2px;
+      z-index: 2;
+    }
+    .regen-pill svg { width: 10px; height: 10px; }
+
+    /* ================================================== */
+    /* Empty State */
+    /* ================================================== */
+    .empty-state {
+      min-height: 360px;
+      padding: 64px 24px 48px;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 12px;
+      text-align: center;
+    }
+    .empty-state__icon {
+      width: 64px;
+      height: 64px;
+      border-radius: var(--wds-radius-full);
+      background: var(--wds-fill-neutral-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 30px;
+      margin-bottom: 4px;
+      color: var(--wds-label-assistive);
+    }
+    .empty-state__title {
+      font-size: 16px;
+      font-weight: var(--wds-font-weight-semibold);
+      color: var(--wds-label-normal);
+      line-height: 1.5;
+    }
+    .empty-state__description {
+      font-size: 13px;
+      font-weight: var(--wds-font-weight-medium);
+      color: var(--wds-label-alternative);
+      line-height: 1.5;
+      max-width: 260px;
+    }
+
+    /* ================================================== */
+    /* Error State (full screen) */
+    /* ================================================== */
+    .error-state {
+      position: absolute;
+      inset: 0;
+      background: var(--wds-background-normal);
+      flex-direction: column;
+      z-index: 50;
+    }
+    .error-state__body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 120px 24px 24px;
+      gap: 12px;
+      text-align: center;
+    }
+    .error-state__icon {
+      width: 72px;
+      height: 72px;
+      border-radius: var(--wds-radius-full);
+      background: var(--wds-fill-neutral-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      margin-bottom: 8px;
+      color: var(--wds-label-assistive);
+    }
+    .error-state__title {
+      font-size: 20px;
+      font-weight: var(--wds-font-weight-semibold);
+      color: var(--wds-label-normal);
+      line-height: 1.5;
+    }
+    .error-state__description {
+      font-size: 14px;
+      font-weight: var(--wds-font-weight-regular);
+      color: var(--wds-label-alternative);
+      line-height: 1.4;
+      max-width: 280px;
+      margin-bottom: 24px;
+    }
+    .btn-secondary {
+      padding: 12px 24px;
+      background: var(--wds-fill-neutral-secondary);
+      color: var(--wds-label-normal);
+      border-radius: var(--wds-radius-md);
+      font-size: 14px;
+      font-weight: var(--wds-font-weight-semibold);
+      min-width: 160px;
+      transition: background 0.15s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-secondary:active { background: var(--wds-line-strong); }
+
+    /* ================================================== */
+    /* Skeleton */
+    /* ================================================== */
+    .skeleton-bar {
+      background: linear-gradient(90deg, #F0F1F3 25%, #E4E5E9 50%, #F0F1F3 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+      border-radius: var(--wds-radius-xs);
+    }
+    .skeleton-avatar {
+      width: 100px; height: 100px;
+      border-radius: var(--wds-radius-full);
+    }
+    .skeleton-counts {
+      display: flex;
+      width: 100%;
+      gap: 0;
+      padding: 0 16px 24px;
+    }
+    .skeleton-count-tile {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .skeleton-count-value { width: 40px; height: 16px; }
+    .skeleton-count-label { width: 36px; height: 12px; }
+
+    /* Header shimmer line */
+    .skeleton-header-title { width: 100px; height: 16px; }
+
+    /* ================================================== */
+    /* Bottom Navigation (Home / Search / My) */
+    /* ================================================== */
+    .bottom-nav {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 64px;
+      background: var(--wds-background-normal);
+      border-top: 1px solid var(--wds-line-alternative);
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      z-index: 15;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    .bn-item {
+      flex: 1;
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      font-size: 10px;
+      color: var(--wds-label-assistive);
+      background: transparent;
+      border: 0;
+      cursor: pointer;
+      padding: 6px 0;
+      position: relative;
+    }
+    .bn-item.active { color: var(--wds-text-primary); }
+    .bn-item svg { width: 22px; height: 22px; }
+    .bn-item .dot {
+      position: absolute;
+      top: 6px;
+      right: calc(50% - 16px);
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--wds-status-error);
+    }
+
+    /* ================================================== */
+    /* Overlay & ActionSheet */
+    /* ================================================== */
+    .overlay-backdrop {
+      display: none;
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 100;
+    }
+    .overlay-backdrop.active {
+      display: block;
+      animation: fadeIn 0.2s ease-out;
+    }
+    .overlay-content {
+      display: none;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 101;
+    }
+    .overlay-content.active { display: block; }
+
+    .action-sheet {
+      background: var(--wds-surface-primary);
+      border-radius: var(--wds-radius-28) var(--wds-radius-28) 0 0;
+      padding: 0 0 20px;
+      box-shadow: 0 -4px 24px rgba(0,0,0,0.08);
+      padding-bottom: calc(20px + env(safe-area-inset-bottom));
+    }
+    .action-sheet__handle {
+      width: 36px;
+      height: 4px;
+      background: var(--sheet-handle);
+      border-radius: var(--wds-radius-full);
+      margin: 10px auto 8px;
+    }
+    .menu-list {
+      display: flex;
+      flex-direction: column;
+      padding: 4px 0 0;
+    }
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 20px;
+      color: var(--wds-text-primary);
+      font-size: 16px;
+      font-weight: var(--wds-font-weight-medium);
+      line-height: 1.5;
+      text-align: left;
+      transition: background 0.15s;
+      width: 100%;
+      border-radius: 0;
+    }
+    .menu-item:active { background: rgba(0, 0, 0, 0.05); }
+    .menu-item__icon {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      color: var(--wds-text-primary);
+      flex-shrink: 0;
+    }
+    .menu-item__label { flex: 1; }
+    .sheet-cancel {
+      width: 100%;
+      padding: 16px 20px;
+      border-top: 1px solid var(--wds-line-sheet-divider);
+      border-radius: 0;
+      background: transparent;
+      color: var(--wds-text-primary);
+      font-size: 16px;
+      font-weight: var(--wds-font-weight-medium);
+      line-height: 1.5;
+      text-align: center;
+      transition: background 0.15s;
+    }
+    .sheet-cancel:active { background: rgba(0, 0, 0, 0.04); }
+
+    /* ================================================== */
+    /* Toast */
+    /* ================================================== */
+    .toast {
+      display: none;
+      position: absolute;
+      left: 50%;
+      bottom: 88px;
+      transform: translateX(-50%);
+      background: var(--wds-fill-neutral-primary);
+      color: var(--wds-label-inverse);
+      padding: 12px 16px;
+      border-radius: var(--wds-radius-md);
+      font-size: 14px;
+      font-weight: var(--wds-font-weight-medium);
+      line-height: 1.4;
+      z-index: 200;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.16);
+      white-space: nowrap;
+    }
+    .toast.active {
+      display: block;
+      animation: fadeIn 0.2s ease-out;
+    }
+    .toast.fading {
+      animation: fadeOut 0.35s ease-in forwards;
+    }
+
+    /* Screen reader only */
+    .sr-only {
+      position: absolute;
+      width: 1px; height: 1px;
+      padding: 0; margin: -1px; overflow: hidden;
+      clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+
+    /* Mobile fullscreen */
+    @media (max-width: 480px) {
+      body { padding: 0; align-items: stretch; min-height: 100dvh; }
+      .control-panel { display: none; }
+      .device-frame {
+        width: 100dvw;
+        height: 100dvh;
+        border: none;
+        border-radius: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Control Panel -->
+  <div class="control-panel">
+    <div class="control-panel__row">
+      <span class="control-panel__label">Screen</span>
+      <select id="screen-select" onchange="navigateBySelect(this.value)">
+        <option value="OtherUserProfileScreen">OtherUserProfileScreen</option>
+      </select>
+    </div>
+    <div class="control-panel__row">
+      <span class="control-panel__label">State</span>
+      <div class="control-panel__states" id="state-toggles">
+        <button class="control-panel__state-btn active" data-state="default" onclick="toggleState('default')">default</button>
+        <button class="control-panel__state-btn" data-state="loading" onclick="toggleState('loading')">loading</button>
+        <button class="control-panel__state-btn" data-state="empty-no-posts" onclick="toggleState('empty-no-posts')">empty-no-posts</button>
+        <button class="control-panel__state-btn" data-state="error-not-found" onclick="toggleState('error-not-found')">error-not-found</button>
+        <button class="control-panel__state-btn" data-state="more-action-sheet" onclick="toggleState('more-action-sheet')">more-action-sheet</button>
+        <button class="control-panel__state-btn" data-state="url-copied-toast" onclick="toggleState('url-copied-toast')">url-copied-toast</button>
+      </div>
+    </div>
+    <div class="control-panel__row">
+      <span class="control-panel__breadcrumb" id="breadcrumb">OtherUserProfileScreen</span>
+    </div>
+  </div>
+
+  <!-- Device Frame -->
+  <div class="device-frame" id="device-frame">
+
+    <!-- ====================================================== -->
+    <!-- Screen: OtherUserProfileScreen                         -->
+    <!-- ====================================================== -->
+    <section class="screen" id="OtherUserProfileScreen">
+
+      <!-- StatusBar -->
+      <div class="status-bar" id="status-bar">
+        <span>9:41</span>
+        <span class="status-bar__icons">
+          <span>●●●●●</span>
+          <span>📶</span>
+          <span>🔋</span>
+        </span>
+      </div>
+
+      <!-- HeaderBar (Figma: h-48, px-12, py-4) -->
+      <header class="header-bar" id="header-bar">
+        <!-- Left: back button (inferred — Figma slot is empty, prototype needs navigation) -->
+        <div class="header-bar__side">
+          <button class="icon-btn" id="btn-back" aria-label="뒤로 가기" onclick="goBack()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Center: 아이디 + emoji_neutral_fill (14px) -->
+        <div class="header-bar__title-wrap" id="header-title-wrap">
+          <!-- Default title visible, hidden during loading -->
+          <span id="header-title-group" data-state="default">
+            <span class="header-bar__title" id="header-nickname">김잼잼</span>
+            <span class="header-bar__title-emoji" id="header-nickname-emoji" aria-hidden="true">😐</span>
+          </span>
+          <span class="skeleton-bar skeleton-header-title" data-state="loading" id="header-title-skeleton"></span>
+        </div>
+
+        <!-- Right: more button -->
+        <div class="header-bar__side">
+          <button class="icon-btn" id="btn-more" aria-label="더보기 메뉴 열기" onclick="openMoreSheet()">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <circle cx="5" cy="12" r="2"/>
+              <circle cx="12" cy="12" r="2"/>
+              <circle cx="19" cy="12" r="2"/>
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <!-- Body -->
+      <main class="body-scroll" id="body">
+
+        <!-- Profile Section : default / empty-no-posts -->
+        <section class="profile-section" data-state="default" id="profile-section-default">
+          <div class="avatar" id="avatar" role="img" aria-label="프로필 이미지">김</div>
+          <!-- NO nickname/bio — Figma spec (header already shows id) -->
+          <ul class="count-row" aria-label="팔로워 팔로잉 재생성된 카운트">
+            <li class="count-tile" id="count-followers">
+              <span class="count-tile__value">8.6천</span>
+              <span class="count-tile__label">팔로워</span>
+            </li>
+            <li class="count-tile" id="count-following">
+              <span class="count-tile__value">142</span>
+              <span class="count-tile__label">팔로잉</span>
+            </li>
+            <li class="count-tile" id="count-regenerated">
+              <span class="count-tile__value">1.4천</span>
+              <span class="count-tile__label">재생성된</span>
+            </li>
+          </ul>
+          <!-- NO action buttons (follow/edit/share) — Phase 1 scope -->
+        </section>
+
+        <!-- Loading skeleton (replaces profile section) -->
+        <section class="profile-section" data-state="loading" id="profile-section-loading">
+          <div class="skeleton-bar skeleton-avatar"></div>
+          <div class="skeleton-counts">
+            <div class="skeleton-count-tile">
+              <span class="skeleton-bar skeleton-count-value"></span>
+              <span class="skeleton-bar skeleton-count-label"></span>
+            </div>
+            <div class="skeleton-count-tile">
+              <span class="skeleton-bar skeleton-count-value"></span>
+              <span class="skeleton-bar skeleton-count-label"></span>
+            </div>
+            <div class="skeleton-count-tile">
+              <span class="skeleton-bar skeleton-count-value"></span>
+              <span class="skeleton-bar skeleton-count-label"></span>
+            </div>
+          </div>
+        </section>
+
+        <!-- NO tab bar — Figma renders grid directly after profile section -->
+
+        <!-- FeedGrid (default state) -->
+        <section class="feed-grid" data-state="default" id="feed-grid" aria-label="공개 게시물">
+          <button class="feed-item aspect-1-1" id="feed-item-1" onclick="navigateGridItem(1)" aria-label="게시물 1">
+            <div class="feed-item__thumb thumb-grad-1">🔥</div>
+            <div class="feed-item__overlay" aria-hidden="true"></div>
+            <span class="regen-pill" aria-label="재생성 24회">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/>
+                <path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/>
+              </svg>
+              24
+            </span>
+          </button>
+          <button class="feed-item aspect-4-5" id="feed-item-2" onclick="navigateGridItem(2)" aria-label="게시물 2">
+            <div class="feed-item__thumb thumb-grad-2">✨</div>
+            <div class="feed-item__overlay" aria-hidden="true"></div>
+            <span class="regen-pill" aria-label="재생성 7회">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/>
+                <path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/>
+              </svg>
+              7
+            </span>
+          </button>
+          <button class="feed-item aspect-4-5" id="feed-item-3" onclick="navigateGridItem(3)" aria-label="게시물 3">
+            <div class="feed-item__thumb thumb-grad-3">😂</div>
+            <div class="feed-item__overlay" aria-hidden="true"></div>
+            <span class="regen-pill" aria-label="재생성 12회">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/>
+                <path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/>
+              </svg>
+              12
+            </span>
+          </button>
+          <button class="feed-item aspect-1-1" id="feed-item-4" onclick="navigateGridItem(4)" aria-label="게시물 4">
+            <div class="feed-item__thumb thumb-grad-4">🌱</div>
+            <div class="feed-item__overlay" aria-hidden="true"></div>
+          </button>
+          <button class="feed-item aspect-1-1" id="feed-item-5" onclick="navigateGridItem(5)" aria-label="게시물 5">
+            <div class="feed-item__thumb thumb-grad-5">🌊</div>
+            <div class="feed-item__overlay" aria-hidden="true"></div>
+            <span class="regen-pill" aria-label="재생성 3회">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/>
+                <path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/>
+              </svg>
+              3
+            </span>
+          </button>
+          <button class="feed-item aspect-4-5" id="feed-item-6" onclick="navigateGridItem(6)" aria-label="게시물 6">
+            <div class="feed-item__thumb thumb-grad-6">🍜</div>
+            <div class="feed-item__overlay" aria-hidden="true"></div>
+          </button>
+        </section>
+
+        <!-- Skeleton Grid (loading state) -->
+        <section class="feed-grid" data-state="loading" id="skeleton-grid" aria-hidden="true">
+          <div class="feed-item aspect-1-1"><div class="skeleton-bar" style="width:100%;height:100%;border-radius:0;"></div></div>
+          <div class="feed-item aspect-4-5"><div class="skeleton-bar" style="width:100%;height:100%;border-radius:0;"></div></div>
+          <div class="feed-item aspect-4-5"><div class="skeleton-bar" style="width:100%;height:100%;border-radius:0;"></div></div>
+          <div class="feed-item aspect-1-1"><div class="skeleton-bar" style="width:100%;height:100%;border-radius:0;"></div></div>
+          <div class="feed-item aspect-1-1"><div class="skeleton-bar" style="width:100%;height:100%;border-radius:0;"></div></div>
+          <div class="feed-item aspect-4-5"><div class="skeleton-bar" style="width:100%;height:100%;border-radius:0;"></div></div>
+        </section>
+
+        <!-- Empty State (empty-no-posts) -->
+        <section class="empty-state" data-state="empty-no-posts" id="empty-state">
+          <div class="empty-state__icon" aria-hidden="true">🖼️</div>
+          <p class="empty-state__title">아직 업로드한 콘텐츠가 없어요</p>
+          <p class="empty-state__description">이 사용자가 콘텐츠를 공개하면<br/>여기에 표시돼요.</p>
+        </section>
+
+      </main>
+
+      <!-- Bottom Navigation (Home / Search / My) -->
+      <nav class="bottom-nav" id="bottom-nav" role="navigation" aria-label="하단 탭">
+        <button class="bn-item" aria-label="홈" onclick="flashBreadcrumb('→ Home')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 10.5 12 3l9 7.5"/><path d="M5 9v12h14V9"/>
+          </svg>
+          <span>홈</span>
+        </button>
+        <button class="bn-item" aria-label="탐색" onclick="flashBreadcrumb('→ Search')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>
+          </svg>
+          <span>탐색</span>
+        </button>
+        <button class="bn-item" aria-label="내 프로필" onclick="flashBreadcrumb('→ My')">
+          <span class="dot" aria-hidden="true"></span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/>
+          </svg>
+          <span>MY</span>
+        </button>
+      </nav>
+
+      <!-- Error State (full-screen overlay on error-not-found) -->
+      <section class="error-state" data-state="error-not-found" id="error-state">
+        <div class="status-bar">
+          <span>9:41</span>
+          <span class="status-bar__icons"><span>●●●●●</span><span>📶</span><span>🔋</span></span>
+        </div>
+        <header class="header-bar">
+          <div class="header-bar__side">
+            <button class="icon-btn" id="error-top-back" aria-label="뒤로 가기" onclick="goBack()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+            </button>
+          </div>
+          <div class="header-bar__title-wrap"></div>
+          <div class="header-bar__side">
+            <button class="icon-btn icon-btn--placeholder" aria-hidden="true" tabindex="-1">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/>
+              </svg>
+            </button>
+          </div>
+        </header>
+        <div class="error-state__body">
+          <div class="error-state__icon" aria-hidden="true">🔍</div>
+          <h2 class="error-state__title">사용자를 찾을 수 없어요</h2>
+          <p class="error-state__description">존재하지 않거나 비공개된 프로필이에요.</p>
+          <button class="btn-secondary" id="error-back-cta" onclick="goBack()">돌아가기</button>
+        </div>
+      </section>
+
+      <!-- Toast (url-copied-toast) -->
+      <div class="toast" id="toast-url-copied" role="status" aria-live="polite">프로필 URL이 복사되었어요</div>
+
+      <!-- Overlay Backdrop -->
+      <div class="overlay-backdrop" id="overlay-backdrop" onclick="closeMoreSheet()"></div>
+
+      <!-- More Action Sheet (more-action-sheet) -->
+      <div class="overlay-content" id="sheet-more" role="dialog" aria-label="더보기 메뉴">
+        <div class="action-sheet">
+          <div class="action-sheet__handle" aria-hidden="true"></div>
+          <ul class="menu-list">
+            <li>
+              <button class="menu-item" id="btn-copy-url" onclick="copyProfileUrl()">
+                <span class="menu-item__icon" aria-hidden="true">🔗</span>
+                <span class="menu-item__label">프로필 URL 복사</span>
+              </button>
+            </li>
+          </ul>
+          <button class="sheet-cancel" id="btn-cancel-sheet" onclick="closeMoreSheet()">취소</button>
+        </div>
+      </div>
+
+    </section>
+  </div>
+
+  <script>
+    // ======= State =======
+    let currentScreen = null;
+    let currentState = 'default';
+    const navHistory = [];
+    let toastTimer = null;
+
+    // ======= Navigation =======
+    function navigate(screenId, transition = 'slide-left') {
+      const target = document.getElementById(screenId);
+      if (!target || (currentScreen && currentScreen.id === screenId)) return;
+      if (currentScreen) {
+        navHistory.push(currentScreen.id);
+        currentScreen.classList.remove('active');
+        currentScreen.className = currentScreen.className.replace(/transition-\S+/g, '');
+      }
+      target.classList.add('active');
+      if (transition !== 'none') {
+        target.classList.add('transition-' + transition);
+        target.addEventListener('animationend', function handler() {
+          target.classList.remove('transition-' + transition);
+          target.removeEventListener('animationend', handler);
+        });
+      }
+      currentScreen = target;
+      applyState(screenId, 'default');
+      updateControlPanel();
+    }
+
+    function goBack() {
+      // Single-screen prototype: "goBack" returns to default and flashes breadcrumb.
+      if (currentScreen && currentScreen.id === 'OtherUserProfileScreen') {
+        closeMoreSheet();
+        applyState('OtherUserProfileScreen', 'default');
+        updateControlPanel();
+        flashBreadcrumb('← back');
+        return;
+      }
+      if (navHistory.length === 0) return;
+      const prevId = navHistory.pop();
+      const target = document.getElementById(prevId);
+      if (!target) return;
+      if (currentScreen) currentScreen.classList.remove('active');
+      target.classList.add('active', 'transition-slide-right');
+      target.addEventListener('animationend', function handler() {
+        target.classList.remove('transition-slide-right');
+        target.removeEventListener('animationend', handler);
+      });
+      currentScreen = target;
+      applyState(prevId, 'default');
+      updateControlPanel();
+    }
+
+    function navigateBySelect(screenId) {
+      navigate(screenId, 'fade');
+    }
+
+    // ======= State handling =======
+    // Some states (more-action-sheet, url-copied-toast) are "modifier" states
+    // layered on top of the default body.
+    function applyState(screenId, stateName) {
+      const screen = document.getElementById(screenId);
+      if (!screen) return;
+
+      const baseState =
+        stateName === 'more-action-sheet' || stateName === 'url-copied-toast'
+          ? 'default'
+          : stateName;
+
+      screen.querySelectorAll('[data-state]').forEach(el => {
+        el.classList.toggle('state-active', el.dataset.state === baseState);
+      });
+
+      // Overlay / toast reset
+      const backdrop = screen.querySelector('#overlay-backdrop');
+      const sheet = screen.querySelector('#sheet-more');
+      const toast = screen.querySelector('#toast-url-copied');
+
+      if (backdrop) backdrop.classList.remove('active');
+      if (sheet) {
+        sheet.classList.remove('active', 'transition-slide-up', 'transition-slide-down');
+      }
+      if (toast) {
+        toast.classList.remove('active', 'fading');
+        if (toastTimer) { clearTimeout(toastTimer); toastTimer = null; }
+      }
+
+      if (stateName === 'more-action-sheet') {
+        if (backdrop) backdrop.classList.add('active');
+        if (sheet) {
+          sheet.classList.add('active', 'transition-slide-up');
+        }
+      }
+      if (stateName === 'url-copied-toast') {
+        if (toast) {
+          toast.classList.add('active');
+          toastTimer = setTimeout(() => {
+            toast.classList.add('fading');
+            toast.addEventListener('animationend', function handler() {
+              toast.classList.remove('active', 'fading');
+              toast.removeEventListener('animationend', handler);
+              if (currentState === 'url-copied-toast') {
+                currentState = 'default';
+                updateStateButtons();
+              }
+            }, { once: true });
+          }, 2000);
+        }
+      }
+
+      currentState = stateName;
+      updateStateButtons();
+    }
+
+    function toggleState(stateName) {
+      if (!currentScreen) return;
+      applyState(currentScreen.id, stateName);
+    }
+
+    // ======= Sheet / Toast helpers =======
+    function openMoreSheet() {
+      applyState('OtherUserProfileScreen', 'more-action-sheet');
+    }
+    function closeMoreSheet() {
+      const sheet = document.getElementById('sheet-more');
+      const backdrop = document.getElementById('overlay-backdrop');
+      if (sheet && sheet.classList.contains('active')) {
+        sheet.classList.remove('transition-slide-up');
+        sheet.classList.add('transition-slide-down');
+        sheet.addEventListener('animationend', function handler() {
+          sheet.classList.remove('active', 'transition-slide-down');
+          sheet.removeEventListener('animationend', handler);
+        }, { once: true });
+      }
+      if (backdrop) {
+        setTimeout(() => backdrop.classList.remove('active'), 180);
+      }
+      if (currentState === 'more-action-sheet') {
+        currentState = 'default';
+        updateStateButtons();
+      }
+    }
+
+    function copyProfileUrl() {
+      const userId = 'user_42';
+      const url = 'zzem://profile/' + userId;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).catch(() => {});
+      }
+      closeMoreSheet();
+      // Give the sheet a beat to animate out, then pop the toast.
+      setTimeout(() => applyState('OtherUserProfileScreen', 'url-copied-toast'), 180);
+    }
+
+    function navigateGridItem(n) {
+      // In a full prototype this would navigate to OtherUserSwipeFeed (app-008).
+      flashBreadcrumb('feed-item-' + n + ' → OtherUserSwipeFeed');
+    }
+
+    // ======= Control Panel =======
+    function updateControlPanel() {
+      if (!currentScreen) return;
+      const select = document.getElementById('screen-select');
+      if (select) select.value = currentScreen.id;
+      const crumb = document.getElementById('breadcrumb');
+      if (crumb) crumb.textContent = [...navHistory, currentScreen.id].join(' → ');
+      updateStateButtons();
+    }
+    function updateStateButtons() {
+      document.querySelectorAll('.control-panel__state-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.state === currentState);
+      });
+    }
+    function flashBreadcrumb(msg) {
+      const crumb = document.getElementById('breadcrumb');
+      if (!crumb) return;
+      const original = crumb.textContent;
+      crumb.textContent = msg;
+      setTimeout(() => { crumb.textContent = original; }, 1400);
+    }
+
+    // ======= Init =======
+    document.addEventListener('DOMContentLoaded', () => {
+      const firstScreen = document.querySelector('.screen');
+      if (firstScreen) {
+        firstScreen.classList.add('active');
+        currentScreen = firstScreen;
+        applyState(firstScreen.id, 'default');
+        updateControlPanel();
+      }
+    });
+  </script>
+
+</body>
+</html>

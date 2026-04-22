@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>app-005 · ProfileEdit Prototype</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet" />
+<style>
+/* ───── tokens.css (inline) — source: sprints/ugc-platform-001/prototypes/context/tokens.css */
+:root {
+  --wds-color-purple-50: #F5F0FF;
+  --wds-color-purple-100: #EBE1FF;
+  --wds-color-purple-500: #8752FA;
+  --wds-color-purple-600: #7040E0;
+  --wds-color-neutral-0: #FFFFFF;
+  --wds-color-neutral-50: #F7F8F9;
+  --wds-color-neutral-100: #F0F1F3;
+  --wds-color-neutral-200: #E4E5E9;
+  --wds-color-neutral-300: #D1D3D8;
+  --wds-color-neutral-400: #B5B8BF;
+  --wds-color-neutral-500: #8E9199;
+  --wds-color-neutral-600: #6B6E76;
+  --wds-color-neutral-900: #212228;
+  --wds-color-neutral-1000: #000000;
+  --wds-color-red-500: #FF3B30;
+
+  --wds-background-normal: #FFFFFF;
+  --wds-background-dimmed: rgba(0, 0, 0, 0.40);
+  --wds-surface-tertiary: #F0F1F3;
+
+  --wds-label-normal: #212228;
+  --wds-label-alternative: #6B6E76;
+  --wds-label-assistive: #8E9199;
+  --wds-label-disabled: #B5B8BF;
+  --wds-label-inverse: #FFFFFF;
+
+  --wds-line-normal: #E4E5E9;
+  --wds-line-alternative: #F0F1F3;
+
+  --wds-fill-brand-primary: #8752FA;
+  --wds-fill-brand-weak: #F5F0FF;
+
+  --wds-status-error: #FF3B30;
+
+  --wds-radius-xs: 4px;
+  --wds-radius-sm: 8px;
+  --wds-radius-md: 12px;
+  --wds-radius-lg: 16px;
+  --wds-radius-xl: 20px;
+  --wds-radius-2xl: 24px;
+  --wds-radius-full: 9999px;
+
+  --wds-font-family-primary: 'Pretendard', -apple-system, 'SF Pro Display', sans-serif;
+
+  /* Profile Edit aliases (§5) */
+  --pe-input-fill: #F7F7F7;
+  --pe-input-border: #F1F1F1;
+  --pe-save-disabled: #F1F1F1;
+  --pe-save-disabled-label: #B5B8BF;
+  --pe-save-active: #262626;
+  --pe-save-active-label: #FFFFFF;
+  --pe-camera-badge-fill: #E2E2E2;
+  --pe-sheet-handle: #A7A7A7;
+  --pe-destructive-text: #D92800;
+  --pe-confirm-btn: #262626;
+  --pe-surface-hover: #F1F1F1;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--wds-font-family-primary);
+  background: #eceef2;
+  min-height: 100vh;
+  padding: 24px;
+  color: var(--wds-label-normal);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+/* ───── Control panel (outside device frame) */
+.control-panel {
+  width: 390px;
+  background: #1a1a2e;
+  color: #e0e0e0;
+  border-radius: 12px 12px 0 0;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13px;
+}
+.control-panel__row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.control-panel__label { color: #888; font-size: 11px; min-width: 48px; }
+.control-panel__select {
+  background: #2a2a3e; color: #ccc; border: 1px solid #444;
+  border-radius: 6px; padding: 4px 8px; font-size: 12px; font-family: inherit;
+}
+.control-panel__states { display: flex; gap: 4px; flex-wrap: wrap; }
+.control-panel__state-btn {
+  background: #2a2a3e; color: #ccc; border: 1px solid #444;
+  border-radius: 6px; padding: 5px 10px; font-size: 11px; cursor: pointer;
+  font-family: inherit;
+}
+.control-panel__state-btn.active {
+  background: var(--wds-fill-brand-primary); color: #fff; border-color: var(--wds-fill-brand-primary);
+}
+.control-panel__breadcrumb { color: #888; font-size: 11px; font-family: monospace; }
+
+/* ───── Device frame */
+.device-frame {
+  width: 390px; height: 844px; background: var(--wds-background-normal);
+  overflow: hidden; position: relative; border: 1px solid #ddd;
+  border-radius: 0 0 12px 12px;
+}
+.screen {
+  position: absolute; inset: 0;
+  display: none;
+  flex-direction: column;
+  background: var(--wds-background-normal);
+}
+.screen.active { display: flex; }
+
+/* Status bar */
+.status-bar {
+  height: 44px; display: flex; justify-content: space-between; align-items: center;
+  padding: 0 20px; font-size: 15px; font-weight: 600; flex-shrink: 0;
+}
+.status-bar__icons { display: flex; gap: 5px; font-size: 12px; }
+
+/* Shared header */
+.screen-header {
+  height: 48px; padding: 0 4px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+  background: var(--wds-background-normal);
+}
+.header-icon-btn {
+  width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;
+  background: transparent; border: none; cursor: pointer;
+  color: var(--wds-label-normal);
+}
+.header-icon-btn svg { width: 24px; height: 24px; }
+.header-title {
+  font-size: 18px; font-weight: 600; color: var(--wds-label-normal);
+  flex: 1; text-align: center;
+}
+.header-right-spacer { width: 44px; height: 44px; }
+.header-text-btn {
+  background: transparent; border: none; cursor: pointer;
+  font-family: inherit; font-size: 16px; font-weight: 600;
+  padding: 0 16px; height: 44px;
+  color: var(--wds-label-normal);
+}
+.header-text-btn.disabled { color: var(--wds-label-disabled); }
+.header-text-btn.brand { color: var(--wds-fill-brand-primary); }
+
+/* ─── ProfileEditScreen body */
+.edit-body {
+  flex: 1;
+  display: flex; flex-direction: column;
+  padding: 32px 20px 120px;
+  overflow-y: auto;
+}
+.avatar-section { display: flex; justify-content: center; margin-bottom: 32px; }
+.avatar-wrapper {
+  position: relative;
+  width: 100px; height: 100px;
+  cursor: pointer;
+}
+.avatar {
+  width: 100px; height: 100px; border-radius: 50%;
+  background: linear-gradient(135deg, #C8B2FF, #8752FA);
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-weight: 700; font-size: 32px;
+  border: none;
+}
+.camera-badge {
+  position: absolute; right: -2px; bottom: -2px;
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--pe-camera-badge-fill);
+  border: 4px solid #fff;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--wds-label-normal);
+}
+.camera-badge svg { width: 14px; height: 14px; }
+
+.upload-overlay {
+  position: absolute; inset: 0;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.45);
+  display: none;
+  align-items: center; justify-content: center;
+  color: #fff;
+}
+.upload-overlay.visible { display: flex; }
+.spinner {
+  width: 28px; height: 28px;
+  border: 3px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Nickname */
+.nickname-section { display: flex; flex-direction: column; gap: 8px; }
+.nickname-label {
+  font-size: 14px; font-weight: 500; color: var(--wds-label-alternative);
+}
+.input-wrap {
+  position: relative;
+  background: var(--pe-input-fill);
+  border: 1px solid var(--pe-input-border);
+  border-radius: var(--wds-radius-lg);
+  padding: 12px 52px 12px 16px;
+  display: flex; align-items: center;
+}
+.input-wrap.error { border-color: var(--wds-status-error); }
+.nickname-input {
+  flex: 1;
+  background: transparent;
+  border: none; outline: none;
+  font-family: inherit;
+  font-size: 16px;
+  color: var(--wds-label-normal);
+}
+.nickname-input::placeholder { color: var(--wds-label-assistive); }
+.char-counter {
+  position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
+  font-size: 12px; color: var(--wds-label-assistive);
+  pointer-events: none;
+}
+.inline-error {
+  display: none;
+  font-size: 12px; color: var(--wds-status-error); padding: 0 4px;
+}
+.inline-error.visible { display: block; }
+
+/* Save button footer */
+.save-footer {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  padding: 16px 20px 24px;
+  background: var(--wds-background-normal);
+}
+.save-btn {
+  width: 100%; height: 56px;
+  border: none; border-radius: var(--wds-radius-lg);
+  font-family: inherit; font-size: 16px; font-weight: 600;
+  background: var(--pe-save-disabled);
+  color: var(--pe-save-disabled-label);
+  cursor: not-allowed;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: background 160ms ease, color 160ms ease;
+}
+.save-btn.active {
+  background: var(--pe-save-active);
+  color: var(--pe-save-active-label);
+  cursor: pointer;
+}
+.save-btn.loading {
+  background: var(--pe-save-active);
+  color: var(--pe-save-active-label);
+  cursor: wait;
+}
+.save-btn.loading .spinner-small {
+  width: 16px; height: 16px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* ─── Toast */
+.toast {
+  position: absolute; left: 50%; bottom: 120px;
+  transform: translateX(-50%);
+  background: rgba(17,17,17,0.92);
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: var(--wds-radius-md);
+  font-size: 14px; font-weight: 500;
+  display: none;
+  z-index: 50;
+}
+.toast.visible { display: block; }
+.toast.error { background: rgba(217, 40, 0, 0.95); }
+
+/* ─── Bottom sheet (shared) */
+.overlay {
+  position: absolute; inset: 0;
+  display: none;
+  z-index: 40;
+}
+.overlay.active { display: block; }
+.overlay-backdrop {
+  position: absolute; inset: 0;
+  background: var(--wds-background-dimmed);
+}
+.bottom-sheet {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  background: var(--wds-background-normal);
+  border-radius: var(--wds-radius-xl) var(--wds-radius-xl) 0 0;
+  padding-bottom: 32px;
+  animation: slideUp 240ms cubic-bezier(0.2, 0, 0, 1);
+}
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+.sheet-handle {
+  width: 40px; height: 4px;
+  background: var(--pe-sheet-handle);
+  border-radius: 2px;
+  margin: 8px auto 8px;
+}
+
+/* Image source sheet */
+.sheet-option {
+  width: 100%; height: 56px;
+  display: flex; align-items: center; gap: 12px;
+  padding: 0 20px;
+  background: transparent; border: none; cursor: pointer;
+  font-family: inherit; font-size: 16px; font-weight: 500;
+  color: var(--wds-label-normal);
+  text-align: left;
+}
+.sheet-option svg { width: 24px; height: 24px; }
+.sheet-option.destructive {
+  color: var(--pe-destructive-text);
+}
+.sheet-option.destructive svg { stroke: var(--pe-destructive-text); }
+
+/* Exit confirm sheet */
+.exit-sheet-body {
+  padding: 16px 24px 0;
+  display: flex; flex-direction: column; gap: 8px;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 24px;
+}
+.exit-title {
+  font-size: 18px; font-weight: 600; color: var(--wds-label-normal);
+}
+.exit-body-text {
+  font-size: 16px; font-weight: 400; color: var(--wds-label-alternative);
+}
+.dual-action-row {
+  display: flex; gap: 8px;
+  padding: 0 24px;
+}
+.dual-action-row button {
+  flex: 1; height: 56px;
+  border: none; border-radius: var(--wds-radius-lg);
+  font-family: inherit; font-size: 16px; font-weight: 600;
+  cursor: pointer;
+}
+.btn-cancel {
+  background: var(--pe-surface-hover);
+  color: var(--wds-label-normal);
+}
+.btn-confirm {
+  background: var(--pe-confirm-btn);
+  color: #FFFFFF;
+}
+
+/* ─── Crop screen */
+.crop-screen {
+  background: #000;
+  color: #fff;
+}
+.crop-screen .screen-header {
+  background: #000; color: #fff;
+}
+.crop-screen .header-title { color: #fff; }
+.crop-screen .header-icon-btn { color: #fff; }
+.crop-screen .header-text-btn { color: #fff; }
+
+.crop-canvas {
+  flex: 1;
+  position: relative;
+  background: #111;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+.crop-image-placeholder {
+  position: absolute; inset: 0;
+  background:
+    linear-gradient(135deg, rgba(135,82,250,0.35) 0%, rgba(50,50,80,0.6) 100%),
+    radial-gradient(circle at 30% 40%, #8752FA 0%, transparent 60%),
+    radial-gradient(circle at 70% 70%, #FF6BA7 0%, transparent 50%),
+    #222;
+}
+.crop-box {
+  position: relative;
+  width: 280px; height: 280px;
+  box-shadow: 0 0 0 9999px rgba(0,0,0,0.55);
+  border-radius: 50%;
+}
+.crop-box::before {
+  content: '';
+  position: absolute; inset: 0;
+  border: 1px solid rgba(255,255,255,0.6);
+  border-radius: 50%;
+}
+.crop-handles {
+  position: absolute; inset: -13px;
+}
+.crop-handle {
+  position: absolute; width: 27px; height: 27px;
+}
+.crop-handle.tl { top: 0; left: 0; border-top: 3px solid #fff; border-left: 3px solid #fff; }
+.crop-handle.tr { top: 0; right: 0; border-top: 3px solid #fff; border-right: 3px solid #fff; }
+.crop-handle.bl { bottom: 0; left: 0; border-bottom: 3px solid #fff; border-left: 3px solid #fff; }
+.crop-handle.br { bottom: 0; right: 0; border-bottom: 3px solid #fff; border-right: 3px solid #fff; }
+
+.crop-bottom-bar {
+  height: 104px;
+  background: #000;
+  padding: 16px 20px 32px;
+  display: flex; align-items: flex-start;
+}
+.crop-done-btn {
+  flex: 1; height: 56px;
+  background: #fff; color: #000;
+  border: none; border-radius: var(--wds-radius-lg);
+  font-family: inherit; font-size: 16px; font-weight: 600;
+  cursor: pointer;
+}
+
+/* ─── Album picker */
+.album-header-dropdown {
+  display: flex; align-items: center; gap: 4px;
+  background: transparent; border: none; cursor: pointer;
+  font-family: inherit; font-size: 16px; font-weight: 600;
+  color: var(--wds-label-normal);
+}
+.album-header-dropdown svg {
+  width: 16px; height: 16px;
+  color: var(--wds-label-assistive);
+}
+.album-grid-scroll {
+  flex: 1;
+  overflow-y: auto;
+  border-top: 1px solid var(--wds-line-alternative);
+}
+.album-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  padding: 2px 0 32px;
+}
+.album-cell {
+  position: relative;
+  aspect-ratio: 1;
+  background: #eee;
+  border: none; padding: 0; cursor: pointer;
+  overflow: hidden;
+}
+.album-cell.camera {
+  background: var(--wds-surface-tertiary);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--wds-label-alternative);
+}
+.album-cell.camera svg { width: 28px; height: 28px; }
+.album-thumb {
+  position: absolute; inset: 0;
+  background-size: cover;
+}
+.album-thumb.t-1 { background: linear-gradient(135deg, #FFB3D1, #FF6BA7); }
+.album-thumb.t-2 { background: linear-gradient(135deg, #FCD34D, #FB923C); }
+.album-thumb.t-3 { background: linear-gradient(135deg, #60A5FA, #8B5CF6); }
+.album-thumb.t-4 { background: linear-gradient(135deg, #34D399, #0EA5E9); }
+.album-thumb.t-5 { background: linear-gradient(135deg, #C084FC, #F472B6); }
+.album-thumb.t-6 { background: linear-gradient(135deg, #F87171, #FBBF24); }
+.album-thumb.t-7 { background: linear-gradient(135deg, #818CF8, #A78BFA); }
+.album-thumb.t-8 { background: linear-gradient(135deg, #10B981, #3B82F6); }
+.album-thumb.t-9 { background: linear-gradient(135deg, #E879F9, #8B5CF6); }
+.album-thumb.t-10 { background: linear-gradient(135deg, #F59E0B, #D946EF); }
+.album-thumb.t-11 { background: linear-gradient(135deg, #06B6D4, #8B5CF6); }
+.album-cell.selected::after {
+  content: '';
+  position: absolute; inset: 0;
+  border: 2px solid var(--wds-fill-brand-primary);
+  pointer-events: none;
+}
+.album-checkbox {
+  position: absolute; top: 8px; right: 8px;
+  width: 24px; height: 24px;
+  border: 2px solid #fff; border-radius: 50%;
+  background: rgba(0,0,0,0.2);
+  display: flex; align-items: center; justify-content: center;
+  color: #fff;
+}
+.album-cell.selected .album-checkbox {
+  background: var(--wds-fill-brand-primary);
+  border-color: var(--wds-fill-brand-primary);
+}
+.album-checkbox svg { width: 14px; height: 14px; display: none; }
+.album-cell.selected .album-checkbox svg { display: block; }
+
+/* ─── Utility */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0;
+  margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
+</style>
+</head>
+<body>
+
+<div class="control-panel">
+  <div class="control-panel__row">
+    <span class="control-panel__label">Screen</span>
+    <select id="screen-select" class="control-panel__select">
+      <option value="ProfileEditScreen">ProfileEditScreen</option>
+      <option value="AlbumPickerScreen">AlbumPickerScreen</option>
+      <option value="CropScreen">CropScreen</option>
+    </select>
+  </div>
+  <div class="control-panel__row">
+    <span class="control-panel__label">State</span>
+    <div id="state-buttons" class="control-panel__states"></div>
+  </div>
+  <div class="control-panel__row">
+    <span class="control-panel__label">Route</span>
+    <span class="control-panel__breadcrumb" id="breadcrumb">zzem://profile → zzem://profile/edit</span>
+  </div>
+</div>
+
+<div class="device-frame">
+
+  <!-- ════ ProfileEditScreen ════ -->
+  <section class="screen active" id="ProfileEditScreen" data-state="default">
+    <div class="status-bar">
+      <span>9:41</span>
+      <div class="status-bar__icons">
+        <span>● ● ●</span><span>📶</span><span>🔋</span>
+      </div>
+    </div>
+    <header class="screen-header">
+      <button class="header-icon-btn" id="btn-back" aria-label="뒤로가기">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      </button>
+      <h1 class="header-title">프로필 편집</h1>
+      <div class="header-right-spacer"></div>
+    </header>
+
+    <div class="edit-body">
+      <div class="avatar-section">
+        <button class="avatar-wrapper" id="btn-avatar" aria-label="프로필 이미지 변경">
+          <div class="avatar">Z</div>
+          <span class="camera-badge" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 5h-3.17l-1.84-2H9.01L7.17 5H4c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm-8 12.5c-2.48 0-4.5-2.02-4.5-4.5s2.02-4.5 4.5-4.5 4.5 2.02 4.5 4.5-2.02 4.5-4.5 4.5z"/></svg>
+          </span>
+          <span class="upload-overlay" id="upload-overlay">
+            <span class="spinner"></span>
+          </span>
+        </button>
+      </div>
+
+      <div class="nickname-section">
+        <label class="nickname-label" for="nickname-input">닉네임</label>
+        <div class="input-wrap" id="input-wrap">
+          <input
+            type="text"
+            id="nickname-input"
+            class="nickname-input"
+            value="ZZEM유저"
+            maxlength="21"
+            placeholder="닉네임을 입력하세요"
+          />
+          <span class="char-counter" id="char-counter">5/20</span>
+        </div>
+        <p class="inline-error" id="inline-error">닉네임은 2자 이상이어야 해요</p>
+      </div>
+    </div>
+
+    <div class="save-footer">
+      <button class="save-btn" id="btn-save" disabled>
+        <span id="save-label">저장</span>
+      </button>
+    </div>
+
+    <div class="toast" id="toast">프로필이 업데이트 되었어요</div>
+
+    <!-- Image Source Bottom Sheet -->
+    <div class="overlay" id="ImageSourceSheet">
+      <div class="overlay-backdrop" data-close="ImageSourceSheet"></div>
+      <div class="bottom-sheet" role="dialog" aria-label="이미지 소스 선택">
+        <div class="sheet-handle"></div>
+        <button class="sheet-option" id="opt-camera">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+            <circle cx="12" cy="13" r="4"></circle>
+          </svg>
+          <span>카메라</span>
+        </button>
+        <button class="sheet-option" id="opt-album">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+            <polyline points="21 15 16 10 5 21"></polyline>
+          </svg>
+          <span>앨범</span>
+        </button>
+        <button class="sheet-option destructive" id="opt-delete">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+            <path d="M10 11v6"></path>
+            <path d="M14 11v6"></path>
+            <path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"></path>
+          </svg>
+          <span>사진 삭제</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Exit Confirm Bottom Sheet -->
+    <div class="overlay" id="ExitConfirmSheet">
+      <div class="overlay-backdrop" data-close="ExitConfirmSheet"></div>
+      <div class="bottom-sheet" role="alertdialog" aria-label="나가기 확인">
+        <div class="sheet-handle"></div>
+        <div class="exit-sheet-body">
+          <h2 class="exit-title">수정사항이 있습니다.</h2>
+          <p class="exit-body-text">그래도 나가시겠습니까?</p>
+        </div>
+        <div class="dual-action-row">
+          <button class="btn-cancel" id="btn-exit-cancel">취소</button>
+          <button class="btn-confirm" id="btn-exit-confirm">확인</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════ AlbumPickerScreen ════ -->
+  <section class="screen" id="AlbumPickerScreen" data-state="default">
+    <div class="status-bar">
+      <span>9:41</span>
+      <div class="status-bar__icons"><span>● ● ●</span><span>📶</span><span>🔋</span></div>
+    </div>
+    <header class="screen-header">
+      <button class="header-icon-btn" id="btn-album-close" aria-label="닫기">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+      <button class="album-header-dropdown" id="btn-album-dropdown" aria-label="앨범 선택">
+        <span>최근 항목</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+      <button class="header-text-btn disabled" id="btn-album-done">완료</button>
+    </header>
+    <div class="album-grid-scroll">
+      <div class="album-grid" id="album-grid">
+        <button class="album-cell camera" id="cell-camera" aria-label="카메라로 촬영">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+            <circle cx="12" cy="13" r="4"></circle>
+          </svg>
+        </button>
+        <!-- photo cells populated via JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ════ CropScreen ════ -->
+  <section class="screen crop-screen" id="CropScreen" data-state="default">
+    <div class="status-bar" style="color:#fff;">
+      <span>9:41</span>
+      <div class="status-bar__icons"><span>● ● ●</span><span>📶</span><span>🔋</span></div>
+    </div>
+    <header class="screen-header">
+      <button class="header-icon-btn" id="btn-crop-close" aria-label="닫기">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+      <h1 class="header-title">크기 설정</h1>
+      <button class="header-text-btn" id="btn-crop-done-header">완료</button>
+    </header>
+    <div class="crop-canvas">
+      <div class="crop-image-placeholder"></div>
+      <div class="crop-box">
+        <div class="crop-handles">
+          <span class="crop-handle tl"></span>
+          <span class="crop-handle tr"></span>
+          <span class="crop-handle bl"></span>
+          <span class="crop-handle br"></span>
+        </div>
+      </div>
+    </div>
+    <div class="crop-bottom-bar">
+      <button class="crop-done-btn" id="btn-crop-done">완료</button>
+    </div>
+  </section>
+
+</div>
+
+<script>
+/* =========================================================
+ * app-005 Profile Edit Prototype — interactions
+ * Screens: ProfileEditScreen (with overlays), AlbumPickerScreen, CropScreen
+ * State model: data-state on ProfileEditScreen
+ *   default | nickname-1-char | nickname-valid | uploading
+ *   | image-source-sheet | exit-confirm-sheet | error
+ * Crop + album screens are separate sections (switched via navigate).
+ * ========================================================= */
+
+const SCREEN_STATES = {
+  ProfileEditScreen: [
+    'default',
+    'nickname-1-char',
+    'nickname-valid',
+    'uploading',
+    'image-source-sheet',
+    'exit-confirm-sheet',
+    'error'
+  ],
+  AlbumPickerScreen: ['default', 'selected'],
+  CropScreen: ['default']
+};
+
+const STATE_LABELS = {
+  'default': 'default',
+  'nickname-1-char': '1자(비활성)',
+  'nickname-valid': '유효(활성)',
+  'uploading': '업로딩',
+  'image-source-sheet': '이미지 시트',
+  'exit-confirm-sheet': '나가기 시트',
+  'error': '에러',
+  'selected': '선택됨'
+};
+
+const root = document.querySelector('.device-frame');
+const breadcrumb = document.getElementById('breadcrumb');
+const screenSelect = document.getElementById('screen-select');
+const stateButtonsEl = document.getElementById('state-buttons');
+const breadcrumbTrail = ['zzem://profile', 'zzem://profile/edit'];
+
+function activeScreen() {
+  return root.querySelector('.screen.active');
+}
+
+function navigate(screenId, pushCrumb = true) {
+  root.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const target = root.querySelector('#' + screenId);
+  if (!target) return;
+  target.classList.add('active');
+  screenSelect.value = screenId;
+  if (pushCrumb) {
+    const crumbMap = {
+      ProfileEditScreen: 'zzem://profile/edit',
+      AlbumPickerScreen: 'zzem://profile/edit/album',
+      CropScreen: 'zzem://profile/edit/crop'
+    };
+    breadcrumbTrail.push(crumbMap[screenId] || screenId);
+  }
+  renderBreadcrumb();
+  renderStateButtons();
+}
+
+function goBack() {
+  if (breadcrumbTrail.length > 1) breadcrumbTrail.pop();
+  const last = breadcrumbTrail[breadcrumbTrail.length - 1];
+  const map = {
+    'zzem://profile/edit': 'ProfileEditScreen',
+    'zzem://profile/edit/album': 'AlbumPickerScreen',
+    'zzem://profile/edit/crop': 'CropScreen',
+    'zzem://profile': 'ProfileEditScreen'
+  };
+  navigate(map[last] || 'ProfileEditScreen', false);
+}
+
+function renderBreadcrumb() {
+  breadcrumb.textContent = breadcrumbTrail.join(' → ');
+}
+
+function renderStateButtons() {
+  const current = activeScreen();
+  if (!current) return;
+  const list = SCREEN_STATES[current.id] || ['default'];
+  const currentState = current.dataset.state || 'default';
+  stateButtonsEl.innerHTML = '';
+  list.forEach(s => {
+    const btn = document.createElement('button');
+    btn.className = 'control-panel__state-btn' + (s === currentState ? ' active' : '');
+    btn.textContent = STATE_LABELS[s] || s;
+    btn.addEventListener('click', () => setState(current.id, s));
+    stateButtonsEl.appendChild(btn);
+  });
+}
+
+function setState(screenId, state) {
+  const screen = root.querySelector('#' + screenId);
+  if (!screen) return;
+  screen.dataset.state = state;
+  applyState(screenId, state);
+  renderStateButtons();
+}
+
+/* ─── State application */
+function applyState(screenId, state) {
+  if (screenId === 'ProfileEditScreen') {
+    applyProfileEditState(state);
+  } else if (screenId === 'AlbumPickerScreen') {
+    applyAlbumPickerState(state);
+  }
+}
+
+const $nickname = document.getElementById('nickname-input');
+const $inputWrap = document.getElementById('input-wrap');
+const $counter = document.getElementById('char-counter');
+const $error = document.getElementById('inline-error');
+const $saveBtn = document.getElementById('btn-save');
+const $saveLabel = document.getElementById('save-label');
+const $uploadOverlay = document.getElementById('upload-overlay');
+const $toast = document.getElementById('toast');
+
+const $imageSheet = document.getElementById('ImageSourceSheet');
+const $exitSheet = document.getElementById('ExitConfirmSheet');
+
+const INITIAL_NICK = 'ZZEM유저';
+let dirty = { nickname: false, image: false };
+
+function resetProfileEditDefaults() {
+  $nickname.value = INITIAL_NICK;
+  dirty = { nickname: false, image: false };
+  updateNicknameUi();
+  $uploadOverlay.classList.remove('visible');
+  $saveBtn.classList.remove('loading', 'active');
+  $saveBtn.disabled = true;
+  $saveLabel.textContent = '저장';
+  $toast.classList.remove('visible', 'error');
+  closeOverlay('ImageSourceSheet');
+  closeOverlay('ExitConfirmSheet');
+}
+
+function applyProfileEditState(state) {
+  // baseline reset every state change
+  $uploadOverlay.classList.remove('visible');
+  $saveBtn.classList.remove('loading');
+  $toast.classList.remove('visible', 'error');
+  closeOverlay('ImageSourceSheet');
+  closeOverlay('ExitConfirmSheet');
+
+  switch (state) {
+    case 'default':
+      $nickname.value = INITIAL_NICK;
+      dirty = { nickname: false, image: false };
+      updateNicknameUi();
+      break;
+    case 'nickname-1-char':
+      $nickname.value = 'Z';
+      dirty = { nickname: true, image: false };
+      updateNicknameUi();
+      break;
+    case 'nickname-valid':
+      $nickname.value = '새닉네임';
+      dirty = { nickname: true, image: false };
+      updateNicknameUi();
+      break;
+    case 'uploading':
+      $nickname.value = INITIAL_NICK;
+      dirty = { nickname: false, image: true };
+      updateNicknameUi();
+      $uploadOverlay.classList.add('visible');
+      $saveBtn.classList.add('loading');
+      $saveBtn.innerHTML = '<span class="spinner-small"></span><span>저장 중...</span>';
+      $saveBtn.disabled = true;
+      break;
+    case 'image-source-sheet':
+      openOverlay('ImageSourceSheet');
+      break;
+    case 'exit-confirm-sheet':
+      $nickname.value = '새닉네임';
+      dirty = { nickname: true, image: false };
+      updateNicknameUi();
+      openOverlay('ExitConfirmSheet');
+      break;
+    case 'error':
+      $nickname.value = '새닉네임';
+      dirty = { nickname: true, image: false };
+      updateNicknameUi();
+      $toast.classList.add('visible', 'error');
+      $toast.textContent = '저장에 실패했어요. 잠시 후 다시 시도해 주세요';
+      break;
+  }
+
+  // re-wire save label when not in uploading
+  if (state !== 'uploading') {
+    $saveBtn.innerHTML = '<span id="save-label">저장</span>';
+  }
+}
+
+function updateNicknameUi() {
+  const len = [...$nickname.value].length;
+  // counter cap at 20 display even when 21+
+  $counter.textContent = Math.min(len, 20) + '/20';
+  const tooShort = len > 0 && len < 2;
+  const tooLong = len > 20;
+
+  // inline error only when user has typed and too short
+  if (tooShort && dirty.nickname) {
+    $error.classList.add('visible');
+    $error.textContent = '닉네임은 2자 이상이어야 해요';
+    $inputWrap.classList.add('error');
+  } else if (tooLong) {
+    $error.classList.add('visible');
+    $error.textContent = '닉네임은 20자 이내로 입력해 주세요';
+    $inputWrap.classList.add('error');
+  } else {
+    $error.classList.remove('visible');
+    $inputWrap.classList.remove('error');
+  }
+
+  // save enable: dirty + valid length
+  const valid = len >= 2 && len <= 20;
+  const isDirty = dirty.nickname || dirty.image;
+  if (valid && isDirty && !$saveBtn.classList.contains('loading')) {
+    $saveBtn.classList.add('active');
+    $saveBtn.disabled = false;
+  } else {
+    $saveBtn.classList.remove('active');
+    $saveBtn.disabled = true;
+  }
+}
+
+/* ─── Overlay helpers */
+function openOverlay(id) {
+  const ov = document.getElementById(id);
+  if (ov) ov.classList.add('active');
+}
+function closeOverlay(id) {
+  const ov = document.getElementById(id);
+  if (ov) ov.classList.remove('active');
+}
+
+/* ─── AlbumPicker */
+function buildAlbumGrid() {
+  const grid = document.getElementById('album-grid');
+  // already has camera cell; add 23 photo cells
+  for (let i = 1; i <= 23; i++) {
+    const tone = ((i - 1) % 11) + 1;
+    const btn = document.createElement('button');
+    btn.className = 'album-cell';
+    btn.dataset.index = i;
+    btn.setAttribute('aria-label', '사진 선택 ' + i);
+    btn.innerHTML =
+      '<span class="album-thumb t-' + tone + '"></span>' +
+      '<span class="album-checkbox">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>' +
+      '</span>';
+    btn.addEventListener('click', () => selectAlbumPhoto(btn));
+    grid.appendChild(btn);
+  }
+}
+
+function selectAlbumPhoto(cell) {
+  // single-select behavior
+  document.querySelectorAll('.album-cell').forEach(c => c.classList.remove('selected'));
+  cell.classList.add('selected');
+  const doneBtn = document.getElementById('btn-album-done');
+  doneBtn.classList.remove('disabled');
+  doneBtn.classList.add('brand');
+  // update control panel state
+  const album = document.getElementById('AlbumPickerScreen');
+  album.dataset.state = 'selected';
+  renderStateButtons();
+}
+
+function applyAlbumPickerState(state) {
+  const doneBtn = document.getElementById('btn-album-done');
+  if (state === 'default') {
+    document.querySelectorAll('.album-cell').forEach(c => c.classList.remove('selected'));
+    doneBtn.classList.add('disabled');
+    doneBtn.classList.remove('brand');
+  } else if (state === 'selected') {
+    const first = document.querySelector('.album-cell:not(.camera)');
+    document.querySelectorAll('.album-cell').forEach(c => c.classList.remove('selected'));
+    if (first) first.classList.add('selected');
+    doneBtn.classList.remove('disabled');
+    doneBtn.classList.add('brand');
+  }
+}
+
+/* ─── Wiring */
+function wireInteractions() {
+  // screen select
+  screenSelect.addEventListener('change', () => navigate(screenSelect.value));
+
+  // back button — if dirty, open exit sheet; else go to previous
+  document.getElementById('btn-back').addEventListener('click', () => {
+    if (dirty.nickname || dirty.image) {
+      openOverlay('ExitConfirmSheet');
+      setStateShallow('ProfileEditScreen', 'exit-confirm-sheet');
+    } else {
+      // simulate goBack — breadcrumb trim, but we stay on edit for demo
+      alert('뒤로 이동: MY 프로필');
+    }
+  });
+
+  // avatar tap → image source sheet
+  document.getElementById('btn-avatar').addEventListener('click', () => {
+    openOverlay('ImageSourceSheet');
+    setStateShallow('ProfileEditScreen', 'image-source-sheet');
+  });
+
+  // image source sheet options
+  document.getElementById('opt-camera').addEventListener('click', () => {
+    closeOverlay('ImageSourceSheet');
+    navigate('CropScreen');
+  });
+  document.getElementById('opt-album').addEventListener('click', () => {
+    closeOverlay('ImageSourceSheet');
+    navigate('AlbumPickerScreen');
+  });
+  document.getElementById('opt-delete').addEventListener('click', () => {
+    closeOverlay('ImageSourceSheet');
+    dirty.image = true;
+    updateNicknameUi();
+    setStateShallow('ProfileEditScreen', 'nickname-valid');
+  });
+
+  // backdrop close
+  document.querySelectorAll('[data-close]').forEach(el => {
+    el.addEventListener('click', () => {
+      closeOverlay(el.dataset.close);
+      if (el.dataset.close === 'ExitConfirmSheet' || el.dataset.close === 'ImageSourceSheet') {
+        // back to nickname-valid if dirty, else default
+        const state = (dirty.nickname || dirty.image) ? 'nickname-valid' : 'default';
+        setStateShallow('ProfileEditScreen', state);
+      }
+    });
+  });
+
+  // exit sheet actions
+  document.getElementById('btn-exit-cancel').addEventListener('click', () => {
+    closeOverlay('ExitConfirmSheet');
+    setStateShallow('ProfileEditScreen', (dirty.nickname || dirty.image) ? 'nickname-valid' : 'default');
+  });
+  document.getElementById('btn-exit-confirm').addEventListener('click', () => {
+    closeOverlay('ExitConfirmSheet');
+    alert('나가기 확정 → MY 프로필 (변경 폐기)');
+    resetProfileEditDefaults();
+    setStateShallow('ProfileEditScreen', 'default');
+  });
+
+  // nickname input
+  $nickname.addEventListener('input', () => {
+    dirty.nickname = ($nickname.value !== INITIAL_NICK);
+    updateNicknameUi();
+    // reflect state in control panel
+    const len = [...$nickname.value].length;
+    if (len === 1) setStateShallow('ProfileEditScreen', 'nickname-1-char');
+    else if (len >= 2 && len <= 20 && dirty.nickname) setStateShallow('ProfileEditScreen', 'nickname-valid');
+    else setStateShallow('ProfileEditScreen', 'default');
+  });
+
+  // save button
+  $saveBtn.addEventListener('click', () => {
+    if ($saveBtn.disabled) return;
+    $saveBtn.classList.add('loading');
+    $saveBtn.innerHTML = '<span class="spinner-small"></span><span>저장 중...</span>';
+    setStateShallow('ProfileEditScreen', 'uploading');
+    $uploadOverlay.classList.add('visible');
+    setTimeout(() => {
+      $uploadOverlay.classList.remove('visible');
+      $saveBtn.classList.remove('loading');
+      $saveBtn.innerHTML = '<span id="save-label">저장</span>';
+      $toast.classList.add('visible');
+      $toast.classList.remove('error');
+      $toast.textContent = '프로필이 업데이트 되었어요';
+      setTimeout(() => {
+        $toast.classList.remove('visible');
+        resetProfileEditDefaults();
+        setStateShallow('ProfileEditScreen', 'default');
+      }, 1600);
+    }, 1400);
+  });
+
+  // album picker
+  document.getElementById('btn-album-close').addEventListener('click', () => {
+    navigate('ProfileEditScreen', false);
+    breadcrumbTrail.pop();
+    renderBreadcrumb();
+  });
+  document.getElementById('cell-camera').addEventListener('click', () => {
+    navigate('CropScreen');
+  });
+  document.getElementById('btn-album-done').addEventListener('click', () => {
+    if (document.getElementById('btn-album-done').classList.contains('disabled')) return;
+    navigate('CropScreen');
+  });
+
+  // crop screen
+  document.getElementById('btn-crop-close').addEventListener('click', () => {
+    navigate('ProfileEditScreen', false);
+    breadcrumbTrail.pop(); renderBreadcrumb();
+  });
+  const cropDone = () => {
+    navigate('ProfileEditScreen', false);
+    breadcrumbTrail.pop(); renderBreadcrumb();
+    dirty.image = true;
+    setStateShallow('ProfileEditScreen', 'uploading');
+    applyProfileEditState('uploading');
+    setTimeout(() => {
+      dirty.image = true;
+      applyProfileEditState('nickname-valid');
+      setStateShallow('ProfileEditScreen', 'nickname-valid');
+    }, 1400);
+  };
+  document.getElementById('btn-crop-done').addEventListener('click', cropDone);
+  document.getElementById('btn-crop-done-header').addEventListener('click', cropDone);
+}
+
+function setStateShallow(screenId, state) {
+  const s = root.querySelector('#' + screenId);
+  if (!s) return;
+  s.dataset.state = state;
+  renderStateButtons();
+}
+
+/* ─── Init */
+buildAlbumGrid();
+wireInteractions();
+updateNicknameUi();
+renderStateButtons();
+renderBreadcrumb();
+</script>
+</body>
+</html>

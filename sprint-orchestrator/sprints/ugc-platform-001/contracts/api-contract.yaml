@@ -1,0 +1,350 @@
+openapi: 3.0.3
+info:
+  title: UGC Platform — Profile & Navigation API
+  version: 0.1.0-ugc-platform-001
+  description: |
+    Sprint ugc-platform-001 (UGC Platform Phase 1) API contract.
+    SSOT for all profile, user, and visibility-filtered content endpoints.
+    All endpoints under /v2 prefix (meme-api convention).
+
+servers:
+  - url: https://api.wrtn.io
+    description: Production
+
+tags:
+  - name: me
+    description: Authenticated user's own profile and content
+  - name: users
+    description: Public view of other users
+  - name: onboarding
+    description: First-run user bootstrapping
+
+security:
+  - LibUserAuth: []
+
+paths:
+  /v2/me/profile:
+    get:
+      tags: [me]
+      summary: 내 프로필 조회 (AC 2.2, 7.5)
+      description: |
+        Returns the authenticated user's full profile including counts and persona flag.
+        If the user has no UserProfile yet, server MUST auto-create with generated nickname
+        (AC 2.6) before returning.
+      operationId: getMyProfile
+      security:
+        - LibUserAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MyProfileResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+    patch:
+      tags: [me]
+      summary: 내 프로필 수정 (AC 2.4)
+      description: |
+        Partial update. Omitted fields are not changed.
+        profileImageFileUuid must be pre-uploaded via presigned URL (see FileAppService).
+      operationId: updateMyProfile
+      security:
+        - LibUserAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProfileRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MyProfileResponse"
+        "400":
+          description: Validation error (nickname length, invalid fileUuid, etc.)
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /v2/me/contents:
+    get:
+      tags: [me]
+      summary: 내 콘텐츠 목록 (가시성 필터, AC 2.1 / 2.2 / 2.5)
+      description: |
+        Lists the authenticated user's contents filtered by visibility.
+        - public: isPublished=true
+        - private: isPublished=false (includes all legacy content without the field)
+        - liked: empty in Phase 1; real liked list arrives in Phase 2.
+          Must still respond with empty CursorResponse (not 404 / 501) so the MY
+          "좋아요" tab can render a stable empty state.
+        Cursor pagination per CursorResponseDto convention.
+      operationId: getMyContents
+      security:
+        - LibUserAuth: []
+      parameters:
+        - name: visibility
+          in: query
+          required: true
+          schema:
+            $ref: "#/components/schemas/Visibility"
+        - name: cursor
+          in: query
+          schema:
+            type: string
+            description: base64-encoded cursor (see CursorRequestDto)
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContentListResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /v2/me/contents/counts:
+    get:
+      tags: [me]
+      summary: 내 콘텐츠 개수 집계 (AC 2.1 landing tab 결정용)
+      description: |
+        Returns counts per visibility so the FE can pick the default landing tab
+        without fetching each list (AC 2.1: public → private → public-as-empty).
+      operationId: getMyContentCounts
+      security:
+        - LibUserAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContentCountsResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /v2/users/{userId}/profile:
+    get:
+      tags: [users]
+      summary: 타 유저 프로필 조회 (AC 7.1)
+      description: |
+        Returns the public projection of another user's profile.
+        Excludes isPersona and any private-only fields.
+      operationId: getUserProfile
+      security:
+        - LibUserAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublicProfileResponse"
+        "404":
+          description: User not found
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /v2/users/{userId}/contents:
+    get:
+      tags: [users]
+      summary: 타 유저의 공개 콘텐츠 목록 (AC 7.1)
+      description: |
+        Lists another user's public contents only (isPublished=true).
+        Private/liked are not exposed via this endpoint.
+      operationId: getUserContents
+      security:
+        - LibUserAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema: { type: string }
+        - name: cursor
+          in: query
+          schema: { type: string }
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContentListResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+components:
+  securitySchemes:
+    LibUserAuth:
+      type: apiKey
+      in: header
+      name: wrtn-user-id
+      description: LibUserGuard 헤더 인증 (기존 convention)
+
+  responses:
+    Unauthorized:
+      description: wrtn-user-id 헤더 누락 / 유효하지 않음
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+  schemas:
+    Visibility:
+      type: string
+      enum: [public, private, liked]
+      description: MY profile tab 구분자
+
+    MyProfileResponse:
+      type: object
+      required:
+        - id
+        - userId
+        - nickname
+        - profileImageUrl
+        - followerCount
+        - followingCount
+        - regeneratedCount
+        - isPersona
+      properties:
+        id:
+          type: string
+          description: UserProfile document id
+        userId:
+          type: string
+          description: Owning auth user id (wrtn-user-id)
+        nickname:
+          type: string
+          minLength: 2
+          maxLength: 20
+        profileImageUrl:
+          type: string
+          description: Default avatar URL when none uploaded (server provides the URL)
+        bio:
+          type: string
+          nullable: true
+        link:
+          type: string
+          nullable: true
+        followerCount:
+          type: integer
+          minimum: 0
+          description: Phase 1 returns 0 (follow 기능은 Phase 3)
+        followingCount:
+          type: integer
+          minimum: 0
+          description: Phase 1 returns 0 (follow 기능은 Phase 3)
+        regeneratedCount:
+          type: integer
+          minimum: 0
+          description: Total count of times this user's public content was regenerated by others
+        isPersona:
+          type: boolean
+          description: AC 7.5 — persona (INTERNAL) 계정 식별 플래그
+
+    PublicProfileResponse:
+      type: object
+      required:
+        - id
+        - userId
+        - nickname
+        - profileImageUrl
+        - followerCount
+        - followingCount
+        - regeneratedCount
+      properties:
+        id: { type: string }
+        userId: { type: string }
+        nickname: { type: string }
+        profileImageUrl: { type: string }
+        bio: { type: string, nullable: true }
+        link: { type: string, nullable: true }
+        followerCount: { type: integer, minimum: 0 }
+        followingCount: { type: integer, minimum: 0 }
+        regeneratedCount: { type: integer, minimum: 0 }
+
+    UpdateProfileRequest:
+      type: object
+      properties:
+        nickname:
+          type: string
+          minLength: 2
+          maxLength: 20
+        profileImageFileUuid:
+          type: string
+          description: pre-uploaded 파일 uuid (presigned PUT 결과)
+        bio:
+          type: string
+          maxLength: 500
+        link:
+          type: string
+          maxLength: 500
+
+    ContentSummary:
+      type: object
+      required: [id, thumbnailUrl, isPublished, createdAt]
+      properties:
+        id: { type: string }
+        thumbnailUrl: { type: string }
+        isPublished: { type: boolean }
+        createdAt: { type: string, format: date-time }
+        status:
+          type: string
+          description: generation status (progress / end / error)
+
+    ContentListResponse:
+      type: object
+      required: [list, nextCursor]
+      properties:
+        list:
+          type: array
+          items:
+            $ref: "#/components/schemas/ContentSummary"
+        nextCursor:
+          type: string
+          nullable: true
+          description: |
+            Controller MUST NOT re-wrap Service's CursorResponseDto (KB correctness-001).
+            Field name MUST be `list` to align with existing meme-api cursor DTO (KB integration-001).
+
+    ContentCountsResponse:
+      type: object
+      required: [public, private, liked]
+      properties:
+        public: { type: integer, minimum: 0 }
+        private: { type: integer, minimum: 0 }
+        liked:
+          type: integer
+          minimum: 0
+          description: Phase 1 returns 0 (liked 실기능은 Phase 2)
+
+    ErrorResponse:
+      type: object
+      required: [statusCode, message]
+      properties:
+        statusCode: { type: integer }
+        message: { type: string }
+        error: { type: string }

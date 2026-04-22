@@ -4,14 +4,16 @@ design-tokens/
 .mcp.json
 .env
 .gstack/
+.superset/
+firebase-debug.log
 
 # Source repo worktrees / symlinks (role-keyed, defined per sprint-config.yaml)
-# Generic role directories used by the reference projects:
-backend/
-app/
-tokens/
+# Only anchor at repo root so sprint-orchestrator/sprints/*/tasks/{backend,app}/ remain trackable.
+/backend/
+/app/
+/tokens
 
 # Legacy role directories (kept for migration; remove once no sprint references them)
-app-core-packages
-wrtn-backend
-wds-tokens
+/app-core-packages
+/wrtn-backend
+/wds-tokens

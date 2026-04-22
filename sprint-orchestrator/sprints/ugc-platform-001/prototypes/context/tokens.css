@@ -1,0 +1,219 @@
+/* ZZEM UGC Platform - Design Tokens
+ * Source: tokens/primitive/*.json + tokens/semantic/light.json
+ * Generated: ugc-platform-001 sprint
+ */
+
+:root {
+  /* ===================================
+   * PRIMITIVE - Color Purple (Brand)
+   * =================================== */
+  --wds-color-purple-50: #F5F0FF;
+  --wds-color-purple-100: #EBE1FF;
+  --wds-color-purple-200: #D4C0FF;
+  --wds-color-purple-300: #B899FF;
+  --wds-color-purple-400: #A17BFF;
+  --wds-color-purple-500: #8752FA;
+  --wds-color-purple-600: #7040E0;
+  --wds-color-purple-700: #5A30C0;
+  --wds-color-purple-800: #44239A;
+  --wds-color-purple-900: #301875;
+  --wds-color-purple-950: #1E0D50;
+
+  /* ===================================
+   * PRIMITIVE - Color Neutral
+   * =================================== */
+  --wds-color-neutral-0: #FFFFFF;
+  --wds-color-neutral-50: #F7F8F9;
+  --wds-color-neutral-100: #F0F1F3;
+  --wds-color-neutral-200: #E4E5E9;
+  --wds-color-neutral-300: #D1D3D8;
+  --wds-color-neutral-400: #B5B8BF;
+  --wds-color-neutral-500: #8E9199;
+  --wds-color-neutral-600: #6B6E76;
+  --wds-color-neutral-700: #4D5058;
+  --wds-color-neutral-800: #35373E;
+  --wds-color-neutral-900: #212228;
+  --wds-color-neutral-950: #141517;
+  --wds-color-neutral-1000: #000000;
+
+  /* ===================================
+   * PRIMITIVE - Color Status
+   * =================================== */
+  --wds-color-red-500: #FF3B30;
+  --wds-color-red-50: #FFF5F5;
+  --wds-color-green-500: #34C759;
+  --wds-color-green-50: #F0FFF4;
+  --wds-color-yellow-500: #FFCC00;
+  --wds-color-blue-500: #007AFF;
+
+  /* ===================================
+   * PRIMITIVE - Brand (OAuth)
+   * =================================== */
+  --wds-color-brand-kakao: #FEE500;
+  --wds-color-brand-naver: #03C75A;
+  --wds-color-brand-google: #4285F4;
+  --wds-color-brand-apple-light: #000000;
+
+  /* ===================================
+   * SEMANTIC - Background
+   * =================================== */
+  --wds-background-normal: var(--wds-color-neutral-0);
+  --wds-background-elevated: var(--wds-color-neutral-0);
+  --wds-background-dimmed: rgba(0, 0, 0, 0.40);
+
+  /* ===================================
+   * SEMANTIC - Surface
+   * =================================== */
+  --wds-surface-primary: var(--wds-color-neutral-0);
+  --wds-surface-secondary: var(--wds-color-neutral-50);
+  --wds-surface-tertiary: var(--wds-color-neutral-100);
+  /* Figma-spec alias: gray button surface (§3 profile dual button) */
+  --wds-surface-button: #F1F1F1;
+
+  /* ===================================
+   * SEMANTIC - Fill
+   * =================================== */
+  --wds-fill-brand-primary: var(--wds-color-purple-500);
+  --wds-fill-brand-weak: var(--wds-color-purple-50);
+  --wds-fill-brand-strong: var(--wds-color-purple-600);
+  --wds-fill-neutral-primary: var(--wds-color-neutral-900);
+  --wds-fill-neutral-secondary: var(--wds-color-neutral-100);
+  --wds-fill-neutral-tertiary: var(--wds-color-neutral-50);
+  --wds-fill-disabled: var(--wds-color-neutral-200);
+  --wds-fill-inverse: var(--wds-color-neutral-900);
+
+  /* ===================================
+   * SEMANTIC - Label (Text)
+   * =================================== */
+  --wds-label-normal: var(--wds-color-neutral-900);
+  --wds-label-strong: var(--wds-color-neutral-1000);
+  --wds-label-alternative: var(--wds-color-neutral-600);
+  --wds-label-assistive: var(--wds-color-neutral-500);
+  --wds-label-disabled: var(--wds-color-neutral-300);
+  --wds-label-inverse: var(--wds-color-neutral-0);
+  --wds-label-brand: var(--wds-color-purple-500);
+  /* Figma-spec alias (§3 Profile Header active tab underline) */
+  --wds-text-primary: #262626;
+
+  /* ===================================
+   * SEMANTIC - Line
+   * =================================== */
+  --wds-line-normal: var(--wds-color-neutral-200);
+  --wds-line-alternative: var(--wds-color-neutral-100);
+  --wds-line-strong: var(--wds-color-neutral-300);
+  --wds-line-brand: var(--wds-color-purple-500);
+  --wds-line-focused: var(--wds-color-neutral-900);
+
+  /* ===================================
+   * SEMANTIC - Status
+   * =================================== */
+  --wds-status-error: var(--wds-color-red-500);
+  --wds-status-error-weak: var(--wds-color-red-50);
+  --wds-status-success: var(--wds-color-green-500);
+  --wds-status-success-weak: var(--wds-color-green-50);
+  --wds-status-warning: var(--wds-color-yellow-500);
+
+  /* ===================================
+   * SEMANTIC - Interaction
+   * =================================== */
+  --wds-interaction-hover: rgba(0, 0, 0, 0.05);
+  --wds-interaction-pressed: rgba(0, 0, 0, 0.10);
+  --wds-interaction-focused: rgba(0, 0, 0, 0.12);
+
+  /* ===================================
+   * SPACING (4px grid)
+   * =================================== */
+  --wds-spacing-0: 0px;
+  --wds-spacing-1: 1px;
+  --wds-spacing-2: 2px;
+  --wds-spacing-4: 4px;
+  --wds-spacing-6: 6px;
+  --wds-spacing-8: 8px;
+  --wds-spacing-10: 10px;
+  --wds-spacing-12: 12px;
+  --wds-spacing-16: 16px;
+  --wds-spacing-20: 20px;
+  --wds-spacing-24: 24px;
+  --wds-spacing-28: 28px;
+  --wds-spacing-32: 32px;
+  --wds-spacing-40: 40px;
+  --wds-spacing-48: 48px;
+  --wds-spacing-56: 56px;
+  --wds-spacing-64: 64px;
+  --wds-spacing-80: 80px;
+
+  /* ===================================
+   * RADIUS
+   * =================================== */
+  --wds-radius-none: 0px;
+  --wds-radius-xs: 4px;
+  --wds-radius-sm: 8px;
+  --wds-radius-md: 12px;
+  --wds-radius-lg: 16px;
+  --wds-radius-xl: 20px;
+  --wds-radius-2xl: 24px;
+  --wds-radius-28: 28px; /* bottom-sheet top corners (§10) */
+  --wds-radius-full: 9999px;
+
+  /* ===================================
+   * TYPOGRAPHY
+   * =================================== */
+  --wds-font-family-primary: 'Pretendard', -apple-system, 'SF Pro Display', 'Apple SD Gothic Neo', sans-serif;
+  --wds-font-family-system: 'SF Pro Display', -apple-system, sans-serif;
+
+  --wds-font-weight-regular: 400;
+  --wds-font-weight-medium: 500;
+  --wds-font-weight-semibold: 600;
+  --wds-font-weight-bold: 700;
+
+  --wds-font-size-3xs: 10px;
+  --wds-font-size-2xs: 11px;
+  --wds-font-size-xs: 12px;
+  --wds-font-size-sm: 13px;
+  --wds-font-size-md: 14px;
+  --wds-font-size-lg: 16px;
+  --wds-font-size-xl: 18px;
+  --wds-font-size-2xl: 20px;
+  --wds-font-size-3xl: 24px;
+  --wds-font-size-4xl: 27px;
+  --wds-font-size-5xl: 32px;
+  --wds-font-size-6xl: 36px;
+
+  --wds-line-height-tight: 1.2;
+  --wds-line-height-snug: 1.35;
+  --wds-line-height-normal: 1.4;
+  --wds-line-height-relaxed: 1.5;
+  --wds-line-height-loose: 1.6;
+
+  /* ===================================
+   * PROFILE EDIT (§5) — concrete aliases
+   * Source: docs/designs/component-patterns.md §5
+   * =================================== */
+  --pe-input-fill: #F7F7F7;           /* 닉네임 filled rounded box bg */
+  --pe-input-border: #F1F1F1;         /* 닉네임 box border */
+  --pe-save-disabled: #F1F1F1;        /* 저장 비활성 배경 */
+  --pe-save-disabled-label: #B5B8BF;  /* 저장 비활성 라벨 */
+  --pe-save-active: #262626;          /* 저장 활성 배경 */
+  --pe-save-active-label: #FFFFFF;    /* 저장 활성 라벨 */
+  --pe-camera-badge-fill: #E2E2E2;    /* 카메라 배지 */
+  --pe-sheet-handle: #A7A7A7;         /* 바텀시트 핸들 */
+  --pe-destructive-text: #D92800;     /* "사진 삭제" 빨간 텍스트 */
+  --pe-confirm-btn: #262626;          /* 나가기 확인 "확인" 버튼 */
+  --pe-surface-hover: #F1F1F1;        /* 나가기 확인 "취소" 버튼 배경 */
+
+  /* ===================================
+   * MY PROFILE (§3) — Figma-verified aliases
+   * Source: Figma MY_게시물탭_기본 (375x812)
+   * =================================== */
+  --background_primary: #FFFFFF;
+  --surface_secondary: #F7F7F7;
+  --surface_button: #F1F1F1;
+  --surface_white: #FFFFFF;
+  --outline_primary: #F1F1F1;
+  --text_primary: #262626;
+  --text_secondary: #656565;
+  --text_tertiary: #8A8A8A;
+  --text_white: #FFFFFF;
+  --profile_avatar_empty_bg: #F5F3FF;
+  --profile_avatar_border: rgba(136, 136, 136, 0.2);
+}

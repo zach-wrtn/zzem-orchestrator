@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>app-006 · OtherUserProfile Prototype</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+  <style>
+    /* ==================================================
+     * Design Tokens (inlined from prototypes/context/tokens.css)
+     * ================================================== */
+    :root {
+      /* PRIMITIVE - Purple (Brand) */
+      --wds-color-purple-50: #F5F0FF;
+      --wds-color-purple-100: #EBE1FF;
+      --wds-color-purple-500: #8752FA;
+      --wds-color-purple-600: #7040E0;
+
+      /* PRIMITIVE - Neutral */
+      --wds-color-neutral-0: #FFFFFF;
+      --wds-color-neutral-50: #F7F8F9;
+      --wds-color-neutral-100: #F0F1F3;
+      --wds-color-neutral-200: #E4E5E9;
+      --wds-color-neutral-300: #D1D3D8;
+      --wds-color-neutral-400: #B5B8BF;
+      --wds-color-neutral-500: #8E9199;
+      --wds-color-neutral-600: #6B6E76;
+      --wds-color-neutral-700: #4D5058;
+      --wds-color-neutral-800: #35373E;
+      --wds-color-neutral-900: #212228;
+      --wds-color-neutral-1000: #000000;
+
+      /* PRIMITIVE - Status */
+      --wds-color-red-500: #FF3B30;
+      --wds-color-green-500: #34C759;
+
+      /* SEMANTIC - Background */
+      --wds-background-normal: #FFFFFF;
+      --wds-background-dimmed: rgba(0, 0, 0, 0.40);
+
+      /* SEMANTIC - Surface */
+      --wds-surface-primary: #FFFFFF;
+      --wds-surface-secondary: #F7F8F9;
+      --wds-surface-tertiary: #F0F1F3;
+      --wds-surface-button: #F1F1F1;
+
+      /* SEMANTIC - Fill */
+      --wds-fill-brand-primary: #8752FA;
+      --wds-fill-brand-weak: #F5F0FF;
+      --wds-fill-neutral-primary: #212228;
+      --wds-fill-neutral-secondary: #F0F1F3;
+      --wds-fill-neutral-tertiary: #F7F8F9;
+
+      /* SEMANTIC - Label */
+      --wds-label-normal: #212228;
+      --wds-label-strong: #000000;
+      --wds-label-alternative: #6B6E76;
+      --wds-label-assistive: #8E9199;
+      --wds-label-disabled: #D1D3D8;
+      --wds-label-inverse: #FFFFFF;
+      --wds-label-brand: #8752FA;
+      --wds-text-primary: #262626;
+
+      /* SEMANTIC - Line */
+      --wds-line-normal: #E4E5E9;
+      --wds-line-alternative: #F0F1F3;
+      --wds-line-strong: #D1D3D8;
+      --wds-line-brand: #8752FA;
+
+      /* SEMANTIC - Status */
+      --wds-status-error: #FF3B30;
+      --wds-status-success: #34C759;
+
+      /* SPACING (4px grid) */
+      --wds-spacing-4: 4px;
+      --wds-spacing-8: 8px;
+      --wds-spacing-12: 12px;
+      --wds-spacing-16: 16px;
+      --wds-spacing-20: 20px;
+      --wds-spacing-24: 24px;
+      --wds-spacing-32: 32px;
+      --wds-spacing-40: 40px;
+      --wds-spacing-48: 48px;
+
+      /* RADIUS */
+      --wds-radius-xs: 4px;
+      --wds-radius-sm: 8px;
+      --wds-radius-md: 12px;
+      --wds-radius-lg: 16px;
+      --wds-radius-xl: 20px;
+      --wds-radius-2xl: 24px;
+      --wds-radius-28: 28px;
+      --wds-radius-full: 9999px;
+
+      /* TYPOGRAPHY */
+      --wds-font-family-primary: 'Pretendard', -apple-system, 'SF Pro Display', 'Apple SD Gothic Neo', sans-serif;
+      --wds-font-weight-regular: 400;
+      --wds-font-weight-medium: 500;
+      --wds-font-weight-semibold: 600;
+      --wds-font-weight-bold: 700;
+    }
+
+    /* ================================================== */
+    /* Reset */
+    /* ================================================== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    button { background: none; border: none; cursor: pointer; font-family: inherit; }
+    ul { list-style: none; }
+
+    body {
+      font-family: var(--wds-font-family-primary);
+      background: #f0f0f0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 16px;
+      color: var(--wds-label-normal);
+    }
+
+    /* ================================================== */
+    /* Control Panel */
+    /* ================================================== */
+    .control-panel {
+      width: 390px;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      border-radius: 12px 12px 0 0;
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 13px;
+    }
+    .control-panel__row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .control-panel__label {
+      color: #888;
+      font-size: 11px;
+      min-width: 48px;
+    }
+    .control-panel select {
+      background: #2a2a3e;
+      color: #e0e0e0;
+      border: 1px solid #444;
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 12px;
+      flex: 1;
+    }
+    .control-panel__states {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+    .control-panel__state-btn {
+      background: #2a2a3e;
+      color: #aaa;
+      border: 1px solid #444;
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .control-panel__state-btn.active {
+      background: var(--wds-color-purple-500);
+      color: #fff;
+      border-color: var(--wds-color-purple-500);
+    }
+    .control-panel__breadcrumb {
+      color: #888;
+      font-size: 11px;
+      font-family: monospace;
+    }
+
+    /* ================================================== */
+    /* Device Frame */
+    /* ================================================== */
+    .device-frame {
+      width: 390px;
+      height: 844px;
+      background: var(--wds-background-normal);
+      overflow: hidden;
+      position: relative;
+      border: 1px solid #ddd;
+      border-radius: 0 0 12px 12px;
+    }
+
+    .screen {
+      display: none;
+      flex-direction: column;
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0; left: 0;
+    }
+    .screen.active { display: flex; }
+
+    /* ================================================== */
+    /* Animations */
+    /* ================================================== */
+    @keyframes slideLeftIn {
+      from { transform: translateX(100%); }
+      to { transform: translateX(0); }
+    }
+    @keyframes slideRightIn {
+      from { transform: translateX(-100%); }
+      to { transform: translateX(0); }
+    }
+    @keyframes slideUpIn {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+    @keyframes slideDownOut {
+      from { transform: translateY(0); }
+      to { transform: translateY(100%); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    .transition-slide-left { animation: slideLeftIn 0.3s ease-out; }
+    .transition-slide-right { animation: slideRightIn 0.3s ease-out; }
+    .transition-slide-up { animation: slideUpIn 0.28s ease-out; }
+    .transition-slide-down { animation: slideDownOut 0.22s ease-in; }
+    .transition-fade { animation: fadeIn 0.2s ease-out; }
+
+    /* ================================================== */
+    /* State Visibility */
+    /* ================================================== */
+    [data-state] { display: none; }
+    [data-state].state-active { display: flex; }
+
+    /* ================================================== */
+    /* StatusBar */
+    /* ================================================== */
+    .status-bar {
+      height: 44px;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 15px;
+      font-weight: var(--wds-font-weight-semibold);
+      color: var(--wds-label-normal);
+      background: var(--wds-background-normal);
+      flex-shrink: 0;
+    }
+    .status-bar__icons {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      font-size: 14px;
+    }
+
+    /* ================================================== */
+    /* TopBar */
+    /* ================================================== */
+    .top-bar {
+      height: 56px;
+      padding: 0 4px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--wds-background-normal);
+      border-bottom: 1px solid var(--wds-line-alternative);
+      flex-shrink: 0;
+    }
+    .icon-btn {
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--wds-label-normal);
+      font-size: 20px;
+      border-radius: var(--wds-radius-full);
+      transition: background 0.15s;
+    }
+    .icon-btn:active { background: rgba(0,0,0,0.05); }
+    .top-bar__title {
+      flex: 1;
+      text-align: center;
+      font-size: 16px;
+      font-weight: var(--wds-font-weight-semibold);
+      color: var(--wds-label-normal);
+    }
+
+    /* ================================================== */
+    /* Body / Scroll */
+    /* ================================================== */
+    .body-scroll {
+      flex: 1;
+      overflow-y: auto;
+      background: var(--wds-background-normal);
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* ================================================== */
+    /* Profile Section */
+    /* ================================================== */
+    .profile-section {
+      padding: 24px 16px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+    .avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: var(--wds-radius-full);
+      background: linear-gradient(135deg, #D4C0FF 0%, #A17BFF 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #FFFFFF;
+      font-size: 36px;
+      font-weight: var(--wds-font-weight-bold);
+      letter-spacing: -0.5px;
+    }
+    .nickname-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .nickname {
+      font-size: 20px;
+      font-weight: var(--wds-font-weight-bold);
+      color: var(--wds-label-normal);
+      line-height: 1.35;
+      letter-spacing: -0.2px;
+    }
+    .verified-badge {
+      width: 16px;
+      height: 16px;
+      border-radius: var(--wds-radius-full);
+      background: var(--wds-fill-brand-primary);
+      color: #FFFFFF;
+      font-size: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: var(--wds-font-weight-bold);
+    }
+    .count-row {
+      display: flex;
+      width: 100%;
+      padding: 8px 16px 4px;
+      gap: 0;
+    }
+    .count-tile {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+    .count-tile__value {
+      font-size: 20px;
+      font-weight: var(--wds-font-weight-semibold);
+      color: var(--wds-label-normal);
+      line-height: 1.4;
+      letter-spacing: -0.2px;
+    }
+    .count-tile__label {
+      font-size: 13px;
+      font-weight: var(--wds-font-weight-medium);
+      color: var(--wds-label-alternative);
+      line-height: 1.4;
+    }
+
+    /* ================================================== */
+    /* Tab Bar (single tab) */
+    /* ================================================== */
+    .tab-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 48px;
+      border-bottom: 1px solid var(--wds-line-alternative);
+      background: var(--wds-background-normal);
+    }
+    .tab {
+      min-width: 60px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: var(--wds-font-weight-semibold);
+      color: var(--wds-label-alternative);
+      position: relative;
+      padding: 0 16px;
+    }
+    .tab.active {
+      color: var(--wds-text-primary);
+    }
+    .tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 16px;
+      right: 16px;
+      height: 2px;
+      background: var(--wds-text-primary);
+      border-radius: 2px 2px 0 0;
+    }
+
+    /* ================================================== */
+    /* Feed Grid */
+    /* ================================================== */
+    .feed-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: var(--wds-line-alternative);
+      padding: 1px 0 0 0;
+    }
+    .feed-item {
+      position: relative;
+      background: var(--wds-fill-neutral-secondary);
+      overflow: hidden;
+      border-radius: 0;
+      display: block;
+    }
+    .feed-item.aspect-1-1 { aspect-ratio: 1 / 1; }
+    .feed-item.aspect-4-5 { aspect-ratio: 4 / 5; }
+    .feed-item__thumb {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      color: rgba(255, 255, 255, 0.85);
+      font-weight: var(--wds-font-weight-bold);
+    }
+    .thumb-grad-1 { background: linear-gradient(135deg, #FFB8B0 0%, #FF6B63 100%); }
+    .thumb-grad-2 { background: linear-gradient(135deg, #B899FF 0%, #7040E0 100%); }
+    .thumb-grad-3 { background: linear-gradient(135deg, #FFE480 0%, #FFB800 100%); }
+    .thumb-grad-4 { background: linear-gradient(135deg, #7DE596 0%, #28A745 100%); }
+    .thumb-grad-5 { background: linear-gradient(135deg, #80BFFF 0%, #007AFF 100%); }
+    .thumb-grad-6 { background: linear-gradient(135deg, #FFC5C2 0%, #D93025 100%); }
+    .thumb-grad-7 { background: linear-gradient(135deg, #EBE1FF 0%, #8752FA 100%); }
+    .thumb-grad-8 { background: linear-gradient(135deg, #35373E 0%, #000000 100%); }
+
+    /* ================================================== */
+    /* Empty State */
+    /* ================================================== */
+    .empty-state {
+      padding: 48px 24px 80px;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 12px;
+      text-align: center;
+    }
+    .empty-state__icon {
+      width: 64px;
+      height: 64px;
+      border-radius: var(--wds-radius-full);
+      background: var(--wds-fill-neutral-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 30px;
+      margin-bottom: 4px;
+      color: var(--wds-label-assistive);
+    }
+    .empty-state__title {
+      font-size: 16px;
+      font-weight: var(--wds-font-weight-semibold);
+      color: var(--wds-label-normal);
+      line-height: 1.5;
+    }
+    .empty-state__description {
+      font-size: 13px;
+      font-weight: var(--wds-font-weight-medium);
+      color: var(--wds-label-alternative);
+      line-height: 1.5;
+      max-width: 260px;
+    }
+
+    /* ================================================== */
+    /* Error State (full screen) */
+    /* ================================================== */
+    .error-state {
+      position: absolute;
+      inset: 0;
+      background: var(--wds-background-normal);
+      flex-direction: column;
+      z-index: 50;
+    }
+    .error-state__body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 120px 24px 24px;
+      gap: 12px;
+      text-align: center;
+    }
+    .error-state__icon {
+      width: 72px;
+      height: 72px;
+      border-radius: var(--wds-radius-full);
+      background: var(--wds-fill-neutral-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+    .error-state__title {
+      font-size: 20px;
+      font-weight: var(--wds-font-weight-semibold);
+      color: var(--wds-label-normal);
+      line-height: 1.5;
+    }
+    .error-state__description {
+      font-size: 14px;
+      font-weight: var(--wds-font-weight-regular);
+      color: var(--wds-label-alternative);
+      line-height: 1.4;
+      max-width: 280px;
+      margin-bottom: 24px;
+    }
+    .btn-secondary {
+      padding: 12px 24px;
+      background: var(--wds-fill-neutral-secondary);
+      color: var(--wds-label-normal);
+      border-radius: var(--wds-radius-md);
+      font-size: 14px;
+      font-weight: var(--wds-font-weight-semibold);
+      min-width: 160px;
+      transition: background 0.15s;
+    }
+    .btn-secondary:active { background: var(--wds-line-strong); }
+
+    /* ================================================== */
+    /* Skeleton */
+    /* ================================================== */
+    .skeleton-bar {
+      background: linear-gradient(90deg, #F0F1F3 25%, #E4E5E9 50%, #F0F1F3 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+      border-radius: var(--wds-radius-xs);
+    }
+    .skeleton-avatar {
+      width: 100px; height: 100px;
+      border-radius: var(--wds-radius-full);
+    }
+    .skeleton-nickname { width: 120px; height: 24px; }
+    .skeleton-counts {
+      display: flex;
+      width: 100%;
+      gap: 0;
+      padding: 8px 16px;
+    }
+    .skeleton-count-tile {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .skeleton-count-value { width: 40px; height: 20px; }
+    .skeleton-count-label { width: 36px; height: 13px; }
+
+    /* ================================================== */
+    /* Overlay & ActionSheet */
+    /* ================================================== */
+    .overlay-backdrop {
+      display: none;
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 100;
+    }
+    .overlay-backdrop.active {
+      display: block;
+      animation: fadeIn 0.2s ease-out;
+    }
+    .overlay-content {
+      display: none;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 101;
+    }
+    .overlay-content.active { display: block; }
+
+    .action-sheet {
+      background: var(--wds-surface-primary);
+      border-radius: var(--wds-radius-28) var(--wds-radius-28) 0 0;
+      padding: 8px 8px 20px;
+      box-shadow: 0 -4px 24px rgba(0,0,0,0.08);
+    }
+    .action-sheet__handle {
+      width: 36px;
+      height: 4px;
+      background: var(--wds-line-strong);
+      border-radius: var(--wds-radius-full);
+      margin: 0 auto 8px;
+    }
+    .menu-list {
+      display: flex;
+      flex-direction: column;
+      padding: 0 8px;
+      margin-bottom: 12px;
+    }
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 8px;
+      border-radius: var(--wds-radius-sm);
+      color: var(--wds-label-normal);
+      font-size: 16px;
+      font-weight: var(--wds-font-weight-medium);
+      line-height: 1.5;
+      text-align: left;
+      transition: background 0.15s;
+      width: 100%;
+    }
+    .menu-item:active { background: rgba(0, 0, 0, 0.05); }
+    .menu-item__icon {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      color: var(--wds-label-normal);
+    }
+    .menu-item__label { flex: 1; }
+    .sheet-cancel {
+      margin: 0 8px;
+      width: calc(100% - 16px);
+    }
+
+    /* ================================================== */
+    /* Toast */
+    /* ================================================== */
+    .toast {
+      display: none;
+      position: absolute;
+      left: 50%;
+      bottom: 40px;
+      transform: translateX(-50%);
+      background: var(--wds-fill-neutral-primary);
+      color: var(--wds-label-inverse);
+      padding: 14px 20px;
+      border-radius: var(--wds-radius-md);
+      font-size: 14px;
+      font-weight: var(--wds-font-weight-medium);
+      line-height: 1.4;
+      z-index: 200;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.16);
+      white-space: nowrap;
+    }
+    .toast.active {
+      display: block;
+      animation: fadeIn 0.2s ease-out;
+    }
+    .toast.fading {
+      animation: fadeOut 0.35s ease-in forwards;
+    }
+
+    /* Mobile fullscreen */
+    @media (max-width: 480px) {
+      body { padding: 0; align-items: stretch; min-height: 100dvh; }
+      .control-panel { display: none; }
+      .device-frame {
+        width: 100dvw;
+        height: 100dvh;
+        border: none;
+        border-radius: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Control Panel -->
+  <div class="control-panel">
+    <div class="control-panel__row">
+      <span class="control-panel__label">Screen</span>
+      <select id="screen-select" onchange="navigateBySelect(this.value)">
+        <option value="OtherUserProfileScreen">OtherUserProfileScreen</option>
+      </select>
+    </div>
+    <div class="control-panel__row">
+      <span class="control-panel__label">State</span>
+      <div class="control-panel__states" id="state-toggles">
+        <button class="control-panel__state-btn active" data-state="default" onclick="toggleState('default')">default</button>
+        <button class="control-panel__state-btn" data-state="loading" onclick="toggleState('loading')">loading</button>
+        <button class="control-panel__state-btn" data-state="empty-no-posts" onclick="toggleState('empty-no-posts')">empty-no-posts</button>
+        <button class="control-panel__state-btn" data-state="error-not-found" onclick="toggleState('error-not-found')">error-not-found</button>
+        <button class="control-panel__state-btn" data-state="more-action-sheet" onclick="toggleState('more-action-sheet')">more-action-sheet</button>
+        <button class="control-panel__state-btn" data-state="url-copied-toast" onclick="toggleState('url-copied-toast')">url-copied-toast</button>
+      </div>
+    </div>
+    <div class="control-panel__row">
+      <span class="control-panel__breadcrumb" id="breadcrumb">OtherUserProfileScreen</span>
+    </div>
+  </div>
+
+  <!-- Device Frame -->
+  <div class="device-frame" id="device-frame">
+
+    <!-- ====================================================== -->
+    <!-- Screen: OtherUserProfileScreen                         -->
+    <!-- ====================================================== -->
+    <section class="screen" id="OtherUserProfileScreen">
+
+      <!-- StatusBar -->
+      <div class="status-bar" id="status-bar">
+        <span>9:41</span>
+        <span class="status-bar__icons">
+          <span>●●●●●</span>
+          <span>📶</span>
+          <span>🔋</span>
+        </span>
+      </div>
+
+      <!-- TopBar -->
+      <header class="top-bar" id="top-bar">
+        <button class="icon-btn" id="back-button" aria-label="뒤로 가기" onclick="goBack()">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+        <div class="top-bar__title" aria-hidden="true"></div>
+        <button class="icon-btn" id="more-button" aria-label="더보기 메뉴 열기" onclick="openMoreSheet()">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+        </button>
+      </header>
+
+      <!-- Body -->
+      <main class="body-scroll" id="body">
+
+        <!-- Profile Section : default / empty-no-posts -->
+        <section class="profile-section" data-state="default" id="profile-section-default">
+          <div class="avatar" id="avatar" aria-label="프로필 이미지">밈</div>
+          <div class="nickname-row" id="nickname-row">
+            <h1 class="nickname" id="nickname">밈메이커</h1>
+            <span class="verified-badge" id="verified-badge" aria-label="인증된 계정">✓</span>
+          </div>
+        </section>
+
+        <!-- Count Row (default/empty-no-posts visible) -->
+        <div class="count-row" data-state="default" id="count-row-default">
+          <div class="count-tile" id="count-posts">
+            <span class="count-tile__value">12</span>
+            <span class="count-tile__label">게시물</span>
+          </div>
+          <div class="count-tile" id="count-followers">
+            <span class="count-tile__value">8.6천</span>
+            <span class="count-tile__label">팔로워</span>
+          </div>
+          <div class="count-tile" id="count-following">
+            <span class="count-tile__value">142</span>
+            <span class="count-tile__label">팔로잉</span>
+          </div>
+        </div>
+
+        <!-- Loading skeleton (replaces profile section) -->
+        <section class="profile-section" data-state="loading" id="profile-section-loading" style="gap: 12px;">
+          <div class="skeleton-bar skeleton-avatar"></div>
+          <div class="skeleton-bar skeleton-nickname"></div>
+        </section>
+        <div class="skeleton-counts" data-state="loading" id="skeleton-counts">
+          <div class="skeleton-count-tile">
+            <span class="skeleton-bar skeleton-count-value"></span>
+            <span class="skeleton-bar skeleton-count-label"></span>
+          </div>
+          <div class="skeleton-count-tile">
+            <span class="skeleton-bar skeleton-count-value"></span>
+            <span class="skeleton-bar skeleton-count-label"></span>
+          </div>
+          <div class="skeleton-count-tile">
+            <span class="skeleton-bar skeleton-count-value"></span>
+            <span class="skeleton-bar skeleton-count-label"></span>
+          </div>
+        </div>
+
+        <!-- TabBar (single-tab: 게시물) -->
+        <nav class="tab-bar" data-state="default" id="tab-bar-default">
+          <button class="tab active" id="tab-posts" role="tab" aria-selected="true">게시물</button>
+        </nav>
+        <nav class="tab-bar" data-state="loading" id="tab-bar-loading" style="border-bottom-color: transparent;">
+          <div class="skeleton-bar" style="width:48px; height:18px;"></div>
+        </nav>
+
+        <!-- TabContent: FeedGrid (default state) -->
+        <section class="feed-grid" data-state="default" id="feed-grid">
+          <button class="feed-item aspect-1-1" id="feed-item-1" onclick="navigateGridItem(1)" aria-label="게시물 1">
+            <div class="feed-item__thumb thumb-grad-1">🔥</div>
+          </button>
+          <button class="feed-item aspect-4-5" id="feed-item-2" onclick="navigateGridItem(2)" aria-label="게시물 2">
+            <div class="feed-item__thumb thumb-grad-2">✨</div>
+          </button>
+          <button class="feed-item aspect-4-5" id="feed-item-3" onclick="navigateGridItem(3)" aria-label="게시물 3">
+            <div class="feed-item__thumb thumb-grad-3">😂</div>
+          </button>
+          <button class="feed-item aspect-1-1" id="feed-item-4" onclick="navigateGridItem(4)" aria-label="게시물 4">
+            <div class="feed-item__thumb thumb-grad-4">🌱</div>
+          </button>
+          <button class="feed-item aspect-1-1" id="feed-item-5" onclick="navigateGridItem(5)" aria-label="게시물 5">
+            <div class="feed-item__thumb thumb-grad-5">🌊</div>
+          </button>
+          <button class="feed-item aspect-4-5" id="feed-item-6" onclick="navigateGridItem(6)" aria-label="게시물 6">
+            <div class="feed-item__thumb thumb-grad-6">🍜</div>
+          </button>
+          <button class="feed-item aspect-4-5" id="feed-item-7" onclick="navigateGridItem(7)" aria-label="게시물 7">
+            <div class="feed-item__thumb thumb-grad-7">💜</div>
+          </button>
+          <button class="feed-item aspect-1-1" id="feed-item-8" onclick="navigateGridItem(8)" aria-label="게시물 8">
+            <div class="feed-item__thumb thumb-grad-8">🌙</div>
+          </button>
+        </section>
+
+        <!-- TabContent: Skeleton Grid (loading state) -->
+        <section class="feed-grid" data-state="loading" id="skeleton-grid">
+          <div class="feed-item aspect-1-1"><div class="skeleton-bar" style="width:100%;height:100%;border-radius:0;"></div></div>
+          <div class="feed-item aspect-4-5"><div class="skeleton-bar" style="width:100%;height:100%;border-radius:0;"></div></div>
+          <div class="feed-item aspect-4-5"><div class="skeleton-bar" style="width:100%;height:100%;border-radius:0;"></div></div>
+          <div class="feed-item aspect-1-1"><div class="skeleton-bar" style="width:100%;height:100%;border-radius:0;"></div></div>
+          <div class="feed-item aspect-1-1"><div class="skeleton-bar" style="width:100%;height:100%;border-radius:0;"></div></div>
+          <div class="feed-item aspect-4-5"><div class="skeleton-bar" style="width:100%;height:100%;border-radius:0;"></div></div>
+        </section>
+
+        <!-- TabContent: Empty State (empty-no-posts) -->
+        <section class="empty-state" data-state="empty-no-posts" id="empty-state">
+          <div class="empty-state__icon" aria-hidden="true">🖼️</div>
+          <p class="empty-state__title">아직 게시물이 없어요</p>
+          <p class="empty-state__description">이 사용자는 아직 공개한 콘텐츠가 없어요.</p>
+        </section>
+
+      </main>
+
+      <!-- Error State (full-screen overlay on error-not-found) -->
+      <section class="error-state" data-state="error-not-found" id="error-state">
+        <div class="status-bar">
+          <span>9:41</span>
+          <span class="status-bar__icons"><span>●●●●●</span><span>📶</span><span>🔋</span></span>
+        </div>
+        <header class="top-bar">
+          <button class="icon-btn" id="error-top-back" aria-label="뒤로 가기" onclick="goBack()">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          </button>
+          <div class="top-bar__title"></div>
+          <div style="width:44px;height:44px;"></div>
+        </header>
+        <div class="error-state__body">
+          <div class="error-state__icon" aria-hidden="true">🔍</div>
+          <h2 class="error-state__title">사용자를 찾을 수 없어요</h2>
+          <p class="error-state__description">존재하지 않거나 비공개된 프로필이에요.</p>
+          <button class="btn-secondary" id="error-back-cta" onclick="goBack()">돌아가기</button>
+        </div>
+      </section>
+
+      <!-- Toast (url-copied-toast) -->
+      <div class="toast" id="toast" role="status" aria-live="polite">프로필 URL이 복사되었어요</div>
+
+      <!-- Overlay Backdrop -->
+      <div class="overlay-backdrop" id="overlay-backdrop" onclick="closeMoreSheet()"></div>
+
+      <!-- More Action Sheet (more-action-sheet) -->
+      <div class="overlay-content" id="more-action-sheet" role="dialog" aria-label="더보기 메뉴">
+        <div class="action-sheet">
+          <div class="action-sheet__handle" aria-hidden="true"></div>
+          <ul class="menu-list">
+            <li>
+              <button class="menu-item" id="more-item-copy-url" onclick="copyProfileUrl()">
+                <span class="menu-item__icon" aria-hidden="true">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                </span>
+                <span class="menu-item__label">프로필 URL 복사</span>
+              </button>
+            </li>
+          </ul>
+          <button class="btn-secondary sheet-cancel" id="more-cancel" onclick="closeMoreSheet()">취소</button>
+        </div>
+      </div>
+
+    </section>
+  </div>
+
+  <script>
+    // ======= State =======
+    let currentScreen = null;
+    let currentState = 'default';
+    const navHistory = [];
+    let toastTimer = null;
+
+    // ======= Navigation =======
+    function navigate(screenId, transition = 'slide-left') {
+      const target = document.getElementById(screenId);
+      if (!target || (currentScreen && currentScreen.id === screenId)) return;
+      if (currentScreen) {
+        navHistory.push(currentScreen.id);
+        currentScreen.classList.remove('active');
+        currentScreen.className = currentScreen.className.replace(/transition-\S+/g, '');
+      }
+      target.classList.add('active');
+      if (transition !== 'none') {
+        target.classList.add('transition-' + transition);
+        target.addEventListener('animationend', function handler() {
+          target.classList.remove('transition-' + transition);
+          target.removeEventListener('animationend', handler);
+        });
+      }
+      currentScreen = target;
+      applyState(screenId, 'default');
+      updateControlPanel();
+    }
+
+    function goBack() {
+      // In this single-screen prototype, "goBack" resets to default state.
+      if (currentScreen && currentScreen.id === 'OtherUserProfileScreen') {
+        closeMoreSheet();
+        applyState('OtherUserProfileScreen', 'default');
+        updateControlPanel();
+        flashBreadcrumb('← back');
+        return;
+      }
+      if (navHistory.length === 0) return;
+      const prevId = navHistory.pop();
+      const target = document.getElementById(prevId);
+      if (!target) return;
+      if (currentScreen) currentScreen.classList.remove('active');
+      target.classList.add('active', 'transition-slide-right');
+      target.addEventListener('animationend', function handler() {
+        target.classList.remove('transition-slide-right');
+        target.removeEventListener('animationend', handler);
+      });
+      currentScreen = target;
+      applyState(prevId, 'default');
+      updateControlPanel();
+    }
+
+    function navigateBySelect(screenId) {
+      navigate(screenId, 'fade');
+    }
+
+    // ======= State handling =======
+    // In addition to the standard data-state visibility, this prototype
+    // also treats some states (more-action-sheet, url-copied-toast) as
+    // "modifier" states layered on top of the default body.
+    function applyState(screenId, stateName) {
+      const screen = document.getElementById(screenId);
+      if (!screen) return;
+
+      // Default mapping for regular states
+      const baseState =
+        stateName === 'more-action-sheet' || stateName === 'url-copied-toast'
+          ? 'default'
+          : stateName;
+
+      screen.querySelectorAll('[data-state]').forEach(el => {
+        el.classList.toggle('state-active', el.dataset.state === baseState);
+      });
+
+      // Overlay / toast behaviour
+      const backdrop = screen.querySelector('#overlay-backdrop');
+      const sheet = screen.querySelector('#more-action-sheet');
+      const toast = screen.querySelector('#toast');
+
+      // Reset layered UI
+      if (backdrop) backdrop.classList.remove('active');
+      if (sheet) {
+        sheet.classList.remove('active', 'transition-slide-up', 'transition-slide-down');
+      }
+      if (toast) {
+        toast.classList.remove('active', 'fading');
+        if (toastTimer) { clearTimeout(toastTimer); toastTimer = null; }
+      }
+
+      if (stateName === 'more-action-sheet') {
+        if (backdrop) backdrop.classList.add('active');
+        if (sheet) {
+          sheet.classList.add('active', 'transition-slide-up');
+        }
+      }
+      if (stateName === 'url-copied-toast') {
+        if (toast) {
+          toast.classList.add('active');
+          toastTimer = setTimeout(() => {
+            toast.classList.add('fading');
+            toast.addEventListener('animationend', function handler() {
+              toast.classList.remove('active', 'fading');
+              toast.removeEventListener('animationend', handler);
+              if (currentState === 'url-copied-toast') {
+                currentState = 'default';
+                updateStateButtons();
+              }
+            }, { once: true });
+          }, 2000);
+        }
+      }
+
+      currentState = stateName;
+      updateStateButtons();
+    }
+
+    function toggleState(stateName) {
+      if (!currentScreen) return;
+      applyState(currentScreen.id, stateName);
+    }
+
+    // ======= Sheet / Toast helpers =======
+    function openMoreSheet() {
+      applyState('OtherUserProfileScreen', 'more-action-sheet');
+    }
+    function closeMoreSheet() {
+      const sheet = document.getElementById('more-action-sheet');
+      const backdrop = document.getElementById('overlay-backdrop');
+      if (sheet && sheet.classList.contains('active')) {
+        sheet.classList.remove('transition-slide-up');
+        sheet.classList.add('transition-slide-down');
+        sheet.addEventListener('animationend', function handler() {
+          sheet.classList.remove('active', 'transition-slide-down');
+          sheet.removeEventListener('animationend', handler);
+        }, { once: true });
+      }
+      if (backdrop) {
+        setTimeout(() => backdrop.classList.remove('active'), 180);
+      }
+      if (currentState === 'more-action-sheet') {
+        currentState = 'default';
+        updateStateButtons();
+      }
+    }
+
+    function copyProfileUrl() {
+      const userId = 'user_42';
+      const url = 'zzem://profile/' + userId;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).catch(() => {});
+      }
+      closeMoreSheet();
+      // Give the sheet a beat to animate out, then pop the toast.
+      setTimeout(() => applyState('OtherUserProfileScreen', 'url-copied-toast'), 180);
+    }
+
+    function navigateGridItem(n) {
+      // In a full prototype this would navigate to OtherUserSwipeFeed (app-008).
+      flashBreadcrumb('feed-item-' + n + ' → OtherUserSwipeFeed');
+    }
+
+    // ======= Control Panel =======
+    function updateControlPanel() {
+      if (!currentScreen) return;
+      const select = document.getElementById('screen-select');
+      if (select) select.value = currentScreen.id;
+      const crumb = document.getElementById('breadcrumb');
+      if (crumb) crumb.textContent = [...navHistory, currentScreen.id].join(' → ');
+      updateStateButtons();
+    }
+    function updateStateButtons() {
+      document.querySelectorAll('.control-panel__state-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.state === currentState);
+      });
+    }
+    function flashBreadcrumb(msg) {
+      const crumb = document.getElementById('breadcrumb');
+      if (!crumb) return;
+      const original = crumb.textContent;
+      crumb.textContent = msg;
+      setTimeout(() => { crumb.textContent = original; }, 1400);
+    }
+
+    // ======= Init =======
+    document.addEventListener('DOMContentLoaded', () => {
+      const firstScreen = document.querySelector('.screen');
+      if (firstScreen) {
+        firstScreen.classList.add('active');
+        currentScreen = firstScreen;
+        applyState(firstScreen.id, 'default');
+        updateControlPanel();
+      }
+    });
+  </script>
+
+</body>
+</html>

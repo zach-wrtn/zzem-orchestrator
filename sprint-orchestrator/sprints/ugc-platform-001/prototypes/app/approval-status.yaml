@@ -1,0 +1,125 @@
+sprint_id: ugc-platform-001
+tasks:
+  app-003:
+    MyProfileScreen:
+      status: approved
+      spec: "app-003/MyProfileScreen.spec.md"
+      prototype: "app-003/prototype.html#MyProfileScreen"
+      states_captured: [public-default, public-empty, private-default, private-empty, liked-empty, loading, error]
+      quality_score: "1.0"
+      fabrication_risk: "none"
+      reviewed_at: "2026-04-22"
+      notes: "Figma 37160:78421 기반 재작성. HeaderBar 48px, icon-only 3탭(media/lock/heart), count 팔로워/팔로잉/재생성된, 2-col flex 그리드(1/1·4/5 교차), BottomNavigation_Home 3탭(Home/Search/My+dot). Figma 구조와 1:1 매칭."
+  app-004:
+    SettingsScreen:
+      status: approved
+      spec: "app-004/SettingsScreen.spec.md"
+      prototype: "app-004/prototype.html#SettingsScreen"
+      states_captured: [default]
+      quality_score: "1.0"
+      fabrication_risk: "none"
+      reviewed_at: "2026-04-22"
+      notes: "Figma 37174:21780 기반 재작성. 3그룹 구조(계정 → 알림/차단/고객센터/약관/개인정보 → 탈퇴/버전), Google 배지 인라인, 앱버전 1.1.1. DRIFT-01: 고객센터 행은 Figma에 있으나 PRD 누락 → Phase 3.4 amendment 대상."
+    ComingSoonScreen:
+      status: approved
+      spec: "app-004/ComingSoonScreen.spec.md"
+      prototype: "app-004/prototype.html#NotificationSettingsPlaceholder"
+      states_captured: [coming-soon-notification, coming-soon-block, coming-soon-customer-service]
+      quality_score: "1.0"
+      fabrication_risk: "none"
+      reviewed_at: "2026-04-22"
+      notes: "Notification + Block + CustomerService 공용 placeholder. '준비 중' 단일 문구."
+  app-006:
+    OtherUserProfileScreen:
+      status: approved
+      spec: "app-006/OtherUserProfileScreen.spec.md"
+      prototype: "app-006/prototype.html#OtherUserProfileScreen"
+      states_captured: [default, loading, empty-no-posts, error-not-found, more-action-sheet, url-copied-toast]
+      quality_score: "1.0"
+      fabrication_risk: "none"
+      reviewed_at: "2026-04-22"
+      notes: "Figma 37160:78423 기반 재작성. 탭 바 제거, count 팔로워/팔로잉/재생성된(MY 동일 패턴), 헤더에 아이디+이모지 인라인, BottomNavigation_Home 3탭. Baseline에 있던 '게시물/팔로워/팔로잉' 라벨이 오류였음 (수정)."
+    MoreActionSheet:
+      status: approved
+      spec: "app-006/MoreActionSheet.spec.md"
+      prototype: "app-006/prototype.html#more-action-sheet"
+      states_captured: [default, open, pressed]
+      quality_score: "1.0"
+      fabrication_risk: "none"
+      reviewed_at: "2026-04-22"
+      notes: "Figma §10 Bottom Sheet. 핸들 #a7a7a7, '프로필 URL 복사' 단일 메뉴(차단/신고 금지), Cancel 버튼 border-top 스타일."
+    ErrorNotFoundScreen:
+      status: approved
+      spec: "app-006/ErrorNotFoundScreen.spec.md"
+      prototype: "app-006/prototype.html (error-not-found state)"
+      states_captured: [default]
+      quality_score: "1.0"
+      fabrication_risk: "none"
+      reviewed_at: "2026-04-22"
+      notes: "userId 404 시 전체 화면 대체. HeaderBar 48px 변형 적용."
+  app-005:
+    ProfileEditScreen:
+      status: approved
+      spec: "app-005/ProfileEditScreen.spec.md"
+      prototype: "app-005/prototype.html#ProfileEditScreen"
+      states_captured: [default, nickname-valid, uploading, image-source-sheet, album-picker, crop, exit-confirm, toast, error]
+      quality_score: "1.0"
+      fabrication_risk: "none"
+      reviewed_at: "2026-04-22"
+      notes: "Figma 37160:79939 기반 재작성. Frame 375×812, 카메라 배지 4px white border, save disabled 텍스트 #C5C5C5(baseline #262626 수정), placeholder 김잼잼."
+    ImageSourceSheet:
+      status: approved
+      spec: "app-005/ImageSourceSheet.spec.md"
+      prototype: "app-005/prototype.html#ImageSourceSheet"
+      states_captured: [hidden, visible, dismissing]
+      quality_score: "1.0"
+      fabrication_risk: "none"
+      reviewed_at: "2026-04-22"
+      notes: "radius-top 28, 핸들 36×4, Cancel 버튼 border-top, '앨범에서 선택'."
+    CropScreen:
+      status: approved
+      spec: "app-005/CropScreen.spec.md"
+      prototype: "app-005/prototype.html#CropScreen"
+      states_captured: [default, adjusting, done]
+      quality_score: "1.0"
+      fabrication_risk: "none"
+      reviewed_at: "2026-04-22"
+      notes: "bg #1a1a1a, 타이틀 '사진 편집', split 취소/완료 text button."
+    AlbumPickerScreen:
+      status: approved
+      spec: "app-005/AlbumPickerScreen.spec.md"
+      prototype: "app-005/prototype.html#AlbumPickerScreen"
+      states_captured: [default, selected, album-dropdown-open]
+      quality_score: "1.0"
+      fabrication_risk: "none"
+      reviewed_at: "2026-04-22"
+      notes: "카메라 셀 bg #262626, back-arrow 아이콘, 3-col 그리드."
+    ExitConfirmSheet:
+      status: approved
+      spec: "app-005/ExitConfirmSheet.spec.md"
+      prototype: "app-005/prototype.html#ExitConfirmSheet"
+      states_captured: [hidden, visible]
+      quality_score: "1.0"
+      fabrication_risk: "none"
+      reviewed_at: "2026-04-22"
+      notes: "radius-top 28, 타이틀 '편집을 그만두시겠어요?', 확인 버튼 '나가기'."
+
+# ─────────────────────────────────────────────────────────────────────────
+# PRD Drift Discoveries (Phase 3.4 Amendment 대상)
+# ─────────────────────────────────────────────────────────────────────────
+prd_drift:
+  - id: DRIFT-01
+    source: figma 37174:21780 (Settings)
+    finding: "'고객센터' 메뉴 행이 Figma Settings에 존재. PRD §4 Settings 7메뉴 목록에는 없음."
+    impact: "Settings 메뉴 8개로 증가. ComingSoon placeholder로 라우팅 예정."
+    resolution: "Phase 3.4 PRD Amendment에서 §4 목록에 추가. destination/라우팅 정책 사용자 확인 필요."
+  - id: DRIFT-02
+    source: figma 37160:78423 (Other User Profile)
+    finding: "카운트 라벨이 '팔로워/팔로잉/재생성된' (MY 프로필과 동일). baseline v1에는 '게시물/팔로워/팔로잉'으로 오기재."
+    impact: "MY·Other 두 화면이 동일 count row 패턴. PRD §6 Other User Profile 명세 텍스트 정합성 필요."
+    resolution: "Phase 3.4 PRD Amendment에서 PRD §6 카운트 항목 명시."
+  - id: DRIFT-03
+    source: figma 37160:79939 (Profile Edit - disabled state)
+    finding: "Save 버튼 disabled 상태 텍스트 컬러 #C5C5C5. Baseline은 #262626이라 활성처럼 보였음."
+    impact: "Dirty-state CTA 시각 구분 명확화."
+    resolution: "이미 revision에서 반영. PRD 변경 불필요, token 추가(--text_placeholder_disable)로 관리."

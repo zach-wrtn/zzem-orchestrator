@@ -1,0 +1,125 @@
+sprint_id: "ugc-platform-001"
+generated_at: "2026-04-22T17:30:00+09:00"
+
+deferred:
+  # PRD AC 부분 충족 (technical_limit)
+  - ac_id: "AC-2.3"
+    original_task: "sprint-orchestrator/sprints/ugc-platform-001/tasks/app/007-profile-share.md"
+    group: "group-003"
+    status: "partially_fulfilled"
+    reason: "Maestro 자동화 불가 (native sheet) — 코드 배선 완료, 수동 QA 미수행"
+    root_cause: "technical_limit"
+    prior_attempts: 1
+    evaluator_notes: "evaluations/group-003-evaluation.md — useShareMyProfile 호출 + buildProfileShareUrl 3/3 pass 확인"
+    suggested_approach: "다음 스프린트 Phase 5 PR 전 수동 QA 1회 (iOS + Android 양쪽 공유 시트 동작 + 웹 브릿지 URL 확인)"
+    priority: "medium"
+    estimated_complexity: "small"
+
+  - ac_id: "AC-7.4"
+    original_task: "sprint-orchestrator/sprints/ugc-platform-001/tasks/app/006-other-user-profile.md"
+    group: "group-003"
+    status: "partially_fulfilled"
+    reason: "Maestro 자동화 불가 (404 seed 주입 불가) — 코드 배선 완료, 수동 QA 미수행"
+    root_cause: "technical_limit"
+    prior_attempts: 1
+    evaluator_notes: "evaluations/group-003-evaluation.md — 404 핸들링 + ErrorNotFound 컴포넌트 존재 확인"
+    suggested_approach: "다음 스프린트 Phase 5 PR 전 수동 QA (임의의 존재하지 않는 userId 로 딥링크 진입 → 에러 화면 렌더 확인). 또는 mock test 추가"
+    priority: "medium"
+    estimated_complexity: "small"
+
+  # Minor 이슈 (follow-up 스프린트 이관)
+  - ac_id: "MINOR-G2-1"
+    original_task: "group-002 (evaluator Minor #1)"
+    group: "group-002"
+    status: "unfulfilled"
+    reason: "Home 헤더 gear icon 잔존 — Settings 진입 dual entry point (Home header + MY 프로필 우상단)"
+    root_cause: "spec_ambiguity"
+    prior_attempts: 0
+    evaluator_notes: "evaluations/group-002-evaluation.md#Minor 1 — 계약에 Home gear 제거 명시 없어 의도적 유지 가능성"
+    suggested_approach: "PRD 재확인 후 dual entry 유지 의도면 PASS 확정. 정리 필요 시 Home header gear 제거 + `home-to-settings.yaml` flow 를 MY 탭 경유로 완전 전환"
+    priority: "low"
+    estimated_complexity: "small"
+
+  - ac_id: "MINOR-G2-2"
+    original_task: "group-002 (evaluator Minor #2)"
+    group: "group-002"
+    status: "unfulfilled"
+    reason: "profile.screen.tsx::useEffect([landingTab]) race — counts API 지연 도착 시 사용자 수동 탭 선택을 덮어쓸 수 있음"
+    root_cause: "scope_creep"
+    prior_attempts: 0
+    evaluator_notes: "evaluations/group-002-evaluation.md#Minor 2 — 저속망 / 대용량 응답 유저에서 노출 가능, 평균적으로는 count 가 먼저 도착"
+    suggested_approach: "'counts 결과 반영 여부' 플래그로 한 번만 sync 또는 route param override 있을 때만 effect 발동. 별도 UX follow-up 스프린트로 이관"
+    priority: "low"
+    estimated_complexity: "small"
+
+  - ac_id: "MINOR-G2-3"
+    original_task: "group-002 (evaluator Minor #3)"
+    group: "group-002"
+    status: "unfulfilled"
+    reason: "Domain 레이어 react-query import — 기존 codebase 22 파일 관습에 +2 (profile/me-contents). Clean Architecture 엄격 해석 시 확대"
+    root_cause: "technical_limit"
+    prior_attempts: 0
+    evaluator_notes: "evaluations/group-002-evaluation.md#Minor 3 — codebase convention 내 허용 판단, 별도 Clean Architecture 스프린트 scope"
+    suggested_approach: "전체 codebase 의 domain react-query 위반 22+2 파일을 별도 스프린트에서 Clean Architecture refactor. 본 스프린트에서는 확대 없음 판정"
+    priority: "low"
+    estimated_complexity: "large"
+
+  - ac_id: "MINOR-G3-3"
+    original_task: "group-003 (evaluator Minor #3)"
+    group: "group-003"
+    status: "unfulfilled"
+    reason: "Clipboard from react-native 은 RN 0.59 이후 deprecated API. 대체: @react-native-clipboard/clipboard"
+    root_cause: "technical_limit"
+    prior_attempts: 0
+    evaluator_notes: "evaluations/group-003-evaluation.md#Minor 3 — OtherUserProfile URL 복사 기능 동작은 정상, deprecation 경고만"
+    suggested_approach: "@react-native-clipboard/clipboard 패키지 추가 + import 변경 + try/catch. 다른 Clipboard 사용처와 함께 codebase-wide migration 권장"
+    priority: "medium"
+    estimated_complexity: "medium"
+
+  - ac_id: "MINOR-G3-4"
+    original_task: "group-003 (evaluator Minor #4)"
+    group: "group-003"
+    status: "unfulfilled"
+    reason: "SwipeFeed initialContentId 가 응답 list 에 존재하지 않을 때 fallback UX 부재"
+    root_cause: "scope_creep"
+    prior_attempts: 0
+    evaluator_notes: "evaluations/group-003-evaluation.md#Minor 4 — 경계 케이스 (첫 응답 페이지에 없는 경우). 일반 사용 흐름에서는 drift 없음"
+    suggested_approach: "응답 list 에 initialContentId 미존재 시 첫 아이템부터 렌더 또는 '콘텐츠를 찾을 수 없음' 상태 표시. 별도 UX follow-up"
+    priority: "low"
+    estimated_complexity: "small"
+
+improvements:
+  - description: "Sprint Contract V-method grep 에 cursor repository 쿼리 `$lt` 패턴 검출 추가 — `rg '_id:\\s*\\{\\s*\\$lt\\s*:' repository/` → 0 hit 의무"
+    source: "pattern_digest"
+    priority: "high"
+    rationale: "Group 001 에서 $lt→$lte regression 발견. 재발 방지."
+
+  - description: "nx 프로젝트 e2e-spec.ts 추가 시 project.json::test-e2e target + jest-e2e.json moduleNameMapper 검증을 Evaluator V-method 에 포함"
+    source: "pattern_digest"
+    priority: "high"
+    rationale: "Group 001 E2E 수동 harness wiring 필요성 발견 — testMatch 부재로 실제 실행 안 되는 문제 재발 방지"
+
+  - description: "Route param 타입 변경 시 FE typecheck 결과를 `grep -v '@wrtn/'` 로 clean 측정 — pre-existing cascade 와 신규 에러 구분"
+    source: "pattern_digest"
+    priority: "medium"
+    rationale: "Group 002 에서 TS2353 tag / TS2322 generic 2건 regression 이 cascade 노이즈에 섞여 발견 지연"
+
+  - description: "Discriminated union params 도입 시 각 variant 의 queryFn 을 `enabled` option 으로 gate — Contract §Done Criteria 에 명시"
+    source: "pattern_digest"
+    priority: "high"
+    rationale: "Group 003 에서 SwipeFeed 양쪽 queryFn 무조건 fire / OtherUserProfile contents query enable 부재 — 동일 class 이슈 2건 관찰"
+
+  - description: "Sprint Lead Planner (Contract drafting) 단계에서 parent context 의존 payload 가 prop threading 되는지 수동 trace — Ground Rule 에 명시"
+    source: "pattern_digest"
+    priority: "medium"
+    rationale: "Group 003 app-008 의 `visibility: currentTab` 요구가 Round 1 review 에서야 발견 — Planner 단계 체크 부족"
+
+  - description: "native sheet / 404 seed 와 같은 Deferred AC 는 Phase 5 PR 제출 전 수동 QA 체크리스트로 반드시 실행"
+    source: "pattern_digest"
+    priority: "medium"
+    rationale: "AC-2.3 프로필 공유, AC-7.4 404 에러 — 본 스프린트에서 수동 QA 미수행으로 partially_fulfilled 상태"
+
+  - description: "Context Pressure Protocol 의 🟡 Caution 진입 기준에 '계약 재발견 이슈 2건+' 추가 검토"
+    source: "pattern_digest"
+    priority: "low"
+    rationale: "Group 003 contract Round 1 에서 Critical 1 + Major 3 (= 4 건) 재발견 — Planner 단계 context pressure 고려 필요"

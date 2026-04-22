@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>app-005 · ProfileEdit Prototype</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet" />
+<style>
+/* ───── tokens.css (inline) — source: sprints/ugc-platform-001/prototypes/context/tokens.css */
+:root {
+  --wds-color-purple-50: #F5F0FF;
+  --wds-color-purple-100: #EBE1FF;
+  --wds-color-purple-500: #8752FA;
+  --wds-color-purple-600: #7040E0;
+  --wds-color-neutral-0: #FFFFFF;
+  --wds-color-neutral-50: #F7F8F9;
+  --wds-color-neutral-100: #F0F1F3;
+  --wds-color-neutral-200: #E4E5E9;
+  --wds-color-neutral-300: #D1D3D8;
+  --wds-color-neutral-400: #B5B8BF;
+  --wds-color-neutral-500: #8E9199;
+  --wds-color-neutral-600: #6B6E76;
+  --wds-color-neutral-900: #212228;
+  --wds-color-neutral-1000: #000000;
+  --wds-color-red-500: #FF3B30;
+
+  --wds-background-normal: #FFFFFF;
+  --wds-background-dimmed: rgba(0, 0, 0, 0.40);
+  --wds-surface-tertiary: #F0F1F3;
+
+  --wds-label-normal: #262626;
+  --wds-label-alternative: #545454;
+  --wds-label-assistive: #8E9199;
+  --wds-label-disabled: #B5B8BF;
+  --wds-label-inverse: #FFFFFF;
+
+  --wds-line-normal: #E4E5E9;
+  --wds-line-alternative: #F0F1F3;
+
+  --wds-fill-brand-primary: #8752FA;
+  --wds-fill-brand-weak: #F5F0FF;
+
+  --wds-status-error: #FF3B30;
+
+  --wds-radius-xs: 4px;
+  --wds-radius-sm: 8px;
+  --wds-radius-md: 12px;
+  --wds-radius-lg: 16px;
+  --wds-radius-xl: 20px;
+  --wds-radius-2xl: 24px;
+  --wds-radius-full: 9999px;
+
+  --wds-font-family-primary: 'Pretendard', -apple-system, 'SF Pro Display', sans-serif;
+
+  /* Profile Edit aliases (§5) — Figma-accurate */
+  --pe-input-fill: #F7F7F7;
+  --pe-input-border: #F1F1F1;
+  --pe-save-disabled: #F1F1F1;
+  --pe-save-disabled-label: #C5C5C5;   /* CRITICAL FIX: Figma spec = #C5C5C5 (baseline had wrong color) */
+  --pe-save-active: #262626;
+  --pe-save-active-label: #FFFFFF;
+  --pe-camera-badge-fill: #E2E2E2;
+  --pe-sheet-handle: #A7A7A7;
+  --pe-destructive-text: #D92800;
+  --pe-confirm-btn: #262626;
+  --pe-surface-hover: #F1F1F1;
+
+  /* New Figma-extracted tokens (extend, do not delete) */
+  --text_placeholder_disable: #C5C5C5;
+  --surface_disable: #F1F1F1;
+  --camera_badge_bg: #E2E2E2;
+  --text_dark: #090909;
+  --destructive: #D92800;
+  --selection_purple: #8752FA;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--wds-font-family-primary);
+  background: #eceef2;
+  min-height: 100vh;
+  padding: 24px;
+  color: var(--wds-label-normal);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+/* ───── Control panel (outside device frame) */
+.control-panel {
+  width: 375px;
+  background: #1a1a2e;
+  color: #e0e0e0;
+  border-radius: 12px 12px 0 0;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13px;
+}
+.control-panel__row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.control-panel__label { color: #888; font-size: 11px; min-width: 48px; }
+.control-panel__select {
+  background: #2a2a3e; color: #ccc; border: 1px solid #444;
+  border-radius: 6px; padding: 4px 8px; font-size: 12px; font-family: inherit;
+}
+.control-panel__states { display: flex; gap: 4px; flex-wrap: wrap; }
+.control-panel__state-btn {
+  background: #2a2a3e; color: #ccc; border: 1px solid #444;
+  border-radius: 6px; padding: 5px 10px; font-size: 11px; cursor: pointer;
+  font-family: inherit;
+}
+.control-panel__state-btn.active {
+  background: var(--wds-fill-brand-primary); color: #fff; border-color: var(--wds-fill-brand-primary);
+}
+.control-panel__breadcrumb { color: #888; font-size: 11px; font-family: monospace; }
+
+/* ───── Device frame — Figma 375×812 */
+.device-frame {
+  width: 375px; height: 812px; background: var(--wds-background-normal);
+  overflow: hidden; position: relative; border: 1px solid #ddd;
+  border-radius: 0 0 12px 12px;
+}
+.screen {
+  position: absolute; inset: 0;
+  display: none;
+  flex-direction: column;
+  background: var(--wds-background-normal);
+}
+.screen.active { display: flex; }
+
+/* Status bar */
+.status-bar {
+  height: 44px; display: flex; justify-content: space-between; align-items: center;
+  padding: 0 20px; font-size: 15px; font-weight: 600; flex-shrink: 0;
+  color: var(--wds-label-normal);
+}
+.status-bar__icons { display: flex; gap: 5px; font-size: 12px; }
+
+/* Shared header — pl-12 pr-44 py-4 (Figma spec) */
+.screen-header {
+  height: 48px;
+  padding: 4px 44px 4px 12px;
+  display: flex; align-items: center;
+  flex-shrink: 0;
+  background: var(--wds-background-normal);
+  position: relative;
+}
+.header-icon-btn {
+  width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+  background: transparent; border: none; cursor: pointer;
+  color: var(--wds-label-normal);
+  flex-shrink: 0;
+}
+.header-icon-btn svg { width: 24px; height: 24px; }
+.header-title {
+  font-size: 18px; font-weight: 600; color: var(--wds-label-normal);
+  flex: 1; text-align: center;
+  margin-left: -40px; /* optical balance when only left icon */
+}
+.header-right-spacer { width: 44px; height: 44px; flex-shrink: 0; }
+.header-text-btn {
+  background: transparent; border: none; cursor: pointer;
+  font-family: inherit; font-size: 16px; font-weight: 600;
+  padding: 0 12px; height: 40px;
+  color: var(--wds-label-normal);
+  flex-shrink: 0;
+}
+.header-text-btn.disabled { color: var(--wds-label-disabled); cursor: not-allowed; }
+.header-text-btn.brand { color: var(--wds-fill-brand-primary); }
+
+/* Header variant: 3-slot (album picker) */
+.screen-header.three-slot {
+  justify-content: space-between;
+  padding: 4px 8px;
+}
+.screen-header.three-slot .header-title { margin-left: 0; }
+
+/* ─── ProfileEditScreen body */
+.edit-body {
+  flex: 1;
+  display: flex; flex-direction: column;
+  padding: 12px 0 120px;
+  overflow-y: auto;
+}
+.avatar-section {
+  display: flex; justify-content: center;
+  padding: 12px 0;
+  margin-bottom: 0;
+}
+.avatar-wrapper {
+  position: relative;
+  width: 100px; height: 100px;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+.avatar {
+  width: 100px; height: 100px; border-radius: 50%;
+  background: linear-gradient(135deg, #FFD6E7, #FFB3D1 60%, #FF8FBE);
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-weight: 700; font-size: 36px;
+  border: 1px solid rgba(136,136,136,0.2);
+  overflow: hidden;
+}
+.avatar__emoji {
+  font-size: 48px;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+}
+.camera-badge {
+  position: absolute; right: 4px; bottom: 4px;
+  width: 24px; height: 24px; border-radius: 50%;
+  background: var(--camera_badge_bg);
+  border: 4px solid #fff;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--wds-label-normal);
+  box-sizing: content-box;
+}
+.camera-badge svg { width: 16px; height: 16px; }
+
+.upload-overlay {
+  position: absolute; inset: 0;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.45);
+  display: none;
+  align-items: center; justify-content: center;
+  color: #fff;
+}
+.upload-overlay.visible { display: flex; }
+.spinner {
+  width: 28px; height: 28px;
+  border: 3px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Nickname */
+.nickname-section {
+  display: flex; flex-direction: column; gap: 8px;
+  padding: 0 16px;
+  width: 100%;
+}
+.nickname-label {
+  font-size: 14px; font-weight: 500; color: var(--wds-label-alternative);
+  padding: 0 4px;
+}
+.input-wrap {
+  position: relative;
+  background: var(--pe-input-fill);
+  border: 1px solid var(--pe-input-border);
+  border-radius: var(--wds-radius-lg);
+  padding: 12px 16px;
+  display: flex; align-items: center;
+  width: 100%;
+}
+.input-wrap.error { border-color: var(--destructive); }
+.nickname-input {
+  flex: 1;
+  background: transparent;
+  border: none; outline: none;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text_dark);
+  width: 100%;
+}
+.nickname-input::placeholder { color: var(--text_placeholder_disable); }
+.inline-error {
+  display: none;
+  font-size: 12px;
+  color: var(--destructive);
+  padding: 0 4px;
+}
+.inline-error.visible { display: block; }
+
+/* Save button footer — pt-12 pb-32 px-16 (Figma) */
+.save-footer {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  padding: 12px 16px 32px;
+  background: var(--wds-background-normal);
+}
+.save-btn {
+  width: 100%; height: 56px;
+  border: none; border-radius: var(--wds-radius-lg);
+  font-family: inherit; font-size: 18px; font-weight: 600;
+  background: var(--pe-save-disabled);
+  color: var(--pe-save-disabled-label);
+  cursor: not-allowed;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 12px 28px;
+  transition: background 160ms ease, color 160ms ease;
+}
+.save-btn.active {
+  background: var(--pe-save-active);
+  color: var(--pe-save-active-label);
+  cursor: pointer;
+}
+.save-btn.loading {
+  background: var(--pe-save-active);
+  color: var(--pe-save-active-label);
+  cursor: wait;
+}
+.save-btn.loading .spinner-small {
+  width: 16px; height: 16px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* ─── Toast — dark pill, bottom 40px above safe area */
+.toast {
+  position: absolute; left: 50%; bottom: 40px;
+  transform: translateX(-50%);
+  background: rgba(38, 38, 38, 0.95);
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 24px;
+  font-size: 14px; font-weight: 500;
+  display: none;
+  z-index: 50;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.toast.visible {
+  display: block;
+  animation: toastFade 2.4s ease forwards;
+}
+@keyframes toastFade {
+  0% { opacity: 0; transform: translate(-50%, 8px); }
+  12% { opacity: 1; transform: translate(-50%, 0); }
+  88% { opacity: 1; transform: translate(-50%, 0); }
+  100% { opacity: 0; transform: translate(-50%, -4px); }
+}
+.toast.error { background: rgba(217, 40, 0, 0.95); }
+
+/* ─── Bottom sheet (shared) */
+.overlay {
+  position: absolute; inset: 0;
+  display: none;
+  z-index: 40;
+}
+.overlay.active { display: block; }
+.overlay-backdrop {
+  position: absolute; inset: 0;
+  background: var(--wds-background-dimmed);
+}
+.bottom-sheet {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  background: var(--wds-background-normal);
+  border-radius: 28px 28px 0 0;
+  padding-bottom: 32px;
+  animation: slideUp 240ms cubic-bezier(0.2, 0, 0, 1);
+}
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+.sheet-handle {
+  width: 36px; height: 4px;
+  background: var(--pe-sheet-handle);
+  border-radius: 2px;
+  margin: 8px auto 8px;
+}
+
+/* Image source sheet */
+.sheet-option {
+  width: 100%;
+  display: flex; align-items: center; gap: 12px;
+  padding: 16px 20px;
+  background: transparent; border: none; cursor: pointer;
+  font-family: inherit; font-size: 16px; font-weight: 500;
+  color: var(--wds-label-normal);
+  text-align: left;
+}
+.sheet-option svg { width: 24px; height: 24px; }
+.sheet-option.destructive {
+  color: var(--destructive);
+}
+.sheet-option.destructive svg { stroke: var(--destructive); }
+.sheet-cancel {
+  width: 100%;
+  background: transparent; border: none; cursor: pointer;
+  font-family: inherit; font-size: 16px; font-weight: 500;
+  color: var(--wds-label-normal);
+  padding: 16px 20px;
+  text-align: center;
+  border-top: 1px solid var(--wds-line-alternative);
+  margin-top: 4px;
+}
+
+/* Exit confirm sheet */
+.exit-sheet-body {
+  padding: 12px 24px 0;
+  display: flex; flex-direction: column; gap: 8px;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 24px;
+}
+.exit-title {
+  font-size: 18px; font-weight: 600; color: var(--wds-label-normal);
+}
+.exit-body-text {
+  font-size: 14px; font-weight: 500; color: #656565;
+}
+.dual-action-row {
+  display: flex; gap: 8px;
+  padding: 0 16px;
+}
+.dual-action-row button {
+  flex: 1; height: 56px;
+  border: none; border-radius: var(--wds-radius-lg);
+  font-family: inherit; font-size: 16px; font-weight: 600;
+  cursor: pointer;
+}
+.btn-cancel {
+  background: var(--pe-surface-hover);
+  color: var(--wds-label-normal);
+}
+.btn-confirm {
+  background: var(--pe-confirm-btn);
+  color: #FFFFFF;
+}
+
+/* ─── Crop screen */
+.crop-screen {
+  background: #1a1a1a;
+  color: #fff;
+}
+.crop-screen .status-bar { color: #fff; }
+.crop-screen .screen-header {
+  background: #1a1a1a; color: #fff;
+}
+.crop-screen .header-title { color: #fff; }
+.crop-screen .header-icon-btn { color: #fff; }
+.crop-screen .header-text-btn { color: #fff; }
+
+.crop-canvas {
+  flex: 1;
+  position: relative;
+  background: #000;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+.crop-image-placeholder {
+  position: absolute; inset: 0;
+  background:
+    linear-gradient(135deg, rgba(135,82,250,0.35) 0%, rgba(50,50,80,0.6) 100%),
+    radial-gradient(circle at 30% 40%, #8752FA 0%, transparent 60%),
+    radial-gradient(circle at 70% 70%, #FF6BA7 0%, transparent 50%),
+    #222;
+}
+.crop-box {
+  position: relative;
+  width: 280px; height: 280px;
+  box-shadow: 0 0 0 9999px rgba(0,0,0,0.55);
+  border-radius: 50%;
+}
+.crop-box::before {
+  content: '';
+  position: absolute; inset: 0;
+  border: 1px solid rgba(255,255,255,0.6);
+  border-radius: 50%;
+}
+.crop-handles {
+  position: absolute; inset: -13px;
+}
+.crop-handle {
+  position: absolute; width: 27px; height: 27px;
+}
+.crop-handle.tl { top: 0; left: 0; border-top: 3px solid #fff; border-left: 3px solid #fff; }
+.crop-handle.tr { top: 0; right: 0; border-top: 3px solid #fff; border-right: 3px solid #fff; }
+.crop-handle.bl { bottom: 0; left: 0; border-bottom: 3px solid #fff; border-left: 3px solid #fff; }
+.crop-handle.br { bottom: 0; right: 0; border-bottom: 3px solid #fff; border-right: 3px solid #fff; }
+
+/* Crop bottom bar — #1a1a1a with 취소/완료 split */
+.crop-bottom-bar {
+  height: 88px;
+  background: #1a1a1a;
+  padding: 16px 20px 24px;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px;
+}
+.crop-bottom-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 14px;
+  padding: 8px 16px;
+  color: #fff;
+}
+.crop-bottom-btn.cancel { font-weight: 500; }
+.crop-bottom-btn.done { font-weight: 600; }
+
+/* ─── Album picker */
+.album-header-dropdown {
+  display: flex; align-items: center; gap: 4px;
+  background: transparent; border: none; cursor: pointer;
+  font-family: inherit; font-size: 16px; font-weight: 600;
+  color: var(--wds-label-normal);
+  flex: 1;
+  justify-content: center;
+}
+.album-header-dropdown svg {
+  width: 16px; height: 16px;
+  color: var(--wds-label-assistive);
+}
+.album-grid-scroll {
+  flex: 1;
+  overflow-y: auto;
+  border-top: 1px solid var(--wds-line-alternative);
+}
+.album-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  padding: 2px 0 32px;
+}
+.album-cell {
+  position: relative;
+  aspect-ratio: 1;
+  background: #eee;
+  border: none; padding: 0; cursor: pointer;
+  overflow: hidden;
+}
+.album-cell.camera {
+  background: #262626;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff;
+}
+.album-cell.camera svg { width: 28px; height: 28px; }
+.album-thumb {
+  position: absolute; inset: 0;
+  background-size: cover;
+}
+.album-thumb.t-1 { background: linear-gradient(135deg, #FFB3D1, #FF6BA7); }
+.album-thumb.t-2 { background: linear-gradient(135deg, #FCD34D, #FB923C); }
+.album-thumb.t-3 { background: linear-gradient(135deg, #60A5FA, #8B5CF6); }
+.album-thumb.t-4 { background: linear-gradient(135deg, #34D399, #0EA5E9); }
+.album-thumb.t-5 { background: linear-gradient(135deg, #C084FC, #F472B6); }
+.album-thumb.t-6 { background: linear-gradient(135deg, #F87171, #FBBF24); }
+.album-thumb.t-7 { background: linear-gradient(135deg, #818CF8, #A78BFA); }
+.album-thumb.t-8 { background: linear-gradient(135deg, #10B981, #3B82F6); }
+.album-thumb.t-9 { background: linear-gradient(135deg, #E879F9, #8B5CF6); }
+.album-thumb.t-10 { background: linear-gradient(135deg, #F59E0B, #D946EF); }
+.album-thumb.t-11 { background: linear-gradient(135deg, #06B6D4, #8B5CF6); }
+.album-cell.selected::after {
+  content: '';
+  position: absolute; inset: 0;
+  border: 2px solid var(--selection_purple);
+  pointer-events: none;
+}
+.album-checkbox {
+  position: absolute; top: 8px; right: 8px;
+  width: 24px; height: 24px;
+  border: 2px solid #fff; border-radius: 50%;
+  background: rgba(0,0,0,0.2);
+  display: flex; align-items: center; justify-content: center;
+  color: #fff;
+}
+.album-cell.selected .album-checkbox {
+  background: var(--selection_purple);
+  border-color: var(--selection_purple);
+}
+.album-checkbox svg { width: 14px; height: 14px; display: none; }
+.album-cell.selected .album-checkbox svg { display: block; }
+
+/* ─── Utility */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0;
+  margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
+</style>
+</head>
+<body>
+
+<div class="control-panel">
+  <div class="control-panel__row">
+    <span class="control-panel__label">Screen</span>
+    <select id="screen-select" class="control-panel__select">
+      <option value="ProfileEditScreen">ProfileEdit</option>
+      <option value="ImageSourceSheetScreen">ImageSourceSheet</option>
+      <option value="CropScreen">CropScreen</option>
+      <option value="AlbumPickerScreen">AlbumPicker</option>
+      <option value="ExitConfirmSheetScreen">ExitConfirmSheet</option>
+    </select>
+  </div>
+  <div class="control-panel__row">
+    <span class="control-panel__label">State</span>
+    <div id="state-buttons" class="control-panel__states"></div>
+  </div>
+  <div class="control-panel__row">
+    <span class="control-panel__label">Route</span>
+    <span class="control-panel__breadcrumb" id="breadcrumb">zzem://profile → zzem://profile/edit</span>
+  </div>
+</div>
+
+<div class="device-frame">
+
+  <!-- ════ ProfileEditScreen ════ -->
+  <section class="screen active" id="ProfileEditScreen" data-state="default">
+    <div class="status-bar">
+      <span>9:41</span>
+      <div class="status-bar__icons">
+        <span>● ● ●</span><span>📶</span><span>🔋</span>
+      </div>
+    </div>
+    <header class="screen-header">
+      <button class="header-icon-btn" id="btn-back" aria-label="뒤로가기">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      </button>
+      <h1 class="header-title">프로필 편집</h1>
+    </header>
+
+    <div class="edit-body">
+      <div class="avatar-section">
+        <button class="avatar-wrapper" id="btn-avatar" aria-label="프로필 이미지 변경">
+          <div class="avatar">
+            <span class="avatar__emoji" aria-hidden="true">🐻</span>
+          </div>
+          <span class="camera-badge" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 5h-3.17l-1.84-2H9.01L7.17 5H4c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm-8 12.5c-2.48 0-4.5-2.02-4.5-4.5s2.02-4.5 4.5-4.5 4.5 2.02 4.5 4.5-2.02 4.5-4.5 4.5z"/></svg>
+          </span>
+          <span class="upload-overlay" id="upload-overlay">
+            <span class="spinner"></span>
+          </span>
+        </button>
+      </div>
+
+      <div class="nickname-section">
+        <label class="nickname-label" for="input-nickname">닉네임</label>
+        <div class="input-wrap" id="input-wrap">
+          <input
+            type="text"
+            id="input-nickname"
+            class="nickname-input"
+            value="김잼잼"
+            maxlength="21"
+            placeholder="닉네임을 입력해주세요"
+          />
+        </div>
+        <p class="inline-error" id="inline-error">2자 이상 입력해주세요</p>
+      </div>
+    </div>
+
+    <div class="save-footer">
+      <button class="save-btn" id="btn-save" disabled>
+        <span id="save-label">저장</span>
+      </button>
+    </div>
+
+    <div class="toast" id="toast-success">프로필이 수정되었어요</div>
+
+    <!-- Image Source Bottom Sheet -->
+    <div class="overlay" id="sheet-image-source">
+      <div class="overlay-backdrop" data-close="sheet-image-source"></div>
+      <div class="bottom-sheet" role="dialog" aria-label="이미지 소스 선택">
+        <div class="sheet-handle"></div>
+        <button class="sheet-option" id="opt-camera">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+            <circle cx="12" cy="13" r="4"></circle>
+          </svg>
+          <span>카메라</span>
+        </button>
+        <button class="sheet-option" id="opt-album">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+            <polyline points="21 15 16 10 5 21"></polyline>
+          </svg>
+          <span>앨범에서 선택</span>
+        </button>
+        <button class="sheet-option destructive" id="opt-delete">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+            <path d="M10 11v6"></path>
+            <path d="M14 11v6"></path>
+            <path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"></path>
+          </svg>
+          <span>사진 삭제</span>
+        </button>
+        <button class="sheet-cancel" id="opt-image-cancel">취소</button>
+      </div>
+    </div>
+
+    <!-- Exit Confirm Bottom Sheet -->
+    <div class="overlay" id="sheet-exit-confirm">
+      <div class="overlay-backdrop" data-close="sheet-exit-confirm"></div>
+      <div class="bottom-sheet" role="alertdialog" aria-label="나가기 확인">
+        <div class="sheet-handle"></div>
+        <div class="exit-sheet-body">
+          <h2 class="exit-title">편집을 그만두시겠어요?</h2>
+          <p class="exit-body-text">저장하지 않은 변경사항은 사라져요.</p>
+        </div>
+        <div class="dual-action-row">
+          <button class="btn-cancel" id="btn-exit-cancel">취소</button>
+          <button class="btn-confirm" id="btn-exit-confirm">나가기</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════ AlbumPickerScreen ════ -->
+  <section class="screen" id="AlbumPickerScreen" data-state="default">
+    <div class="status-bar">
+      <span>9:41</span>
+      <div class="status-bar__icons"><span>● ● ●</span><span>📶</span><span>🔋</span></div>
+    </div>
+    <header class="screen-header three-slot">
+      <button class="header-icon-btn" id="btn-album-close" aria-label="뒤로가기">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      </button>
+      <button class="album-header-dropdown" id="btn-album-dropdown" aria-label="앨범 선택">
+        <span>최근 항목</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+      <button class="header-text-btn disabled" id="btn-album-done">완료</button>
+    </header>
+    <div class="album-grid-scroll">
+      <div class="album-grid" id="album-grid">
+        <button class="album-cell camera" id="album-cell-0" aria-label="카메라로 촬영">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+            <circle cx="12" cy="13" r="4"></circle>
+          </svg>
+        </button>
+        <!-- photo cells populated via JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ════ CropScreen ════ -->
+  <section class="screen crop-screen" id="CropScreen" data-state="default">
+    <div class="status-bar">
+      <span>9:41</span>
+      <div class="status-bar__icons"><span>● ● ●</span><span>📶</span><span>🔋</span></div>
+    </div>
+    <header class="screen-header">
+      <button class="header-icon-btn" id="btn-crop-close" aria-label="뒤로가기">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      </button>
+      <h1 class="header-title">사진 편집</h1>
+    </header>
+    <div class="crop-canvas">
+      <div class="crop-image-placeholder"></div>
+      <div class="crop-box">
+        <div class="crop-handles">
+          <span class="crop-handle tl"></span>
+          <span class="crop-handle tr"></span>
+          <span class="crop-handle bl"></span>
+          <span class="crop-handle br"></span>
+        </div>
+      </div>
+    </div>
+    <div class="crop-bottom-bar">
+      <button class="crop-bottom-btn cancel" id="btn-crop-cancel">취소</button>
+      <button class="crop-bottom-btn done" id="btn-crop-done">완료</button>
+    </div>
+  </section>
+
+</div>
+
+<script>
+/* =========================================================
+ * app-005 Profile Edit Prototype — interactions
+ * Screens: ProfileEditScreen (with overlays), AlbumPickerScreen, CropScreen
+ * Virtual screens (via control panel): ImageSourceSheetScreen, ExitConfirmSheetScreen
+ * ========================================================= */
+
+const SCREEN_STATES = {
+  ProfileEditScreen: [
+    'default',
+    'nickname-1-char',
+    'nickname-valid',
+    'uploading',
+    'success-toast',
+    'error'
+  ],
+  ImageSourceSheetScreen: ['visible'],
+  CropScreen: ['default'],
+  AlbumPickerScreen: ['default', 'selected'],
+  ExitConfirmSheetScreen: ['visible']
+};
+
+const STATE_LABELS = {
+  'default': 'default',
+  'nickname-1-char': '1자(에러)',
+  'nickname-valid': '유효(활성)',
+  'uploading': '업로딩',
+  'success-toast': '성공토스트',
+  'error': '에러',
+  'selected': '선택됨',
+  'visible': 'visible'
+};
+
+const root = document.querySelector('.device-frame');
+const breadcrumb = document.getElementById('breadcrumb');
+const screenSelect = document.getElementById('screen-select');
+const stateButtonsEl = document.getElementById('state-buttons');
+const breadcrumbTrail = ['zzem://profile', 'zzem://profile/edit'];
+
+// Virtual screens map to ProfileEdit host + overlay
+const VIRTUAL_SCREENS = {
+  ImageSourceSheetScreen: { host: 'ProfileEditScreen', overlay: 'sheet-image-source' },
+  ExitConfirmSheetScreen: { host: 'ProfileEditScreen', overlay: 'sheet-exit-confirm' }
+};
+
+function activeScreen() {
+  return root.querySelector('.screen.active');
+}
+
+function navigate(screenId, pushCrumb = true) {
+  const virtual = VIRTUAL_SCREENS[screenId];
+  if (virtual) {
+    root.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    const host = root.querySelector('#' + virtual.host);
+    host.classList.add('active');
+    root.querySelectorAll('.overlay').forEach(o => o.classList.remove('active'));
+    openOverlay(virtual.overlay);
+    screenSelect.value = screenId;
+    _updateBreadcrumb(screenId, pushCrumb);
+    renderStateButtons();
+    return;
+  }
+  // Close any open sheet when navigating to real screen
+  root.querySelectorAll('.overlay').forEach(o => o.classList.remove('active'));
+  root.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const target = root.querySelector('#' + screenId);
+  if (!target) return;
+  target.classList.add('active');
+  screenSelect.value = screenId;
+  _updateBreadcrumb(screenId, pushCrumb);
+  renderStateButtons();
+}
+
+function _updateBreadcrumb(screenId, pushCrumb) {
+  if (!pushCrumb) { renderBreadcrumb(); return; }
+  const crumbMap = {
+    ProfileEditScreen: 'zzem://profile/edit',
+    ImageSourceSheetScreen: 'zzem://profile/edit/photo-source',
+    AlbumPickerScreen: 'zzem://profile/edit/album',
+    CropScreen: 'zzem://profile/edit/crop',
+    ExitConfirmSheetScreen: 'zzem://profile/edit/exit-confirm'
+  };
+  breadcrumbTrail.push(crumbMap[screenId] || screenId);
+  renderBreadcrumb();
+}
+
+function renderBreadcrumb() {
+  breadcrumb.textContent = breadcrumbTrail.join(' → ');
+}
+
+function renderStateButtons() {
+  const currentId = screenSelect.value;
+  const real = VIRTUAL_SCREENS[currentId]?.host || currentId;
+  const realEl = root.querySelector('#' + real);
+  const list = SCREEN_STATES[currentId] || ['default'];
+  const currentState = VIRTUAL_SCREENS[currentId] ? 'visible' : ((realEl?.dataset.state) || 'default');
+  stateButtonsEl.innerHTML = '';
+  list.forEach(s => {
+    const btn = document.createElement('button');
+    btn.className = 'control-panel__state-btn' + (s === currentState ? ' active' : '');
+    btn.textContent = STATE_LABELS[s] || s;
+    btn.addEventListener('click', () => setState(currentId, s));
+    stateButtonsEl.appendChild(btn);
+  });
+}
+
+function setState(screenId, state) {
+  if (VIRTUAL_SCREENS[screenId]) {
+    renderStateButtons();
+    return;
+  }
+  const screen = root.querySelector('#' + screenId);
+  if (!screen) return;
+  screen.dataset.state = state;
+  applyState(screenId, state);
+  renderStateButtons();
+}
+
+/* ─── State application */
+function applyState(screenId, state) {
+  if (screenId === 'ProfileEditScreen') {
+    applyProfileEditState(state);
+  } else if (screenId === 'AlbumPickerScreen') {
+    applyAlbumPickerState(state);
+  }
+}
+
+const $nickname = document.getElementById('input-nickname');
+const $inputWrap = document.getElementById('input-wrap');
+const $error = document.getElementById('inline-error');
+const $saveBtn = document.getElementById('btn-save');
+const $saveLabel = document.getElementById('save-label');
+const $uploadOverlay = document.getElementById('upload-overlay');
+const $toast = document.getElementById('toast-success');
+
+const INITIAL_NICK = '김잼잼';
+let dirty = { nickname: false, image: false };
+
+function resetProfileEditDefaults() {
+  $nickname.value = INITIAL_NICK;
+  dirty = { nickname: false, image: false };
+  updateNicknameUi();
+  $uploadOverlay.classList.remove('visible');
+  $saveBtn.classList.remove('loading', 'active');
+  $saveBtn.disabled = true;
+  $saveBtn.innerHTML = '<span id="save-label">저장</span>';
+  $toast.classList.remove('visible', 'error');
+  closeOverlay('sheet-image-source');
+  closeOverlay('sheet-exit-confirm');
+}
+
+function applyProfileEditState(state) {
+  // baseline reset every state change
+  $uploadOverlay.classList.remove('visible');
+  $saveBtn.classList.remove('loading');
+  $toast.classList.remove('visible', 'error');
+  closeOverlay('sheet-image-source');
+  closeOverlay('sheet-exit-confirm');
+
+  switch (state) {
+    case 'default':
+      $nickname.value = INITIAL_NICK;
+      dirty = { nickname: false, image: false };
+      updateNicknameUi();
+      break;
+    case 'nickname-1-char':
+      $nickname.value = '김';
+      dirty = { nickname: true, image: false };
+      updateNicknameUi();
+      break;
+    case 'nickname-valid':
+      $nickname.value = '김잼잼너굴';
+      dirty = { nickname: true, image: false };
+      updateNicknameUi();
+      break;
+    case 'uploading':
+      $nickname.value = INITIAL_NICK;
+      dirty = { nickname: false, image: true };
+      updateNicknameUi();
+      $uploadOverlay.classList.add('visible');
+      $saveBtn.classList.add('loading');
+      $saveBtn.innerHTML = '<span class="spinner-small"></span><span>저장 중...</span>';
+      $saveBtn.disabled = true;
+      break;
+    case 'success-toast':
+      $nickname.value = INITIAL_NICK;
+      dirty = { nickname: false, image: false };
+      updateNicknameUi();
+      $toast.classList.add('visible');
+      $toast.classList.remove('error');
+      $toast.textContent = '프로필이 수정되었어요';
+      break;
+    case 'error':
+      $nickname.value = '김잼잼너굴';
+      dirty = { nickname: true, image: false };
+      updateNicknameUi();
+      $toast.classList.add('visible', 'error');
+      $toast.textContent = '저장에 실패했어요. 잠시 후 다시 시도해주세요';
+      break;
+  }
+
+  if (state !== 'uploading') {
+    $saveBtn.innerHTML = '<span id="save-label">저장</span>';
+  }
+}
+
+function updateNicknameUi() {
+  const len = [...$nickname.value].length;
+  const tooShort = len > 0 && len < 2;
+  const tooLong = len > 20;
+
+  if (tooShort && dirty.nickname) {
+    $error.classList.add('visible');
+    $error.textContent = '2자 이상 입력해주세요';
+    $inputWrap.classList.add('error');
+  } else if (tooLong) {
+    $error.classList.add('visible');
+    $error.textContent = '20자 이내로 입력해주세요';
+    $inputWrap.classList.add('error');
+  } else {
+    $error.classList.remove('visible');
+    $inputWrap.classList.remove('error');
+  }
+
+  const valid = len >= 2 && len <= 20;
+  const isDirty = dirty.nickname || dirty.image;
+  if (valid && isDirty && !$saveBtn.classList.contains('loading')) {
+    $saveBtn.classList.add('active');
+    $saveBtn.disabled = false;
+  } else {
+    $saveBtn.classList.remove('active');
+    $saveBtn.disabled = true;
+  }
+}
+
+/* ─── Overlay helpers */
+function openOverlay(id) {
+  const ov = document.getElementById(id);
+  if (ov) ov.classList.add('active');
+}
+function closeOverlay(id) {
+  const ov = document.getElementById(id);
+  if (ov) ov.classList.remove('active');
+}
+
+/* ─── AlbumPicker */
+function buildAlbumGrid() {
+  const grid = document.getElementById('album-grid');
+  for (let i = 1; i <= 23; i++) {
+    const tone = ((i - 1) % 11) + 1;
+    const btn = document.createElement('button');
+    btn.className = 'album-cell';
+    btn.id = 'album-cell-' + i;
+    btn.dataset.index = i;
+    btn.setAttribute('aria-label', '사진 선택 ' + i);
+    btn.innerHTML =
+      '<span class="album-thumb t-' + tone + '"></span>' +
+      '<span class="album-checkbox">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>' +
+      '</span>';
+    btn.addEventListener('click', () => selectAlbumPhoto(btn));
+    grid.appendChild(btn);
+  }
+}
+
+function selectAlbumPhoto(cell) {
+  document.querySelectorAll('.album-cell').forEach(c => c.classList.remove('selected'));
+  cell.classList.add('selected');
+  const doneBtn = document.getElementById('btn-album-done');
+  doneBtn.classList.remove('disabled');
+  doneBtn.classList.add('brand');
+  const album = document.getElementById('AlbumPickerScreen');
+  album.dataset.state = 'selected';
+  renderStateButtons();
+}
+
+function applyAlbumPickerState(state) {
+  const doneBtn = document.getElementById('btn-album-done');
+  if (state === 'default') {
+    document.querySelectorAll('.album-cell').forEach(c => c.classList.remove('selected'));
+    doneBtn.classList.add('disabled');
+    doneBtn.classList.remove('brand');
+  } else if (state === 'selected') {
+    const first = document.querySelector('.album-cell:not(.camera)');
+    document.querySelectorAll('.album-cell').forEach(c => c.classList.remove('selected'));
+    if (first) first.classList.add('selected');
+    doneBtn.classList.remove('disabled');
+    doneBtn.classList.add('brand');
+  }
+}
+
+/* ─── Wiring */
+function wireInteractions() {
+  screenSelect.addEventListener('change', () => navigate(screenSelect.value));
+
+  document.getElementById('btn-back').addEventListener('click', () => {
+    if (dirty.nickname || dirty.image) {
+      navigate('ExitConfirmSheetScreen');
+    } else {
+      alert('뒤로 이동: MY 프로필');
+    }
+  });
+
+  document.getElementById('btn-avatar').addEventListener('click', () => {
+    navigate('ImageSourceSheetScreen');
+  });
+
+  document.getElementById('opt-camera').addEventListener('click', () => {
+    closeOverlay('sheet-image-source');
+    navigate('CropScreen');
+  });
+  document.getElementById('opt-album').addEventListener('click', () => {
+    closeOverlay('sheet-image-source');
+    navigate('AlbumPickerScreen');
+  });
+  document.getElementById('opt-delete').addEventListener('click', () => {
+    closeOverlay('sheet-image-source');
+    dirty.image = true;
+    screenSelect.value = 'ProfileEditScreen';
+    setState('ProfileEditScreen', 'nickname-valid');
+  });
+  document.getElementById('opt-image-cancel').addEventListener('click', () => {
+    closeOverlay('sheet-image-source');
+    screenSelect.value = 'ProfileEditScreen';
+    renderStateButtons();
+  });
+
+  document.querySelectorAll('[data-close]').forEach(el => {
+    el.addEventListener('click', () => {
+      closeOverlay(el.dataset.close);
+      screenSelect.value = 'ProfileEditScreen';
+      renderStateButtons();
+    });
+  });
+
+  document.getElementById('btn-exit-cancel').addEventListener('click', () => {
+    closeOverlay('sheet-exit-confirm');
+    screenSelect.value = 'ProfileEditScreen';
+    renderStateButtons();
+  });
+  document.getElementById('btn-exit-confirm').addEventListener('click', () => {
+    closeOverlay('sheet-exit-confirm');
+    alert('나가기 확정 → MY 프로필 (변경 폐기)');
+    resetProfileEditDefaults();
+    screenSelect.value = 'ProfileEditScreen';
+    setState('ProfileEditScreen', 'default');
+  });
+
+  $nickname.addEventListener('input', () => {
+    dirty.nickname = ($nickname.value !== INITIAL_NICK);
+    updateNicknameUi();
+    const len = [...$nickname.value].length;
+    const screen = document.getElementById('ProfileEditScreen');
+    if (len === 1) screen.dataset.state = 'nickname-1-char';
+    else if (len >= 2 && len <= 20 && dirty.nickname) screen.dataset.state = 'nickname-valid';
+    else screen.dataset.state = 'default';
+    renderStateButtons();
+  });
+
+  $saveBtn.addEventListener('click', () => {
+    if ($saveBtn.disabled) return;
+    $saveBtn.classList.add('loading');
+    $saveBtn.innerHTML = '<span class="spinner-small"></span><span>저장 중...</span>';
+    const screen = document.getElementById('ProfileEditScreen');
+    screen.dataset.state = 'uploading';
+    $uploadOverlay.classList.add('visible');
+    renderStateButtons();
+    setTimeout(() => {
+      $uploadOverlay.classList.remove('visible');
+      $saveBtn.classList.remove('loading');
+      $saveBtn.innerHTML = '<span id="save-label">저장</span>';
+      $toast.classList.add('visible');
+      $toast.classList.remove('error');
+      $toast.textContent = '프로필이 수정되었어요';
+      screen.dataset.state = 'success-toast';
+      renderStateButtons();
+      setTimeout(() => {
+        $toast.classList.remove('visible');
+        resetProfileEditDefaults();
+        screen.dataset.state = 'default';
+        renderStateButtons();
+      }, 2000);
+    }, 1400);
+  });
+
+  document.getElementById('btn-album-close').addEventListener('click', () => {
+    navigate('ProfileEditScreen', false);
+    breadcrumbTrail.pop();
+    renderBreadcrumb();
+  });
+  document.getElementById('album-cell-0').addEventListener('click', () => {
+    navigate('CropScreen');
+  });
+  document.getElementById('btn-album-done').addEventListener('click', () => {
+    if (document.getElementById('btn-album-done').classList.contains('disabled')) return;
+    navigate('CropScreen');
+  });
+
+  document.getElementById('btn-crop-close').addEventListener('click', () => {
+    navigate('ProfileEditScreen', false);
+    breadcrumbTrail.pop(); renderBreadcrumb();
+  });
+  document.getElementById('btn-crop-cancel').addEventListener('click', () => {
+    navigate('ProfileEditScreen', false);
+    breadcrumbTrail.pop(); renderBreadcrumb();
+  });
+  document.getElementById('btn-crop-done').addEventListener('click', () => {
+    navigate('ProfileEditScreen', false);
+    breadcrumbTrail.pop(); renderBreadcrumb();
+    dirty.image = true;
+    const screen = document.getElementById('ProfileEditScreen');
+    screen.dataset.state = 'uploading';
+    applyProfileEditState('uploading');
+    renderStateButtons();
+    setTimeout(() => {
+      dirty.image = true;
+      applyProfileEditState('nickname-valid');
+      screen.dataset.state = 'nickname-valid';
+      renderStateButtons();
+    }, 1400);
+  });
+}
+
+/* ─── Init */
+buildAlbumGrid();
+wireInteractions();
+updateNicknameUi();
+renderStateButtons();
+renderBreadcrumb();
+</script>
+</body>
+</html>
