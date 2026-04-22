@@ -1,0 +1,205 @@
+sprint_id: ugc-platform-002
+tasks:
+  app-001:
+    SwipeFeedActionBar:
+      status: approved
+      spec: "app-001/SwipeFeedActionBar.spec.md"
+      prototype: "app-001/prototype.html#SwipeFeedScreen"
+      screenshot: null
+      states_captured: [default, liked, zero-counts, high-counts, guest]
+      quality_score: "1.0"
+      fabrication_risk: "low"
+      revision_count: 1
+      last_revision: "major"
+      reviewed_at: "2026-04-23"
+      notes: "AC 1.7 4버튼 세로 스택 (좋아요→재생성→공유→더보기). likeCount=실숫자(toString), regenerateCount=korean-count 축약. 공유는 카운트 미노출. 댓글 spec-out. 더보기는 app-002 MoreSheet 트리거 (본 프로토타입 preview 포함). In-context SwipeFeed 프레임 (BG gradient + CTA placeholder는 app-003 scope 참고용). [Revision 1/major] app-003 canonical CTA 패턴으로 footer 교체 (sf-creator + sf-footer + cta-button 'other' variant '템플릿 사용하기'), likeCount ko-KR thousand separator 적용 (8,600 / 12,345), action-bar 위치 조정."
+  app-002:
+    SwipeFeedMoreSheet:
+      status: approved
+      spec: "app-002/SwipeFeedMoreSheet.spec.md"
+      prototype: "app-002/prototype.html#SwipeFeedMoreSheet"
+      screenshot: null
+      states_captured: [default-me, default-other, delete-confirm-open, report-placeholder-toast, closed]
+      quality_score: "1.0"
+      fabrication_risk: "low"
+      reviewed_at: "2026-04-23"
+      notes: "소유자 분기 3메뉴 (me: 다운로드/의견/삭제 destructive, other: 다운로드/의견/신고). Report = Phase 3 placeholder → Toast '곧 제공될 예정이에요'. §10 BottomSheet 패턴 준수."
+    DeleteConfirmSheet:
+      status: approved
+      spec: "app-002/DeleteConfirmSheet.spec.md"
+      prototype: "app-002/prototype.html#DeleteConfirmSheet"
+      screenshot: null
+      states_captured: [default, loading, error, closed]
+      quality_score: "1.0"
+      fabrication_risk: "low"
+      reviewed_at: "2026-04-23"
+      notes: "Horizontal 2-button (취소 + 삭제). BottomConfirmSheet 재사용. Destructive CTA red fill (#D92800). PRD 직역 문구 보존."
+  app-003:
+    SwipeFeedCTAButton:
+      status: approved
+      spec: "app-003/SwipeFeedCTAButton.spec.md"
+      prototype: "app-003/prototype.html#SwipeFeedDetailView"
+      screenshot: null
+      states_captured: [default-me, default-other, credit-deficit, free, pressed]
+      quality_score: "1.0"
+      extraction_accuracy: "20/20 = 1.0"
+      fabrication_risk: "low"
+      context_coverage:
+        why_linked: "2/2 AC (AC 1.5 소유자 분기, AC 1.6 플로우 진입점)"
+        what_resolved: "10/10 components"
+      reviewed_at: "2026-04-23"
+      notes: "AC 1.5 소유자 분기 — me:'다시 생성하기' / other:'템플릿 사용하기'. 동일 버튼 크기(56h full-width)/색상(brand-primary #8752FA)/radius(16px), 라벨 텍스트만 교체. 크레딧 뱃지(coin icon + 숫자/무료) 우측 정렬. credit-deficit variant: 60% opacity + coin red-500. §공통 토큰(CTA radius 16px) 준수. 세로 스와이프 footer context 포함 (creator info + gradient + 사이드 액션 reference)."
+    FilterDeletedErrorModal:
+      status: approved
+      spec: "app-003/FilterDeletedErrorModal.spec.md"
+      prototype: "app-003/prototype.html#filter-deleted-error-modal"
+      screenshot: null
+      states_captured: [default, entering, exiting]
+      quality_score: "1.0"
+      extraction_accuracy: "14/14 = 1.0"
+      fabrication_risk: "low"
+      context_coverage:
+        why_linked: "1/1 AC (AC 1.6 삭제된 필터 에러 모달)"
+        what_resolved: "7/7 components"
+      reviewed_at: "2026-04-23"
+      notes: "AC 1.6 단일 액션 BottomConfirmSheet. Title: '원본 게시글이 사라져서 다시 만들 수 없어요' / Action: '확인' (#262626 pe-confirm-btn). 확인 시 close-overlay + 피드 유지(네비게이션 없음). Backdrop tap noop(단일 액션 강제). §10 BottomSheet 패턴(28px top radius, 40x4 handle, 34px safe-area) 준수."
+  app-004:
+    PublishToggle:
+      status: approved
+      spec: "app-004/PublishToggle.spec.md"
+      prototype: "app-004/prototype.html#swipe-feed-screen"
+      screenshot: null
+      states_captured: [toggle-on, toggle-off, toggle-disabled, publish-success-toast, custom-prompt-blocked-toast]
+      quality_score: "1.0"
+      extraction_accuracy: "8/8 = 1.0"
+      fabrication_risk: "low"
+      context_coverage:
+        why_linked: "3/3 AC (AC-1.1, AC-1.4, AC-1.8)"
+        what_resolved: "4/4 components"
+      reviewed_at: "2026-04-23"
+      notes: "iOS-style Switch 51×31 표준 채택 (Android Material 32×20 참조). OFF→ON 일반은 즉시 PATCH + toast '공개됐어요', custom-prompt는 API 호출 없이 안내 toast, ON→OFF는 UnpublishConfirmSheet 경유. 타 유저에서는 미노출 (AC 1.8)."
+    UnpublishConfirmSheet:
+      status: approved
+      spec: "app-004/UnpublishConfirmSheet.spec.md"
+      prototype: "app-004/prototype.html#unpublish-sheet"
+      screenshot: null
+      states_captured: [default, loading, error, closed]
+      quality_score: "1.0"
+      extraction_accuracy: "14/14 = 1.0"
+      fabrication_risk: "low"
+      context_coverage:
+        why_linked: "2/2 AC (AC-1.3, AC-1.8)"
+        what_resolved: "7/7 components"
+      reviewed_at: "2026-04-23"
+      notes: "Horizontal 2-button (취소 / 비공개로 전환 destructive). 페이백 크레딧 유지 안내 PRD 원문 적용. Backdrop tap = Cancel. §10 BottomSheet 패턴 준수."
+  app-007:
+    PaybackIntroModal:
+      status: approved
+      spec: "app-007/PaybackIntroModal.spec.md"
+      prototype: "app-007/prototype.html#payback-intro-overlay"
+      screenshot: null
+      states_captured: [default, dismissing, hidden]
+      quality_score: "1.0"
+      fabrication_risk: "low"
+      reviewed_at: "2026-04-23"
+      notes: "AC 4.4 1회성 페이백 안내 BottomSheet. PRD 직역 문구 보존. Backdrop tap 닫기 비허용. Illustration inline SVG(coin + heart) placeholder. §10 BottomSheetWithHandle 패턴 준수."
+  app-009:
+    HomeHeader-WithoutGear:
+      status: approved
+      sub_fix: "MINOR-G2-1"
+      spec: "app-009/HomeHeader-WithoutGear.spec.md"
+      prototype: "app-009/prototype.html"
+      screenshot: null
+      states_captured: [before, after]
+      quality_score: "1.0"
+      fabrication_risk: "none"
+      reviewed_at: "2026-04-23"
+      notes: "PRD grep 결과 Home header gear 명시 없음 → 제거 decision. Before/After 비교 spec + HTML."
+    Sub-fix-2-landingTab-race:
+      status: skipped
+      sub_fix: "MINOR-G2-2"
+      reason: "logic-only"
+      notes: "profile.screen useEffect landingTab race — logic fix, UI 변경 없음. Prototype 생략."
+    Sub-fix-3-Clipboard-migration:
+      status: skipped
+      sub_fix: "MINOR-G3-3"
+      reason: "logic-only"
+      notes: "react-native Clipboard → @react-native-clipboard/clipboard 모듈 교체. Import/의존성 변경만, UI 변경 없음."
+    Sub-fix-4-SwipeFeed-initialContentId-fallback:
+      status: skipped
+      sub_fix: "MINOR-G3-4"
+      reason: "logic-only"
+      notes: "initialContentId 없을 시 첫 아이템 fallback. 기존 SwipeFeed UI 재사용, 신규 컴포넌트 없음."
+  app-005:
+    LikeButton:
+      status: approved
+      spec: "app-005/LikeButton.spec.md"
+      prototype: "app-005/prototype.html#SwipeFeedScreen"
+      screenshot: null
+      states_captured: [not-liked-zero, not-liked-with-count, liked, self-liked, double-tap-burst, pending-optimistic, error-rollback]
+      quality_score: "1.0"
+      extraction_accuracy: "8/8 = 1.0"
+      fabrication_risk: "low"
+      context_coverage:
+        why_linked: "2/2 AC (AC 3.1 self-like, AC 3.3 실숫자)"
+        what_resolved: "4/4 components"
+      reviewed_at: "2026-04-23"
+      notes: "세로 스와이프 우측 액션 바 1번째 버튼 (heart + count 세로 정렬). outlined↔filled-red 스위치, count=실숫자(0 포함, 축약 금지, 4자리+ ko-KR 천단위 콤마). DoubleTapLikeOverlay 재사용 — media 영역 더블탭 시 burst animation + 동일 훅 호출 (nextState=true, idempotent). Optimistic update + onError rollback. 셀프 좋아요 허용 (disable 없음, AC 3.1). Regenerate/Share/More 는 참조용 (app-001/app-002 scope). bounce 애니메이션 160ms, burst 600ms."
+    ProfileGridCard-LikeBadge:
+      status: approved
+      spec: "app-005/ProfileGridCard-LikeBadge.spec.md"
+      prototype: "app-005/prototype.html#MyProfileScreen"
+      screenshot: null
+      states_captured: [card-default, card-zero-likes, card-large-count, card-private, card-new]
+      quality_score: "1.0"
+      extraction_accuracy: "12/12 = 1.0"
+      fabrication_risk: "low"
+      context_coverage:
+        why_linked: "1/1 AC (AC 3.3 — 그리드 카드에도 실숫자 노출)"
+        what_resolved: "6/6 components"
+      reviewed_at: "2026-04-23"
+      notes: "프로필 그리드 카드 우하단 좋아요 badge (heart 12×12 filled white + 실숫자). Phase 1 regen-count 좌측 유지, 우측 신규 like badge. 0 반드시 노출, 축약 금지 (8600 → '8,600'). 재생성 축약(1.2만)과 혼동 없도록 좌/우 위치 고정. 비공개·신규 뱃지와도 공존. card 탭 → SwipeFeed 이동 (badge 단독 탭 없음). opacity 0.9, text-shadow 0 1px 2px rgba(0,0,0,0.45) 미디어 위 가독성."
+  app-006:
+    MyProfileScreen-LikedTab:
+      status: approved
+      spec: "app-006/MyProfileScreen-LikedTab.spec.md"
+      prototype: "app-006/prototype.html#MyProfileScreen-LikedTab"
+      screenshot: null
+      states_captured: [liked-default, liked-empty, loading, error]
+      quality_score: "1.0"
+      extraction_accuracy: "44/44 = 1.0"
+      fabrication_risk: "low"
+      context_coverage:
+        why_linked: "7/7 ACs (AC-3.2, AC-3.3, AC-2.1, AC-2.7, AC-2.profile-header, AC-2.count-format, AC-2.settings-entry)"
+        what_resolved: "22/22 components · 18/18 tokens"
+      reviewed_at: "2026-04-23"
+      notes: "MY 프로필 좋아요 탭 active variant. Phase 1 고정 EmptyState → 실 그리드 + LikeCountBadge(♡ + 실숫자, 축약 없음, 0 포함). 공개/비공개 탭 UI 재사용(2-col 1px gap, 1:1·4:5 교차). counts row 는 app-003 동일(팔로워/팔로잉/재생성된 — korean-count 축약 유지). Empty 메시지 커스텀: '아직 좋아요한 콘텐츠가 없어요'. 카드 탭 → SwipeFeed(source={kind:'me', visibility:'liked'}). app-003 선례 + app-005 badge 컨벤션 일관."
+  app-008:
+    CreditHistoryRow-Payback:
+      status: approved
+      spec: "app-008/CreditHistoryRow-Payback.spec.md"
+      prototype: "app-008/prototype.html#CreditHistoryRow-Payback"
+      screenshot: null
+      states_captured: [default, with-description, without-description, thumbnail-fallback, loading]
+      quality_score: "1.0"
+      extraction_accuracy: "16/16 = 1.0"
+      fabrication_risk: "low"
+      context_coverage:
+        why_linked: "1/1 AC (AC-4.2)"
+        what_resolved: "8/8 components"
+      reviewed_at: "2026-04-23"
+      notes: "AC 4.2 PAYBACK row variant. 기존 MyCreditHistoryListItem 구조 유지하며 좌측 코인 아이콘 → 콘텐츠 썸네일(40×40 radius 12) 교체. title='크레딧 페이백' (Subtitle4 Semibold #262626). amount 는 기존 isIncreasedAmount 규칙(zzem_violet_600 #7040E0) 재사용 — DESIGN.md 에 별도 --color-promotion 토큰 없음, 기존 violet-600 을 promotion alias 로 선언. description 존재 시만 separator+설명 노출. thumbnail=null → zzem_violet_100 fallback. Phase 2 scope: 탭 핸들러 no-op."
+    CreditHistoryScreen-WithPayback:
+      status: approved
+      spec: "app-008/CreditHistoryScreen-WithPayback.spec.md"
+      prototype: "app-008/prototype.html#CreditHistoryScreen-WithPayback"
+      screenshot: null
+      states_captured: [default, with-payback-entries, payback-only, empty, loading]
+      quality_score: "1.0"
+      extraction_accuracy: "20/20 = 1.0"
+      fabrication_risk: "low"
+      context_coverage:
+        why_linked: "1/1 AC (AC-4.2)"
+        what_resolved: "10/10 components"
+      reviewed_at: "2026-04-23"
+      notes: "혼합 row 리스트 (충전/차감/환불/PAYBACK). 헤더/MyCreditInfo/ChipBar/DateSection 기존 패턴 유지. '적립' 칩 선택 시 PAYBACK+recharged+refunded 필터 (task 본문 기본 규칙). 페이지네이션 cursor(base64 createdAt) 회귀 없음. Empty/Loading state 포함 — empty copy 는 관례적 placeholder (PRD 미명시 low-risk)."

@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>app-001 · SwipeFeedActionBar Prototype</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+  <style>
+    /* ==================================================
+     * Design Tokens (inlined from prototypes/context/tokens.css — subset)
+     * ================================================== */
+    :root {
+      /* PRIMITIVE - Purple (Brand) */
+      --wds-color-purple-500: #8752FA;
+      --wds-color-purple-600: #7040E0;
+
+      /* PRIMITIVE - Neutral */
+      --wds-color-neutral-0: #FFFFFF;
+      --wds-color-neutral-50: #F7F8F9;
+      --wds-color-neutral-100: #F0F1F3;
+      --wds-color-neutral-200: #E4E5E9;
+      --wds-color-neutral-500: #8E9199;
+      --wds-color-neutral-600: #6B6E76;
+      --wds-color-neutral-900: #212228;
+      --wds-color-neutral-1000: #000000;
+
+      /* PRIMITIVE - Status */
+      --wds-color-red-500: #FF3B30;
+      --wds-color-yellow-500: #FFCC00;
+
+      /* SEMANTIC */
+      --wds-background-normal: #FFFFFF;
+      --wds-background-dimmed: rgba(0, 0, 0, 0.40);
+      --wds-surface-button: #F1F1F1;
+      --wds-fill-brand-primary: var(--wds-color-purple-500);
+      --wds-label-normal: #212228;
+      --wds-label-alternative: #6B6E76;
+      --wds-label-inverse: #FFFFFF;
+      --wds-line-normal: #E4E5E9;
+
+      /* RADIUS */
+      --wds-radius-sm: 8px;
+      --wds-radius-md: 12px;
+      --wds-radius-lg: 16px;
+      --wds-radius-full: 9999px;
+
+      /* SPACING */
+      --wds-spacing-4: 4px;
+      --wds-spacing-8: 8px;
+      --wds-spacing-12: 12px;
+      --wds-spacing-16: 16px;
+      --wds-spacing-20: 20px;
+      --wds-spacing-24: 24px;
+
+      /* TYPOGRAPHY */
+      --wds-font-family-primary: 'Pretendard', -apple-system, 'SF Pro Display', sans-serif;
+      --wds-font-weight-medium: 500;
+      --wds-font-weight-semibold: 600;
+      --wds-font-weight-bold: 700;
+
+      /* LIKE ACTIVE (swipe-feed-actions.tsx 실측값) */
+      --like-active: #FE2B54;
+    }
+
+    /* Reset */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    button { background: none; border: none; cursor: pointer; font-family: inherit; color: inherit; }
+
+    body {
+      font-family: var(--wds-font-family-primary);
+      background: #E7E8EB;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 16px;
+      color: var(--wds-label-normal);
+    }
+
+    /* ==================================================
+     * Control Panel
+     * ================================================== */
+    .control-panel {
+      width: 390px;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      border-radius: 12px 12px 0 0;
+      padding: 12px 16px;
+      display: flex; flex-direction: column; gap: 8px;
+      font-size: 13px;
+    }
+    .control-panel__row {
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    }
+    .control-panel__label {
+      color: #888; font-size: 11px; min-width: 52px;
+    }
+    .control-panel__states { display: flex; gap: 4px; flex-wrap: wrap; }
+    .state-btn {
+      background: #2a2a3e; color: #aaa;
+      border: 1px solid #444; border-radius: 6px;
+      padding: 4px 10px; font-size: 11px;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .state-btn.active {
+      background: var(--wds-color-purple-500); color: #fff;
+      border-color: var(--wds-color-purple-500);
+    }
+    .control-panel__breadcrumb {
+      color: #888; font-size: 11px; font-family: monospace;
+    }
+    .control-panel__meta { color: #aaa; font-size: 11px; }
+
+    /* ==================================================
+     * Device Frame
+     * ================================================== */
+    .device-frame {
+      width: 390px; height: 844px;
+      position: relative; overflow: hidden;
+      background: #000;
+      border: 1px solid #ddd;
+      border-radius: 0 0 12px 12px;
+    }
+    .screen {
+      position: absolute; inset: 0;
+      display: none; flex-direction: column;
+    }
+    .screen.active { display: flex; }
+
+    /* ==================================================
+     * StatusBar
+     * ================================================== */
+    .status-bar {
+      height: 44px; padding: 0 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      color: #fff; font-size: 15px; font-weight: 600;
+      position: absolute; top: 0; left: 0; right: 0; z-index: 6;
+      letter-spacing: -0.3px;
+    }
+    .status-bar__icons {
+      display: flex; gap: 6px; align-items: center; font-size: 14px;
+    }
+
+    /* ==================================================
+     * Swipe Card (in-context)
+     * ================================================== */
+    .swipe-card {
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(circle at 30% 25%, rgba(255,255,255,0.15) 0%, transparent 50%),
+        linear-gradient(135deg, #7040E0 0%, #B23BC7 50%, #FE2B54 100%);
+    }
+    .swipe-card__watermark {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      color: rgba(255,255,255,0.15);
+      font-size: 64px; font-weight: 800;
+      letter-spacing: -2px;
+      pointer-events: none;
+      user-select: none;
+    }
+    .top-fade {
+      position: absolute; top: 0; left: 0; right: 0; height: 120px;
+      background: linear-gradient(180deg, rgba(0,0,0,0.45) 0%, transparent 100%);
+      z-index: 1;
+    }
+
+    /* ==================================================
+     * Footer — canonical pattern from app-003
+     * (creator info + CTA bar + bottom gradient)
+     * ================================================== */
+    .sf-footer {
+      position: absolute;
+      bottom: 64px; left: 0; right: 0;
+      padding: 16px 16px 16px 16px;
+      z-index: 4;
+    }
+    .sf-footer__gradient {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 240px;
+      background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.75) 60%, rgba(0,0,0,0.95) 100%);
+      z-index: -1;
+      pointer-events: none;
+    }
+    .sf-creator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .sf-creator__avatar {
+      width: 36px; height: 36px;
+      border-radius: 9999px;
+      background: linear-gradient(135deg, #F5F3FF, #D4C0FF);
+      border: 1px solid rgba(136,136,136,0.2);
+      display: inline-flex;
+      align-items: center; justify-content: center;
+      color: #7040E0;
+      font-weight: var(--wds-font-weight-bold);
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+    .sf-creator__name {
+      color: #fff;
+      font-size: 14px;
+      font-weight: var(--wds-font-weight-semibold);
+    }
+    .sf-creator__verified {
+      width: 14px; height: 14px;
+      border-radius: 9999px;
+      background: #007AFF;
+      color: #fff;
+      font-size: 9px;
+      display: inline-flex;
+      align-items: center; justify-content: center;
+      margin-left: 2px;
+    }
+    .sf-creator__caption {
+      margin-top: 6px;
+      color: rgba(255,255,255,0.85);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    /* --- CTA Bar (canonical app-003 pattern, 'other' variant as default) --- */
+    .cta-bar {
+      display: flex;
+      align-items: stretch;
+      gap: 8px;
+    }
+    .cta-button {
+      position: relative;
+      flex: 1;
+      height: 56px;
+      border-radius: var(--wds-radius-lg);
+      background: var(--wds-fill-brand-primary);
+      color: var(--wds-label-inverse);
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 16px;
+      font-weight: var(--wds-font-weight-semibold);
+      transition: opacity 0.15s ease, transform 0.1s ease;
+      box-shadow: 0 6px 18px rgba(135,82,250,0.35);
+    }
+    .cta-button:hover { opacity: 0.95; }
+    .cta-button:active {
+      opacity: 0.85;
+      transform: scale(0.98);
+    }
+    .cta-button__label {
+      letter-spacing: -0.01em;
+    }
+    .cta-button__credit {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      height: 28px;
+      background: rgba(255,255,255,0.18);
+      border-radius: 9999px;
+      font-size: 13px;
+      font-weight: var(--wds-font-weight-medium);
+    }
+    .cta-button__coin {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px; height: 16px;
+      font-size: 14px;
+      color: var(--wds-color-yellow-500);
+    }
+
+    /* ==================================================
+     * ACTION BAR (⭐ 핵심 — app-001)
+     * ================================================== */
+    .action-bar {
+      position: absolute;
+      right: 12px; bottom: 240px;
+      display: flex; flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      z-index: 5;
+    }
+    .action-btn {
+      display: flex; flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 6px;
+      border-radius: var(--wds-radius-sm);
+      color: #fff;
+      transition: transform 0.12s ease, background 0.12s ease;
+      min-height: 44px;
+    }
+    .action-btn:active {
+      transform: scale(0.92);
+      background: rgba(0,0,0,0.10);
+    }
+    .action-btn__icon {
+      width: 28px; height: 28px;
+      display: inline-flex; align-items: center; justify-content: center;
+      filter: drop-shadow(0 1px 3px rgba(0,0,0,0.35));
+    }
+    .action-btn__icon svg { width: 28px; height: 28px; display: block; }
+    .action-btn__count {
+      color: var(--wds-label-inverse);
+      opacity: 0.95;
+      font-size: 12px;
+      font-weight: var(--wds-font-weight-semibold);
+      line-height: 1.4;
+      letter-spacing: -0.2px;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.45);
+    }
+
+    /* Liked state */
+    .action-btn[data-liked="true"] .action-btn__icon { color: var(--like-active); }
+
+    /* Double-tap heart overlay (reference — not bound in prototype) */
+    .double-tap-heart {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%) scale(1);
+      color: var(--like-active); font-size: 100px;
+      opacity: 0; pointer-events: none;
+      z-index: 5;
+      filter: drop-shadow(0 4px 16px rgba(0,0,0,0.4));
+    }
+    .double-tap-heart.flash {
+      animation: heartFlash 1.8s ease-out forwards;
+    }
+    @keyframes heartFlash {
+      0% { opacity: 0; transform: translate(-50%, -50%) scale(0.6); }
+      15% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+      30% { transform: translate(-50%, -50%) scale(1); }
+      80% { opacity: 1; }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
+    }
+
+    /* ==================================================
+     * Bottom Nav (context)
+     * ================================================== */
+    .bottom-nav {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      height: 64px;
+      background: rgba(0,0,0,0.55);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      display: flex; align-items: center; justify-content: space-around;
+      color: #fff; font-size: 11px; font-weight: 500;
+      z-index: 4;
+      padding-bottom: 8px;
+      border-top: 0.5px solid rgba(255,255,255,0.12);
+    }
+    .bottom-nav__tab {
+      display: flex; flex-direction: column;
+      align-items: center; gap: 2px;
+      color: rgba(255,255,255,0.7);
+    }
+    .bottom-nav__tab.active { color: #fff; }
+    .bottom-nav__icon { font-size: 18px; }
+
+    /* ==================================================
+     * MoreSheet preview (app-002 domain — trigger target)
+     * ================================================== */
+    .overlay-backdrop {
+      position: absolute; inset: 0;
+      background: var(--wds-background-dimmed);
+      z-index: 10;
+      display: none;
+      align-items: flex-end;
+    }
+    .overlay-backdrop.open { display: flex; }
+    .more-sheet {
+      width: 100%;
+      background: #fff;
+      border-radius: 20px 20px 0 0;
+      padding: 12px 16px 28px;
+      animation: slideUp 0.28s ease-out;
+    }
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+    .sheet-handle {
+      width: 36px; height: 4px;
+      background: #A7A7A7;
+      border-radius: 9999px;
+      margin: 0 auto 16px;
+    }
+    .sheet-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 4px;
+      font-size: 15px; font-weight: 500;
+      color: var(--wds-label-normal);
+      width: 100%;
+      text-align: left;
+    }
+    .sheet-item--destructive { color: #D92800; }
+    .sheet-divider { height: 1px; background: var(--wds-line-normal); margin: 4px 0; }
+    .sheet-cancel {
+      margin-top: 8px; width: 100%;
+      padding: 14px;
+      background: #F1F1F1;
+      border-radius: 12px;
+      font-size: 15px; font-weight: 600;
+      color: var(--wds-label-normal);
+    }
+
+    /* Annotation helper */
+    .spec-callout {
+      position: absolute;
+      right: 72px;
+      display: flex; align-items: center; gap: 6px;
+      background: rgba(0,0,0,0.7);
+      color: #fff;
+      font-size: 10px; font-weight: 500;
+      padding: 3px 8px; border-radius: 4px;
+      z-index: 8;
+      pointer-events: none;
+    }
+    .spec-callout::after {
+      content: '';
+      position: absolute;
+      right: -6px; top: 50%;
+      transform: translateY(-50%);
+      border: 4px solid transparent;
+      border-left-color: rgba(0,0,0,0.7);
+    }
+    .spec-callout--hidden { display: none; }
+  </style>
+</head>
+<body>
+  <div class="control-panel">
+    <div class="control-panel__row">
+      <span class="control-panel__label">Task</span>
+      <span class="control-panel__meta">app-001 · SwipeFeedActionBar (좋아요/재생성/공유/더보기)</span>
+    </div>
+    <div class="control-panel__row">
+      <span class="control-panel__label">State</span>
+      <div class="control-panel__states" id="state-buttons">
+        <button class="state-btn active" data-state="default">default</button>
+        <button class="state-btn" data-state="liked">liked</button>
+        <button class="state-btn" data-state="zero-counts">zero-counts</button>
+        <button class="state-btn" data-state="high-counts">high-counts</button>
+        <button class="state-btn" data-state="guest">guest</button>
+      </div>
+    </div>
+    <div class="control-panel__row">
+      <span class="control-panel__label">Overlay</span>
+      <button class="state-btn" id="toggle-sheet">MoreSheet preview (app-002)</button>
+      <span class="control-panel__breadcrumb" id="breadcrumb">SwipeFeedScreen → ActionBar</span>
+    </div>
+  </div>
+
+  <div class="device-frame">
+    <section class="screen active" id="SwipeFeedScreen">
+      <!-- In-context swipe card (placeholder for app-003 CTA, app-001 scope is action-bar only) -->
+      <div class="swipe-card" aria-hidden="true"></div>
+      <div class="swipe-card__watermark" aria-hidden="true">ZZEM</div>
+      <div class="top-fade" aria-hidden="true"></div>
+
+      <div class="status-bar">
+        <span>9:41</span>
+        <span class="status-bar__icons">
+          <span>●●●●</span>
+          <span>📶</span>
+          <span>🔋</span>
+        </span>
+      </div>
+
+      <!-- ⭐ 핵심 — SwipeFeedActionBar (app-001) -->
+      <aside class="action-bar" id="action-bar" role="group" aria-label="액션 바">
+        <button class="action-btn" id="btn-like" type="button" data-liked="false" aria-label="좋아요">
+          <span class="action-btn__icon" id="icon-like" aria-hidden="true">
+            <!-- Heart stroke (default) -->
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 20.5S3.5 14.7 3.5 9.1C3.5 6.4 5.6 4.3 8.2 4.3c1.5 0 3 .7 3.8 1.9.8-1.2 2.3-1.9 3.8-1.9 2.6 0 4.7 2.1 4.7 4.8 0 5.6-8.5 11.4-8.5 11.4z"
+                stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" fill="none"/>
+            </svg>
+          </span>
+          <span class="action-btn__count" id="count-like">8,600</span>
+        </button>
+
+        <button class="action-btn" id="btn-regenerate" type="button" aria-label="재생성 횟수">
+          <span class="action-btn__icon" aria-hidden="true">
+            <!-- Regenerate / rotate-arrow -->
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M20 12a8 8 0 1 1-2.3-5.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              <path d="M20 4v4h-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+          <span class="action-btn__count" id="count-regenerate">8.6천</span>
+        </button>
+
+        <button class="action-btn" id="btn-share" type="button" aria-label="공유">
+          <span class="action-btn__icon" aria-hidden="true">
+            <!-- Upload / share -->
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 3v13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              <path d="M7 8l5-5 5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <!-- Share has NO count label per AC-1.7.share -->
+        </button>
+
+        <button class="action-btn" id="btn-more" type="button" aria-label="더보기">
+          <span class="action-btn__icon" aria-hidden="true">
+            <!-- Horizontal dots (···) -->
+            <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="5.5" cy="12" r="1.8"/>
+              <circle cx="12" cy="12" r="1.8"/>
+              <circle cx="18.5" cy="12" r="1.8"/>
+            </svg>
+          </span>
+        </button>
+      </aside>
+
+      <!-- Footer — canonical app-003 pattern (creator info + CTA) -->
+      <section class="sf-footer" id="swipe-feed-footer">
+        <div class="sf-footer__gradient" aria-hidden="true"></div>
+
+        <div class="sf-creator" id="creator-info-row">
+          <div class="sf-creator__avatar" id="creator-avatar">쨈</div>
+          <div>
+            <div>
+              <span class="sf-creator__name" id="creator-nickname">zzem_creator</span>
+              <span class="sf-creator__verified" aria-label="인증된 크리에이터">✓</span>
+            </div>
+            <div class="sf-creator__caption">방금 전</div>
+          </div>
+        </div>
+
+        <!-- CTA Bar — app-003 canonical 'other' variant (타 유저 컨텍스트) -->
+        <div class="cta-bar" id="cta-bar">
+          <button
+            class="cta-button"
+            id="cta-button"
+            aria-label="템플릿 사용하기, 크레딧 10개 소비"
+            onclick="handleCta()"
+          >
+            <span class="cta-button__label">템플릿 사용하기</span>
+            <span class="cta-button__credit">
+              <span class="cta-button__coin" aria-label="크레딧">🪙</span>
+              <span class="cta-button__value">10</span>
+            </span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Spec callouts (hidden until toggled for reviewer context) -->
+      <div class="spec-callout spec-callout--hidden" id="callout-like" style="bottom: 390px;">AC 3.3 · 실제 숫자 (ko-KR ,)</div>
+      <div class="spec-callout spec-callout--hidden" id="callout-regenerate" style="bottom: 330px;">AC 1.7 · korean-count 축약</div>
+      <div class="spec-callout spec-callout--hidden" id="callout-share" style="bottom: 282px;">카운트 미노출</div>
+      <div class="spec-callout spec-callout--hidden" id="callout-more" style="bottom: 242px;">app-002 MoreSheet 트리거</div>
+
+      <!-- Double-tap heart (reference) -->
+      <div class="double-tap-heart" id="dt-heart" aria-hidden="true">♥</div>
+
+      <nav class="bottom-nav" aria-label="주 내비게이션">
+        <div class="bottom-nav__tab">
+          <span class="bottom-nav__icon">🏠</span>
+          <span>홈</span>
+        </div>
+        <div class="bottom-nav__tab active">
+          <span class="bottom-nav__icon">🔍</span>
+          <span>탐색</span>
+        </div>
+        <div class="bottom-nav__tab">
+          <span class="bottom-nav__icon">👤</span>
+          <span>MY</span>
+        </div>
+      </nav>
+
+      <!-- MoreSheet preview overlay (app-002 scope) -->
+      <div class="overlay-backdrop" id="more-sheet-backdrop" role="dialog" aria-modal="true" aria-labelledby="sheet-label">
+        <div class="more-sheet" role="document">
+          <div class="sheet-handle" aria-hidden="true"></div>
+          <span id="sheet-label" style="display:block;text-align:center;font-size:12px;color:var(--wds-label-alternative);margin-bottom:8px;">app-002 MoreSheet (참고)</span>
+          <button class="sheet-item" type="button">
+            <span aria-hidden="true">💬</span>
+            <span>의견 보내기</span>
+          </button>
+          <div class="sheet-divider"></div>
+          <button class="sheet-item sheet-item--destructive" type="button">
+            <span aria-hidden="true">🚨</span>
+            <span>신고하기</span>
+          </button>
+          <button class="sheet-cancel" id="sheet-cancel" type="button">취소</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // ==================================================
+    // State Engine — applies state presets to ActionBar
+    // ==================================================
+    const $btnLike = document.getElementById('btn-like');
+    const $iconLike = document.getElementById('icon-like');
+    const $countLike = document.getElementById('count-like');
+    const $countRegen = document.getElementById('count-regenerate');
+    const $actionBar = document.getElementById('action-bar');
+
+    const HEART_STROKE = `
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 20.5S3.5 14.7 3.5 9.1C3.5 6.4 5.6 4.3 8.2 4.3c1.5 0 3 .7 3.8 1.9.8-1.2 2.3-1.9 3.8-1.9 2.6 0 4.7 2.1 4.7 4.8 0 5.6-8.5 11.4-8.5 11.4z"
+          stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" fill="none"/>
+      </svg>`;
+    const HEART_FILL = `
+      <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 20.5S3.5 14.7 3.5 9.1C3.5 6.4 5.6 4.3 8.2 4.3c1.5 0 3 .7 3.8 1.9.8-1.2 2.3-1.9 3.8-1.9 2.6 0 4.7 2.1 4.7 4.8 0 5.6-8.5 11.4-8.5 11.4z"/>
+      </svg>`;
+
+    // likeCount formatter — AC 3.3 + app-005 spec: ko-KR thousand separator, 0 그대로
+    function formatLikeCount(n) {
+      if (n === 0) return '0';
+      return n.toLocaleString('ko-KR');
+    }
+
+    // regenerateCount formatter — korean-count 축약 (변경 없음)
+    function formatKoreanCount(n) {
+      if (n < 1000) return String(n);
+      if (n < 10000) {
+        const v = (n / 1000).toFixed(1).replace(/\.0$/, '');
+        return v + '천';
+      }
+      const v = (n / 10000).toFixed(1).replace(/\.0$/, '');
+      return v + '만';
+    }
+
+    const STATE_PRESETS = {
+      'default':      { liked: false, likeCount: 8600,  regenCount: 8600,  guest: false },
+      'liked':        { liked: true,  likeCount: 8601,  regenCount: 8600,  guest: false },
+      'zero-counts':  { liked: false, likeCount: 0,     regenCount: 0,     guest: false },
+      'high-counts':  { liked: false, likeCount: 12345, regenCount: 12345, guest: false },
+      'guest':        { liked: false, likeCount: 8600,  regenCount: 8600,  guest: true  },
+    };
+
+    function applyState(stateName) {
+      const preset = STATE_PRESETS[stateName] || STATE_PRESETS['default'];
+      // Like button
+      $btnLike.setAttribute('data-liked', String(preset.liked));
+      $iconLike.innerHTML = preset.liked ? HEART_FILL : HEART_STROKE;
+      // Counts (AC rules)
+      $countLike.textContent = formatLikeCount(preset.likeCount);           // ko-KR 실제 숫자 + ,
+      $countRegen.textContent = formatKoreanCount(preset.regenCount);       // korean-count 축약
+      // Guest — hide LikeButton
+      $btnLike.style.display = preset.guest ? 'none' : '';
+      // Breadcrumb
+      document.getElementById('breadcrumb').textContent = `SwipeFeedScreen → ActionBar · state=${stateName}`;
+    }
+
+    // State button wiring
+    document.querySelectorAll('#state-buttons .state-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#state-buttons .state-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        applyState(btn.dataset.state);
+      });
+    });
+
+    // ==================================================
+    // Action Button Interactions
+    // ==================================================
+    function trackAction(buttonName) {
+      // Simulated telemetry (event: click_vertical_feed_action_btn)
+      console.info('[telemetry] click_vertical_feed_action_btn', { button_name: buttonName });
+    }
+
+    // Like — toggle + track
+    $btnLike.addEventListener('click', () => {
+      const wasLiked = $btnLike.getAttribute('data-liked') === 'true';
+      const nowLiked = !wasLiked;
+      $btnLike.setAttribute('data-liked', String(nowLiked));
+      $iconLike.innerHTML = nowLiked ? HEART_FILL : HEART_STROKE;
+      const currentText = $countLike.textContent.replace(/,/g, '');
+      const current = parseInt(currentText, 10) || 0;
+      const next = Math.max(0, current + (nowLiked ? 1 : -1));
+      $countLike.textContent = formatLikeCount(next);
+      trackAction('like');
+    });
+
+    // Regenerate — no-op per scope, track only
+    document.getElementById('btn-regenerate').addEventListener('click', () => {
+      trackAction('regenerate');
+    });
+
+    // Share — simulate OS share sheet
+    document.getElementById('btn-share').addEventListener('click', () => {
+      trackAction('share');
+      alert('OS 공유 시트 오픈 (simulated)');
+    });
+
+    // More — open MoreSheet preview (app-002 trigger)
+    const $backdrop = document.getElementById('more-sheet-backdrop');
+    document.getElementById('btn-more').addEventListener('click', () => {
+      trackAction('more');
+      $backdrop.classList.add('open');
+    });
+    document.getElementById('sheet-cancel').addEventListener('click', () => {
+      $backdrop.classList.remove('open');
+    });
+    $backdrop.addEventListener('click', (e) => {
+      if (e.target === $backdrop) $backdrop.classList.remove('open');
+    });
+
+    // Toggle sheet button (control panel)
+    document.getElementById('toggle-sheet').addEventListener('click', () => {
+      $backdrop.classList.toggle('open');
+    });
+
+    // CTA — in-context app-003 canonical (prototype reference)
+    function handleCta() {
+      alert('handleCta(\'other\'): 이미지 선택 → CreateContent (sourceContentId 전달) ※ 템플릿 사용 시뮬레이션');
+    }
+
+    // Init
+    applyState('default');
+  </script>
+</body>
+</html>

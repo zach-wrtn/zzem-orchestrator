@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>app-008 · 크레딧 히스토리 페이백 행 Prototype</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+  <style>
+    /* ==================================================
+     * Design Tokens (inlined from prototypes/context/tokens.css)
+     * ================================================== */
+    :root {
+      /* PRIMITIVE - Purple (Brand) */
+      --wds-color-purple-50:  #F5F0FF;
+      --wds-color-purple-100: #EBE1FF;
+      --wds-color-purple-500: #8752FA;
+      --wds-color-purple-600: #7040E0;
+
+      /* PRIMITIVE - Neutral */
+      --wds-color-neutral-0:    #FFFFFF;
+      --wds-color-neutral-50:   #F7F8F9;
+      --wds-color-neutral-100:  #F0F1F3;
+      --wds-color-neutral-200:  #E4E5E9;
+      --wds-color-neutral-300:  #D1D3D8;
+      --wds-color-neutral-400:  #B5B8BF;
+      --wds-color-neutral-500:  #8E9199;
+      --wds-color-neutral-600:  #6B6E76;
+      --wds-color-neutral-700:  #4D5058;
+      --wds-color-neutral-800:  #35373E;
+      --wds-color-neutral-900:  #212228;
+      --wds-color-neutral-1000: #000000;
+
+      /* SEMANTIC */
+      --wds-background-normal: #FFFFFF;
+      --wds-surface-secondary: #F7F7F7;
+      --wds-surface-button:    #F1F1F1;
+      --wds-label-normal:      #212228;
+      --wds-label-alternative: #6B6E76;
+      --wds-label-assistive:   #8E9199;
+      --wds-line-normal:       #E4E5E9;
+      --wds-line-alternative:  #F0F1F3;
+      --wds-fill-brand-primary:#8752FA;
+      --wds-fill-brand-weak:   #EBE1FF;
+
+      /* APP ALIASES (from MemeApp design guide) */
+      --background_primary:   #FFFFFF;
+      --surface_secondary:    #F7F7F7;
+      --surface_elevated:     #FFFFFF;
+      --surface_primary_invert:#262626;
+      --outline_primary:      #F1F1F1;
+      --outline_secondary:    #E4E5E9;
+      --text_primary:         #262626;
+      --text_secondary:       #656565;
+      --text_tertiary:        #8A8A8A;
+      --text_primary_invert:  #FFFFFF;
+      --icon_disable:         #D1D3D8;
+      --zzem_violet_100:      #EBE1FF;
+      --zzem_violet_600:      #7040E0; /* PAYBACK promotion color */
+      --color-promotion:      #7040E0; /* semantic alias requested in task */
+
+      /* SPACING (4px grid) */
+      --wds-spacing-4: 4px;
+      --wds-spacing-8: 8px;
+      --wds-spacing-12:12px;
+      --wds-spacing-16:16px;
+      --wds-spacing-20:20px;
+      --wds-spacing-24:24px;
+
+      /* RADIUS */
+      --wds-radius-xs:  4px;
+      --wds-radius-sm:  8px;
+      --wds-radius-md:  12px;
+      --wds-radius-lg:  16px;
+      --wds-radius-xl:  20px;
+      --wds-radius-2xl: 24px;
+      --wds-radius-full:9999px;
+
+      --wds-font-family-primary: 'Pretendard', -apple-system, 'SF Pro Display', 'Apple SD Gothic Neo', sans-serif;
+    }
+
+    /* Reset */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    button { background: none; border: none; cursor: pointer; font-family: inherit; color: inherit; }
+    ul { list-style: none; }
+
+    body {
+      font-family: var(--wds-font-family-primary);
+      background: #E7E8EB;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 16px;
+      color: var(--text_primary);
+    }
+
+    /* === Control Panel === */
+    .control-panel {
+      width: 390px;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      border-radius: 12px 12px 0 0;
+      padding: 12px 16px;
+      display: flex; flex-direction: column; gap: 8px;
+      font-size: 13px;
+    }
+    .control-panel__row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .control-panel__label { color: #888; font-size: 11px; min-width: 58px; }
+    .control-panel select {
+      background: #2a2a3e; color: #e0e0e0;
+      border: 1px solid #444; border-radius: 6px;
+      padding: 4px 8px; font-size: 12px; flex: 1;
+      font-family: inherit;
+    }
+    .control-panel__states { display: flex; gap: 4px; flex-wrap: wrap; }
+    .control-panel__state-btn {
+      background: #2a2a3e; color: #aaa;
+      border: 1px solid #444; border-radius: 6px;
+      padding: 4px 10px; font-size: 11px; cursor: pointer;
+      transition: all .15s;
+    }
+    .control-panel__state-btn.active {
+      background: var(--wds-color-purple-500);
+      color: #fff; border-color: var(--wds-color-purple-500);
+    }
+    .control-panel__breadcrumb { color: #888; font-size: 11px; font-family: monospace; }
+
+    /* === Device Frame === */
+    .device-frame {
+      width: 390px; height: 844px;
+      background: var(--background_primary);
+      overflow: hidden; position: relative;
+      border: 1px solid #ddd;
+      border-radius: 0 0 12px 12px;
+      box-shadow: 0 12px 32px rgba(0,0,0,.12);
+    }
+
+    /* Screen containers */
+    .screen { width: 100%; height: 100%; display: none; flex-direction: column; }
+    .screen.active { display: flex; }
+
+    /* Status Bar */
+    .status-bar {
+      height: 44px; flex: 0 0 44px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 24px;
+      font-size: 14px; font-weight: 600;
+      color: var(--text_primary);
+      background: var(--background_primary);
+    }
+    .status-bar__right { display: flex; gap: 6px; font-size: 12px; letter-spacing: 1px; }
+
+    /* Header */
+    .header {
+      height: 48px; flex: 0 0 48px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 16px;
+      background: var(--background_primary);
+      border-bottom: 1px solid var(--outline_primary);
+      position: sticky; top: 0; z-index: 10;
+    }
+    .header__back {
+      width: 24px; height: 24px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; color: var(--text_primary);
+    }
+    .header__title {
+      font-size: 16px; font-weight: 600; color: var(--text_primary);
+      letter-spacing: -0.3px;
+    }
+    .header__spacer { width: 24px; height: 24px; }
+
+    /* Body (scroll) */
+    .body {
+      flex: 1; overflow-y: auto; overflow-x: hidden;
+      background: var(--background_primary);
+    }
+
+    /* MyCreditInfo */
+    .credit-info {
+      padding: 20px 16px 24px;
+      display: flex; flex-direction: column; gap: 6px;
+      background: var(--background_primary);
+    }
+    .credit-info__label {
+      font-size: 12px; font-weight: 500; color: var(--text_secondary);
+    }
+    .credit-info__amount {
+      display: flex; align-items: baseline; gap: 4px;
+      font-size: 28px; font-weight: 700; color: var(--text_primary);
+      letter-spacing: -0.5px;
+    }
+    .credit-info__amount-unit {
+      font-size: 16px; font-weight: 600; color: var(--text_primary);
+    }
+    .credit-info__expiration {
+      font-size: 11px; font-weight: 400; color: var(--text_tertiary);
+    }
+
+    .section-divider-8 {
+      height: 8px; width: 100%;
+      background: var(--surface_secondary);
+    }
+
+    /* Chip Bar */
+    .chip-bar {
+      display: flex; gap: 4px;
+      padding: 12px 16px;
+      background: var(--background_primary);
+      overflow-x: auto;
+      position: sticky; top: 48px; z-index: 5;
+    }
+    .chip-bar::-webkit-scrollbar { display: none; }
+    .chip {
+      height: 30px;
+      padding: 0 10px;
+      display: inline-flex; align-items: center; justify-content: center;
+      border-radius: var(--wds-radius-full);
+      border: 1px solid var(--outline_secondary);
+      background: var(--surface_elevated);
+      color: var(--text_primary);
+      font-size: 12px; font-weight: 500;
+      white-space: nowrap;
+    }
+    .chip.active {
+      background: var(--surface_primary_invert);
+      border-color: var(--surface_primary_invert);
+      color: var(--text_primary_invert);
+    }
+
+    /* Date Section */
+    .date-section { display: flex; flex-direction: column; }
+    .date-section__header {
+      padding: 20px 16px 8px;
+      font-size: 12px; font-weight: 500;
+      color: var(--text_secondary);
+    }
+
+    /* Row base */
+    .row {
+      display: flex; align-items: center;
+      padding: 12px 16px;
+      gap: 12px;
+      min-height: 64px;
+      background: var(--background_primary);
+    }
+    .row__middle {
+      flex: 1; display: flex; flex-direction: column; gap: 2px;
+      min-width: 0;
+    }
+    .row__title {
+      font-size: 14px; font-weight: 600; color: var(--text_primary);
+      line-height: 20px; letter-spacing: -0.2px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .row__meta {
+      display: flex; align-items: center; gap: 4px;
+      color: var(--text_tertiary);
+      font-size: 11px; font-weight: 400;
+    }
+    .row__meta-sep {
+      width: 1px; height: 10px;
+      background: var(--icon_disable);
+    }
+    .row__amount {
+      font-size: 14px; font-weight: 600;
+      color: var(--text_primary);
+      letter-spacing: -0.2px;
+      flex-shrink: 0;
+    }
+    .row__amount--up { color: var(--zzem_violet_600); }
+
+    /* Coin thumbnail (기존 변형) */
+    .thumb-coin {
+      width: 40px; height: 40px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .thumb-coin--recharged { background: var(--zzem_violet_100); }
+    .thumb-coin--refunded  { background: var(--wds-color-neutral-100); }
+    .thumb-coin--used      { background: var(--wds-color-neutral-100); }
+    .thumb-coin__icon {
+      width: 26px; height: 26px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+
+    /* Content thumbnail (PAYBACK) */
+    .thumb-content {
+      width: 40px; height: 40px;
+      border-radius: 12px;
+      background: var(--zzem_violet_100);
+      background-size: cover;
+      background-position: center;
+      flex-shrink: 0;
+      position: relative;
+      overflow: hidden;
+    }
+    .thumb-content.has-image::after { content: ""; position: absolute; inset: 0; }
+    .thumb-content--fallback::before {
+      content: "🎬";
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; color: var(--wds-color-purple-500);
+      opacity: 0.45;
+    }
+
+    /* Demo gradient thumbnails (placeholder UGC covers) */
+    .thumb-a { background: linear-gradient(135deg, #FFB4E6 0%, #FF6F91 50%, #8752FA 100%); }
+    .thumb-b { background: linear-gradient(135deg, #FFD76E 0%, #FF6F3C 60%, #C92B87 100%); }
+    .thumb-c { background: linear-gradient(135deg, #6ED7FF 0%, #4F7BFF 60%, #8752FA 100%); }
+
+    /* Empty / Loading */
+    .empty-state {
+      flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 48px 24px; gap: 8px;
+    }
+    .empty-state__icon {
+      width: 56px; height: 56px; border-radius: 9999px;
+      background: var(--wds-color-neutral-100);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px; color: var(--text_tertiary);
+      margin-bottom: 8px;
+    }
+    .empty-state__title {
+      font-size: 16px; font-weight: 600; color: var(--text_primary);
+    }
+    .empty-state__desc {
+      font-size: 13px; font-weight: 400; color: var(--text_tertiary);
+    }
+
+    .skeleton {
+      background: linear-gradient(90deg, #F0F1F3 0%, #F7F8F9 50%, #F0F1F3 100%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s ease-in-out infinite;
+      border-radius: 8px;
+    }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    .skeleton-row { display: flex; align-items: center; padding: 12px 16px; gap: 12px; }
+    .skeleton-row__thumb { width: 40px; height: 40px; border-radius: 12px; }
+    .skeleton-row__middle { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+    .skeleton-row__title { width: 60%; height: 14px; }
+    .skeleton-row__meta  { width: 30%; height: 10px; }
+    .skeleton-row__amount{ width: 40px; height: 14px; }
+
+    /* Bottom safe area */
+    .bottom-safe { height: 34px; flex: 0 0 34px; background: var(--background_primary); }
+
+    /* ========================================================
+     * Row Variant Isolation View (spec sample)
+     * ======================================================== */
+    .spec-container {
+      width: 100%; padding: 40px 0 0;
+      display: flex; flex-direction: column; align-items: stretch;
+      background: #F0F1F3;
+      height: 100%;
+    }
+    .spec-label {
+      padding: 0 16px 12px;
+      font-size: 11px; font-weight: 600; letter-spacing: 0.4px;
+      color: var(--text_tertiary); text-transform: uppercase;
+    }
+    .spec-card {
+      background: var(--background_primary);
+      margin-bottom: 24px;
+      border-top: 1px solid var(--outline_primary);
+      border-bottom: 1px solid var(--outline_primary);
+    }
+
+    /* Dimension annotation */
+    .annot {
+      margin: 0 16px; font-size: 10px; color: var(--text_tertiary);
+      padding: 6px 0; font-family: monospace; line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- =====================================================
+       Control Panel
+       ===================================================== -->
+  <div class="control-panel">
+    <div class="control-panel__row">
+      <span class="control-panel__label">Screen</span>
+      <select id="screen-select">
+        <option value="CreditHistoryScreen-WithPayback">CreditHistoryScreen-WithPayback</option>
+        <option value="CreditHistoryRow-Payback">CreditHistoryRow-Payback (variant)</option>
+      </select>
+    </div>
+    <div class="control-panel__row">
+      <span class="control-panel__label">State</span>
+      <div class="control-panel__states" id="state-buttons">
+        <!-- Populated by JS per screen -->
+      </div>
+    </div>
+    <div class="control-panel__row">
+      <span class="control-panel__label">Breadcrumb</span>
+      <span class="control-panel__breadcrumb" id="breadcrumb">CreditHistoryScreen-WithPayback → default</span>
+    </div>
+  </div>
+
+  <!-- =====================================================
+       Device Frame
+       ===================================================== -->
+  <div class="device-frame">
+
+    <!-- ===== SCREEN 1: Full screen with payback ===== -->
+    <section class="screen active" id="CreditHistoryScreen-WithPayback" data-screen="CreditHistoryScreen-WithPayback" data-state="default">
+
+      <!-- Status bar -->
+      <div class="status-bar">
+        <span>9:41</span>
+        <span class="status-bar__right"><span>•••</span><span>􀙇</span><span>􀛨</span></span>
+      </div>
+
+      <!-- Header -->
+      <header class="header">
+        <button class="header__back" aria-label="뒤로 가기">←</button>
+        <div class="header__title">크레딧 내역</div>
+        <div class="header__spacer"></div>
+      </header>
+
+      <!-- Body -->
+      <main class="body" id="history-body">
+
+        <!-- Default / With-Payback content -->
+        <div data-content="default,with-payback-entries">
+          <section class="credit-info">
+            <div class="credit-info__label">보유 크레딧</div>
+            <div class="credit-info__amount">18 <span class="credit-info__amount-unit">크레딧</span></div>
+            <div class="credit-info__expiration">3 크레딧이 이번 달 말 소멸 예정이에요</div>
+          </section>
+          <div class="section-divider-8"></div>
+
+          <nav class="chip-bar" id="chip-bar-default">
+            <button class="chip active" data-chip="all">전체</button>
+            <button class="chip" data-chip="earn">적립</button>
+            <button class="chip" data-chip="use">사용</button>
+            <button class="chip" data-chip="refund">환불/소멸</button>
+          </nav>
+
+          <ul class="history-list">
+
+            <li class="date-section">
+              <div class="date-section__header">오늘 2026.04.22</div>
+
+              <!-- RECHARGED -->
+              <div class="row" data-row-variant="recharged">
+                <div class="thumb-coin thumb-coin--recharged">
+                  <span class="thumb-coin__icon">🪙</span>
+                </div>
+                <div class="row__middle">
+                  <p class="row__title">10 크레딧 충전</p>
+                  <div class="row__meta">
+                    <span>14:32</span>
+                  </div>
+                </div>
+                <p class="row__amount row__amount--up">+10</p>
+              </div>
+
+              <!-- PAYBACK (variant) -->
+              <div class="row" data-row-variant="PAYBACK">
+                <div class="thumb-content thumb-a" aria-label="재생성된 콘텐츠 썸네일"></div>
+                <div class="row__middle">
+                  <p class="row__title">크레딧 페이백</p>
+                  <div class="row__meta">
+                    <span>13:10</span>
+                  </div>
+                </div>
+                <p class="row__amount row__amount--up">+1</p>
+              </div>
+
+              <!-- USED -->
+              <div class="row" data-row-variant="used">
+                <div class="thumb-coin thumb-coin--used">
+                  <span class="thumb-coin__icon" style="opacity:0.6;">🪙</span>
+                </div>
+                <div class="row__middle">
+                  <p class="row__title">밈 생성</p>
+                  <div class="row__meta">
+                    <span>12:04</span>
+                    <span class="row__meta-sep"></span>
+                    <span>필터 · 귀염이</span>
+                  </div>
+                </div>
+                <p class="row__amount">-1</p>
+              </div>
+            </li>
+
+            <li class="date-section">
+              <div class="date-section__header">2026.04.21</div>
+
+              <!-- PAYBACK with description -->
+              <div class="row" data-row-variant="PAYBACK">
+                <div class="thumb-content thumb-b" aria-label="재생성된 콘텐츠 썸네일"></div>
+                <div class="row__middle">
+                  <p class="row__title">크레딧 페이백</p>
+                  <div class="row__meta">
+                    <span>19:22</span>
+                    <span class="row__meta-sep"></span>
+                    <span>홍길동님이 재생성</span>
+                  </div>
+                </div>
+                <p class="row__amount row__amount--up">+2</p>
+              </div>
+
+              <!-- REFUNDED -->
+              <div class="row" data-row-variant="refunded">
+                <div class="thumb-coin thumb-coin--refunded">
+                  <span class="thumb-coin__icon" style="opacity:0.6;">🪙</span>
+                </div>
+                <div class="row__middle">
+                  <p class="row__title">환불</p>
+                  <div class="row__meta">
+                    <span>09:18</span>
+                  </div>
+                </div>
+                <p class="row__amount row__amount--up">+1</p>
+              </div>
+
+              <!-- PAYBACK fallback thumbnail -->
+              <div class="row" data-row-variant="PAYBACK">
+                <div class="thumb-content thumb-content--fallback" aria-label="콘텐츠 썸네일 없음"></div>
+                <div class="row__middle">
+                  <p class="row__title">크레딧 페이백</p>
+                  <div class="row__meta">
+                    <span>08:02</span>
+                  </div>
+                </div>
+                <p class="row__amount row__amount--up">+1</p>
+              </div>
+            </li>
+          </ul>
+          <div style="height:16px"></div>
+        </div>
+
+        <!-- PAYBACK-ONLY content ('적립' chip) -->
+        <div data-content="payback-only" style="display:none;">
+          <section class="credit-info">
+            <div class="credit-info__label">보유 크레딧</div>
+            <div class="credit-info__amount">18 <span class="credit-info__amount-unit">크레딧</span></div>
+            <div class="credit-info__expiration">3 크레딧이 이번 달 말 소멸 예정이에요</div>
+          </section>
+          <div class="section-divider-8"></div>
+
+          <nav class="chip-bar" id="chip-bar-earn">
+            <button class="chip" data-chip="all">전체</button>
+            <button class="chip active" data-chip="earn">적립</button>
+            <button class="chip" data-chip="use">사용</button>
+            <button class="chip" data-chip="refund">환불/소멸</button>
+          </nav>
+
+          <ul class="history-list">
+            <li class="date-section">
+              <div class="date-section__header">오늘 2026.04.22</div>
+
+              <div class="row" data-row-variant="recharged">
+                <div class="thumb-coin thumb-coin--recharged">
+                  <span class="thumb-coin__icon">🪙</span>
+                </div>
+                <div class="row__middle">
+                  <p class="row__title">10 크레딧 충전</p>
+                  <div class="row__meta"><span>14:32</span></div>
+                </div>
+                <p class="row__amount row__amount--up">+10</p>
+              </div>
+
+              <div class="row" data-row-variant="PAYBACK">
+                <div class="thumb-content thumb-a" aria-label="재생성된 콘텐츠 썸네일"></div>
+                <div class="row__middle">
+                  <p class="row__title">크레딧 페이백</p>
+                  <div class="row__meta"><span>13:10</span></div>
+                </div>
+                <p class="row__amount row__amount--up">+1</p>
+              </div>
+            </li>
+
+            <li class="date-section">
+              <div class="date-section__header">2026.04.21</div>
+              <div class="row" data-row-variant="PAYBACK">
+                <div class="thumb-content thumb-b" aria-label="재생성된 콘텐츠 썸네일"></div>
+                <div class="row__middle">
+                  <p class="row__title">크레딧 페이백</p>
+                  <div class="row__meta">
+                    <span>19:22</span>
+                    <span class="row__meta-sep"></span>
+                    <span>홍길동님이 재생성</span>
+                  </div>
+                </div>
+                <p class="row__amount row__amount--up">+2</p>
+              </div>
+              <div class="row" data-row-variant="PAYBACK">
+                <div class="thumb-content thumb-c" aria-label="재생성된 콘텐츠 썸네일"></div>
+                <div class="row__middle">
+                  <p class="row__title">크레딧 페이백</p>
+                  <div class="row__meta">
+                    <span>11:48</span>
+                    <span class="row__meta-sep"></span>
+                    <span>김잼잼님이 재생성</span>
+                  </div>
+                </div>
+                <p class="row__amount row__amount--up">+1</p>
+              </div>
+              <div class="row" data-row-variant="PAYBACK">
+                <div class="thumb-content thumb-content--fallback" aria-label="콘텐츠 썸네일 없음"></div>
+                <div class="row__middle">
+                  <p class="row__title">크레딧 페이백</p>
+                  <div class="row__meta"><span>08:02</span></div>
+                </div>
+                <p class="row__amount row__amount--up">+1</p>
+              </div>
+            </li>
+          </ul>
+          <div style="height:16px"></div>
+        </div>
+
+        <!-- EMPTY content -->
+        <div data-content="empty" style="display:none;">
+          <section class="credit-info">
+            <div class="credit-info__label">보유 크레딧</div>
+            <div class="credit-info__amount">0 <span class="credit-info__amount-unit">크레딧</span></div>
+          </section>
+          <div class="section-divider-8"></div>
+          <nav class="chip-bar">
+            <button class="chip active" data-chip="all">전체</button>
+            <button class="chip" data-chip="earn">적립</button>
+            <button class="chip" data-chip="use">사용</button>
+            <button class="chip" data-chip="refund">환불/소멸</button>
+          </nav>
+          <div class="empty-state">
+            <div class="empty-state__icon">📭</div>
+            <div class="empty-state__title">내역이 없어요</div>
+            <div class="empty-state__desc">아직 크레딧 사용 내역이 없어요.</div>
+          </div>
+        </div>
+
+        <!-- LOADING content -->
+        <div data-content="loading" style="display:none;">
+          <section class="credit-info">
+            <div class="credit-info__label">보유 크레딧</div>
+            <div class="credit-info__amount"><span class="skeleton" style="width:80px;height:28px;border-radius:6px"></span></div>
+          </section>
+          <div class="section-divider-8"></div>
+          <nav class="chip-bar">
+            <button class="chip active" data-chip="all">전체</button>
+            <button class="chip" data-chip="earn">적립</button>
+            <button class="chip" data-chip="use">사용</button>
+            <button class="chip" data-chip="refund">환불/소멸</button>
+          </nav>
+          <div style="padding:4px 0;">
+            <div class="skeleton-row">
+              <div class="skeleton skeleton-row__thumb"></div>
+              <div class="skeleton-row__middle">
+                <div class="skeleton skeleton-row__title"></div>
+                <div class="skeleton skeleton-row__meta"></div>
+              </div>
+              <div class="skeleton skeleton-row__amount"></div>
+            </div>
+            <div class="skeleton-row">
+              <div class="skeleton skeleton-row__thumb"></div>
+              <div class="skeleton-row__middle">
+                <div class="skeleton skeleton-row__title" style="width:75%"></div>
+                <div class="skeleton skeleton-row__meta" style="width:35%"></div>
+              </div>
+              <div class="skeleton skeleton-row__amount"></div>
+            </div>
+            <div class="skeleton-row">
+              <div class="skeleton skeleton-row__thumb"></div>
+              <div class="skeleton-row__middle">
+                <div class="skeleton skeleton-row__title" style="width:45%"></div>
+                <div class="skeleton skeleton-row__meta" style="width:28%"></div>
+              </div>
+              <div class="skeleton skeleton-row__amount"></div>
+            </div>
+            <div class="skeleton-row">
+              <div class="skeleton skeleton-row__thumb"></div>
+              <div class="skeleton-row__middle">
+                <div class="skeleton skeleton-row__title" style="width:55%"></div>
+                <div class="skeleton skeleton-row__meta" style="width:30%"></div>
+              </div>
+              <div class="skeleton skeleton-row__amount"></div>
+            </div>
+          </div>
+        </div>
+
+      </main>
+
+      <div class="bottom-safe"></div>
+    </section>
+
+    <!-- ===== SCREEN 2: Row variant isolation ===== -->
+    <section class="screen" id="CreditHistoryRow-Payback" data-screen="CreditHistoryRow-Payback" data-state="default">
+      <div class="spec-container">
+        <div class="spec-label">Variant · default (description 없음)</div>
+        <div class="spec-card">
+          <div class="row" data-row-variant="PAYBACK">
+            <div class="thumb-content thumb-a" aria-label="재생성된 콘텐츠 썸네일"></div>
+            <div class="row__middle">
+              <p class="row__title">크레딧 페이백</p>
+              <div class="row__meta"><span>13:10</span></div>
+            </div>
+            <p class="row__amount row__amount--up">+1</p>
+          </div>
+        </div>
+        <div class="annot">
+          thumb 40×40 · radius 12 · padding 12/16 · title Subtitle4 (14/600 #262626) · amount Subtitle4 (14/600 #7040E0 /zzem_violet_600)
+        </div>
+
+        <div class="spec-label">Variant · with-description (BE description 제공)</div>
+        <div class="spec-card">
+          <div class="row" data-row-variant="PAYBACK">
+            <div class="thumb-content thumb-b" aria-label="재생성된 콘텐츠 썸네일"></div>
+            <div class="row__middle">
+              <p class="row__title">크레딧 페이백</p>
+              <div class="row__meta">
+                <span>19:22</span>
+                <span class="row__meta-sep"></span>
+                <span>홍길동님이 재생성</span>
+              </div>
+            </div>
+            <p class="row__amount row__amount--up">+2</p>
+          </div>
+        </div>
+        <div class="annot">
+          description 존재 시 separator 1×10 #D1D3D8 + Body7 (11/400 #8A8A8A) 노출.
+        </div>
+
+        <div class="spec-label">Variant · thumbnail-fallback (BE thumbnail=null)</div>
+        <div class="spec-card">
+          <div class="row" data-row-variant="PAYBACK">
+            <div class="thumb-content thumb-content--fallback" aria-label="콘텐츠 썸네일 없음"></div>
+            <div class="row__middle">
+              <p class="row__title">크레딧 페이백</p>
+              <div class="row__meta"><span>08:02</span></div>
+            </div>
+            <p class="row__amount row__amount--up">+1</p>
+          </div>
+        </div>
+        <div class="annot">
+          thumbnail null → zzem_violet_100 (#EBE1FF) 단색 박스 + 희미한 아이콘 fallback.
+        </div>
+
+        <div class="spec-label">Variant · loading (row skeleton)</div>
+        <div class="spec-card">
+          <div class="skeleton-row">
+            <div class="skeleton skeleton-row__thumb"></div>
+            <div class="skeleton-row__middle">
+              <div class="skeleton skeleton-row__title"></div>
+              <div class="skeleton skeleton-row__meta"></div>
+            </div>
+            <div class="skeleton skeleton-row__amount"></div>
+          </div>
+        </div>
+        <div class="annot">
+          thumb 40×40 · title 60% / meta 30% / amount 40px · shimmer 1.4s.
+        </div>
+
+        <div class="spec-label">Context · sibling rows 비교</div>
+        <div class="spec-card">
+          <div class="row" data-row-variant="recharged">
+            <div class="thumb-coin thumb-coin--recharged">
+              <span class="thumb-coin__icon">🪙</span>
+            </div>
+            <div class="row__middle">
+              <p class="row__title">10 크레딧 충전</p>
+              <div class="row__meta"><span>14:32</span></div>
+            </div>
+            <p class="row__amount row__amount--up">+10</p>
+          </div>
+          <div class="row" data-row-variant="PAYBACK">
+            <div class="thumb-content thumb-c" aria-label="재생성된 콘텐츠 썸네일"></div>
+            <div class="row__middle">
+              <p class="row__title">크레딧 페이백</p>
+              <div class="row__meta"><span>13:10</span></div>
+            </div>
+            <p class="row__amount row__amount--up">+1</p>
+          </div>
+          <div class="row" data-row-variant="used">
+            <div class="thumb-coin thumb-coin--used">
+              <span class="thumb-coin__icon" style="opacity:0.6;">🪙</span>
+            </div>
+            <div class="row__middle">
+              <p class="row__title">밈 생성</p>
+              <div class="row__meta"><span>12:04</span></div>
+            </div>
+            <p class="row__amount">-1</p>
+          </div>
+        </div>
+        <div class="annot">
+          PAYBACK 은 코인 대신 콘텐츠 썸네일 사용. amount 색상은 증가(recharged/refunded)와 동일한 zzem_violet_600 재사용.
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    // ======================================================
+    // State registry per screen
+    // ======================================================
+    const STATES = {
+      'CreditHistoryScreen-WithPayback': ['default', 'with-payback-entries', 'payback-only', 'empty', 'loading'],
+      'CreditHistoryRow-Payback': ['default']
+    };
+
+    const screenSelect = document.getElementById('screen-select');
+    const stateButtonsEl = document.getElementById('state-buttons');
+    const breadcrumbEl = document.getElementById('breadcrumb');
+
+    function renderStateButtons(screenId, activeState) {
+      stateButtonsEl.innerHTML = '';
+      (STATES[screenId] || ['default']).forEach(state => {
+        const btn = document.createElement('button');
+        btn.className = 'control-panel__state-btn' + (state === activeState ? ' active' : '');
+        btn.dataset.state = state;
+        btn.textContent = state;
+        btn.addEventListener('click', () => applyState(screenId, state));
+        stateButtonsEl.appendChild(btn);
+      });
+    }
+
+    function applyScreen(screenId) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      const target = document.getElementById(screenId);
+      if (target) target.classList.add('active');
+      const defaultState = (STATES[screenId] || ['default'])[0];
+      applyState(screenId, defaultState);
+    }
+
+    function applyState(screenId, state) {
+      const screen = document.getElementById(screenId);
+      if (!screen) return;
+      screen.dataset.state = state;
+
+      // Show/hide content blocks by data-content attribute
+      const body = screen.querySelector('#history-body');
+      if (body) {
+        body.querySelectorAll('[data-content]').forEach(block => {
+          const allowed = block.getAttribute('data-content').split(',').map(s => s.trim());
+          block.style.display = allowed.includes(state) ? '' : 'none';
+        });
+      }
+
+      // Re-render state buttons
+      renderStateButtons(screenId, state);
+
+      // Breadcrumb
+      breadcrumbEl.textContent = `${screenId} → ${state}`;
+    }
+
+    screenSelect.addEventListener('change', e => applyScreen(e.target.value));
+
+    // Chip click within default content → switch to payback-only
+    document.querySelectorAll('#chip-bar-default .chip').forEach(chip => {
+      chip.addEventListener('click', (e) => {
+        const key = e.currentTarget.dataset.chip;
+        if (key === 'earn') applyState('CreditHistoryScreen-WithPayback', 'payback-only');
+        else if (key === 'all') applyState('CreditHistoryScreen-WithPayback', 'default');
+        else if (key === 'use') applyState('CreditHistoryScreen-WithPayback', 'default'); // 실제 앱에서는 used-only 필터. 프로토는 default fallback.
+        else applyState('CreditHistoryScreen-WithPayback', 'default');
+      });
+    });
+    document.querySelectorAll('#chip-bar-earn .chip').forEach(chip => {
+      chip.addEventListener('click', (e) => {
+        const key = e.currentTarget.dataset.chip;
+        if (key === 'all') applyState('CreditHistoryScreen-WithPayback', 'default');
+        else if (key === 'earn') applyState('CreditHistoryScreen-WithPayback', 'payback-only');
+        else applyState('CreditHistoryScreen-WithPayback', 'default');
+      });
+    });
+
+    // Back button → no-op (prototype)
+    document.querySelectorAll('.header__back').forEach(b =>
+      b.addEventListener('click', () => console.warn('[proto] goBack()'))
+    );
+
+    // Init
+    renderStateButtons('CreditHistoryScreen-WithPayback', 'default');
+  </script>
+</body>
+</html>

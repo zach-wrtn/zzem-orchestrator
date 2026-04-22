@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ZZEM · app-007 · Payback Intro Modal</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.css" />
+<style>
+/* ==========================================================================
+ * Design Tokens — inline copy of sprint-orchestrator/sprints/ugc-platform-002/prototypes/context/tokens.css
+ * ========================================================================== */
+:root {
+  --wds-color-purple-50: #F5F0FF;
+  --wds-color-purple-100: #EBE1FF;
+  --wds-color-purple-500: #8752FA;
+  --wds-color-purple-600: #7040E0;
+
+  --wds-color-neutral-0: #FFFFFF;
+  --wds-color-neutral-50: #F7F8F9;
+  --wds-color-neutral-100: #F0F1F3;
+  --wds-color-neutral-200: #E4E5E9;
+  --wds-color-neutral-300: #D1D3D8;
+  --wds-color-neutral-500: #8E9199;
+  --wds-color-neutral-600: #6B6E76;
+  --wds-color-neutral-900: #212228;
+  --wds-color-neutral-1000: #000000;
+
+  --wds-color-red-500: #FF3B30;
+
+  --wds-background-normal: var(--wds-color-neutral-0);
+  --wds-background-dimmed: rgba(0, 0, 0, 0.40);
+
+  --wds-fill-brand-primary: var(--wds-color-purple-500);
+  --wds-fill-brand-weak: var(--wds-color-purple-50);
+  --wds-fill-disabled: var(--wds-color-neutral-200);
+
+  --wds-label-normal: var(--wds-color-neutral-900);
+  --wds-label-alternative: var(--wds-color-neutral-600);
+  --wds-label-assistive: var(--wds-color-neutral-500);
+  --wds-label-inverse: var(--wds-color-neutral-0);
+
+  --wds-line-normal: var(--wds-color-neutral-200);
+
+  --wds-spacing-4: 4px;
+  --wds-spacing-8: 8px;
+  --wds-spacing-12: 12px;
+  --wds-spacing-16: 16px;
+  --wds-spacing-20: 20px;
+  --wds-spacing-24: 24px;
+  --wds-spacing-32: 32px;
+
+  --wds-radius-md: 12px;
+  --wds-radius-lg: 16px;
+  --wds-radius-xl: 20px;
+  --wds-radius-28: 28px;
+  --wds-radius-full: 9999px;
+
+  --wds-font-family-primary: 'Pretendard Variable', 'Pretendard', -apple-system, 'SF Pro Display', sans-serif;
+  --wds-font-weight-regular: 400;
+  --wds-font-weight-medium: 500;
+  --wds-font-weight-semibold: 600;
+  --wds-font-weight-bold: 700;
+
+  --wds-font-size-xs: 12px;
+  --wds-font-size-sm: 13px;
+  --wds-font-size-md: 14px;
+  --wds-font-size-lg: 16px;
+  --wds-font-size-xl: 18px;
+  --wds-font-size-2xl: 20px;
+
+  --pe-sheet-handle: #A7A7A7;
+  --text_primary: #262626;
+  --text_secondary: #656565;
+  --text_tertiary: #8A8A8A;
+  --background_primary: #FFFFFF;
+  --surface_secondary: #F7F7F7;
+  --surface_button: #F1F1F1;
+}
+
+/* ==========================================================================
+ * Base layout (workspace + device frame)
+ * ========================================================================== */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; min-height: 100%; }
+body {
+  font-family: var(--wds-font-family-primary);
+  color: var(--wds-label-normal);
+  background: #EDEEF0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 16px 48px;
+  gap: 20px;
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.4;
+}
+
+.workspace-header {
+  width: 100%;
+  max-width: 960px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 20px;
+  background: #FFFFFF;
+  border-radius: 14px;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.04);
+}
+.workspace-title {
+  font-size: 18px; font-weight: 700; color: var(--wds-label-normal);
+  display: flex; align-items: center; gap: 8px;
+}
+.workspace-title .badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 2px 10px; border-radius: 999px; font-size: 12px;
+  background: var(--wds-fill-brand-weak); color: var(--wds-fill-brand-primary);
+  font-weight: 600;
+}
+.workspace-meta {
+  display: flex; flex-wrap: wrap; gap: 16px;
+  font-size: 12px; color: var(--wds-label-alternative);
+}
+.workspace-meta strong { color: var(--wds-label-normal); font-weight: 600; margin-right: 4px; }
+
+.control-panel {
+  width: 100%;
+  max-width: 960px;
+  display: flex; flex-wrap: wrap; gap: 8px;
+  padding: 12px 16px;
+  background: #FFFFFF;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+  align-items: center;
+}
+.control-panel .label { font-size: 12px; color: var(--wds-label-alternative); font-weight: 600; margin-right: 4px; }
+.control-panel .state-btn {
+  font-family: inherit; font-size: 12px; font-weight: 600;
+  padding: 8px 14px; border-radius: 999px; border: 1px solid var(--wds-line-normal);
+  background: #FFFFFF; color: var(--wds-label-normal); cursor: pointer;
+  transition: all 0.15s ease;
+}
+.control-panel .state-btn:hover { background: var(--surface_secondary); }
+.control-panel .state-btn.active {
+  background: var(--wds-label-normal); color: var(--wds-label-inverse);
+  border-color: var(--wds-label-normal);
+}
+.control-panel .spacer { flex: 1; }
+.control-panel .hint {
+  font-size: 11px; color: var(--wds-label-assistive);
+}
+
+.device-frame {
+  width: 390px; height: 844px;
+  background: var(--background_primary);
+  border-radius: 48px;
+  box-shadow:
+    0 0 0 10px #1b1b1b,
+    0 0 0 12px #2d2d2d,
+    0 22px 60px rgba(0,0,0,0.25);
+  overflow: hidden;
+  position: relative;
+  flex-shrink: 0;
+}
+.device-frame::before {
+  /* Dynamic island */
+  content: "";
+  position: absolute;
+  top: 11px; left: 50%;
+  transform: translateX(-50%);
+  width: 120px; height: 34px;
+  background: #000; border-radius: 999px;
+  z-index: 1000;
+}
+
+/* Status bar */
+.status-bar {
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 54px; padding: 18px 28px 0;
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 15px; font-weight: 600; color: var(--wds-label-normal);
+  z-index: 50;
+}
+.status-bar .time { margin-right: 110px; }
+.status-bar .sys-icons { display: flex; gap: 6px; align-items: center; color: var(--wds-label-normal); }
+
+/* ==========================================================================
+ * Background screen — simulated MY Profile (reduced, behind modal)
+ * ========================================================================== */
+.bg-screen {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  padding-top: 54px;
+  background: var(--background_primary);
+  overflow: hidden;
+}
+.bg-header {
+  height: 48px; display: flex; align-items: center; justify-content: space-between;
+  padding: 0 16px;
+}
+.bg-header .nick {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 16px; font-weight: 700; color: var(--text_primary);
+}
+.bg-header .right-icons { display: flex; gap: 14px; color: var(--text_primary); }
+.bg-header .right-icons svg { width: 22px; height: 22px; }
+
+.bg-profile {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 12px 16px 16px; gap: 12px;
+}
+.bg-avatar {
+  width: 100px; height: 100px; border-radius: 999px;
+  background: var(--wds-fill-brand-weak);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px;
+  border: 1px solid rgba(136, 136, 136, 0.2);
+}
+.bg-counts {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  width: 100%; padding: 8px 0;
+}
+.bg-count-tile { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.bg-count-tile .num { font-size: 16px; font-weight: 700; color: var(--text_primary); }
+.bg-count-tile .lab { font-size: 12px; color: var(--text_tertiary); }
+
+.bg-dual {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 8px; width: 100%;
+}
+.bg-dual .dbtn {
+  background: var(--surface_button); border: none;
+  padding: 10px 0; border-radius: 12px;
+  font-size: 13px; font-weight: 600; color: var(--text_primary);
+  font-family: inherit;
+}
+.bg-tabs {
+  display: flex; height: 48px; border-bottom: 1px solid var(--surface_button);
+}
+.bg-tab {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  color: var(--text_tertiary);
+}
+.bg-tab svg { width: 22px; height: 22px; }
+.bg-tab.active { color: var(--text_primary); border-bottom: 2px solid var(--text_primary); }
+
+.bg-grid {
+  flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 1px;
+  background: var(--background_primary);
+  padding: 1px;
+  overflow: hidden;
+}
+.bg-grid-cell {
+  aspect-ratio: 1 / 1;
+  background: linear-gradient(135deg, #F5F0FF 0%, #E0D0FF 100%);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; color: rgba(135, 82, 250, 0.35);
+}
+.bg-grid-cell:nth-child(4n+2) { aspect-ratio: 4 / 5; background: linear-gradient(160deg, #FFF0F5 0%, #FFD1DF 100%); }
+.bg-grid-cell:nth-child(4n+3) { background: linear-gradient(200deg, #F0FBFF 0%, #C5E7FF 100%); }
+.bg-grid-cell:nth-child(4n) { background: linear-gradient(120deg, #FFFAF0 0%, #FFE0B5 100%); }
+
+.bg-bottom-nav {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  height: 83px; padding: 8px 0 24px;
+  background: var(--background_primary);
+  display: flex; justify-content: space-around; align-items: flex-start;
+  border-top: 1px solid var(--wds-line-normal);
+}
+.bg-nav-item { flex: 1; display: flex; justify-content: center; color: var(--text_tertiary); padding-top: 8px; }
+.bg-nav-item.active { color: var(--text_primary); }
+.bg-nav-item svg { width: 26px; height: 26px; }
+
+/* ==========================================================================
+ * Overlay + Bottom Sheet — the actual prototype
+ * ========================================================================== */
+.overlay {
+  position: absolute; inset: 0; z-index: 900;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 200ms ease-out;
+}
+.overlay[data-state="default"] {
+  pointer-events: auto;
+  opacity: 1;
+}
+.overlay[data-state="dismissing"] {
+  pointer-events: none;
+  opacity: 0;
+}
+.overlay[data-state="hidden"] {
+  display: none;
+}
+
+.backdrop {
+  position: absolute; inset: 0;
+  background: var(--wds-background-dimmed);
+  cursor: default;
+}
+
+.sheet {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  background: var(--wds-background-normal);
+  border-top-left-radius: var(--wds-radius-28);
+  border-top-right-radius: var(--wds-radius-28);
+  padding: 12px 20px calc(32px + 14px);
+  display: flex; flex-direction: column; align-items: stretch;
+  box-shadow: 0 -10px 40px rgba(0,0,0,0.08);
+  transform: translateY(0);
+  transition: transform 220ms cubic-bezier(0.25, 1, 0.3, 1);
+}
+.overlay[data-state="dismissing"] .sheet {
+  transform: translateY(100%);
+}
+/* Initial mount animation */
+.overlay.mounting .sheet {
+  transform: translateY(100%);
+}
+
+.sheet-handle {
+  width: 40px; height: 4px;
+  background: var(--pe-sheet-handle);
+  border-radius: var(--wds-radius-full);
+  align-self: center;
+  margin-bottom: 16px;
+}
+
+.illustration-wrap {
+  width: 100%;
+  height: 140px;
+  background: var(--wds-fill-brand-weak);
+  border-radius: var(--wds-radius-lg);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 20px;
+}
+.illustration-wrap svg {
+  width: 96px; height: 96px;
+}
+
+.text-group {
+  display: flex; flex-direction: column; align-items: center;
+  text-align: center; gap: 10px;
+  margin-bottom: 24px;
+  padding: 0 4px;
+}
+
+.payback-title {
+  font-size: var(--wds-font-size-2xl);
+  line-height: 1.35;
+  font-weight: var(--wds-font-weight-bold);
+  color: var(--wds-label-normal);
+  letter-spacing: -0.3px;
+  word-break: keep-all;
+}
+
+.payback-body {
+  font-size: var(--wds-font-size-md);
+  line-height: 1.5;
+  font-weight: var(--wds-font-weight-regular);
+  color: var(--wds-label-alternative);
+  word-break: keep-all;
+  padding: 0 6px;
+}
+
+.cta-primary {
+  height: 52px;
+  width: 100%;
+  background: var(--wds-fill-brand-primary);
+  color: var(--wds-label-inverse);
+  border: none;
+  border-radius: var(--wds-radius-md);
+  font-family: inherit;
+  font-size: var(--wds-font-size-lg);
+  font-weight: var(--wds-font-weight-semibold);
+  cursor: pointer;
+  transition: opacity 0.12s ease, transform 0.08s ease;
+}
+.cta-primary:hover { opacity: 0.92; }
+.cta-primary:active { opacity: 0.82; transform: scale(0.99); }
+
+/* ==========================================================================
+ * Post-dismiss toast (so reviewers can see that flag was set)
+ * ========================================================================== */
+.flag-toast {
+  position: absolute;
+  bottom: 110px; left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: rgba(33, 34, 40, 0.92);
+  color: #FFFFFF;
+  font-size: 13px; font-weight: 500;
+  padding: 10px 16px;
+  border-radius: 10px;
+  opacity: 0;
+  transition: all 220ms ease;
+  pointer-events: none;
+  z-index: 1001;
+}
+.flag-toast.visible {
+  opacity: 1; transform: translateX(-50%) translateY(0);
+}
+</style>
+</head>
+<body>
+
+<section class="workspace-header">
+  <div class="workspace-title">
+    app-007 · 페이백 안내 모달
+    <span class="badge">AC 4.4 · 1회성</span>
+  </div>
+  <div class="workspace-meta">
+    <span><strong>Screen</strong>PaybackIntroModal (BottomSheet)</span>
+    <span><strong>Frame</strong>390×844</span>
+    <span><strong>Pattern</strong>§10 BottomSheetWithHandle</span>
+    <span><strong>Dismiss</strong>CTA 탭 전용</span>
+    <span><strong>Gate</strong>userStorage['PAYBACK_INTRO_SHOWN']</span>
+  </div>
+</section>
+
+<section class="control-panel" aria-label="Prototype state controls">
+  <span class="label">State</span>
+  <button class="state-btn active" data-state="default" onclick="setState('default')">default (open)</button>
+  <button class="state-btn" data-state="dismissing" onclick="setState('dismissing')">dismissing</button>
+  <button class="state-btn" data-state="hidden" onclick="setState('hidden')">hidden (after flag)</button>
+  <span class="spacer"></span>
+  <button class="state-btn" onclick="replay()">↺ Replay open</button>
+  <span class="hint">Backdrop tap 닫기 비허용</span>
+</section>
+
+<div class="device-frame" role="region" aria-label="Mobile device preview 390 by 844">
+
+  <!-- Status bar -->
+  <div class="status-bar">
+    <span class="time">9:41</span>
+    <span class="sys-icons">
+      <svg width="17" height="11" viewBox="0 0 17 11" fill="none" aria-hidden="true">
+        <rect x="0" y="6" width="3" height="5" rx="0.8" fill="currentColor"/>
+        <rect x="4.5" y="4" width="3" height="7" rx="0.8" fill="currentColor"/>
+        <rect x="9" y="2" width="3" height="9" rx="0.8" fill="currentColor"/>
+        <rect x="13.5" y="0" width="3" height="11" rx="0.8" fill="currentColor"/>
+      </svg>
+      <svg width="15" height="11" viewBox="0 0 15 11" fill="none" aria-hidden="true">
+        <path d="M7.5 2C4.5 2 2 3.3 0 4.8l2 2.3c1.6-1.2 3.5-1.9 5.5-1.9s3.9.7 5.5 1.9l2-2.3C13 3.3 10.5 2 7.5 2z" fill="currentColor"/>
+      </svg>
+      <svg width="25" height="12" viewBox="0 0 25 12" fill="none" aria-hidden="true">
+        <rect x="0.5" y="0.5" width="21" height="11" rx="2.5" stroke="currentColor" opacity="0.4"/>
+        <rect x="2" y="2" width="16" height="8" rx="1.5" fill="currentColor"/>
+        <rect x="22.5" y="4" width="1.5" height="4" rx="0.5" fill="currentColor" opacity="0.4"/>
+      </svg>
+    </span>
+  </div>
+
+  <!-- Background screen (MY profile, blurred behind modal) -->
+  <div class="bg-screen" aria-hidden="true">
+    <div class="bg-header">
+      <div class="nick">김잼잼 <span style="font-size:14px;">✨</span></div>
+      <div class="right-icons">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/><circle cx="12" cy="12" r="4"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </div>
+    </div>
+
+    <div class="bg-profile">
+      <div class="bg-avatar">😎</div>
+      <div class="bg-counts">
+        <div class="bg-count-tile"><span class="num">1.2천</span><span class="lab">팔로워</span></div>
+        <div class="bg-count-tile"><span class="num">480</span><span class="lab">팔로잉</span></div>
+        <div class="bg-count-tile"><span class="num">24</span><span class="lab">재생성된</span></div>
+      </div>
+      <div class="bg-dual">
+        <button class="dbtn">프로필 편집</button>
+        <button class="dbtn">공유</button>
+      </div>
+    </div>
+
+    <div class="bg-tabs">
+      <div class="bg-tab active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      </div>
+      <div class="bg-tab">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </div>
+      <div class="bg-tab">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      </div>
+    </div>
+
+    <div class="bg-grid">
+      <div class="bg-grid-cell">✨</div>
+      <div class="bg-grid-cell">💜</div>
+      <div class="bg-grid-cell">🔥</div>
+      <div class="bg-grid-cell">🌟</div>
+      <div class="bg-grid-cell">🎨</div>
+      <div class="bg-grid-cell">💫</div>
+    </div>
+
+    <div class="bg-bottom-nav">
+      <div class="bg-nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></div>
+      <div class="bg-nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg></div>
+      <div class="bg-nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M6 21c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg></div>
+    </div>
+  </div>
+
+  <!-- Overlay + Modal -->
+  <div class="overlay" id="payback-intro-overlay" data-state="default" role="dialog" aria-modal="true" aria-labelledby="payback-title" aria-describedby="payback-body">
+    <div class="backdrop" id="payback-intro-backdrop" aria-hidden="true"></div>
+    <section class="sheet" id="payback-intro-sheet">
+      <div class="sheet-handle" id="sheet-handle" aria-hidden="true"></div>
+
+      <div class="illustration-wrap" id="illustration-wrap">
+        <!-- Inline SVG: Coin + Heart combo (placeholder) -->
+        <svg viewBox="0 0 96 96" fill="none" aria-label="크레딧 페이백 일러스트" role="img" id="payback-illustration">
+          <!-- Coin body -->
+          <circle cx="40" cy="52" r="28" fill="#8752FA"/>
+          <circle cx="40" cy="52" r="22" fill="#A17BFF"/>
+          <!-- Coin star symbol -->
+          <path d="M40 40 L43 48 L51 49 L45 54.5 L46.5 62.5 L40 58.5 L33.5 62.5 L35 54.5 L29 49 L37 48 Z" fill="#FFFFFF"/>
+          <!-- Heart -->
+          <path d="M72 22 C77 17, 86 19, 86 28 C86 37, 76 44, 70 48 C64 44, 54 37, 54 28 C54 19, 63 17, 68 22 C69 23, 70 24, 70 25 C70 24, 71 23, 72 22 Z" fill="#FF3B30"/>
+          <!-- Small sparkle -->
+          <circle cx="14" cy="28" r="2.5" fill="#FFCC00"/>
+          <circle cx="80" cy="62" r="2" fill="#FFCC00"/>
+          <circle cx="22" cy="74" r="1.8" fill="#8752FA"/>
+        </svg>
+      </div>
+
+      <div class="text-group" id="text-group">
+        <h2 class="payback-title" id="payback-title">쨈 런칭 기념 프로모션 크레딧 1% 페이백</h2>
+        <p class="payback-body" id="payback-body">내 콘텐츠를 다른 유저가 재생성하면,<br/>소비한 크레딧의 1%가 나에게 적립돼요.</p>
+      </div>
+
+      <button class="cta-primary" id="payback-confirm-cta" type="button" aria-label="확인했어요, 페이백 안내 닫기">확인했어요</button>
+    </section>
+  </div>
+
+  <!-- Flag toast (shown after CTA tap to indicate flag set, for reviewer only) -->
+  <div class="flag-toast" id="flag-toast" role="status" aria-live="polite">PAYBACK_INTRO_SHOWN = true · 2회차부터 노출 안 함</div>
+
+</div>
+
+<script>
+  // ==========================================================================
+  // Interactions — based on PaybackIntroModal.spec.md
+  // ==========================================================================
+  const overlay = document.getElementById('payback-intro-overlay');
+  const cta = document.getElementById('payback-confirm-cta');
+  const backdrop = document.getElementById('payback-intro-backdrop');
+  const toast = document.getElementById('flag-toast');
+  const stateButtons = document.querySelectorAll('.state-btn[data-state]');
+
+  // Simulated userStorage (local-only, for reviewer replay)
+  let flagShown = false;
+
+  function setState(next) {
+    overlay.setAttribute('data-state', next);
+    stateButtons.forEach(b => {
+      b.classList.toggle('active', b.dataset.state === next);
+    });
+  }
+
+  // CTA tap → dismiss + flag set + toast
+  cta.addEventListener('click', () => {
+    setState('dismissing');
+    flagShown = true;
+    showToast('PAYBACK_INTRO_SHOWN = true · 2회차부터 노출 안 함');
+    // After transition, hide overlay
+    setTimeout(() => { setState('hidden'); }, 260);
+  });
+
+  // Backdrop tap → DO NOT dismiss (AC rule). Provide visual nudge on title.
+  backdrop.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const title = document.getElementById('payback-title');
+    title.animate(
+      [
+        { transform: 'translateX(0)' },
+        { transform: 'translateX(-3px)' },
+        { transform: 'translateX(3px)' },
+        { transform: 'translateX(-2px)' },
+        { transform: 'translateX(0)' },
+      ],
+      { duration: 260, easing: 'ease-out' }
+    );
+    showToast('CTA 탭으로만 닫을 수 있어요', 1600);
+  });
+
+  // Replay: reset flag + show modal again with mount animation
+  function replay() {
+    flagShown = false;
+    overlay.classList.add('mounting');
+    setState('default');
+    // force reflow then remove mounting class to trigger slide-up
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => overlay.classList.remove('mounting'));
+    });
+  }
+
+  function showToast(message, duration = 2200) {
+    toast.textContent = message;
+    toast.classList.add('visible');
+    clearTimeout(toast._t);
+    toast._t = setTimeout(() => toast.classList.remove('visible'), duration);
+  }
+
+  // Control panel state buttons — allow reviewer to flip states
+  stateButtons.forEach(btn => {
+    btn.addEventListener('click', () => setState(btn.dataset.state));
+  });
+
+  // Initial mount animation (slide-up on page load)
+  window.addEventListener('DOMContentLoaded', () => {
+    overlay.classList.add('mounting');
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => overlay.classList.remove('mounting'));
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>app-004 · Publish Toggle Prototype</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+  <style>
+    /* ==========================================================
+     * Design Tokens (inlined from tokens.css)
+     * ========================================================== */
+    :root {
+      /* Primitive - Purple (Brand) */
+      --wds-color-purple-50: #F5F0FF;
+      --wds-color-purple-500: #8752FA;
+      --wds-color-purple-600: #7040E0;
+
+      /* Primitive - Neutral */
+      --wds-color-neutral-0: #FFFFFF;
+      --wds-color-neutral-50: #F7F8F9;
+      --wds-color-neutral-100: #F0F1F3;
+      --wds-color-neutral-200: #E4E5E9;
+      --wds-color-neutral-300: #D1D3D8;
+      --wds-color-neutral-400: #B5B8BF;
+      --wds-color-neutral-500: #8E9199;
+      --wds-color-neutral-600: #6B6E76;
+      --wds-color-neutral-700: #4D5058;
+      --wds-color-neutral-800: #35373E;
+      --wds-color-neutral-900: #212228;
+      --wds-color-neutral-950: #141517;
+
+      /* Status */
+      --wds-color-red-500: #FF3B30;
+
+      /* Semantic */
+      --wds-background-normal: var(--wds-color-neutral-0);
+      --wds-background-elevated: var(--wds-color-neutral-0);
+      --wds-background-dimmed: rgba(0, 0, 0, 0.40);
+      --wds-surface-primary: var(--wds-color-neutral-0);
+      --wds-surface-secondary: var(--wds-color-neutral-50);
+      --wds-surface-tertiary: var(--wds-color-neutral-100);
+      --wds-surface-button: #F1F1F1;
+
+      --wds-fill-brand-primary: var(--wds-color-purple-500);
+      --wds-fill-neutral-primary: var(--wds-color-neutral-900);
+      --wds-fill-neutral-secondary: var(--wds-color-neutral-100);
+      --wds-fill-disabled: var(--wds-color-neutral-200);
+      --wds-fill-inverse: var(--wds-color-neutral-900);
+
+      --wds-label-normal: var(--wds-color-neutral-900);
+      --wds-label-alternative: var(--wds-color-neutral-600);
+      --wds-label-assistive: var(--wds-color-neutral-500);
+      --wds-label-disabled: var(--wds-color-neutral-300);
+      --wds-label-inverse: var(--wds-color-neutral-0);
+      --wds-label-brand: var(--wds-color-purple-500);
+
+      --wds-line-normal: var(--wds-color-neutral-200);
+      --wds-line-alternative: var(--wds-color-neutral-100);
+
+      --wds-status-error: var(--wds-color-red-500);
+
+      /* Spacing */
+      --wds-spacing-4: 4px;
+      --wds-spacing-8: 8px;
+      --wds-spacing-12: 12px;
+      --wds-spacing-16: 16px;
+      --wds-spacing-20: 20px;
+      --wds-spacing-24: 24px;
+
+      /* Radius */
+      --wds-radius-sm: 8px;
+      --wds-radius-md: 12px;
+      --wds-radius-lg: 16px;
+      --wds-radius-28: 28px;
+      --wds-radius-full: 9999px;
+
+      /* Typography */
+      --wds-font-family-primary: 'Pretendard', -apple-system, 'SF Pro Display', 'Apple SD Gothic Neo', sans-serif;
+    }
+
+    /* === Reset === */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--wds-font-family-primary);
+      background: #f0f0f0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 16px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* === Control Panel === */
+    .control-panel {
+      width: 390px;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      border-radius: 12px 12px 0 0;
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 13px;
+    }
+    .control-panel__row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .control-panel__label {
+      color: #888;
+      font-size: 11px;
+      min-width: 54px;
+    }
+    .control-panel__states {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+    .control-panel__state-btn {
+      background: #2a2a3e;
+      color: #bbb;
+      border: 1px solid #444;
+      border-radius: 6px;
+      padding: 5px 10px;
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: inherit;
+    }
+    .control-panel__state-btn:hover {
+      background: #353550;
+      color: #fff;
+    }
+    .control-panel__state-btn.active {
+      background: var(--wds-fill-brand-primary);
+      color: #fff;
+      border-color: var(--wds-fill-brand-primary);
+    }
+    .control-panel__breadcrumb {
+      color: #666;
+      font-size: 10px;
+      font-family: monospace;
+    }
+
+    /* === Device Frame === */
+    .device-frame {
+      width: 390px;
+      height: 844px;
+      background: var(--wds-background-normal);
+      overflow: hidden;
+      position: relative;
+      border: 1px solid #ddd;
+      border-radius: 0 0 12px 12px;
+    }
+
+    /* === Status Bar (mock) === */
+    .status-bar {
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #fff;
+      z-index: 10;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      pointer-events: none;
+    }
+    .status-bar .time { font-variant-numeric: tabular-nums; }
+
+    /* === Swipe Feed Host Screen (backdrop visual) === */
+    .swipe-feed {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, #1a1a2e 0%, #2d1b52 50%, #4a2d78 100%);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Content image placeholder (simulated meme card) */
+    .content-card {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 30% 20%, rgba(255, 180, 230, 0.25) 0%, transparent 40%),
+        radial-gradient(ellipse at 70% 80%, rgba(135, 82, 250, 0.35) 0%, transparent 50%),
+        linear-gradient(180deg, #3a2a5a 0%, #1f1438 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(255, 255, 255, 0.4);
+      font-size: 13px;
+    }
+
+    .content-card::before {
+      content: '생성된 밈 콘텐츠 (placeholder)';
+      display: block;
+      padding: 8px 16px;
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: 8px;
+      backdrop-filter: blur(8px);
+    }
+
+    /* Top action bar (feed header) */
+    .feed-top-bar {
+      position: absolute;
+      top: 44px;
+      left: 0;
+      right: 0;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      color: #fff;
+      z-index: 5;
+    }
+    .feed-top-bar__back {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.35);
+      border-radius: 50%;
+      font-size: 18px;
+      cursor: pointer;
+      border: none;
+      color: #fff;
+    }
+    .feed-top-bar__more {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.35);
+      border-radius: 50%;
+      font-size: 18px;
+      cursor: pointer;
+      border: none;
+      color: #fff;
+    }
+
+    /* Right-side reactions (mock — to show scale/context) */
+    .feed-side-actions {
+      position: absolute;
+      right: 12px;
+      bottom: 200px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      align-items: center;
+      color: #fff;
+      z-index: 4;
+    }
+    .feed-side-actions .action {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .feed-side-actions .action-icon {
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 50%;
+      font-size: 20px;
+    }
+
+    /* CTA Footer Area (hosting) */
+    .cta-footer {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 12px 16px 34px;
+      background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.75) 100%);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      z-index: 10;
+    }
+
+    /* Publish toggle row */
+    .publish-toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 4px;
+      color: #fff;
+    }
+    .publish-toggle-row.hidden {
+      display: none;
+    }
+
+    .publish-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: #fff;
+      letter-spacing: -0.1px;
+    }
+    .publish-label__hint {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.6);
+      margin-left: 8px;
+      font-weight: 400;
+    }
+
+    /* === iOS-style Switch (51 x 31) === */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 51px;
+      height: 31px;
+      flex-shrink: 0;
+      border: none;
+      padding: 0;
+      background: transparent;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .switch__track {
+      position: absolute;
+      inset: 0;
+      border-radius: 9999px;
+      background: var(--wds-fill-neutral-secondary);
+      transition: background-color 200ms ease;
+    }
+    .switch__thumb {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 27px;
+      height: 27px;
+      background: #FFFFFF;
+      border-radius: 50%;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15), 0 2px 2px rgba(0, 0, 0, 0.06);
+      transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    /* ON state */
+    .switch[aria-checked="true"] .switch__track {
+      background: var(--wds-fill-brand-primary);
+    }
+    .switch[aria-checked="true"] .switch__thumb {
+      transform: translateX(20px);
+    }
+    /* Disabled state (custom-prompt) — track tonal gray, reduced opacity */
+    .switch[data-disabled="true"] .switch__track {
+      background: var(--wds-surface-tertiary);
+      opacity: 0.6;
+    }
+    .switch[data-disabled="true"] .switch__thumb {
+      background: #E4E5E9;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    }
+
+    .switch:focus-visible {
+      outline: 2px solid var(--wds-fill-brand-primary);
+      outline-offset: 3px;
+      border-radius: 9999px;
+    }
+
+    /* Template CTA Button */
+    .btn-template-cta {
+      width: 100%;
+      height: 56px;
+      border: none;
+      border-radius: var(--wds-radius-lg);
+      background: var(--wds-fill-brand-primary);
+      color: var(--wds-label-inverse);
+      font-size: 16px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      letter-spacing: -0.2px;
+      transition: background-color 150ms ease;
+    }
+    .btn-template-cta:hover {
+      background: var(--wds-color-purple-600);
+    }
+
+    /* === Bottom Sheet (UnpublishConfirmSheet) === */
+    .overlay-backdrop {
+      position: absolute;
+      inset: 0;
+      background: var(--wds-background-dimmed);
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 250ms ease;
+    }
+    .overlay-backdrop.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .bottom-sheet {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--wds-background-elevated);
+      border-radius: 28px 28px 0 0;
+      padding: 16px 20px 34px;
+      z-index: 101;
+      transform: translateY(100%);
+      transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.15);
+    }
+    .bottom-sheet.active {
+      transform: translateY(0);
+    }
+    .bottom-sheet__handle {
+      width: 48px;
+      height: 4px;
+      background: var(--wds-color-neutral-300);
+      border-radius: var(--wds-radius-full);
+      margin: 0 auto 20px;
+    }
+    .bottom-sheet__title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--wds-label-normal);
+      text-align: center;
+      margin-bottom: 8px;
+      line-height: 1.4;
+      letter-spacing: -0.3px;
+    }
+    .bottom-sheet__description {
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--wds-label-alternative);
+      text-align: center;
+      line-height: 1.5;
+      margin-bottom: 24px;
+      padding: 0 4px;
+      letter-spacing: -0.1px;
+    }
+    .bottom-sheet__button-row {
+      display: flex;
+      gap: 8px;
+    }
+    .btn-sheet {
+      flex: 1;
+      height: 56px;
+      border: none;
+      border-radius: var(--wds-radius-lg);
+      font-size: 16px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      letter-spacing: -0.2px;
+      transition: background-color 150ms ease, opacity 150ms ease;
+    }
+    .btn-cancel {
+      background: var(--wds-surface-button);
+      color: var(--wds-label-normal);
+    }
+    .btn-cancel:hover {
+      background: #E4E5E9;
+    }
+    .btn-confirm-destructive {
+      background: var(--wds-status-error);
+      color: var(--wds-label-inverse);
+    }
+    .btn-confirm-destructive:hover {
+      background: #E6332A;
+    }
+
+    /* === Toast === */
+    .toast {
+      position: absolute;
+      left: 16px;
+      right: 16px;
+      bottom: 100px;
+      background: var(--wds-color-neutral-900);
+      color: var(--wds-label-inverse);
+      padding: 14px 16px;
+      border-radius: var(--wds-radius-md);
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 1.4;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+      z-index: 200;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 200ms ease, transform 200ms ease;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      letter-spacing: -0.1px;
+    }
+    .toast.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .toast--success {
+      background: var(--wds-color-neutral-900);
+    }
+    .toast--warn {
+      background: var(--wds-color-neutral-900);
+    }
+    .toast--error {
+      background: var(--wds-status-error);
+    }
+    .toast__icon {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+
+    /* === Spec caption (meta info) === */
+    .meta-caption {
+      width: 390px;
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-top: none;
+      border-radius: 0 0 12px 12px;
+      padding: 12px 16px;
+      font-size: 12px;
+      color: #555;
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+    .meta-caption strong { color: #212228; }
+    .meta-caption code {
+      background: #f5f5f7;
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-size: 11px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- === Control Panel === -->
+  <div class="control-panel" role="region" aria-label="프로토타입 컨트롤 패널">
+    <div class="control-panel__row">
+      <span class="control-panel__label">State</span>
+      <div class="control-panel__states" id="state-buttons">
+        <button class="control-panel__state-btn active" data-state="toggle-on">toggle-on</button>
+        <button class="control-panel__state-btn" data-state="toggle-off">toggle-off</button>
+        <button class="control-panel__state-btn" data-state="toggle-disabled">toggle-disabled (custom-prompt)</button>
+        <button class="control-panel__state-btn" data-state="unpublish-confirm">unpublish-confirm</button>
+        <button class="control-panel__state-btn" data-state="publish-success-toast">publish-success-toast</button>
+        <button class="control-panel__state-btn" data-state="custom-prompt-blocked-toast">custom-prompt-blocked-toast</button>
+      </div>
+    </div>
+    <div class="control-panel__row">
+      <span class="control-panel__label">Flow</span>
+      <span class="control-panel__breadcrumb" id="breadcrumb">app-004 / PublishToggle (toggle-on)</span>
+    </div>
+  </div>
+
+  <!-- === Device Frame === -->
+  <div class="device-frame" id="device-frame">
+
+    <!-- Swipe Feed Host Screen -->
+    <section class="swipe-feed" id="swipe-feed-screen">
+
+      <!-- Content card backdrop -->
+      <div class="content-card" aria-hidden="true"></div>
+
+      <!-- Status Bar -->
+      <div class="status-bar">
+        <span class="time">9:41</span>
+        <span>● ● ●</span>
+      </div>
+
+      <!-- Top bar -->
+      <div class="feed-top-bar">
+        <button class="feed-top-bar__back" aria-label="뒤로가기">‹</button>
+        <button class="feed-top-bar__more" aria-label="더보기">⋯</button>
+      </div>
+
+      <!-- Side action column (read-only mock for context) -->
+      <div class="feed-side-actions" aria-hidden="true">
+        <div class="action">
+          <div class="action-icon">♡</div>
+          <span>1.2천</span>
+        </div>
+        <div class="action">
+          <div class="action-icon">💬</div>
+          <span>34</span>
+        </div>
+        <div class="action">
+          <div class="action-icon">↗</div>
+          <span>공유</span>
+        </div>
+      </div>
+
+      <!-- CTA Footer Area -->
+      <div class="cta-footer" id="cta-footer">
+        <!-- Publish Toggle Row -->
+        <div class="publish-toggle-row" id="publish-toggle-row" role="group" aria-label="게시 토글 영역">
+          <div>
+            <span class="publish-label">게시</span>
+            <span class="publish-label__hint" id="publish-hint">공개 중</span>
+          </div>
+          <button
+            class="switch"
+            id="publish-switch"
+            role="switch"
+            aria-checked="true"
+            aria-label="게시 토글"
+            data-disabled="false"
+          >
+            <span class="switch__track" aria-hidden="true"></span>
+            <span class="switch__thumb" aria-hidden="true"></span>
+          </button>
+        </div>
+
+        <!-- Primary CTA (scope 외지만 레이아웃 맥락) -->
+        <button class="btn-template-cta" aria-label="템플릿 사용하기">템플릿 사용하기</button>
+      </div>
+
+      <!-- Toasts -->
+      <div class="toast toast--success" id="toast-success" role="status" aria-live="polite">
+        <span class="toast__icon">✓</span>
+        <span id="toast-success-text">공개됐어요</span>
+      </div>
+
+      <div class="toast toast--warn" id="toast-blocked" role="status" aria-live="polite">
+        <span class="toast__icon">ℹ</span>
+        <span>커스텀 프롬프트 결과물 게시 기능도 곧 지원될 예정이니 조금만 기다려주세요!</span>
+      </div>
+
+      <!-- Overlay: Unpublish Confirm Sheet -->
+      <div class="overlay-backdrop" id="sheet-backdrop" aria-hidden="true"></div>
+      <div
+        class="bottom-sheet"
+        id="unpublish-sheet"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="unpublish-title"
+        aria-describedby="unpublish-description"
+      >
+        <div class="bottom-sheet__handle" aria-hidden="true"></div>
+        <h2 class="bottom-sheet__title" id="unpublish-title">콘텐츠를 비공개로 전환할까요?</h2>
+        <p class="bottom-sheet__description" id="unpublish-description">
+          피드에서 사라지고 나만 볼 수 있어요.<br>이미 받은 페이백 크레딧은 유지돼요.
+        </p>
+        <div class="bottom-sheet__button-row">
+          <button class="btn-sheet btn-cancel" id="btn-sheet-cancel" aria-label="취소">취소</button>
+          <button class="btn-sheet btn-confirm-destructive" id="btn-sheet-confirm" aria-label="비공개로 전환">비공개로 전환</button>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="meta-caption">
+    <strong>app-004 · Publish Toggle + Unpublish Confirm Sheet</strong><br>
+    Switch 표준: <code>iOS 51×31</code> (본 스펙 채택) / 참고: <code>Android Material 32×20</code><br>
+    Spec: <code>PublishToggle.spec.md</code> + <code>UnpublishConfirmSheet.spec.md</code>
+  </div>
+
+  <script>
+    // === Elements ===
+    const publishRow = document.getElementById('publish-toggle-row');
+    const publishSwitch = document.getElementById('publish-switch');
+    const publishHint = document.getElementById('publish-hint');
+    const sheetBackdrop = document.getElementById('sheet-backdrop');
+    const sheet = document.getElementById('unpublish-sheet');
+    const btnCancel = document.getElementById('btn-sheet-cancel');
+    const btnConfirm = document.getElementById('btn-sheet-confirm');
+    const toastSuccess = document.getElementById('toast-success');
+    const toastSuccessText = document.getElementById('toast-success-text');
+    const toastBlocked = document.getElementById('toast-blocked');
+    const stateBtns = document.querySelectorAll('.control-panel__state-btn');
+    const breadcrumb = document.getElementById('breadcrumb');
+
+    // === State model ===
+    // In the real app, this reflects item.isPublished + item.isCustomPrompt + isOwn
+    let state = {
+      isPublished: true,
+      isCustomPrompt: false,
+      isOwn: true,
+    };
+    let toastTimer = null;
+
+    function updateHint() {
+      if (publishSwitch.dataset.disabled === 'true') {
+        publishHint.textContent = '게시 불가';
+      } else if (publishSwitch.getAttribute('aria-checked') === 'true') {
+        publishHint.textContent = '공개 중';
+      } else {
+        publishHint.textContent = '비공개';
+      }
+    }
+
+    function renderSwitch() {
+      publishSwitch.setAttribute('aria-checked', state.isPublished ? 'true' : 'false');
+      publishSwitch.dataset.disabled = state.isCustomPrompt ? 'true' : 'false';
+      publishRow.classList.toggle('hidden', !state.isOwn);
+      updateHint();
+    }
+
+    function openSheet() {
+      sheetBackdrop.classList.add('active');
+      sheet.classList.add('active');
+      sheet.setAttribute('aria-hidden', 'false');
+    }
+    function closeSheet() {
+      sheetBackdrop.classList.remove('active');
+      sheet.classList.remove('active');
+      sheet.setAttribute('aria-hidden', 'true');
+    }
+
+    function showToast(el, duration = 2500) {
+      if (toastTimer) { clearTimeout(toastTimer); }
+      // Hide all toasts first
+      [toastSuccess, toastBlocked].forEach(t => t.classList.remove('active'));
+      // Trigger reflow for restart
+      void el.offsetWidth;
+      el.classList.add('active');
+      toastTimer = setTimeout(() => {
+        el.classList.remove('active');
+      }, duration);
+    }
+
+    // === Switch tap handler (core logic) ===
+    publishSwitch.addEventListener('click', () => {
+      // Owner check (in real app, gated by isOwn — here always visible)
+      if (!state.isOwn) { return; }
+
+      // Custom-prompt: show toast, no API call
+      if (state.isCustomPrompt) {
+        showToast(toastBlocked, 3500);
+        return;
+      }
+
+      if (state.isPublished) {
+        // ON → OFF: show confirm sheet; do NOT toggle until confirm
+        openSheet();
+      } else {
+        // OFF → ON: optimistic toggle + success toast
+        state.isPublished = true;
+        renderSwitch();
+        toastSuccessText.textContent = '공개됐어요';
+        showToast(toastSuccess, 2000);
+      }
+    });
+
+    // === Sheet actions ===
+    btnCancel.addEventListener('click', () => {
+      closeSheet();
+      // Toggle remains ON — no state change
+    });
+
+    sheetBackdrop.addEventListener('click', () => {
+      closeSheet();
+    });
+
+    btnConfirm.addEventListener('click', () => {
+      // Commit OFF → close sheet → (in real app: PATCH)
+      state.isPublished = false;
+      renderSwitch();
+      closeSheet();
+      // In the real app, a subtle confirmation could appear; PRD does not mandate a toast here,
+      // but for parity we show none on the confirm path (sheet itself IS the confirmation UX).
+    });
+
+    // === Control Panel: state selection ===
+    function setActiveButton(stateKey) {
+      stateBtns.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.state === stateKey);
+      });
+      breadcrumb.textContent = `app-004 / ${stateKey === 'unpublish-confirm' ? 'UnpublishConfirmSheet' : 'PublishToggle'} (${stateKey})`;
+    }
+
+    function applyState(stateKey) {
+      // Reset overlays
+      closeSheet();
+      [toastSuccess, toastBlocked].forEach(t => t.classList.remove('active'));
+
+      switch (stateKey) {
+        case 'toggle-on':
+          state = { isPublished: true, isCustomPrompt: false, isOwn: true };
+          renderSwitch();
+          break;
+        case 'toggle-off':
+          state = { isPublished: false, isCustomPrompt: false, isOwn: true };
+          renderSwitch();
+          break;
+        case 'toggle-disabled':
+          state = { isPublished: false, isCustomPrompt: true, isOwn: true };
+          renderSwitch();
+          break;
+        case 'unpublish-confirm':
+          state = { isPublished: true, isCustomPrompt: false, isOwn: true };
+          renderSwitch();
+          openSheet();
+          break;
+        case 'publish-success-toast':
+          state = { isPublished: true, isCustomPrompt: false, isOwn: true };
+          renderSwitch();
+          toastSuccessText.textContent = '공개됐어요';
+          showToast(toastSuccess, 3000);
+          break;
+        case 'custom-prompt-blocked-toast':
+          state = { isPublished: false, isCustomPrompt: true, isOwn: true };
+          renderSwitch();
+          showToast(toastBlocked, 4000);
+          break;
+      }
+      setActiveButton(stateKey);
+    }
+
+    stateBtns.forEach(btn => {
+      btn.addEventListener('click', () => applyState(btn.dataset.state));
+    });
+
+    // Initial state
+    applyState('toggle-on');
+  </script>
+
+</body>
+</html>

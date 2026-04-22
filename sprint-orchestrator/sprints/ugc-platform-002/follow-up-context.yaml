@@ -1,0 +1,71 @@
+previous_sprint: "ugc-platform-001"
+generated_at: "2026-04-22T18:50:00+09:00"
+
+inherited_from:
+  deferred_items: 7            # AC-2.3, AC-7.4, MINOR-G2-1, MINOR-G2-2, MINOR-G3-3, MINOR-G3-4 (medium/low) + MINOR-G2-3 (별도 스프린트, 본 scope 제외)
+  api_contract: true           # ugc-platform-001/contracts/api-contract.yaml 을 기반으로 확장
+  patterns: 5                  # cursor $lte, e2e nx discovery, TS cascade measurement, RQ enabled guard, prop threading
+  prototype_amendments: 4      # DRIFT-01~04 반영됨 (재적용 불필요)
+
+previous_metrics:
+  fulfillment_rate: 0.88       # 15/17 AC
+  partially_fulfilled_rate: 0.12  # 2/17 AC (technical_limit)
+  unfulfilled_rate: 0.0
+  first_pass_rate: 0.0         # 3/3 group all had issues in Round 1
+  avg_fix_cycles: 1.67         # G1:3, G2:1, G3:1
+  critical_issues_found: 0
+  major_issues_found: 5
+  minor_issues_found: 6
+
+# Phase 2 에서 해소 목표
+follow_up_goals:
+  resolve_deferred:
+    - ac_id: "AC-2.3"
+      strategy: "Phase 5 PR 전 수동 QA 체크리스트 (iOS+Android)"
+      priority: "medium"
+    - ac_id: "AC-7.4"
+      strategy: "Phase 5 PR 전 수동 QA (임의 userId 딥링크)"
+      priority: "medium"
+    - ac_id: "MINOR-G2-1"
+      strategy: "PRD 재확인 후 dual entry 유지/정리 판단. 정리 시 home-to-settings flow MY 경유로 전환"
+      priority: "low"
+    - ac_id: "MINOR-G2-2"
+      strategy: "counts 반영 1회 sync flag 또는 route param override gated effect"
+      priority: "low"
+    - ac_id: "MINOR-G3-3"
+      strategy: "@react-native-clipboard/clipboard 도입 + import 교체"
+      priority: "medium"
+    - ac_id: "MINOR-G3-4"
+      strategy: "initialContentId 미존재 시 첫 아이템 fallback 또는 empty state"
+      priority: "low"
+
+  systemic_improvements:
+    - source: "pattern_digest"
+      clause: "Cursor repo 쿼리 $lte 의무 (Contract V-method grep 추가)"
+      applies_to: "backend impl group"
+    - source: "pattern_digest"
+      clause: "nx test-e2e target + jest-e2e.json moduleNameMapper 검증"
+      applies_to: "backend impl group with new e2e"
+    - source: "pattern_digest"
+      clause: "FE typecheck clean 측정 (grep -v '@wrtn/')"
+      applies_to: "app impl group"
+    - source: "pattern_digest"
+      clause: "Discriminated union / parent-dependent query enabled 가드 (completeness-002)"
+      applies_to: "app impl group"
+    - source: "pattern_digest"
+      clause: "Navigate payload parent context 의존 시 prop threading Done Criterion 명시"
+      applies_to: "app contract review"
+    - source: "deferred_items"
+      clause: "native sheet / seed 주입 불가 AC 는 Phase 5 전 수동 QA 필수"
+      applies_to: "phase 5 PR submission"
+
+regression_scope:
+  # Phase 1 fulfilled AC 15건 중 Phase 2 작업이 영향 줄 가능성 있는 범위
+  high_risk:
+    - "AC-2.5 (MY 스와이프) — Phase 2 의 AC 1.5/1.6/1.7/1.8 이 SwipeFeed 를 확장"
+    - "AC-7.3 (타유저 스와이프) — 동일 SwipeFeed, CTA 분기 영향"
+  medium_risk:
+    - "AC-2.2 (카운트 포맷) — AC 3.3 좋아요는 축약 없음 (별도 규약). 재생성 카운트는 축약 유지"
+    - "AC-2.7 (landingTab 라우팅) — 재생성 후 MY 공개 탭 복귀 유지 필요"
+  low_risk:
+    - "AC-1.x 탭바, AC-2.1 landing 우선순위, AC-2.4 편집, AC-2.8 설정, AC-7.1/7.2/7.5"

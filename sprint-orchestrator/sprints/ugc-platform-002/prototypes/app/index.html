@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>UGC Platform Phase 2 — Prototype Gallery</title>
+<style>
+  :root {
+    --brand: #8752FA;
+    --bg: #FAFBFC;
+    --surface: #FFFFFF;
+    --border: #E4E5E9;
+    --text: #212228;
+    --text-sub: #6B6E76;
+    --pending: #E8A500;
+    --approved: #22A76D;
+    --rejected: #D92800;
+  }
+  body { margin: 0; padding: 32px; font-family: 'Pretendard', -apple-system, sans-serif; background: var(--bg); color: var(--text); }
+  .header { max-width: 1200px; margin: 0 auto 32px; }
+  .header h1 { font-size: 28px; font-weight: 700; margin: 0 0 8px; }
+  .header p { color: var(--text-sub); margin: 0 0 4px; }
+  .grid { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 20px; transition: border-color 0.15s; }
+  .card:hover { border-color: var(--brand); }
+  .card h2 { margin: 0 0 4px; font-size: 18px; font-weight: 700; }
+  .card .task-id { color: var(--brand); font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+  .card .desc { color: var(--text-sub); font-size: 14px; line-height: 1.5; margin-bottom: 12px; min-height: 63px; }
+  .card .meta { font-size: 12px; color: var(--text-sub); margin-bottom: 14px; }
+  .card .meta b { color: var(--text); }
+  .card .actions { display: flex; gap: 8px; }
+  .card .actions a {
+    flex: 1; text-align: center; padding: 10px 12px; border-radius: 10px;
+    text-decoration: none; font-size: 13px; font-weight: 600; transition: background 0.15s;
+  }
+  .card .actions .primary { background: var(--brand); color: #fff; }
+  .card .actions .primary:hover { background: #7040E0; }
+  .card .actions .secondary { background: #F0F1F3; color: var(--text); }
+  .card .actions .secondary:hover { background: #E4E5E9; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; margin-left: 4px; }
+  .badge.pending { background: #FFF8E6; color: var(--pending); }
+  .badge.approved { background: #E3F7EE; color: var(--approved); }
+  .badge.rejected { background: #FDE6E0; color: var(--rejected); }
+  .legend { max-width: 1200px; margin: 20px auto; padding: 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; font-size: 13px; color: var(--text-sub); }
+</style>
+</head>
+<body>
+  <div class="header">
+    <h1>UGC Platform Phase 2 — Prototype Gallery</h1>
+    <p>Sprint <b>ugc-platform-002</b> · 피드 인터랙션 & 페이백</p>
+    <p>Follow-up of ugc-platform-001 · Generated 2026-04-22 · 9 prototypes</p>
+  </div>
+
+  <div class="legend">
+    <b>리뷰 가이드</b> — 각 카드의 "프로토타입 열기" 클릭 → 브라우저 화면에서 control panel 로 state 토글. 각 프로토타입은 self-contained HTML (외부 의존성 없음).
+    `.spec.md` 는 machine-readable 스펙 (Phase 4 에서 FE Engineer 가 참조).
+  </div>
+
+  <div class="grid">
+
+    <div class="card">
+      <div class="task-id">app-001</div>
+      <h2>SwipeFeedActionBar</h2>
+      <div class="desc">세로 스와이프 우측 4버튼 액션 바 (좋아요/재생성/공유/더보기). AC 1.7 레이아웃 + 카운트 포맷 (좋아요=실숫자, 재생성=축약).</div>
+      <div class="meta">states: default, liked, zero, high-counts, guest · <b>quality 1.0</b> · <span class="badge pending">pending</span></div>
+      <div class="actions">
+        <a class="primary" href="app-001/prototype.html">프로토타입</a>
+        <a class="secondary" href="app-001/SwipeFeedActionBar.spec.md">spec</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="task-id">app-002</div>
+      <h2>MoreSheet + DeleteConfirm</h2>
+      <div class="desc">더보기 바텀시트 (me/other 분기, 3 메뉴) + 삭제 확인 2-button sheet. 신고하기는 Phase 3 placeholder.</div>
+      <div class="meta">me/other/delete-confirm/report-toast · <b>quality 1.0</b> · <span class="badge pending">pending</span></div>
+      <div class="actions">
+        <a class="primary" href="app-002/prototype.html">프로토타입</a>
+        <a class="secondary" href="app-002/SwipeFeedMoreSheet.spec.md">spec</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="task-id">app-003</div>
+      <h2>CTA Button + 삭제 필터 모달</h2>
+      <div class="desc">소유자 분기 라벨 ("다시 생성하기" / "템플릿 사용하기"). 동일 버튼 크기/색상. 삭제된 원본 필터 에러 모달.</div>
+      <div class="meta">me/other/credit-deficit/free/deleted-modal · <b>quality 1.0</b> · <span class="badge pending">pending</span></div>
+      <div class="actions">
+        <a class="primary" href="app-003/prototype.html">프로토타입</a>
+        <a class="secondary" href="app-003/SwipeFeedCTAButton.spec.md">spec</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="task-id">app-004</div>
+      <h2>PublishToggle + UnpublishConfirm</h2>
+      <div class="desc">iOS-style 게시 토글 (51×31). OFF→ON 일반 즉시 / custom-prompt 안내 / ON→OFF 확인 시트. 내 콘텐츠만 노출.</div>
+      <div class="meta">toggle-on/off/disabled/confirm/toast · <b>quality 1.0</b> · <span class="badge pending">pending</span></div>
+      <div class="actions">
+        <a class="primary" href="app-004/prototype.html">프로토타입</a>
+        <a class="secondary" href="app-004/PublishToggle.spec.md">spec</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="task-id">app-005</div>
+      <h2>LikeButton + LikeBadge</h2>
+      <div class="desc">좋아요 카운트 실제 숫자 렌더 (축약 없음, 0 포함). SwipeFeed LikeButton + 프로필 그리드 카드 badge. DoubleTapLikeOverlay 재사용.</div>
+      <div class="meta">not-liked/liked/self/0/high-count · <b>quality 1.0</b> · <span class="badge pending">pending</span></div>
+      <div class="actions">
+        <a class="primary" href="app-005/prototype.html">프로토타입</a>
+        <a class="secondary" href="app-005/LikeButton.spec.md">spec</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="task-id">app-006</div>
+      <h2>MyProfile · Liked Tab</h2>
+      <div class="desc">좋아요 탭 활성화. 기존 MY profile 3탭 그리드 재사용 + 좋아요 카운트 badge. 빈/로딩/에러 상태.</div>
+      <div class="meta">liked-default/empty/loading/error · <b>quality 1.0</b> · <span class="badge pending">pending</span></div>
+      <div class="actions">
+        <a class="primary" href="app-006/prototype.html">프로토타입</a>
+        <a class="secondary" href="app-006/MyProfileScreen-LikedTab.spec.md">spec</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="task-id">app-007</div>
+      <h2>PaybackIntroModal</h2>
+      <div class="desc">최초 공개 1회성 페이백 안내 모달. BottomSheet 패턴. PRD 문구 직역. CTA tap 으로만 닫힘 (backdrop dismiss 금지).</div>
+      <div class="meta">default/dismissing/hidden · <b>quality 1.0</b> · <span class="badge pending">pending</span></div>
+      <div class="actions">
+        <a class="primary" href="app-007/prototype.html">프로토타입</a>
+        <a class="secondary" href="app-007/PaybackIntroModal.spec.md">spec</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="task-id">app-008</div>
+      <h2>CreditHistory Payback Row</h2>
+      <div class="desc">크레딧 히스토리 PAYBACK variant row + 전체 화면 (기존 구조 유지). 40×40 썸네일 + "크레딧 페이백" 타이틀 + promotion violet amount.</div>
+      <div class="meta">default/payback-only/empty · <b>quality 1.0</b> · <span class="badge pending">pending</span></div>
+      <div class="actions">
+        <a class="primary" href="app-008/prototype.html">프로토타입</a>
+        <a class="secondary" href="app-008/CreditHistoryRow-Payback.spec.md">spec</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="task-id">app-009</div>
+      <h2>HomeHeader — gear 제거</h2>
+      <div class="desc">Deferred cleanup (Sub-fix 1). PRD grep 결과 Home gear 명시 없음 → 제거 default. Sub-fix 2/3/4 (landingTab/Clipboard/initialContentId) 는 logic-only.</div>
+      <div class="meta">before/after comparison · <b>quality 1.0</b> · <span class="badge pending">pending</span></div>
+      <div class="actions">
+        <a class="primary" href="app-009/prototype.html">프로토타입</a>
+        <a class="secondary" href="app-009/HomeHeader-WithoutGear.spec.md">spec</a>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>
