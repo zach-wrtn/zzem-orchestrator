@@ -6,7 +6,7 @@
 
 UGC Platform **Phase 1** (profile & navigation). PRD 1 `/docs/prds/01-profile-navigation.md` + KB mirror.
 
-- Navigation 뼈대: 하단 3탭 (홈/둘러보기/프로필)
+- Navigation 뼈대: 하단 3탭 (홈/탐색/MY) — Phase 3.4 amendment로 canonical 라벨 확정
 - MY 프로필 3탭 (공개/비공개/좋아요) + 기본 랜딩 분기
 - 프로필 편집 / 공유 / 설정 7메뉴
 - 타유저 공개 프로필 + 공개 콘텐츠 피드 진입

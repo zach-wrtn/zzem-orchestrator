@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ZZEM · MY 프로필 (app-003)</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+<style>
+/* ============================================================
+ * Inlined tokens.css (ugc-platform-001)
+ * Source: tokens/primitive + tokens/semantic + MY Profile Figma aliases
+ * ============================================================ */
+:root {
+  /* Primitive */
+  --wds-color-purple-50: #F5F0FF;
+  --wds-color-purple-100: #EBE1FF;
+  --wds-color-purple-500: #8752FA;
+  --wds-color-purple-600: #7040E0;
+
+  --wds-color-neutral-0: #FFFFFF;
+  --wds-color-neutral-50: #F7F8F9;
+  --wds-color-neutral-100: #F0F1F3;
+  --wds-color-neutral-200: #E4E5E9;
+  --wds-color-neutral-300: #D1D3D8;
+  --wds-color-neutral-400: #B5B8BF;
+  --wds-color-neutral-500: #8E9199;
+  --wds-color-neutral-600: #6B6E76;
+  --wds-color-neutral-700: #4D5058;
+  --wds-color-neutral-800: #35373E;
+  --wds-color-neutral-900: #212228;
+  --wds-color-neutral-1000: #000000;
+
+  --wds-color-red-500: #FF3B30;
+
+  /* Semantic (legacy, kept for compatibility) */
+  --wds-background-normal: var(--wds-color-neutral-0);
+  --wds-surface-secondary: var(--wds-color-neutral-50);
+  --wds-surface-tertiary: var(--wds-color-neutral-100);
+  --wds-surface-button: #F1F1F1;
+  --wds-label-normal: var(--wds-color-neutral-900);
+  --wds-label-alternative: var(--wds-color-neutral-600);
+  --wds-label-assistive: var(--wds-color-neutral-500);
+  --wds-label-inverse: var(--wds-color-neutral-0);
+  --wds-label-brand: var(--wds-color-purple-500);
+  --wds-text-primary: #262626;
+  --wds-line-normal: var(--wds-color-neutral-200);
+  --wds-line-alternative: var(--wds-color-neutral-100);
+  --wds-status-error: var(--wds-color-red-500);
+  --wds-radius-xs: 4px;
+  --wds-radius-sm: 8px;
+  --wds-radius-md: 12px;
+  --wds-radius-lg: 16px;
+  --wds-radius-full: 9999px;
+  --wds-font-family-primary: 'Pretendard', -apple-system, 'SF Pro Display', 'Apple SD Gothic Neo', sans-serif;
+
+  /* MY Profile — Figma-verified */
+  --background_primary: #FFFFFF;
+  --surface_secondary: #F7F7F7;
+  --surface_button: #F1F1F1;
+  --outline_primary: #F1F1F1;
+  --text_primary: #262626;
+  --text_white: #FFFFFF;
+  --profile_avatar_empty_bg: #F5F3FF;
+  --profile_avatar_border: rgba(136, 136, 136, 0.2);
+}
+
+/* ============================================================
+ * Page Frame / Control Panel
+ * ============================================================ */
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; padding: 0;
+  background: #E7E8EB;
+  font-family: var(--wds-font-family-primary);
+  color: var(--text_primary);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 16px 64px;
+  gap: 16px;
+}
+
+.control-panel {
+  width: 100%;
+  max-width: 760px;
+  background: #fff;
+  border: 1px solid var(--wds-line-normal);
+  border-radius: var(--wds-radius-lg);
+  padding: 14px 16px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 13px;
+}
+.control-panel .row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.control-panel .label {
+  font-weight: 600;
+  color: var(--text_primary);
+  min-width: 64px;
+}
+.control-panel select,
+.control-panel button {
+  font-family: inherit;
+  font-size: 12px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--wds-line-normal);
+  background: #fff;
+  cursor: pointer;
+  color: var(--text_primary);
+}
+.control-panel button.active {
+  background: var(--text_primary);
+  color: #fff;
+  border-color: var(--text_primary);
+}
+.control-panel .breadcrumb {
+  color: var(--wds-label-alternative);
+  font-size: 12px;
+}
+.control-panel .breadcrumb code {
+  background: var(--wds-surface-tertiary);
+  padding: 1px 6px;
+  border-radius: 6px;
+}
+
+/* ============================================================
+ * Device Frame (390×844 outer, inner uses 375 Figma viewport)
+ * ============================================================ */
+.device-frame {
+  width: 390px;
+  height: 844px;
+  background: var(--background_primary);
+  border-radius: 44px;
+  border: 10px solid #111;
+  box-shadow: 0 12px 48px rgba(0,0,0,0.18);
+  overflow: hidden;
+  position: relative;
+}
+.device-frame .notch {
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 120px; height: 26px;
+  background: #111;
+  border-bottom-left-radius: 18px;
+  border-bottom-right-radius: 18px;
+  z-index: 50;
+}
+
+/* Inner screen — 375px wide (Figma), centered in 390 frame */
+.screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--background_primary);
+  overflow: hidden;
+}
+.screen-inner {
+  width: 375px;
+  margin: 0 auto;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ============================================================
+ * Status Bar (20px — iOS style)
+ * ============================================================ */
+.status-bar {
+  flex: 0 0 auto;
+  height: 20px;
+  padding-top: 14px; /* breathing room under notch */
+}
+
+/* ============================================================
+ * HeaderBar — h-48, center title, right setting
+ * ============================================================ */
+.header-bar {
+  flex: 0 0 auto;
+  height: 48px;
+  padding: 4px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--background_primary);
+  position: relative;
+  z-index: 10;
+}
+.header-slot {
+  width: 32px;
+  height: 32px;
+  padding: 4px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 0;
+  cursor: default;
+}
+.header-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text_primary);
+  margin: 0;
+  letter-spacing: -0.3px;
+  line-height: 1.35;
+  text-align: center;
+  flex: 1;
+}
+.icon-btn {
+  width: 32px; height: 32px;
+  padding: 4px;
+  border-radius: 8px;
+  background: transparent;
+  border: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text_primary);
+  cursor: pointer;
+}
+.icon-btn:active { background: rgba(0,0,0,0.05); }
+.icon-btn svg { width: 24px; height: 24px; }
+
+/* ============================================================
+ * Scroll area
+ * ============================================================ */
+.scroll-area {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-bottom: 77px; /* bottom nav height */
+}
+.scroll-area::-webkit-scrollbar { width: 0; display: none; }
+
+/* ============================================================
+ * Profile Section — pt-12 px-16 gap-16
+ * ============================================================ */
+.profile-section {
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+.avatar-100 {
+  width: 100px;
+  height: 100px;
+  border-radius: var(--wds-radius-full);
+  background: var(--profile_avatar_empty_bg);
+  border: 1px solid var(--profile_avatar_border);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  font-size: 44px;
+  color: var(--wds-label-brand);
+  font-weight: 700;
+}
+
+/* Count row — px-40, 3 cells evenly */
+.count-row {
+  list-style: none;
+  margin: 0;
+  padding: 0 40px;
+  width: 100%;
+  display: flex;
+  gap: 0;
+}
+.count-tile {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+.count-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text_primary);
+  line-height: 1.4;
+  text-align: center;
+  letter-spacing: -0.2px;
+}
+.count-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text_primary);
+  line-height: 1.4;
+  text-align: center;
+}
+
+/* Action buttons — gap-6, h-40, rounded-12, px-28 py-12 */
+.dual-btn {
+  width: 100%;
+  display: flex;
+  gap: 6px;
+}
+.btn-gray {
+  flex: 1;
+  height: 40px;
+  padding: 12px 28px;
+  background: var(--surface_button);
+  color: var(--text_primary);
+  border: 0;
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+  cursor: pointer;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+.btn-gray:active { background: #E4E4E4; }
+
+/* ============================================================
+ * Tab Bar — h-46, border-b, px-20, ICON ONLY (no text)
+ * 3 cells, each 120px (375 - 40 padding = 335; but spec says 120 each → width flexes)
+ * ============================================================ */
+.tab-bar {
+  flex: 0 0 auto;
+  height: 46px;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--outline_primary);
+  background: var(--background_primary);
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+.tab-item {
+  flex: 1;
+  max-width: 120px;
+  height: 46px;
+  border: 0;
+  background: transparent;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  color: var(--text_primary);
+  position: relative;
+  opacity: 0.3;
+  transition: opacity 0.12s ease;
+}
+.tab-item[aria-selected="true"] {
+  opacity: 1;
+}
+.tab-item[aria-selected="true"]::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 2px;
+  background: var(--text_primary);
+}
+.tab-item svg { width: 24px; height: 24px; }
+
+/* ============================================================
+ * Tab Content
+ * ============================================================ */
+.tab-content-slot { padding: 0; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ============================================================
+ * Feed Grid — 2-col flex, 1px gap, 375 wide
+ * ============================================================ */
+.feed-grid {
+  display: flex;
+  width: 375px;
+  gap: 1px;
+  background: var(--outline_primary);
+}
+.feed-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.feed-cell {
+  position: relative;
+  background: var(--surface_secondary);
+  border-radius: 4px;
+  overflow: hidden;
+  display: block;
+}
+.feed-cell.ratio-11 { aspect-ratio: 1 / 1; }
+.feed-cell.ratio-45 { aspect-ratio: 4 / 5; }
+
+.feed-cell .bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+}
+.feed-cell .overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(19,19,19,0) 36%, rgba(19,19,19,0.2) 90%);
+  pointer-events: none;
+}
+.feed-cell .top-row {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 40px;
+  padding: 10px 10px 10px 8px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+.feed-cell .tag-slot {
+  width: 37px;
+  height: 26px;
+}
+.feed-cell .ic-slot {
+  width: 24px;
+  height: 24px;
+  color: var(--text_white);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.feed-cell .ic-slot svg { width: 20px; height: 20px; }
+.feed-cell .bottom-row {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 62px;
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  color: var(--text_white);
+}
+.feed-cell .bottom-row svg {
+  width: 14px;
+  height: 14px;
+  stroke: var(--text_white);
+  fill: none;
+}
+.feed-cell .regen-count {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text_white);
+  line-height: 1;
+  letter-spacing: -0.2px;
+}
+
+/* ============================================================
+ * Empty States
+ * ============================================================ */
+.empty-state {
+  min-height: 420px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+  gap: 12px;
+}
+.empty-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: var(--wds-radius-full);
+  background: var(--profile_avatar_empty_bg);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--wds-label-brand);
+  opacity: 0.5;
+  margin-bottom: 4px;
+}
+.empty-avatar svg { width: 40px; height: 40px; }
+.empty-title {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--wds-label-alternative);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* ============================================================
+ * Loading / Error overlays
+ * ============================================================ */
+.state-overlay {
+  position: absolute;
+  top: 68px; /* below status + header */
+  left: 0; right: 0; bottom: 77px;
+  background: var(--background_primary);
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 32px 20px;
+  z-index: 20;
+}
+.state-overlay.active { display: flex; }
+.skeleton-avatar {
+  width: 100px; height: 100px;
+  border-radius: 50%;
+  background: linear-gradient(90deg, #F0F1F3 25%, #F7F8F9 50%, #F0F1F3 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+  margin-bottom: 16px;
+}
+.skeleton-line {
+  height: 14px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #F0F1F3 25%, #F7F8F9 50%, #F0F1F3 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+  margin-bottom: 8px;
+}
+.skeleton-grid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  margin-top: 24px;
+}
+.skeleton-cell {
+  aspect-ratio: 1 / 1;
+  background: linear-gradient(90deg, #F0F1F3 25%, #F7F8F9 50%, #F0F1F3 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+  border-radius: 4px;
+}
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.error-icon {
+  width: 64px; height: 64px;
+  border-radius: var(--wds-radius-full);
+  background: rgba(255, 59, 48, 0.08);
+  color: var(--wds-status-error);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+.error-icon svg { width: 28px; height: 28px; }
+.error-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text_primary);
+  margin: 0;
+}
+.error-sub {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--wds-label-alternative);
+  margin: 0;
+  line-height: 1.5;
+  text-align: center;
+  max-width: 280px;
+}
+.btn-retry {
+  margin-top: 8px;
+  height: 44px;
+  padding: 0 24px;
+  background: var(--text_primary);
+  color: #fff;
+  border: 0;
+  border-radius: var(--wds-radius-md);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* ============================================================
+ * Bottom Navigation — pb-26 pt-10 px-12, w-full, border-t 0.5px
+ * ============================================================ */
+.bottom-nav {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  width: 100%;
+  padding: 10px 12px 26px;
+  background: var(--background_primary);
+  border-top: 0.5px solid var(--outline_primary);
+  z-index: 15;
+}
+.bottom-nav-inner {
+  width: 351px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+}
+.bn-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  padding: 0;
+  position: relative;
+}
+.bn-icon {
+  width: 28px;
+  height: 28px;
+  padding: 3px 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  position: relative;
+  color: var(--text_primary);
+  opacity: 0.4;
+}
+.bn-item.active .bn-icon { opacity: 1; }
+.bn-item.active .bn-dot {
+  position: absolute;
+  left: 22px;
+  top: -2px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--wds-color-red-500);
+  z-index: 2;
+}
+.bn-label {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text_primary);
+  opacity: 0;
+  line-height: 1;
+  min-height: 1em;
+}
+
+/* ============================================================
+ * Toast
+ * ============================================================ */
+.toast {
+  position: absolute;
+  left: 50%; bottom: 100px;
+  transform: translate(-50%, 20px);
+  background: rgba(33, 34, 40, 0.92);
+  color: #fff;
+  font-size: 13px;
+  padding: 10px 16px;
+  border-radius: var(--wds-radius-md);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .2s ease, transform .2s ease;
+  z-index: 60;
+  white-space: nowrap;
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* ============================================================
+ * State-driven visibility
+ * ============================================================ */
+.screen[data-state="loading"] .status-bar,
+.screen[data-state="loading"] .header-bar,
+.screen[data-state="loading"] .scroll-area { visibility: hidden; }
+.screen[data-state="loading"] #loading-overlay { display: flex; }
+
+.screen[data-state="error"] .scroll-area { visibility: hidden; }
+.screen[data-state="error"] #error-overlay { display: flex; }
+
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     Control Panel
+     ============================================================ -->
+<section class="control-panel" aria-label="Prototype Control Panel">
+  <div class="row">
+    <span class="label">Screen</span>
+    <select id="screen-select" disabled>
+      <option value="MyProfileScreen">MyProfileScreen (app-003)</option>
+    </select>
+    <span class="breadcrumb">Route: <code>Main/Profile</code></span>
+  </div>
+  <div class="row">
+    <span class="label">State</span>
+    <button class="state-btn active" data-state="public-default">public-default</button>
+    <button class="state-btn" data-state="public-empty">public-empty</button>
+    <button class="state-btn" data-state="private-default">private-default</button>
+    <button class="state-btn" data-state="private-empty">private-empty</button>
+    <button class="state-btn" data-state="liked-empty">liked-empty</button>
+    <button class="state-btn" data-state="loading">loading</button>
+    <button class="state-btn" data-state="error">error</button>
+  </div>
+  <div class="row breadcrumb" id="breadcrumb-row">
+    <span class="label">Flow</span>
+    <span id="breadcrumb">MyProfileScreen</span>
+  </div>
+</section>
+
+<!-- ============================================================
+     Device Frame
+     ============================================================ -->
+<div class="device-frame" aria-label="iPhone 14 Pro preview">
+  <div class="notch" aria-hidden="true"></div>
+
+  <!-- MyProfileScreen -->
+  <section class="screen" id="MyProfileScreen" data-state="public-default" role="region" aria-label="MY 프로필 화면">
+    <div class="screen-inner">
+
+      <!-- Status Bar -->
+      <div class="status-bar" aria-hidden="true"></div>
+
+      <!-- HeaderBar (48px) — empty-left, center title, settings-right -->
+      <header class="header-bar">
+        <div class="header-slot" aria-hidden="true"></div>
+        <h1 class="header-title" id="header-nickname">김잼잼</h1>
+        <button class="icon-btn" id="nav-settings" aria-label="설정" title="설정">
+          <!-- setting_stroke icon -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </button>
+      </header>
+
+      <!-- Scroll Area (contains profile section + sticky tab bar + content) -->
+      <div class="scroll-area">
+
+        <!-- Profile Section -->
+        <section class="profile-section" aria-label="프로필 정보">
+          <div class="avatar-100" role="img" aria-label="내 프로필 이미지">잼</div>
+
+          <ul class="count-row" aria-label="팔로워 팔로잉 재생성된 카운트">
+            <li class="count-tile">
+              <span class="count-value" id="count-followers">128</span>
+              <span class="count-label">팔로워</span>
+            </li>
+            <li class="count-tile">
+              <span class="count-value" id="count-following">54</span>
+              <span class="count-label">팔로잉</span>
+            </li>
+            <li class="count-tile">
+              <span class="count-value" id="count-regenerated">1.2만</span>
+              <span class="count-label">재생성된</span>
+            </li>
+          </ul>
+
+          <div class="dual-btn">
+            <button class="btn-gray" id="btn-edit-profile" aria-label="프로필 편집">프로필 편집</button>
+            <button class="btn-gray" id="btn-share-profile" aria-label="프로필 공유">프로필 공유</button>
+          </div>
+        </section>
+
+        <!-- Icon-only Tab Bar -->
+        <nav class="tab-bar" role="tablist" aria-label="프로필 콘텐츠 탭">
+          <button class="tab-item" id="tab-public" role="tab" data-tab="public" aria-selected="true" aria-label="공개">
+            <!-- media_fill icon -->
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M4 4h6v6H4V4zm0 10h6v6H4v-6zM14 4h6v6h-6V4zm0 10h6v6h-6v-6z"/>
+            </svg>
+          </button>
+          <button class="tab-item" id="tab-private" role="tab" data-tab="private" aria-selected="false" aria-label="비공개">
+            <!-- lock_fill icon -->
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5zm-3 8V7a3 3 0 0 1 6 0v3H9z"/>
+            </svg>
+          </button>
+          <button class="tab-item" id="tab-liked" role="tab" data-tab="liked" aria-selected="false" aria-label="좋아요">
+            <!-- heart_fill icon -->
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 6.5 5.5 5.5 0 0 1 21.5 12c-2.5 4.5-9.5 9-9.5 9z"/>
+            </svg>
+          </button>
+        </nav>
+
+        <!-- Tab Content Slot -->
+        <div class="tab-content-slot">
+
+          <!-- PUBLIC -->
+          <div class="tab-panel active" data-tab-panel="public">
+            <!-- Populated grid: col-1 = [1/1, 4/5, 4/5], col-2 = [4/5, 4/5, 1/1] -->
+            <div class="feed-grid" data-feed="public-populated">
+              <div class="feed-col">
+                <article class="feed-cell ratio-11">
+                  <div class="bg" style="background: linear-gradient(135deg, #a8c0ff, #3f2b96);"></div>
+                  <div class="overlay"></div>
+                  <div class="top-row"><span class="tag-slot" aria-hidden="true"></span><span class="ic-slot" aria-hidden="true"></span></div>
+                  <div class="bottom-row">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg>
+                    <span class="regen-count">382</span>
+                  </div>
+                </article>
+                <article class="feed-cell ratio-45">
+                  <div class="bg" style="background: linear-gradient(135deg, #ff9a9e, #fad0c4);"></div>
+                  <div class="overlay"></div>
+                  <div class="top-row"><span class="tag-slot" aria-hidden="true"></span><span class="ic-slot" aria-hidden="true"></span></div>
+                  <div class="bottom-row">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg>
+                    <span class="regen-count">127</span>
+                  </div>
+                </article>
+                <article class="feed-cell ratio-45">
+                  <div class="bg" style="background: linear-gradient(135deg, #fbc2eb, #a6c1ee);"></div>
+                  <div class="overlay"></div>
+                  <div class="top-row"><span class="tag-slot" aria-hidden="true"></span><span class="ic-slot" aria-hidden="true"></span></div>
+                  <div class="bottom-row">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg>
+                    <span class="regen-count">54</span>
+                  </div>
+                </article>
+              </div>
+              <div class="feed-col">
+                <article class="feed-cell ratio-45">
+                  <div class="bg" style="background: linear-gradient(135deg, #84fab0, #8fd3f4);"></div>
+                  <div class="overlay"></div>
+                  <div class="top-row"><span class="tag-slot" aria-hidden="true"></span><span class="ic-slot" aria-hidden="true"></span></div>
+                  <div class="bottom-row">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg>
+                    <span class="regen-count">89</span>
+                  </div>
+                </article>
+                <article class="feed-cell ratio-45">
+                  <div class="bg" style="background: linear-gradient(135deg, #fddb92, #d1fdff);"></div>
+                  <div class="overlay"></div>
+                  <div class="top-row"><span class="tag-slot" aria-hidden="true"></span><span class="ic-slot" aria-hidden="true"></span></div>
+                  <div class="bottom-row">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg>
+                    <span class="regen-count">0</span>
+                  </div>
+                </article>
+                <article class="feed-cell ratio-11">
+                  <div class="bg" style="background: linear-gradient(135deg, #cfd9df, #e2ebf0);"></div>
+                  <div class="overlay"></div>
+                  <div class="top-row"><span class="tag-slot" aria-hidden="true"></span><span class="ic-slot" aria-hidden="true"></span></div>
+                  <div class="bottom-row">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg>
+                    <span class="regen-count">211</span>
+                  </div>
+                </article>
+              </div>
+            </div>
+
+            <!-- Empty state for public -->
+            <div class="empty-state" data-feed="public-empty" hidden>
+              <div class="empty-avatar" aria-hidden="true">
+                <!-- Avatar_UserProfile nodata silhouette -->
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0 2c-3.3 0-8 1.7-8 5v1h16v-1c0-3.3-4.7-5-8-5z"/>
+                </svg>
+              </div>
+              <p class="empty-title">아직 공개한 콘텐츠가 없어요</p>
+            </div>
+          </div>
+
+          <!-- PRIVATE -->
+          <div class="tab-panel" data-tab-panel="private">
+            <!-- Populated grid with lock icons visible on cards -->
+            <div class="feed-grid" data-feed="private-populated">
+              <div class="feed-col">
+                <article class="feed-cell ratio-11">
+                  <div class="bg" style="background: linear-gradient(135deg, #e0c3fc, #8ec5fc);"></div>
+                  <div class="overlay"></div>
+                  <div class="top-row">
+                    <span class="tag-slot" aria-hidden="true"></span>
+                    <span class="ic-slot" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5zm-3 8V7a3 3 0 0 1 6 0v3H9z"/></svg>
+                    </span>
+                  </div>
+                </article>
+                <article class="feed-cell ratio-45">
+                  <div class="bg" style="background: linear-gradient(135deg, #f6d365, #fda085);"></div>
+                  <div class="overlay"></div>
+                  <div class="top-row">
+                    <span class="tag-slot" aria-hidden="true"></span>
+                    <span class="ic-slot" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5zm-3 8V7a3 3 0 0 1 6 0v3H9z"/></svg>
+                    </span>
+                  </div>
+                </article>
+                <article class="feed-cell ratio-45">
+                  <div class="bg" style="background: linear-gradient(135deg, #a1c4fd, #c2e9fb);"></div>
+                  <div class="overlay"></div>
+                  <div class="top-row">
+                    <span class="tag-slot" aria-hidden="true"></span>
+                    <span class="ic-slot" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5zm-3 8V7a3 3 0 0 1 6 0v3H9z"/></svg>
+                    </span>
+                  </div>
+                </article>
+              </div>
+              <div class="feed-col">
+                <article class="feed-cell ratio-45">
+                  <div class="bg" style="background: linear-gradient(135deg, #d299c2, #fef9d7);"></div>
+                  <div class="overlay"></div>
+                  <div class="top-row">
+                    <span class="tag-slot" aria-hidden="true"></span>
+                    <span class="ic-slot" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5zm-3 8V7a3 3 0 0 1 6 0v3H9z"/></svg>
+                    </span>
+                  </div>
+                </article>
+                <article class="feed-cell ratio-45">
+                  <div class="bg" style="background: linear-gradient(135deg, #fccb90, #d57eeb);"></div>
+                  <div class="overlay"></div>
+                  <div class="top-row">
+                    <span class="tag-slot" aria-hidden="true"></span>
+                    <span class="ic-slot" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5zm-3 8V7a3 3 0 0 1 6 0v3H9z"/></svg>
+                    </span>
+                  </div>
+                </article>
+                <article class="feed-cell ratio-11">
+                  <div class="bg" style="background: linear-gradient(135deg, #96fbc4, #f9f586);"></div>
+                  <div class="overlay"></div>
+                  <div class="top-row">
+                    <span class="tag-slot" aria-hidden="true"></span>
+                    <span class="ic-slot" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5zm-3 8V7a3 3 0 0 1 6 0v3H9z"/></svg>
+                    </span>
+                  </div>
+                </article>
+              </div>
+            </div>
+
+            <!-- Empty state for private -->
+            <div class="empty-state" data-feed="private-empty" hidden>
+              <div class="empty-avatar" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0 2c-3.3 0-8 1.7-8 5v1h16v-1c0-3.3-4.7-5-8-5z"/>
+                </svg>
+              </div>
+              <p class="empty-title">아직 비공개로 저장한 콘텐츠가 없어요</p>
+            </div>
+          </div>
+
+          <!-- LIKED (Phase 1 fixed empty) -->
+          <div class="tab-panel" data-tab-panel="liked">
+            <div class="empty-state">
+              <div class="empty-avatar" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0 2c-3.3 0-8 1.7-8 5v1h16v-1c0-3.3-4.7-5-8-5z"/>
+                </svg>
+              </div>
+              <p class="empty-title">아직 좋아요한 콘텐츠가 없어요</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Loading Overlay -->
+      <div class="state-overlay" id="loading-overlay" aria-live="polite">
+        <div class="skeleton-avatar"></div>
+        <div class="skeleton-line" style="width: 120px;"></div>
+        <div class="skeleton-line" style="width: 220px;"></div>
+        <div class="skeleton-grid">
+          <div class="skeleton-cell"></div>
+          <div class="skeleton-cell"></div>
+          <div class="skeleton-cell"></div>
+          <div class="skeleton-cell"></div>
+        </div>
+      </div>
+
+      <!-- Error Overlay -->
+      <div class="state-overlay" id="error-overlay" role="alert">
+        <div class="error-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/>
+          </svg>
+        </div>
+        <h3 class="error-title">콘텐츠를 불러오지 못했어요</h3>
+        <p class="error-sub">네트워크 상태를 확인하고<br/>다시 시도해 주세요.</p>
+        <button class="btn-retry" id="btn-retry">다시 시도</button>
+      </div>
+
+      <!-- Bottom Navigation — 3 tabs: Home / Search / My (active) -->
+      <nav class="bottom-nav" role="navigation" aria-label="하단 탭">
+        <div class="bottom-nav-inner">
+          <button class="bn-item" aria-label="홈">
+            <span class="bn-icon" aria-hidden="true">🏠</span>
+            <span class="bn-label">&nbsp;</span>
+          </button>
+          <button class="bn-item" aria-label="탐색">
+            <span class="bn-icon" aria-hidden="true">🔍</span>
+            <span class="bn-label">&nbsp;</span>
+          </button>
+          <button class="bn-item active" aria-label="마이">
+            <span class="bn-icon" aria-hidden="true">
+              <span class="bn-dot" aria-hidden="true"></span>
+              👤
+            </span>
+            <span class="bn-label">&nbsp;</span>
+          </button>
+        </div>
+      </nav>
+
+      <!-- Toast (for placeholder navigation feedback) -->
+      <div class="toast" id="toast" role="status"></div>
+
+    </div>
+  </section>
+</div>
+
+<script>
+/* ============================================================
+ * Prototype State Controller
+ * ============================================================ */
+(function(){
+  const screen = document.getElementById('MyProfileScreen');
+  const stateBtns = document.querySelectorAll('.state-btn');
+  const tabItems = document.querySelectorAll('.tab-item');
+  const tabPanels = document.querySelectorAll('.tab-panel');
+  const breadcrumb = document.getElementById('breadcrumb');
+  const toast = document.getElementById('toast');
+
+  const STATE_TO_TAB = {
+    'public-default':  'public',
+    'public-empty':    'public',
+    'private-default': 'private',
+    'private-empty':   'private',
+    'liked-empty':     'liked',
+    'loading':         null,
+    'error':           null,
+  };
+
+  // Breadcrumb history
+  let trail = ['MyProfileScreen'];
+  function pushTrail(node) {
+    trail.push(node);
+    breadcrumb.textContent = trail.join(' → ');
+  }
+
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(() => toast.classList.remove('show'), 1600);
+  }
+
+  function setTab(tabKey) {
+    tabItems.forEach(b => b.setAttribute('aria-selected', String(b.dataset.tab === tabKey)));
+    tabPanels.forEach(p => p.classList.toggle('active', p.dataset.tabPanel === tabKey));
+  }
+
+  function applyVariant(state) {
+    // Public variant
+    const pubPop = screen.querySelector('[data-feed="public-populated"]');
+    const pubEmp = screen.querySelector('[data-feed="public-empty"]');
+    if (state === 'public-empty') {
+      pubPop.hidden = true; pubEmp.hidden = false;
+      document.getElementById('count-regenerated').textContent = '0';
+    } else {
+      pubPop.hidden = false; pubEmp.hidden = true;
+      document.getElementById('count-regenerated').textContent = '1.2만';
+    }
+    // Private variant
+    const privPop = screen.querySelector('[data-feed="private-populated"]');
+    const privEmp = screen.querySelector('[data-feed="private-empty"]');
+    if (state === 'private-empty') {
+      privPop.hidden = true; privEmp.hidden = false;
+    } else {
+      privPop.hidden = false; privEmp.hidden = true;
+    }
+  }
+
+  function setState(state) {
+    screen.setAttribute('data-state', state);
+    stateBtns.forEach(b => b.classList.toggle('active', b.dataset.state === state));
+    const tab = STATE_TO_TAB[state];
+    if (tab) setTab(tab);
+    applyVariant(state);
+  }
+
+  stateBtns.forEach(b => {
+    b.addEventListener('click', () => {
+      setState(b.dataset.state);
+      pushTrail('state:' + b.dataset.state);
+    });
+  });
+
+  tabItems.forEach(b => {
+    b.addEventListener('click', () => {
+      const t = b.dataset.tab;
+      if (t === 'public')      setState('public-default');
+      else if (t === 'private') setState('private-default');
+      else if (t === 'liked')   setState('liked-empty');
+      pushTrail('tab:' + t);
+    });
+  });
+
+  // Navigation entry points
+  document.getElementById('nav-settings').addEventListener('click', () => {
+    showToast('→ Settings 라우트 (app-004)');
+    pushTrail('SettingsScreen');
+  });
+  document.getElementById('btn-edit-profile').addEventListener('click', () => {
+    showToast('→ 프로필 편집 (app-005)');
+    pushTrail('EditProfileScreen');
+  });
+  document.getElementById('btn-share-profile').addEventListener('click', () => {
+    showToast('→ 프로필 공유 (app-007)');
+    pushTrail('ShareProfileSheet');
+  });
+  document.getElementById('btn-retry').addEventListener('click', () => {
+    setState('loading');
+    pushTrail('retry→loading');
+    setTimeout(() => setState('public-default'), 900);
+  });
+
+  // Init
+  setState('public-default');
+})();
+</script>
+
+</body>
+</html>

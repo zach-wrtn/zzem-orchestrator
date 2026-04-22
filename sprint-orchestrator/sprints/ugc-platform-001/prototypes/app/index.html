@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>ugc-platform-001 Prototype Gallery</title>
+  <style>
+    :root {
+      --bg: #FAFAFA;
+      --card: #FFFFFF;
+      --border: #E5E5E5;
+      --text: #212228;
+      --muted: #656565;
+      --accent: #8752FA;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Pretendard', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 32px 24px 64px;
+      line-height: 1.5;
+    }
+    header { max-width: 960px; margin: 0 auto 32px; }
+    h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+    p.lead { color: var(--muted); font-size: 14px; }
+    main { max-width: 960px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+    a.card {
+      display: block;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      text-decoration: none;
+      color: inherit;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    a.card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.08); border-color: var(--accent); }
+    .task-id { font-size: 11px; letter-spacing: 0.04em; color: var(--accent); font-weight: 600; margin-bottom: 6px; }
+    .title { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+    .meta { font-size: 12px; color: var(--muted); margin-bottom: 12px; }
+    .tags { display: flex; flex-wrap: wrap; gap: 4px; }
+    .tag { font-size: 11px; padding: 2px 8px; border-radius: 999px; background: #F1F1F1; color: var(--muted); }
+    .baseline-link { display: inline-block; margin-top: 12px; font-size: 11px; color: var(--muted); text-decoration: underline; }
+    .baseline-link:hover { color: var(--accent); }
+    .revision-badge { display: inline-block; font-size: 10px; padding: 2px 6px; border-radius: 4px; background: #EDE7FC; color: var(--accent); margin-left: 6px; font-weight: 600; letter-spacing: 0.04em; }
+</style>
+</head>
+<body>
+<header>
+  <h1>UGC Platform Phase 1 — Prototype Gallery <span class="revision-badge">REV · FIGMA</span></h1>
+  <p class="lead">각 카드를 클릭하면 Figma 구조로 재작성된 프로토타입이 열립니다. Control Panel에서 상태 토글 가능. 각 카드 하단의 "baseline 보기"로 v1(리비전 전) 버전과 비교할 수 있습니다.</p>
+</header>
+<main>
+  <div>
+    <a class="card" href="./app-003/prototype.html">
+      <div class="task-id">app-003</div>
+      <div class="title">MY Profile</div>
+      <div class="meta">icon-only 3탭(미디어/락/하트) + 카운트(팔로워/팔로잉/재생성된) + 2열 그리드 + 하단 탭</div>
+      <div class="tags">
+        <span class="tag">public-default</span><span class="tag">public-empty</span><span class="tag">private-default</span><span class="tag">private-empty</span><span class="tag">liked-empty</span><span class="tag">loading</span><span class="tag">error</span>
+      </div>
+    </a>
+    <a class="baseline-link" href="./app-003/prototype.baseline.html">baseline(v1) 보기 →</a>
+  </div>
+  <div>
+    <a class="card" href="./app-004/prototype.html">
+      <div class="task-id">app-004</div>
+      <div class="title">Settings</div>
+      <div class="meta">계정(Google 배지) + 알림/차단/<b>고객센터</b>/약관/개인정보 + 탈퇴/1.1.1 + 로그아웃</div>
+      <div class="tags">
+        <span class="tag">default</span><span class="tag">coming-soon-notification</span><span class="tag">coming-soon-block</span><span class="tag">coming-soon-customer-service</span>
+      </div>
+    </a>
+    <a class="baseline-link" href="./app-004/prototype.baseline.html">baseline(v1) 보기 →</a>
+  </div>
+  <div>
+    <a class="card" href="./app-005/prototype.html">
+      <div class="task-id">app-005</div>
+      <div class="title">Profile Edit</div>
+      <div class="meta">375×812 / 카메라 배지 + 닉네임 입력 + 이미지 시트 + 앨범/크롭 + 나가기 + 토스트</div>
+      <div class="tags">
+        <span class="tag">default</span><span class="tag">nickname-valid</span><span class="tag">uploading</span><span class="tag">image-source-sheet</span><span class="tag">album-picker</span><span class="tag">crop</span><span class="tag">exit-confirm</span><span class="tag">toast</span>
+      </div>
+    </a>
+    <a class="baseline-link" href="./app-005/prototype.baseline.html">baseline(v1) 보기 →</a>
+  </div>
+  <div>
+    <a class="card" href="./app-006/prototype.html">
+      <div class="task-id">app-006</div>
+      <div class="title">Other User Profile</div>
+      <div class="meta">헤더(아이디+이모지) + 카운트(팔로워/팔로잉/재생성된) + 탭 없이 그리드 + 더보기 시트 + 404</div>
+      <div class="tags">
+        <span class="tag">default</span><span class="tag">loading</span><span class="tag">empty-no-posts</span><span class="tag">error-not-found</span><span class="tag">more-action-sheet</span><span class="tag">url-copied-toast</span>
+      </div>
+    </a>
+    <a class="baseline-link" href="./app-006/prototype.baseline.html">baseline(v1) 보기 →</a>
+  </div>
+</main>
+</body>
+</html>

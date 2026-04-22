@@ -13,7 +13,7 @@
 
 ### 포함
 
-- 하단 탭 바 3탭 네비게이션 (홈 / 생성 / MY)
+- 하단 탭 바 3탭 네비게이션 (홈 / 탐색 / MY) — Figma icon-only, 라벨은 accessibilityLabel / route name / analytics key용 canonical
 - MY 탭: 3개 하위 탭 (좋아요 껍데기, 업로드, 저장) — 좋아요 실제 기능은 Phase 2, 소셜 실제 기능은 Phase 3
 - 프로필 편집 (닉네임, 프로필 이미지, 소개, 링크)
 - 타 유저 프로필 조회 화면
