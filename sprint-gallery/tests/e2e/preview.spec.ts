@@ -25,4 +25,10 @@ test.describe('preview route', () => {
     await page.waitForURL(href!);
     await expect(page.locator('.device iframe')).toBeVisible();
   });
+
+  test('close control receives focus on preview mount', async ({ page }) => {
+    await page.goto('prototypes/ugc-platform-002/app-001/');
+    const close = page.locator('[data-close]');
+    await expect(close).toBeFocused();
+  });
 });

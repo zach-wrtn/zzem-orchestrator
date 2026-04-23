@@ -15,9 +15,10 @@ const searchData = sprints.map((s) => ({
 }));
 ---
 <Layout title="ZZEM Sprints">
+  <a href="#stream" class="skip-link">Skip timeline navigation</a>
   <div class="layout">
     <Timeline sprints={sprints} />
-    <div class="stream">
+    <div class="stream" id="stream" tabindex="-1">
       {sprints.map((s, i) => <SprintPanel sprint={s} index={i} />)}
       {sprints.length === 0 && <p class="empty">No sprints yet.</p>}
     </div>
@@ -37,6 +38,21 @@ const searchData = sprints.map((s) => ({
     -webkit-overflow-scrolling: touch;
   }
   .empty { color: var(--text-dim); padding: 48px 0; }
+
+  .skip-link {
+    position: absolute;
+    left: 16px; top: -40px;
+    background: var(--surface); color: var(--text);
+    border: 1px solid var(--accent); border-radius: var(--radius-chip);
+    padding: 8px 14px;
+    font-family: var(--font-mono); font-size: var(--fs-label);
+    z-index: 100;
+    transition: top var(--dur-ui) var(--ease-out-quart);
+  }
+  .skip-link:focus {
+    top: 12px;
+    outline: 2px solid var(--accent); outline-offset: 2px;
+  }
 
   @media (max-width: 720px) {
     .layout { grid-template-columns: 1fr; }

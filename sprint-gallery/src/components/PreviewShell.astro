@@ -27,28 +27,48 @@ const vtName = `proto-${sprintSlug}-${proto.id}`;
 </main>
 
 <script>
-  const onKey = (e: KeyboardEvent) => {
-    if (e.key === 'Escape') history.back();
-  };
-  document.addEventListener('keydown', onKey);
+  const SHELL = document.querySelector<HTMLElement>('.shell');
+  const CLOSE = document.querySelector<HTMLAnchorElement>('[data-close]');
+  const BACKDROP = document.querySelector<HTMLElement>('.backdrop');
+  const IFRAME = document.querySelector<HTMLIFrameElement>('.device iframe');
 
-  const backdrop = document.querySelector('.backdrop');
-  backdrop?.addEventListener('click', () => history.back());
+  // Move focus to the close control when the shell mounts.
+  CLOSE?.focus({ preventScroll: true });
 
-  const close = document.querySelector<HTMLAnchorElement>('[data-close]');
-  close?.addEventListener('click', (e) => {
-    e.preventDefault();
-    history.back();
+  // Cheap focus trap: if focus escapes the shell subtree, pull it back.
+  document.addEventListener('focusin', (e) => {
+    if (!SHELL) return;
+    const target = e.target as Node;
+    if (!SHELL.contains(target)) {
+      CLOSE?.focus({ preventScroll: true });
+    }
   });
 
-  const iframe = document.querySelector<HTMLIFrameElement>('.device iframe');
-  iframe?.addEventListener('error', () => {
+  // ESC closes via browser history.
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    if (history.length > 1) history.back();
+    else if (CLOSE) location.href = CLOSE.href;
+  });
+
+  BACKDROP?.addEventListener('click', () => {
+    if (history.length > 1) history.back();
+    else if (CLOSE) location.href = CLOSE.href;
+  });
+
+  CLOSE?.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (history.length > 1) history.back();
+    else if (CLOSE) location.href = CLOSE.href;
+  });
+
+  IFRAME?.addEventListener('error', () => {
     const device = document.querySelector('.device');
-    if (!device) return;
+    if (!device || !IFRAME) return;
     device.innerHTML = `
       <div class="iframe-fallback">
         <p>프로토타입을 불러오지 못했습니다.</p>
-        <a href="${iframe.src}" target="_blank" rel="noopener">새 탭에서 열기 ↗</a>
+        <a href="${IFRAME.src}" target="_blank" rel="noopener">새 탭에서 열기 ↗</a>
       </div>`;
   });
 </script>
