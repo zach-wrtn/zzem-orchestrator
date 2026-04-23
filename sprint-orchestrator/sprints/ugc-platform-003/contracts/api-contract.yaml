@@ -1,0 +1,578 @@
+openapi: 3.0.3
+info:
+  title: UGC Platform — Social & Notification API
+  version: 0.3.0-ugc-platform-003
+  description: |
+    Sprint ugc-platform-003 (UGC Platform Phase 3) API contract.
+    Extends ugc-platform-002 (Feed Interaction & Payback) with:
+      - Follow domain (US6): follow/unfollow, follower·following list, follow state (NONE|FOLLOWING|MUTUAL)
+      - Block domain (US7): 양방향 블록 + feed/profile 상호 차단 + 팔로우 양방향 해제 side effect
+      - Content Report (US7 AC 7.3, 7.4): 자유 텍스트 사유 (100자) + 추천 시스템 시그널 전달 (AC 7.4 1h 반영 지연)
+      - Notification entity (US5 AC 5.1, 5.2, 5.3): persistence + 3 types (LIKE, FOLLOW, PAYBACK) + red-dot unread count + read-all
+      - Push payload (AC 5.4): like/follow/payback — new-noti + UserDevice.fcmToken. Fallback deeplink = home.
+      - Notification settings (AC 5.5): 4 toggles (pushAll / like / news / follow) — payback 토글 없음 (항상 ON), persona 전체 OFF default.
+
+    Regression Guard: ugc-platform-001/002 의 profile/visibility/like/payback/credit 엔드포인트는 회귀 금지.
+    All endpoints under /v2 prefix (meme-api convention).
+
+servers:
+  - url: https://api.wrtn.io
+    description: Production
+
+tags:
+  - name: follows
+    description: User follow/unfollow + follower·following list (US6)
+  - name: blocks
+    description: User block + block list + cross-feed 차단 (US7 AC 7.2, 7.6)
+  - name: reports
+    description: Content report — 자유 텍스트 (US7 AC 7.3, 7.4)
+  - name: notifications
+    description: Notification center — list, red-dot, read-all (US5 AC 5.1, 5.3)
+  - name: notification-settings
+    description: Per-category push toggles (US5 AC 5.5)
+  - name: me
+    description: Authenticated user endpoints
+
+security:
+  - LibUserAuth: []
+
+# ============================================================================
+# PATHS
+# ============================================================================
+paths:
+
+  # --------------------------------------------------------------------------
+  # Inherited from ugc-platform-001/002 (unchanged surface — regression guard)
+  # --------------------------------------------------------------------------
+  # - GET/PATCH /v2/me/profile
+  # - GET       /v2/me/contents (ContentSummary) — 필드 불변
+  # - GET       /v2/me/contents/counts
+  # - GET       /v2/users/{userId}/profile       → response extended (isBlocked 필드 추가, AC 7.2)
+  # - GET       /v2/users/{userId}/contents      → block 필터 반영 (AC 7.2)
+  # - PATCH     /v2/me/contents/{contentId}/visibility
+  # - POST/DELETE /v2/me/contents/{contentId}/likes
+  # - GET       /v2/me/likes (페이지네이션) — block 필터 반영
+  # - POST      /v2/me/contents/regenerate
+  # - Credit/Payback endpoints
+  #
+  # 응답 shape 변경은 ContentSummary 에 `blocked` 암묵 필드 없음(차단자 콘텐츠는 list 에서 제외).
+  # UserPublicProfile 에 `isBlocked` (boolean) + `followState` (enum) 필드 추가 (확장).
+
+  # --------------------------------------------------------------------------
+  # be-001 — Follow Domain (US6)
+  # --------------------------------------------------------------------------
+  /v2/users/{userId}/follows:
+    post:
+      tags: [follows, me]
+      summary: 유저 팔로우 (AC 6.1)
+      description: |
+        Caller 가 target userId 를 팔로우한다. Idempotent (이미 follow 상태면 200 + 상태 반환).
+        Rules:
+          - Self-follow 금지 → 400 SELF_FOLLOW_FORBIDDEN.
+          - target 이 Caller 를 블록했거나 Caller 가 target 을 블록한 상태 → 403 BLOCKED.
+          - target 이 존재하지 않음 → 404 USER_NOT_FOUND.
+          - 페르소나(target.type === INTERNAL) follow 가능하나 target 쪽에 알림 미발송 (AC 7.5).
+        Side effect: target 쪽에 FOLLOW 알림 1건 생성 (persona 면 skip). 추천 가중치 반영은 AC 6.3 — 본 엔드포인트는 signal emit 만.
+      operationId: followUser
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Follow 성공 (idempotent — 이미 follow 중이어도 동일 응답)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FollowStateResponse" }
+        "400": { description: SELF_FOLLOW_FORBIDDEN }
+        "403": { description: BLOCKED (block 관계 존재) }
+        "404": { description: USER_NOT_FOUND }
+    delete:
+      tags: [follows, me]
+      summary: 유저 언팔로우 (AC 6.1)
+      description: |
+        Caller 가 target userId 를 언팔로우한다. Idempotent (이미 미follow 면 200 + NONE/FOLLOWED_BY).
+      operationId: unfollowUser
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Unfollow 성공
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FollowStateResponse" }
+        "404": { description: USER_NOT_FOUND }
+
+  /v2/me/followers:
+    get:
+      tags: [follows, me]
+      summary: 내 팔로워 리스트 (AC 6.2)
+      description: |
+        본인만 호출 가능. 가나다순 (nickname ASC + _id ASC tiebreaker). cursor 페이지네이션.
+        각 항목: userId, nickname, profileImageUrl, followState (caller → target 기준).
+        차단된 유저 (양방향) 는 리스트에서 제외.
+      operationId: listMyFollowers
+      parameters:
+        - $ref: "#/components/parameters/CursorParam"
+        - $ref: "#/components/parameters/LimitParam"
+      responses:
+        "200":
+          description: 팔로워 리스트
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FollowUserListResponse" }
+
+  /v2/me/following:
+    get:
+      tags: [follows, me]
+      summary: 내 팔로잉 리스트 (AC 6.2)
+      operationId: listMyFollowing
+      parameters:
+        - $ref: "#/components/parameters/CursorParam"
+        - $ref: "#/components/parameters/LimitParam"
+      responses:
+        "200":
+          description: 팔로잉 리스트
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FollowUserListResponse" }
+
+  /v2/users/{userId}/follow-state:
+    get:
+      tags: [follows]
+      summary: 타 유저와의 팔로우 상태 (AC 6.1)
+      description: |
+        caller ↔ target 간 팔로우 상태 계산. NONE / FOLLOWING / FOLLOWED_BY / MUTUAL.
+        차단 관계 존재 시 → NONE + isBlocked=true.
+      operationId: getFollowState
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Follow state
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FollowStateResponse" }
+        "404": { description: USER_NOT_FOUND }
+
+  # --------------------------------------------------------------------------
+  # be-002 — Block Domain (US7 AC 7.2, 7.6)
+  # --------------------------------------------------------------------------
+  /v2/users/{userId}/blocks:
+    post:
+      tags: [blocks, me]
+      summary: 유저 차단 (AC 7.2)
+      description: |
+        Caller 가 target userId 를 차단한다. Idempotent.
+        Side effects (atomic, 단일 transaction 내 수행):
+          1. UserBlock 레코드 생성 (userId=caller, blockedUserId=target).
+          2. 팔로우 양방향 해제 — (caller → target), (target → caller) 모두 UserFollow 삭제.
+          3. 차단 알림 발송 없음 (AC 7.2 미통지).
+        Feed/profile 차단은 read-path 필터에서 수행 (persistence layer 변경 없음).
+        Self-block 금지 → 400 SELF_BLOCK_FORBIDDEN.
+      operationId: blockUser
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: 차단 성공
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/BlockStateResponse" }
+        "400": { description: SELF_BLOCK_FORBIDDEN }
+        "404": { description: USER_NOT_FOUND }
+    delete:
+      tags: [blocks, me]
+      summary: 유저 차단 해제 (AC 7.2, 7.6)
+      description: |
+        Idempotent. 차단 해제 시 양방향 콘텐츠 노출 복원은 read-path 자동 반영 (stored filter 없음).
+        단, 팔로우는 자동 복원되지 않음 (AC 7.6).
+        알림 발송 없음 (AC 7.2).
+      operationId: unblockUser
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: 차단 해제 성공
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/BlockStateResponse" }
+        "404": { description: USER_NOT_FOUND }
+
+  /v2/me/blocks:
+    get:
+      tags: [blocks, me]
+      summary: 내가 차단한 유저 리스트 (AC 7.6)
+      description: |
+        차단한 시각 최신순 (blockedAt DESC + _id DESC). cursor 페이지네이션.
+        각 항목: userId, nickname, profileImageUrl, blockedAt.
+      operationId: listMyBlocks
+      parameters:
+        - $ref: "#/components/parameters/CursorParam"
+        - $ref: "#/components/parameters/LimitParam"
+      responses:
+        "200":
+          description: 차단 리스트
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/BlockUserListResponse" }
+
+  # --------------------------------------------------------------------------
+  # be-003 — Content Report (US7 AC 7.3, 7.4)
+  # --------------------------------------------------------------------------
+  /v2/contents/{contentId}/reports:
+    post:
+      tags: [reports]
+      summary: 콘텐츠 신고 (AC 7.3)
+      description: |
+        신고 사유: 자유 텍스트 100자 이내, 필수. 사유 드롭다운 없음.
+        Rules:
+          - 본인 콘텐츠 신고 금지 → 400 SELF_REPORT_FORBIDDEN.
+          - 동일 유저 × 동일 콘텐츠 중복 신고 → 200 (idempotent, 기존 report 반환).
+          - 상대방(콘텐츠 소유자) 에 미통지 (AC 7.3).
+          - 신고 후 caller 의 개인화 피드에서 해당 콘텐츠 ~1h 내 필터링 (AC 7.4).
+            → 피드 read-path 는 ContentReport 레코드를 signal 로 사용하여 동일 userId-contentId 쌍 필터.
+          - PA (추천) 팀 전달: 신고 이벤트 emit (`ContentReportedEvent`) 만 수행. 패널티 로직 없음.
+        신고 이후 Content 의 모든 read endpoint (feed, me/contents) 에서 caller → contentId 필터 적용.
+      operationId: reportContent
+      parameters:
+        - name: contentId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ContentReportRequest" }
+      responses:
+        "201":
+          description: 신고 생성
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ContentReportResponse" }
+        "200":
+          description: 이미 동일 report 존재 (idempotent)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ContentReportResponse" }
+        "400": { description: VALIDATION (reason empty / >100자) 또는 SELF_REPORT_FORBIDDEN }
+        "404": { description: CONTENT_NOT_FOUND }
+
+  # --------------------------------------------------------------------------
+  # be-004 / be-005 — Notification Center (US5 AC 5.1, 5.2, 5.3)
+  # --------------------------------------------------------------------------
+  /v2/me/notifications:
+    get:
+      tags: [notifications, me]
+      summary: 알림센터 리스트 (AC 5.3)
+      description: |
+        생성 시각 역순 (createdAt DESC + _id DESC), cursor 페이지네이션.
+        보관 기간: 1개월 (1개월 초과 레코드는 hard-delete 또는 응답 제외 — 구현 선택, 본 엔드포인트는 응답 제외로 처리).
+        알림 탭 동작 정보는 `deeplink` 필드로 제공 — FE 는 이 값을 그대로 navigation 에 전달.
+        응답에 unread 여부 포함 (red-dot 은 별도 unread-count 엔드포인트 우선).
+      operationId: listMyNotifications
+      parameters:
+        - $ref: "#/components/parameters/CursorParam"
+        - $ref: "#/components/parameters/LimitParam"
+      responses:
+        "200":
+          description: 알림 리스트
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/NotificationListResponse" }
+
+  /v2/me/notifications/unread-count:
+    get:
+      tags: [notifications, me]
+      summary: 미확인 알림 개수 (Red dot용, AC 5.3)
+      description: |
+        현재 미확인 Notification 개수. 0 이면 red-dot 제거.
+      operationId: getUnreadNotificationCount
+      responses:
+        "200":
+          description: Unread count
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/UnreadCountResponse" }
+
+  /v2/me/notifications/read-all:
+    post:
+      tags: [notifications, me]
+      summary: 알림센터 진입 시 일괄 읽음 처리 (AC 5.3)
+      description: |
+        Caller 의 모든 unread=true Notification 을 unread=false 로 batch update.
+        Idempotent. 응답에 처리된 개수 반환.
+      operationId: markAllNotificationsRead
+      responses:
+        "200":
+          description: 처리 완료
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MarkAllReadResponse" }
+
+  # --------------------------------------------------------------------------
+  # be-007 — Notification Settings (US5 AC 5.5)
+  # --------------------------------------------------------------------------
+  /v2/me/notification-settings:
+    get:
+      tags: [notification-settings, me]
+      summary: 알림 설정 조회 (AC 5.5)
+      description: |
+        4개 토글 반환. 기본 전부 ON. 페르소나 계정은 기본 전부 OFF + 변경 불가.
+        pushAll=false 이면 like/follow/news 도 응답상 false 고정 (클라이언트 disable 렌더).
+        크레딧 페이백 알림은 토글 없음 (항상 ON, 응답에 미포함).
+      operationId: getNotificationSettings
+      responses:
+        "200":
+          description: Settings
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/NotificationSettingsResponse" }
+    patch:
+      tags: [notification-settings, me]
+      summary: 알림 설정 수정 (AC 5.5)
+      description: |
+        부분 수정. pushAll=false 로 설정하면 하위 3 토글은 서버 저장 값 유지(변경 안 함).
+        페르소나 계정 → 403 PERSONA_NOTIFICATION_LOCKED.
+      operationId: updateNotificationSettings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/NotificationSettingsUpdateRequest" }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/NotificationSettingsResponse" }
+        "403": { description: PERSONA_NOTIFICATION_LOCKED }
+
+# ============================================================================
+# COMPONENTS
+# ============================================================================
+components:
+  securitySchemes:
+    LibUserAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+
+  parameters:
+    CursorParam:
+      name: cursor
+      in: query
+      required: false
+      description: base64-encoded JSON cursor (compound). 없으면 첫 페이지.
+      schema: { type: string }
+    LimitParam:
+      name: limit
+      in: query
+      required: false
+      description: 페이지 크기 (1~100, 기본 20)
+      schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+
+  schemas:
+    # --- Common ---
+    UserPublicSummary:
+      type: object
+      required: [userId, nickname, profileImageUrl]
+      properties:
+        userId: { type: string }
+        nickname: { type: string }
+        profileImageUrl: { type: string, nullable: true }
+        followState:
+          type: string
+          enum: [NONE, FOLLOWING, FOLLOWED_BY, MUTUAL]
+        isBlocked:
+          type: boolean
+          description: caller 가 target 을 차단했는지 (양방향 대신 단방향 표시)
+
+    CursorResponse:
+      type: object
+      required: [nextCursor, hasNext]
+      properties:
+        nextCursor: { type: string, nullable: true }
+        hasNext: { type: boolean }
+
+    # --- Follow ---
+    FollowStateResponse:
+      type: object
+      required: [userId, followState, isBlocked]
+      properties:
+        userId: { type: string }
+        followState:
+          type: string
+          enum: [NONE, FOLLOWING, FOLLOWED_BY, MUTUAL]
+        isBlocked: { type: boolean }
+
+    FollowUserItem:
+      allOf:
+        - $ref: "#/components/schemas/UserPublicSummary"
+        - type: object
+          required: [followState]
+
+    FollowUserListResponse:
+      type: object
+      required: [list, cursor]
+      properties:
+        list:
+          type: array
+          items: { $ref: "#/components/schemas/FollowUserItem" }
+        cursor: { $ref: "#/components/schemas/CursorResponse" }
+
+    # --- Block ---
+    BlockStateResponse:
+      type: object
+      required: [userId, isBlocked]
+      properties:
+        userId: { type: string }
+        isBlocked: { type: boolean }
+        blockedAt: { type: string, format: date-time, nullable: true }
+
+    BlockUserItem:
+      type: object
+      required: [userId, nickname, profileImageUrl, blockedAt]
+      properties:
+        userId: { type: string }
+        nickname: { type: string }
+        profileImageUrl: { type: string, nullable: true }
+        blockedAt: { type: string, format: date-time }
+
+    BlockUserListResponse:
+      type: object
+      required: [list, cursor]
+      properties:
+        list:
+          type: array
+          items: { $ref: "#/components/schemas/BlockUserItem" }
+        cursor: { $ref: "#/components/schemas/CursorResponse" }
+
+    # --- Report ---
+    ContentReportRequest:
+      type: object
+      required: [reason]
+      properties:
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: 자유 텍스트 사유 (AC 7.3, 100자)
+
+    ContentReportResponse:
+      type: object
+      required: [reportId, contentId, reason, createdAt]
+      properties:
+        reportId: { type: string }
+        contentId: { type: string }
+        reason: { type: string }
+        createdAt: { type: string, format: date-time }
+
+    # --- Notification ---
+    NotificationType:
+      type: string
+      enum: [LIKE, FOLLOW, PAYBACK]
+      description: |
+        - LIKE: 실시간 개별. 내 콘텐츠 좋아요 1건.
+        - FOLLOW: 실시간 건별. 나를 팔로우.
+        - PAYBACK: 배치. 매일 10시 KST. 전일 페이백 합산 1건.
+
+    NotificationItem:
+      type: object
+      required: [notificationId, type, title, unread, deeplink, createdAt]
+      properties:
+        notificationId: { type: string }
+        type: { $ref: "#/components/schemas/NotificationType" }
+        title:
+          type: string
+          description: |
+            템플릿:
+              LIKE: "{nickname}님이 회원님의 콘텐츠를 좋아합니다"
+              FOLLOW: "{nickname}님이 회원님을 팔로우했습니다"
+              PAYBACK: "어제 {N}크레딧이 페이백되었어요!"
+        body:
+          type: string
+          nullable: true
+          description: |
+            PAYBACK only — "회원님의 콘텐츠가 {M}회 재생성되었습니다"
+        unread: { type: boolean }
+        deeplink:
+          type: string
+          description: |
+            Tap 시 이동:
+              LIKE: zzem://contents/{contentId}
+              FOLLOW: zzem://profile/{userId}
+              PAYBACK: zzem://credit-history
+            파싱 실패 시 FE 측에서 zzem://home fallback.
+        thumbnailUrl:
+          type: string
+          nullable: true
+          description: LIKE — 콘텐츠 썸네일, FOLLOW — 팔로워 profileImage, PAYBACK — null
+        actorUserId:
+          type: string
+          nullable: true
+          description: LIKE/FOLLOW — 이벤트 주체 유저 ID. PAYBACK — null.
+        createdAt: { type: string, format: date-time }
+
+    NotificationListResponse:
+      type: object
+      required: [list, cursor]
+      properties:
+        list:
+          type: array
+          items: { $ref: "#/components/schemas/NotificationItem" }
+        cursor: { $ref: "#/components/schemas/CursorResponse" }
+
+    UnreadCountResponse:
+      type: object
+      required: [unreadCount]
+      properties:
+        unreadCount: { type: integer, minimum: 0 }
+
+    MarkAllReadResponse:
+      type: object
+      required: [updatedCount]
+      properties:
+        updatedCount: { type: integer, minimum: 0 }
+
+    # --- Notification Settings ---
+    NotificationSettingsResponse:
+      type: object
+      required: [pushAll, like, news, follow]
+      properties:
+        pushAll:
+          type: boolean
+          description: 전체 푸시 on/off (AC 5.5 1)
+        like:
+          type: boolean
+          description: 좋아요 알림 (AC 5.5 2)
+        news:
+          type: boolean
+          description: 소식 알림 (AC 5.5 3)
+        follow:
+          type: boolean
+          description: 팔로우 알림 (AC 5.5 4)
+        # payback: 항상 ON — 토글 없음, 응답 미포함 (AC 5.5)
+
+    NotificationSettingsUpdateRequest:
+      type: object
+      properties:
+        pushAll: { type: boolean }
+        like: { type: boolean }
+        news: { type: boolean }
+        follow: { type: boolean }
+      minProperties: 1

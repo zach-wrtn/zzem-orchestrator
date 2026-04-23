@@ -1,0 +1,206 @@
+sprint_id: "ugc-platform-003"
+prd_source: "sprint-orchestrator/sprints/ugc-platform-003/PRD.md + KB products/ugc-platform/phase-3-social-notification/prd.md"
+generated_at: "2026-04-23T00:00:00+09:00"
+
+coverage:
+  total_ac: 13
+  fulfilled: 11
+  partially_fulfilled: 2
+  unfulfilled: 0
+  fulfillment_rate: "0.85"
+
+# Phase 3 Prototype auto-skipped (no ### Screens / Components header + no DESIGN.md)
+prototype_amendments:
+  total: 0
+  applied: 0
+  deferred: 0
+  dismissed: 0
+  categories:
+    new_ac: 0
+    clarify_ac: 0
+    add_ui_spec: 0
+    implicit_req: 0
+    add_rule: 0
+
+items:
+  # US6 팔로우 (3 AC)
+  - ac_id: "AC-6.1"
+    ac_text: "팔로우 상태 3가지 (팔로우/팔로잉/맞팔로우)"
+    task_id: "be-001, app-001"
+    group: "group-001"
+    status: "fulfilled"
+    reason: "FollowState enum (NONE/FOLLOWING/FOLLOWED_BY/MUTUAL) + computeFollowState pure fn 양방향 확인. FE FollowButton text 매핑 정확 (NONE/FOLLOWED_BY→'팔로우', FOLLOWING→'팔로잉', MUTUAL→'맞팔로우')."
+    evidence: "evaluations/group-001.md § be-001 + § app-001"
+    root_cause: null
+    recommendation: null
+    priority: "critical"
+
+  - ac_id: "AC-6.2"
+    ac_text: "팔로워/팔로잉 리스트 — 본인만 리스트 진입, 타 유저 프로필은 숫자만"
+    task_id: "be-001, app-002"
+    group: "group-001"
+    status: "partially_fulfilled"
+    reason: "본인 전용 진입 + 타 유저 프로필 tap 무효 완료. 다만 BE 정렬이 가나다순 (nickname ASC) 이 아닌 createdAt DESC 로 임시 구현 (user-follow-domain.service TODO 주석). AC 충족도 측면에서 진입/노출은 OK, 정렬 순서는 gap."
+    evidence: "evaluations/group-001.md § app-002 + Group 001 checkpoint Minor nickname sort"
+    root_cause: "technical_limit"
+    recommendation: "BE 에 `$lookup(UserProfile)` aggregation 기반 nickname ASC 정렬 추가. Group 002/003 에서 cross-domain join 패턴 precedent 없음 — 별도 후속."
+    priority: "medium"
+
+  - ac_id: "AC-6.3"
+    ac_text: "팔로우 → 피드 추천 부스트 (PA 추천팀 소관)"
+    task_id: "be-001"
+    group: "group-001"
+    status: "fulfilled"
+    reason: "FollowCreatedEvent emit 구현 완료. 추천 로직 자체는 PA 추천팀 별도 전달 (scope 외). 개발단 signal emit 책임까지만 구현 — PRD 명시와 일치."
+    evidence: "evaluations/group-001.md § be-001 event emit"
+    root_cause: null
+    recommendation: null
+    priority: "high"
+
+  # US7 차단/신고 (5 AC)
+  - ac_id: "AC-7.2"
+    ac_text: "차단 양방향 + 팔로우 양방향 해제 + 미통지"
+    task_id: "be-002, app-003"
+    group: "group-002"
+    status: "fulfilled"
+    reason: "@Transactional blockUser 내 rollbackFollowByPair (Group 001 helper) 경유 follow 양방향 삭제. 4-endpoint read-path filter (profile isBlocked / contents / me-likes / feed). 알림/푸시 emit 0 hit grep 검증. BlockConfirmSheet AC 7.2 문구 직역."
+    evidence: "evaluations/group-002.md § be-002 + § app-003"
+    root_cause: null
+    recommendation: null
+    priority: "critical"
+
+  - ac_id: "AC-7.3"
+    ac_text: "신고 자유 텍스트 100자 + 상대방 미통지"
+    task_id: "be-003, app-005"
+    group: "group-002"
+    status: "fulfilled"
+    reason: "ContentReport schema unique {reporterUserId, contentId} + class-validator 1-100 validation. ContentReportBottomSheet 100자 maxLength + counter. 11000 race absorb. 미통지 grep 검증 (notifyReport / REPORT_CREATED 0 hit)."
+    evidence: "evaluations/group-002.md § be-003 + § app-005"
+    root_cause: null
+    recommendation: null
+    priority: "critical"
+
+  - ac_id: "AC-7.4"
+    ac_text: "신고 → 추천 시스템 시그널 전달 + ~1h 반영 지연"
+    task_id: "be-003"
+    group: "group-002"
+    status: "partially_fulfilled"
+    reason: "ContentReportedEvent emit + caller read-path 즉시 필터링 완료. PA 추천 시스템 연동 (~1h 지연 penalty 로직) 은 PA 팀 별도 구현 — 본 스프린트 scope 외. 현 구현은 caller 즉시 필터 (scope 명시)."
+    evidence: "evaluations/group-002.md § be-003 3-endpoint filter"
+    root_cause: "dependency"
+    recommendation: "PA 추천 팀 ContentReportedEvent consume 확인 (별도 서비스). AC 7.4 '~1h 지연' 문구는 추천 시스템 latency — 본 개발단 구현 아님."
+    priority: "medium"
+
+  - ac_id: "AC-7.5"
+    ac_text: "페르소나 계정 소셜 처리 (알림 수신 불가, 팔로우 가능하나 알림 미발송)"
+    task_id: "be-001, be-004, be-007"
+    group: "group-001, group-003"
+    status: "fulfilled"
+    reason: "be-001 FollowCreatedEvent shouldNotify=false (persona target). be-004 LikeNotificationListener + PaybackBatchScheduler persona skip. be-007 NotificationSetting 4 fields persona default false + PERSONA_NOTIFICATION_LOCKED 403. 페르소나 콘텐츠 좋아요 가능 (AC 7.5) — Like endpoint 미간섭."
+    evidence: "evaluations/group-001.md § be-001 + evaluations/group-003.md § be-004/007"
+    root_cause: null
+    recommendation: null
+    priority: "high"
+
+  - ac_id: "AC-7.6"
+    ac_text: "차단 관리 화면 + 차단 해제 (팔로우 자동 복원 없음)"
+    task_id: "app-004"
+    group: "group-002"
+    status: "fulfilled"
+    reason: "BlockManagementScreen + UnblockConfirmSheet AC 7.6 문구 직역. Settings canonical order ('알림 설정'→'차단 관리'→'고객센터') middleSlot 패턴으로 보존. Toast '{nickname}님을 차단 해제했어요' 정확. 팔로우 자동 복원 없음 — BE 가 이미 follow 삭제 (be-002 transaction) + FE 는 follow-state=NONE 재조회."
+    evidence: "evaluations/group-002.md § app-004"
+    root_cause: null
+    recommendation: null
+    priority: "high"
+
+  # US5 알림/푸시 (5 AC)
+  - ac_id: "AC-5.1"
+    ac_text: "알림 카테고리 (좋아요/크레딧/소식/팔로우), 페르소나 제외, 페이백 배치 10시 KST"
+    task_id: "be-004, be-007"
+    group: "group-003"
+    status: "fulfilled"
+    reason: "be-004 3 listener (LIKE realtime / FOLLOW realtime / PAYBACK batch @Cron '0 10 * * *' KST). Persona skip via be-007 shouldNotify helper. 좋아요 빈도 제한 없음 (개별 alert). 팔로우 건별. 페이백 bucket YYYY-MM-DD unique partial."
+    evidence: "evaluations/group-003.md § be-004 scheduler + listeners"
+    root_cause: null
+    recommendation: null
+    priority: "critical"
+
+  - ac_id: "AC-5.2"
+    ac_text: "팔로우 알림 즉시 + 활동 알림 카테고리"
+    task_id: "be-004"
+    group: "group-003"
+    status: "fulfilled"
+    reason: "FollowNotificationListener EVENT_TYPE.FOLLOW_CREATED consume. shouldNotify=false (persona target) → full skip. 알림 내용 'OOO님이 회원님을 팔로우했습니다' (buildNotificationTitle FOLLOW template)."
+    evidence: "evaluations/group-003.md § be-004 FollowNotificationListener"
+    root_cause: null
+    recommendation: null
+    priority: "high"
+
+  - ac_id: "AC-5.3"
+    ac_text: "알림센터 (홈 벨 아이콘 + Red dot + 시간순 리스트 + 빈 상태 + 푸시 권한 배너)"
+    task_id: "be-005, app-006"
+    group: "group-003, group-004"
+    status: "fulfilled"
+    reason: "be-005 3 endpoints (list cursor page[limit] + unread-count + read-all). app-006 HomeHeaderBellButton (coin/MyButton 불변 additive) + red dot conditional. PushPermissionBanner FCM messaging().hasPermission() + Linking.openSettings. 빈 상태 문구 '아직 도착한 알림이 없어요'. Tap → item.deeplink + zzem://home fallback."
+    evidence: "evaluations/group-003.md § be-005 + evaluations/group-004.md § app-006"
+    root_cause: null
+    recommendation: null
+    priority: "critical"
+
+  - ac_id: "AC-5.4"
+    ac_text: "푸시 알림 메시지 템플릿 3종 (좋아요 실시간 / 팔로우 실시간 / 페이백 배치)"
+    task_id: "be-006, app-008"
+    group: "group-003, group-004"
+    status: "fulfilled"
+    reason: "be-006 PushNotificationService via KafkaProduceService (기존 meme-gen-complete 인프라). data.appLink SSOT (not deeplink). 3 template per AC 5.4. Fallback deeplink: app-008 parsePushPayload regex + zzem://home. shouldPush gate (persona + pushAll + type toggle)."
+    evidence: "evaluations/group-003.md § be-006 + evaluations/group-004.md § app-008"
+    root_cause: null
+    recommendation: null
+    priority: "critical"
+
+  - ac_id: "AC-5.5"
+    ac_text: "알림 설정 4 토글 (pushAll/like/news/follow), 페이백 토글 없음, pushAll=false 시 하위 비활성"
+    task_id: "be-007, app-007"
+    group: "group-003, group-004"
+    status: "fulfilled"
+    reason: "be-007 Schema 4 fields default true + persona default false + write-through lazy default + PATCH persona 403. GET mapper pushAll=false → 하위 3 강제 false. app-007 NotificationToggleRow iOS Switch 51×31 + disabled visual (opacity 0.4 + pointerEvents none). BE 응답 그대로 신뢰 — client recompute 금지 (Group 003 Lesson)."
+    evidence: "evaluations/group-003.md § be-007 + evaluations/group-004.md § app-007"
+    root_cause: null
+    recommendation: null
+    priority: "high"
+
+# PRD Amendments — Phase 3 auto-skipped, amendment 없음.
+amendments: []
+
+# Follow-up 연계 (ugc-platform-002 inherited + Phase 1 manual QA carryover)
+follow_up_tracking:
+  previous_sprint: "ugc-platform-002"
+  inherited_deferred: 10                 # 2 Phase-1 manual QA + 5 G1 Minor + 1 G2 Minor + 1 G3 architectural + 1 Phase-1 architectural
+  resolved_in_this_sprint: 0              # Phase-1 manual QA 2 건 여전히 pending (PR body 체크리스트만 제공)
+  still_deferred: 10                      # inherited 항목 carryover (PR merge 전 수동 QA 미실행)
+  trend:
+    fulfillment_rate: "1.00 → 0.85 (new AC only; AC 6.2 nickname sort, AC 7.4 PA dependency)"
+    first_pass_rate: "0.33 → 0.50 (+0.17)"
+    avg_fix_cycles: "0.67 → 0.50 (-0.17)"
+    critical_issues_found: "0 → 0"
+    major_issues_found: "10 → 3 (-7)"
+
+# Inherited Phase 1 deferred AC (여전히 pending — Phase 5 PR body 체크리스트 포함)
+inherited_items:
+  - ac_id: "AC-2.3 (Phase 1 inherited)"
+    ac_text: "프로필 공유 native 시트 (zzem://profile/{userId})"
+    original_sprint: "ugc-platform-001"
+    status: "partially_fulfilled"
+    reason: "Phase 1 코드 배선 완료. Phase 2/3 PR body 체크리스트 유지. 수동 QA 미수행 상태 — 3 스프린트 연속 carryover."
+    root_cause: "technical_limit"
+    recommendation: "PR #804/#563 머지 전 수동 QA 수행 후 PR comment 에 결과 기록. 지속 carryover 방지 위해 다음 스프린트 retrospective 에서 승패 확정."
+    priority: "medium"
+
+  - ac_id: "AC-7.4 Phase 1 (Phase 1 inherited)"
+    ac_text: "존재하지 않는 userId → 404 에러 화면"
+    original_sprint: "ugc-platform-001"
+    status: "partially_fulfilled"
+    reason: "Phase 1 코드 배선 완료. Manual QA 미수행. 3 스프린트 carryover."
+    root_cause: "technical_limit"
+    recommendation: "동일 — PR 머지 전 수동 QA."
+    priority: "medium"

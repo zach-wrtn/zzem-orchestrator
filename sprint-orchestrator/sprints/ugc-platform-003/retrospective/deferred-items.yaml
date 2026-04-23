@@ -1,0 +1,250 @@
+sprint_id: "ugc-platform-003"
+generated_at: "2026-04-23T00:00:00+09:00"
+
+deferred:
+  # Phase 1 inherited — still pending (3 sprints carryover)
+  - ac_id: "AC-2.3 (Phase 1 inherited)"
+    original_task: "ugc-platform-001/tasks/app/007-profile-share.md"
+    group: "inherited"
+    status: "partially_fulfilled"
+    reason: "Phase 1 코드 배선 완료. Phase 2 PR + Phase 3 PR body 체크리스트 유지. 수동 QA 미수행 — 3 스프린트 연속 carryover."
+    root_cause: "technical_limit"
+    prior_attempts: 2
+    evaluator_notes: "PR #563 body Test plan manual QA 섹션에 명시."
+    suggested_approach: "PR #804/#563 merge 전 수동 QA 수행 후 PR comment 에 결과 기록. 확인 failure 시 회귀 취급하여 다음 sprint 에 --continue 로 fix."
+    priority: "medium"
+    estimated_complexity: "small"
+
+  - ac_id: "AC-7.4 Phase 1 (Phase 1 inherited)"
+    original_task: "ugc-platform-001/tasks/app/006-other-user-profile.md"
+    group: "inherited"
+    status: "partially_fulfilled"
+    reason: "Phase 1 코드 배선 완료 (ErrorNotFound + 404 handling). 수동 QA 미수행 — 3 스프린트 carryover."
+    root_cause: "technical_limit"
+    prior_attempts: 2
+    evaluator_notes: "PR #563 body Test plan 명시."
+    suggested_approach: "동일 — PR merge 전 수동 QA."
+    priority: "medium"
+    estimated_complexity: "small"
+
+  # AC-6.2 — Nickname 가나다순 정렬 (Group 001 partial)
+  - ac_id: "AC-6.2 (nickname sort)"
+    original_task: "ugc-platform-003/tasks/backend/001-follow-domain.md"
+    group: "group-001"
+    status: "partially_fulfilled"
+    reason: "BE 정렬이 createdAt DESC 로 임시 구현 (user-follow-domain.service TODO). AC 6.2 '가나다순' (nickname ASC) 미이행. 진입/노출 OK, 정렬만 gap."
+    root_cause: "technical_limit"
+    prior_attempts: 1
+    evaluator_notes: "Group 001 Minor, Round 1 보고서 + group-001-summary.md"
+    suggested_approach: "`$lookup(UserProfile)` aggregation pipeline 으로 nickname ASC 정렬. 기존 cross-domain join precedent 부재 — 새 패턴. 후속 small task 또는 Group 001 continue."
+    priority: "medium"
+    estimated_complexity: "small"
+
+  # AC-7.4 — PA 추천 dependency (Group 002)
+  - ac_id: "AC-7.4 (PA 추천 연동)"
+    original_task: "ugc-platform-003/tasks/backend/003-content-report.md"
+    group: "group-002"
+    status: "partially_fulfilled"
+    reason: "ContentReportedEvent emit + caller read-path 즉시 필터링 완료. PA 추천 시스템 ~1h 지연 penalty 로직 구현은 PA 팀 별도 서비스 — 본 스프린트 scope 외."
+    root_cause: "dependency"
+    prior_attempts: 0
+    evaluator_notes: "PRD 명시 '개발단에서 신고 데이터를 추천 시스템에 시그널로 전달하는 것까지만 구현'."
+    suggested_approach: "PA 팀 consume 확인 (별도 서비스). AC 7.4 latency 조건은 추천 시스템 soft-delete window — 본 개발단 scope 아님."
+    priority: "low"
+    estimated_complexity: "large"
+
+  # Group 001 Minor (4건)
+  - ac_id: "MINOR-G1-2"
+    original_task: "group-001 (Evaluator Minor — persona nickname fallback)"
+    group: "group-001"
+    status: "unfulfilled"
+    reason: "user-follow-app.service `profile.nickname ?? profile.name` persona display fallback. KB completeness-008 경계. 의도적 fallback + `// Why:` 주석 보완 필요 (pattern-digest 반영)."
+    root_cause: "scope_creep"
+    prior_attempts: 0
+    evaluator_notes: "Group 001 Round 1 Minor m2"
+    suggested_approach: "`displayName(profile)` helper 로 encapsulate 또는 주석 의무화. KB completeness-008 확장 조항으로 승격 가능."
+    priority: "low"
+    estimated_complexity: "small"
+
+  - ac_id: "MINOR-G1-3"
+    original_task: "group-001 (Contract UserPublicProfile 확장 문구 미이행)"
+    group: "group-001"
+    status: "unfulfilled"
+    reason: "Contract 가 '/v2/users/{userId}/profile 에 followState + isBlocked 추가' 명시했으나 실제 endpoint 확장 없음. FollowButton 은 follow-state endpoint 로 isBlocked 수신 — 기능 동등. Contract deviation."
+    root_cause: "spec_ambiguity"
+    prior_attempts: 0
+    evaluator_notes: "Group 001 Round 1 Minor"
+    suggested_approach: "다음 스프린트 Contract 작성 시 파일 경로 + 필드 name 구체 명시 (Group 002 에서는 이미 적용 — 긍정 precedent)."
+    priority: "low"
+    estimated_complexity: "small"
+
+  - ac_id: "MINOR-G1-4"
+    original_task: "group-001 (follow-button-tap.yaml seed drift 위험)"
+    group: "group-001"
+    status: "unfulfilled"
+    reason: "초기 'FOLLOWING' 상태 seed 되면 assertVisible '팔로우' 실패. e2e-seed-plan.md 가 NONE seed 보장 but seed drift 시 flaky."
+    root_cause: "scope_creep"
+    prior_attempts: 0
+    evaluator_notes: "Group 001 Round 1 Minor"
+    suggested_approach: "yaml 에 `# Pre-condition: seed FollowState=NONE` 주석 보강 + seed fetch 스크립트에 state reset 추가."
+    priority: "low"
+    estimated_complexity: "small"
+
+  # Group 002 Minor (4건)
+  - ac_id: "MINOR-G2-1"
+    original_task: "group-002 (transaction rollback integration test 부재)"
+    group: "group-002"
+    status: "unfulfilled"
+    reason: "be-002 unit spec 이 rollbackFollowByPair throw 시 error propagation 만 검증. 실제 MongoDB @Transactional rollback 은 integration 환경 필요. meme-api 컨벤션에 위임 — ugc-platform-002 동일 패턴."
+    root_cause: "technical_limit"
+    prior_attempts: 0
+    evaluator_notes: "Group 002 Minor m1"
+    suggested_approach: "mongodb-memory-server 기반 integration harness 구축 후 @Transactional rollback 직접 assertion. 인프라 과제."
+    priority: "low"
+    estimated_complexity: "medium"
+
+  - ac_id: "MINOR-G2-2"
+    original_task: "group-002 (BlockRelationPort dual-provider DI 단일화)"
+    group: "group-002"
+    status: "unfulfilled"
+    reason: "UserFollowDomainModule inline factory + UserBlockDomainModule useExisting alias 2개 provider 병존. circular DI 회피 pragmatic 선택. 장기적 3-layer factorization (port/adapter/service) 이 이상적."
+    root_cause: "technical_limit"
+    prior_attempts: 0
+    evaluator_notes: "Group 002 Minor m2"
+    suggested_approach: "별도 refactor 스프린트 — port module 분리 + adapter 일관화."
+    priority: "low"
+    estimated_complexity: "medium"
+
+  - ac_id: "MINOR-G2-3"
+    original_task: "group-002 (BlockedProfileState copy UX 애매)"
+    group: "group-002"
+    status: "unfulfilled"
+    reason: "'이 계정을 차단했어요' 문구가 AC 7.2 문구와 완전 일치하지 않을 수 있음. PRD 표기 애매 — 현 구현 채택."
+    root_cause: "spec_ambiguity"
+    prior_attempts: 0
+    evaluator_notes: "Group 002 Minor m3"
+    suggested_approach: "디자이너 리뷰 또는 PM 확정. 필요 시 copy 교체."
+    priority: "low"
+    estimated_complexity: "small"
+
+  - ac_id: "MINOR-G2-4"
+    original_task: "group-002 (report filter recency window)"
+    group: "group-002"
+    status: "unfulfilled"
+    reason: "AC 7.4 '~1h 지연'. 본 구현은 즉시 필터링 (React Query invalidation + BE read-path). PA 추천 시스템 latency 는 별개 — 과잉 즉시성이 business rule 과 miss-match 가능."
+    root_cause: "scope_creep"
+    prior_attempts: 0
+    evaluator_notes: "Group 002 Minor m4"
+    suggested_approach: "PA 팀 신고 반영 latency 확인 후 정책 확정. 본 개발단은 signal emit 책임까지만."
+    priority: "low"
+    estimated_complexity: "small"
+
+  # Group 003 Minor (3건)
+  - ac_id: "MINOR-G3-1"
+    original_task: "group-003 (shouldPush inline vs shouldNotify helper 통합)"
+    group: "group-003"
+    status: "unfulfilled"
+    reason: "be-006 shouldPush 가 be-007 shouldNotify helper 위임 대신 readSetting + inline. 동작 정합. settings gate 단일 SOT 원칙 미달. KB 승격 후보 (integration-002 확장 — notification-domain)."
+    root_cause: "scope_creep"
+    prior_attempts: 0
+    evaluator_notes: "Group 003 Minor m1 + Evaluator report cross-group concern"
+    suggested_approach: "NotificationSettingDomainService.shouldPush(ownerId, type) helper 추가 + be-006 위임. integration-002 확장으로 KB promote."
+    priority: "medium"
+    estimated_complexity: "small"
+
+  - ac_id: "MINOR-G3-2"
+    original_task: "group-003 (Payback batch integration test)"
+    group: "group-003"
+    status: "unfulfilled"
+    reason: "@Cron + bucket idempotency unit 커버. 실제 MongoDB transaction + race 는 integration 환경 필요."
+    root_cause: "technical_limit"
+    prior_attempts: 0
+    evaluator_notes: "Group 003 Minor m2"
+    suggested_approach: "MINOR-G2-1 과 동일 infra 의존. integration harness 구축 후."
+    priority: "low"
+    estimated_complexity: "medium"
+
+  - ac_id: "MINOR-G3-3"
+    original_task: "group-003 (Notification.paybackBucket admin 노출)"
+    group: "group-003"
+    status: "unfulfilled"
+    reason: "paybackBucket 필드 internal only (응답 DTO 미노출). 향후 admin/debug endpoint 에 노출 검토."
+    root_cause: "scope_creep"
+    prior_attempts: 0
+    evaluator_notes: "Group 003 Minor m3"
+    suggested_approach: "Admin moderation endpoint 도입 시 필드 추가. 현 스프린트 scope 외."
+    priority: "low"
+    estimated_complexity: "small"
+
+  # Group 004 Minor (3건)
+  - ac_id: "MINOR-G4-1"
+    original_task: "group-004 (foreground malformed-fallback path 테스트 부재)"
+    group: "group-004"
+    status: "unfulfilled"
+    reason: "usePushNotificationHandler 5 test case 중 foreground malformed (isFallback → FOREGROUND_PARSE_ERROR_TOAST) branch 직접 미테스트. background malformed 는 테스트 있음."
+    root_cause: "scope_creep"
+    prior_attempts: 0
+    evaluator_notes: "Group 004 Minor m1"
+    suggested_approach: "test 케이스 1 추가 (foreground + malformed appLink → error Toast). 소규모 작업."
+    priority: "low"
+    estimated_complexity: "small"
+
+  - ac_id: "MINOR-G4-2"
+    original_task: "group-004 (useUnreadCount `?? 0` render gate)"
+    group: "group-004"
+    status: "unfulfilled"
+    reason: "HomeHeaderBellButton `unreadCount ?? 0 > 0` — render gate 의도. KB completeness-008 경계. 주석 없음 — promotion 시 false positive 위험."
+    root_cause: "scope_creep"
+    prior_attempts: 0
+    evaluator_notes: "Group 004 Minor m2"
+    suggested_approach: "`// Why: render gate, not value fallback` 주석 추가. pattern-digest 의 'Pragmatic persona display fallback' 확장 조항."
+    priority: "low"
+    estimated_complexity: "small"
+
+  - ac_id: "MINOR-G4-3"
+    original_task: "group-004 (HomeHeaderBellButton 배치 architectural)"
+    group: "group-004"
+    status: "unfulfilled"
+    reason: "BellButton 이 `presentation/notification-center/components/` 에 위치 (feature co-location). Task spec 은 `presentation/home/componenets/home-header/` 를 명시 — spec drift."
+    root_cause: "spec_ambiguity"
+    prior_attempts: 0
+    evaluator_notes: "Group 004 Minor m3"
+    suggested_approach: "Architectural guideline 결정: feature co-location (home-header 하위) vs consumer co-location (notification-center 하위). 팀 컨벤션 수립."
+    priority: "low"
+    estimated_complexity: "small"
+
+improvements:
+  - description: "Cursor encoding Contract 조항에 reference 파일 경로 명시 표준화 — formal grep gate (`$lt` 0 hit) 외에 reference 구현 파일 (e.g., `me-contents-app.service.ts:buildLikedListResponse`) 경로를 Done Criteria 에 명시. Group 001 M1 이후 Group 002/003 에서 선제 반영 입증."
+    source: "pattern_digest"
+    priority: "high"
+    rationale: "correctness-004 rubric 확장 — semantic 위반 방지. 이번 스프린트 첫 관측 but Group 002/003 에서 즉시 효과 증명."
+
+  - description: "E2E appId uniformity grep gate 표준화 — 신규 yaml 작성 시 `rg '^appId:' e2e/flows | sort -u | wc -l → 1` 게이트를 Contract §E2E 표준 조항으로 승격. Group 001 M2 이후 Group 002/003/004 선제 반영 재발 없음."
+    source: "pattern_digest"
+    priority: "high"
+    rationale: "E2E flow 추가 시 frequent issue. 1-line grep gate 로 자동 방지."
+
+  - description: "테스트 파일에서 production 상수 (queryKey/eventType/enum/URL pattern) literal 복제 금지. typed import 강제. Spec reconciliation checklist 에 test 파일 포함. Group 004 M1 재발 방지."
+    source: "pattern_digest"
+    priority: "high"
+    rationale: "completeness-008 확장 후보 — mapper fallback 뿐 아니라 test-side drift 도 포함. skill_candidate (자동 import 제안 tool)."
+
+  - description: "settings/permission gate single helper SOT 원칙 — shouldNotify (persist) + shouldPush (push) 2-layer 역할 분리. cross-layer inline 재구현 금지. integration-002 확장 조항 — notification-domain 에도 적용."
+    source: "evaluator_suggestion"
+    priority: "medium"
+    rationale: "Group 003 Minor m1. 다음 스프린트에서 NotificationSettingDomainService.shouldPush 도입 + be-006 위임 refactor."
+
+  - description: "Manual QA carryover 종결 — Phase 1 AC-2.3 / AC-7.4 가 3 스프린트 연속 pending. 다음 스프린트 start 시 PR merge 전 manual QA 수행 필수. PR comment 에 결과 기록."
+    source: "user_feedback"
+    priority: "high"
+    rationale: "3 스프린트 carryover 는 실제로 미해결 risk. 반드시 확정 필요 — 다음 스프린트에서 block."
+
+  - description: "Shared component slot-based composition 패턴 표준화 — ComingSoonSettingsSection topSlot/middleSlot additive design. 순서 보존 + 병렬 수정 coordinate 에 효과적. 유사 shared component (settings menu, more-sheet action list 등) 에 적용."
+    source: "pattern_digest"
+    priority: "medium"
+    rationale: "Group 002 + Group 004 공유 component 수정 시 conflict-free. skill_candidate — composition helper 자동 생성."
+
+  - description: "Phase 3 Prototype auto-skip 을 follow-up 스프린트에서 표준화. component-patterns.md + phase-1/2 기구현 컴포넌트가 충분할 때 proto 생성 overhead 회피. 단, 신규 novel screen (notification dot color 등) 은 retrospective amendment 로 후속 확정."
+    source: "pattern_digest"
+    priority: "low"
+    rationale: "이번 스프린트 auto-skip 성공 — 새 screen 많았으나 component pattern 재사용으로 구현 회귀 없음."
