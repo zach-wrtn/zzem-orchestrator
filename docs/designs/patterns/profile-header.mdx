@@ -1,0 +1,35 @@
+---
+name: Profile Header
+key: profile-header
+purpose: MY 프로필 상단 — 이미지·카운트·액션 버튼·탭 바 조합.
+usesComponents: [button, chip]
+---
+
+## Layout
+
+헤더 (아이디 중앙 + 설정 아이콘 우측) → 100px 원형 프로필 이미지 → 3열 카운트 → 액션 버튼 행 → 탭 바.
+
+## 프로필 이미지
+
+- 100px 원형, border `1px rgba(136,136,136,0.2)`
+- 미설정 시: 회색 실루엣 아바타 (bg `#e8e8e8`)
+
+## 카운트
+
+- padding `0 40px`, 3열 균등
+- 숫자: Pretendard SemiBold 16px `#262626`
+- 라벨: Pretendard Medium 12px `#262626`
+- 포맷: 1,000 미만 그대로 / 1,000~9,999 → "X.X천" / 10,000+ → "X.X만"
+
+## 버튼
+
+**둘 다 회색** (bg `#f1f1f1`, NOT brand purple). 상세는 [Button](/zzem-orchestrator/system/components/button/) 참조.
+
+- `프로필 편집` + `프로필 공유`, gap-6, rounded-12, h-40
+- Pretendard SemiBold 14px `#262626`
+
+## 프로필 탭
+
+- **아이콘 only** (텍스트 라벨 없음): 게시물(grid) / 비공개(lock) / 좋아요(heart)
+- Active: 하단 2px 밑줄 `#262626`, w-60px
+- 탭 바: px-20, border-bottom `1px #f1f1f1`

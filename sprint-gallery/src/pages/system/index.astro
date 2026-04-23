@@ -4,6 +4,7 @@ import SystemSidebar from '@/components/system/SystemSidebar.astro';
 import { getCollection } from 'astro:content';
 const foundations = (await getCollection('foundations')).sort((a, b) => a.data.order - b.data.order);
 const components = await getCollection('components');
+const patterns = await getCollection('patterns');
 const base = import.meta.env.BASE_URL;
 const p = (s: string) => `${base}/${s}`.replace(/\/+/g, '/');
 ---
@@ -52,6 +53,24 @@ const p = (s: string) => `${base}/${s}`.replace(/\/+/g, '/');
           ))}
         </div>
       </section>
+
+      {patterns.length > 0 && (
+        <section>
+          <div class="section-head">
+            <h2>Patterns</h2>
+            <a class="more" href={p('system/patterns/')}>See all →</a>
+          </div>
+          <div class="grid">
+            {patterns.map((pt) => (
+              <a class="card" href={p(`system/patterns/${pt.data.key}/`)}>
+                <span class="cat">pattern</span>
+                <span class="name">{pt.data.name}</span>
+                <span class="desc">{pt.data.purpose}</span>
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
     </main>
   </div>
 </Layout>

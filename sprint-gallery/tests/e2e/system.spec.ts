@@ -2,10 +2,10 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('system foundations', () => {
-  test('foundations list renders all 6 entries', async ({ page }) => {
+  test('foundations list renders all 7 entries', async ({ page }) => {
     await page.goto('system/foundations/');
     const cards = page.locator('[data-foundation-card]');
-    await expect(cards).toHaveCount(6);
+    await expect(cards).toHaveCount(7);
   });
 
   test('color route renders swatch section', async ({ page }) => {
@@ -72,15 +72,23 @@ test.describe('system nav + home', () => {
     await expect(page).toHaveURL(/\/system\/?$/);
   });
 
-  test('/system home shows foundations + components sections', async ({ page }) => {
+  test('/system home shows foundations + components + patterns sections', async ({ page }) => {
     await page.goto('system/');
     const sections = page.locator('main > section');
-    await expect(sections).toHaveCount(2);
+    await expect(sections).toHaveCount(3);
   });
 
-  test('/system/patterns renders empty state with deferred list', async ({ page }) => {
+  test('/system/patterns renders 7 pattern cards', async ({ page }) => {
     await page.goto('system/patterns/');
-    const deferred = page.locator('.deferred li');
-    await expect(deferred).toHaveCount(7);
+    const cards = page.locator('.grid .card');
+    await expect(cards).toHaveCount(7);
+  });
+
+  test('pattern detail renders body + related list', async ({ page }) => {
+    await page.goto('system/patterns/feed-grid/');
+    await expect(page.locator('h1')).toHaveText('Feed Grid');
+    const related = page.locator('.related a');
+    const count = await related.count();
+    expect(count).toBeGreaterThan(0);  // feed-grid uses card + chip
   });
 });

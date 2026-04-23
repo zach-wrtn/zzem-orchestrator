@@ -1,0 +1,26 @@
+---
+name: Feed Grid
+key: feed-grid
+purpose: 2열 매거진 피드. Pinterest/Masonry 스타일로 카드 비율 1:1·4:5 교차.
+usesComponents: [card, chip]
+---
+
+## Layout
+
+- **2열 매거진** (Pinterest/Masonry 스타일)
+- 열 간격: 1px (모자이크 느낌)
+- 카드 비율: 1:1과 4:5 교차 (같은 열 내에서 번갈아)
+- 카드 border-radius: 4px (Card 컴포넌트 기본)
+
+## Card anatomy
+
+상세는 [Card 컴포넌트](/zzem-orchestrator/system/components/card/) 참조. 피드 컨텍스트 특이사항:
+
+- 하단 그라데이션 오버레이 + 크리에이터 바 (18px 아바타 + 닉네임 + 인증 뱃지)
+- 우측 하단: 하트 아이콘 + 좋아요 수
+- 좌상단: "신규" 뱃지 (bg `#0080c6`, SemiBold 12px, padding 4px 8px)
+
+## Variants
+
+- **home** — 콘텐츠 피드. 크리에이터 프로필 노출.
+- **profile (MY)** — 재생성 카운트 표시 (크리에이터 프로필 대신). 좌하단 pill bg 반투명.
