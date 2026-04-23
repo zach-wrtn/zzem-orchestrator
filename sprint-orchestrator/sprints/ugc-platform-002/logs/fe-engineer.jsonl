@@ -1,0 +1,24 @@
+{"ts":"2026-04-22T00:00:00Z","task":"impl/app/group-002","phase":"started","message":"context loaded, beginning app-001","detail":null}
+{"ts":"2026-04-22T00:01:00Z","task":"impl/app/app-001","phase":"implementing","message":"FeedItemEntity 확장 + mapper + swipe-feed-actions 재구성 완료","detail":null}
+{"ts":"2026-04-22T00:01:30Z","task":"impl/app/app-002","phase":"implementing","message":"MoreSheet owner-branched + useDeleteMyContentUseCase + DeleteConfirmSheet 완료","detail":null}
+{"ts":"2026-04-22T00:02:30Z","task":"impl/app/app-003","phase":"implementing","message":"CTA branch + sourceContentId threading + errorCode handling 완료","detail":null}
+{"ts":"2026-04-22T00:03:15Z","task":"impl/app/app-004","phase":"implementing","message":"PublishToggleRow + useUpdateMeContentVisibilityUseCase + telemetry 완료","detail":null}
+{"ts":"2026-04-22T00:04:00Z","task":"impl/app/group-002","phase":"build_check","message":"yarn/tsc bash permission denied; manual code audit completed","detail":"typecheck skipped — sandbox restriction. Sprint Lead should run yarn typescript"}
+{"ts":"2026-04-22T00:04:30Z","task":"impl/app/group-002","phase":"completed","message":"app-001~004 implementation complete; dead-hook grep passed (callsite ≥ 1 each)","detail":null}
+{"ts":"2026-04-22T00:05:00Z","task":"impl/app/group-002","phase":"completed","message":"all 4 tasks implemented; manual audit passed; TS typecheck blocked by sandbox — Sprint Lead to verify","detail":null}
+{"ts":"2026-04-22T18:32:01Z","task":"fix/app/group-002-r1","phase":"fixing","message":"Round 1 Major 3건 수정: isOwn threading (footer/actions/screen), FilterDeletedErrorModal (single-action modal + usecase wiring), e2e flow 3개 신규","detail":{"files_modified":["app/apps/MemeApp/src/presentation/swipe-feed/swipe-feed.screen.tsx","app/apps/MemeApp/src/presentation/swipe-feed/components/swipe-feed-footer.tsx","app/apps/MemeApp/src/presentation/swipe-feed/components/swipe-feed-actions.tsx","app/apps/MemeApp/src/domain/meme/meme.usecase.ts"],"files_added":["app/apps/MemeApp/src/presentation/swipe-feed/components/filter-deleted-error-modal.tsx","app/apps/MemeApp/e2e/flows/swipe-feed-publish-toggle.yaml","app/apps/MemeApp/e2e/flows/swipe-feed-custom-prompt-block.yaml","app/apps/MemeApp/e2e/flows/swipe-feed-more-sheet.yaml"],"typescript":"신규 0 (pre-existing cascade 1건 — swipe-feed-persona mb prop 동일)","dead_hook_grep":"useUpdateMeContentVisibilityUseCase 1 hit, useDeleteMyContentUseCase 1 hit"}}
+{"ts":"2026-04-22T10:00:00Z","task":"impl/app/app-005","phase":"started","message":"Like count + toggle 재배선 시작","detail":null}
+{"ts":"2026-04-22T10:15:00Z","task":"impl/app/app-005","phase":"implementing","message":"favorite usecase + mapper + LikeBadge 구현","detail":null}
+{"ts":"2026-04-22T10:16:00Z","task":"impl/app/app-006","phase":"started","message":"Liked tab 활성화 시작","detail":null}
+{"ts":"2026-04-22T10:30:00Z","task":"impl/app/app-006","phase":"implementing","message":"isLikedPhase1 제거 + liked variant grid 활성","detail":null}
+{"ts":"2026-04-22T10:31:00Z","task":"impl/app/app-007","phase":"started","message":"PaybackIntroModal 시작","detail":null}
+{"ts":"2026-04-22T10:45:00Z","task":"impl/app/app-007","phase":"implementing","message":"usePaybackIntro hook + 2 callsite (generate onSuccess, publish OFF→ON)","detail":null}
+{"ts":"2026-04-22T10:46:00Z","task":"impl/app/app-008","phase":"started","message":"Credit History PAYBACK row 시작","detail":null}
+{"ts":"2026-04-22T11:00:00Z","task":"impl/app/app-008","phase":"implementing","message":"PaybackHistoryRow variant + Zod enum 확장","detail":null}
+{"ts":"2026-04-22T11:01:00Z","task":"impl/app/app-009","phase":"implementing","message":"4 sub-fixes: gear / landingTab / Clipboard / initialContentId","detail":null}
+{"ts":"2026-04-22T11:20:00Z","task":"impl/app/app-005","phase":"build_check","message":"typescript clean (신규 에러 0)","detail":null}
+{"ts":"2026-04-22T11:20:30Z","task":"impl/app/app-005","phase":"completed","message":"Like toggle + LikeBadge 완료","detail":null}
+{"ts":"2026-04-22T11:21:00Z","task":"impl/app/app-006","phase":"completed","message":"liked tab 활성화 완료","detail":null}
+{"ts":"2026-04-22T11:21:30Z","task":"impl/app/app-007","phase":"completed","message":"PaybackIntroModal + 3 callsites","detail":null}
+{"ts":"2026-04-22T11:22:00Z","task":"impl/app/app-008","phase":"completed","message":"PaybackHistoryRow + Zod enum payback","detail":null}
+{"ts":"2026-04-22T11:22:30Z","task":"impl/app/app-009","phase":"completed","message":"4 sub-fixes 완료 (Clipboard 는 yarn install 필요)","detail":null}

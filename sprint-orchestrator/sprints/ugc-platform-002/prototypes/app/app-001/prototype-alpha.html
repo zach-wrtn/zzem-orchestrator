@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>app-001 · SwipeFeedActionBar (alpha)</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+  <style>
+    /* Tokens (inlined subset from context/tokens.css) */
+    :root {
+      --wds-color-purple-500: #8752FA;
+      --wds-color-neutral-0: #FFFFFF;
+      --wds-color-neutral-100: #F0F1F3;
+      --wds-color-neutral-200: #E4E5E9;
+      --wds-color-neutral-500: #8E9199;
+      --wds-color-neutral-900: #212228;
+      --wds-color-red-500: #FF3B30;
+      --wds-label-inverse: #FFFFFF;
+      --wds-background-normal: #FFFFFF;
+      --wds-background-dimmed: rgba(0,0,0,0.40);
+      --wds-surface-button: #F1F1F1;
+      --wds-radius-sm: 8px;
+      --wds-radius-md: 12px;
+      --wds-radius-full: 9999px;
+      --wds-spacing-4: 4px;
+      --wds-spacing-8: 8px;
+      --wds-spacing-12: 12px;
+      --wds-spacing-16: 16px;
+      --wds-font-family-primary: 'Pretendard', -apple-system, 'SF Pro Display', sans-serif;
+      --wds-font-weight-semibold: 600;
+      --like-active: #FE2B54;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    button { background: none; border: none; cursor: pointer; font-family: inherit; }
+    body {
+      font-family: var(--wds-font-family-primary);
+      background: #E7E8EB;
+      display: flex; flex-direction: column; align-items: center;
+      min-height: 100vh; padding: 16px;
+    }
+    .device-frame {
+      width: 390px; height: 844px;
+      position: relative; overflow: hidden;
+      background: #000;
+      border: 1px solid #ddd;
+      border-radius: 0 0 12px 12px;
+    }
+    .screen { position: absolute; inset: 0; display: flex; flex-direction: column; }
+    /* Status bar */
+    .status-bar {
+      height: 44px; padding: 0 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      color: #fff; font-size: 14px; font-weight: 600;
+      position: absolute; top: 0; left: 0; right: 0; z-index: 5;
+    }
+    /* Swipe card */
+    .swipe-card {
+      position: absolute; inset: 0;
+      background-image: linear-gradient(135deg, #7040E0 0%, #FF3B30 100%);
+    }
+    .top-fade {
+      position: absolute; top: 0; left: 0; right: 0; height: 120px;
+      background: linear-gradient(180deg, rgba(0,0,0,0.45) 0%, transparent 100%);
+    }
+    .bottom-fade {
+      position: absolute; bottom: 0; left: 0; right: 0; height: 240px;
+      background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.70) 100%);
+    }
+    .creator-row {
+      position: absolute; left: 16px; bottom: 152px; right: 76px;
+      display: flex; align-items: center; gap: 8px; color: #fff; z-index: 2;
+    }
+    .creator-avatar {
+      width: 28px; height: 28px; border-radius: var(--wds-radius-full);
+      background: var(--wds-color-purple-500); color: #fff;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700;
+    }
+    .creator-name { font-size: 13px; font-weight: 600; }
+    .filter-title { position: absolute; left: 16px; bottom: 128px; right: 76px; color: #fff; font-size: 16px; font-weight: 600; z-index: 2; }
+    .cta-button {
+      position: absolute; left: 16px; right: 76px; bottom: 88px;
+      height: 48px; background: var(--wds-color-purple-500); color: #fff;
+      border-radius: var(--wds-radius-md);
+      font-size: 15px; font-weight: 600; z-index: 2;
+    }
+    /* Action bar */
+    .action-bar {
+      position: absolute; right: 12px; bottom: 120px;
+      display: flex; flex-direction: column; align-items: center;
+      gap: 16px; z-index: 3;
+    }
+    .action-btn {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 4px; padding: 8px; border-radius: var(--wds-radius-sm);
+      color: #fff;
+    }
+    .action-btn:active { background: rgba(0,0,0,0.10); }
+    .action-btn__icon {
+      width: 28px; height: 28px;
+      display: inline-flex; align-items: center; justify-content: center;
+    }
+    .action-btn__icon svg { width: 28px; height: 28px; }
+    .action-btn__count {
+      color: var(--wds-label-inverse); opacity: 0.9;
+      font-size: 12px; font-weight: var(--wds-font-weight-semibold);
+      line-height: 1.4; letter-spacing: -0.2px;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+    }
+    .action-btn--liked .action-btn__icon { color: var(--like-active); }
+    /* Bottom nav */
+    .bottom-nav {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      height: 64px; background: rgba(0,0,0,0.55);
+      backdrop-filter: blur(16px);
+      display: flex; align-items: center; justify-content: space-around;
+      color: #fff; font-size: 11px; z-index: 4;
+    }
+  </style>
+</head>
+<body>
+  <div class="device-frame">
+    <section class="screen" id="SwipeFeedScreen">
+      <div class="status-bar">
+        <span>9:41</span>
+        <span>●●● ▲</span>
+      </div>
+      <div class="swipe-card"></div>
+      <div class="top-fade"></div>
+      <div class="bottom-fade"></div>
+
+      <div class="creator-row">
+        <div class="creator-avatar">잼</div>
+        <div class="creator-name">@김잼잼</div>
+      </div>
+      <p class="filter-title">오늘의 기분 필터</p>
+      <button class="cta-button">이 필터로 만들기</button>
+
+      <aside class="action-bar" id="action-bar">
+        <button class="action-btn" id="btn-like" data-liked="false">
+          <span class="action-btn__icon" id="icon-like"></span>
+          <span class="action-btn__count" id="count-like">8600</span>
+        </button>
+        <button class="action-btn" id="btn-regenerate">
+          <span class="action-btn__icon" id="icon-regenerate"></span>
+          <span class="action-btn__count" id="count-regenerate">8.6천</span>
+        </button>
+        <button class="action-btn" id="btn-share">
+          <span class="action-btn__icon" id="icon-share"></span>
+        </button>
+        <button class="action-btn" id="btn-more">
+          <span class="action-btn__icon" id="icon-more"></span>
+        </button>
+      </aside>
+
+      <nav class="bottom-nav">
+        <span>홈</span><span>탐색</span><span>MY</span>
+      </nav>
+    </section>
+  </div>
+</body>
+</html>

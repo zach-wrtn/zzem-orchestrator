@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>app-002 · 더보기 메뉴 + 삭제 확인 시트 | ZZEM UGC Platform Phase 2</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+<link rel="stylesheet" as="style" crossorigin
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
+<style>
+/* ============================================
+ * TOKENS (inline from ../context/tokens.css + Phase 2 additions)
+ * ============================================ */
+:root {
+  /* Brand */
+  --wds-color-purple-500: #8752FA;
+
+  /* Neutral */
+  --wds-color-neutral-0: #FFFFFF;
+  --wds-color-neutral-300: #D1D3D8;
+  --wds-color-neutral-500: #8E9199;
+  --wds-color-neutral-600: #6B6E76;
+  --wds-color-neutral-900: #212228;
+
+  /* Status */
+  --wds-color-red-500: #FF3B30;
+
+  /* Semantic */
+  --wds-background-normal: #FFFFFF;
+  --wds-background-dimmed: rgba(0, 0, 0, 0.40);
+  --wds-text-primary: #262626;
+  --wds-text-secondary: #656565;
+  --wds-text-tertiary: #8A8A8A;
+  --wds-text-white: #FFFFFF;
+  --wds-label-inverse: #FFFFFF;
+  --wds-surface-button: #F1F1F1;
+  --wds-outline-primary: #F1F1F1;
+  --wds-interaction-pressed: rgba(0, 0, 0, 0.10);
+
+  /* Destructive (Phase 2 addition) */
+  --wds-destructive-text: #D92800;
+  --wds-destructive-fill: #D92800;
+
+  /* Bottom sheet */
+  --sheet-surface: #FFFFFF;
+  --sheet-radius: 28px;
+  --sheet-handle: #A7A7A7;
+  --sheet-backdrop: rgba(0, 0, 0, 0.40);
+  --sheet-cancel-btn: rgba(0, 0, 0, 0.08);
+  --sheet-cancel-btn-label: #262626;
+
+  /* Swipe feed (dark BG for context) */
+  --swipe-feed-bg: #090909;
+
+  /* Toast */
+  --toast-bg: #171717;
+  --toast-label: #FFFFFF;
+  --toast-radius: 40px;
+  --toast-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+
+  /* Spacing / radius */
+  --wds-radius-lg: 16px;
+  --wds-radius-full: 9999px;
+
+  /* Font */
+  --wds-font-family-primary: 'Pretendard Variable', 'Pretendard', -apple-system, 'SF Pro Display', 'Apple SD Gothic Neo', sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  font-family: var(--wds-font-family-primary);
+  background: #EDEEF1;
+  color: var(--wds-text-primary);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 16px 80px;
+  gap: 20px;
+}
+
+/* ============================================
+ * CONTROL PANEL
+ * ============================================ */
+.control-panel {
+  width: 100%;
+  max-width: 720px;
+  background: #FFFFFF;
+  border: 1px solid #E4E5E9;
+  border-radius: 16px;
+  padding: 16px 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.control-panel h1 {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.control-panel p {
+  font-size: 13px;
+  color: var(--wds-text-secondary);
+  line-height: 1.5;
+}
+.control-panel .state-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.control-panel button {
+  padding: 8px 14px;
+  border-radius: 9999px;
+  border: 1px solid #E4E5E9;
+  background: #FFFFFF;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--wds-text-primary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.control-panel button:hover { background: #F7F8F9; }
+.control-panel button.active {
+  background: var(--wds-color-purple-500);
+  color: #FFFFFF;
+  border-color: var(--wds-color-purple-500);
+}
+.control-panel .breadcrumb {
+  font-size: 12px;
+  color: var(--wds-text-tertiary);
+  padding-top: 8px;
+  border-top: 1px dashed #E4E5E9;
+}
+
+/* ============================================
+ * DEVICE FRAME
+ * ============================================ */
+.device-frame {
+  position: relative;
+  width: 390px;
+  height: 844px;
+  background: var(--swipe-feed-bg);
+  border-radius: 40px;
+  overflow: hidden;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.2), 0 0 0 10px #1A1A1D, 0 0 0 11px #000;
+  flex-shrink: 0;
+}
+
+/* ============================================
+ * SWIPE FEED (behind frame)
+ * ============================================ */
+.swipe-feed {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(0,0,0,0.5) 0%, transparent 25%, transparent 60%, rgba(0,0,0,0.85) 100%),
+    radial-gradient(ellipse at 30% 40%, #5A30C0 0%, #301875 30%, #1A0B45 60%, #090909 100%);
+  color: #FFFFFF;
+}
+.status-bar {
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #FFFFFF;
+}
+.status-bar .icons { display: flex; gap: 6px; font-size: 12px; opacity: 0.85; }
+
+.swipe-feed-header {
+  position: absolute;
+  top: 44px;
+  left: 0;
+  right: 0;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 2;
+}
+.swipe-feed-header .back-btn {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.3);
+  display: flex; align-items: center; justify-content: center;
+  color: #FFFFFF; font-size: 18px;
+  border: none; cursor: pointer;
+}
+.swipe-feed-header .title {
+  font-size: 15px; font-weight: 600;
+}
+
+.swipe-feed-content {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 0 16px 120px 16px;
+  gap: 12px;
+}
+.creator-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.creator-avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #A17BFF, #8752FA);
+  display: flex; align-items: center; justify-content: center;
+  color: #FFFFFF; font-weight: 700; font-size: 14px;
+}
+.creator-name {
+  font-size: 14px; font-weight: 600; color: #FFFFFF;
+}
+.creator-badge {
+  font-size: 12px; color: #4CC2FF;
+}
+.post-caption {
+  font-size: 14px; font-weight: 500; color: #FFFFFF;
+  line-height: 1.5; max-width: 260px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+.action-bar {
+  position: absolute;
+  right: 12px;
+  bottom: 140px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  z-index: 2;
+}
+.action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: #FFFFFF;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+.action-btn .icon {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.35);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+}
+.action-btn .count {
+  font-size: 12px; font-weight: 600; color: #FFFFFF;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+}
+.action-btn.more .icon { font-size: 26px; letter-spacing: -1px; }
+.action-btn.highlight .icon {
+  background: rgba(215, 40, 0, 0.15);
+  outline: 2px solid rgba(255,255,255,0.55);
+}
+
+.bottom-gradient {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 120px;
+  background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%);
+  pointer-events: none;
+}
+
+/* ============================================
+ * BOTTOM SHEET — Base
+ * ============================================ */
+.sheet-overlay {
+  position: absolute;
+  inset: 0;
+  display: none;
+  z-index: 10;
+}
+.sheet-overlay.visible { display: block; }
+
+.sheet-backdrop {
+  position: absolute;
+  inset: 0;
+  background: var(--sheet-backdrop);
+  animation: fade-in 200ms ease-out;
+}
+
+.sheet-body {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  background: var(--sheet-surface);
+  border-radius: var(--sheet-radius) var(--sheet-radius) 0 0;
+  padding: 12px 0 32px 0;
+  animation: slide-up 260ms cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: 0 -4px 16px rgba(0,0,0,0.06);
+}
+.sheet-handle {
+  width: 40px;
+  height: 4px;
+  background: var(--sheet-handle);
+  border-radius: var(--wds-radius-full);
+  margin: 0 auto 20px auto;
+}
+
+@keyframes slide-up {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ============================================
+ * SwipeFeedMoreSheet (menu)
+ * ============================================ */
+.more-menu-list {
+  display: flex;
+  flex-direction: column;
+}
+.menu-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 56px;
+  padding: 16px 24px 16px 20px;
+  background: transparent;
+  border: none;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--wds-text-primary);
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  transition: background 0.12s ease;
+}
+.menu-row:hover { background: rgba(0,0,0,0.03); }
+.menu-row:active { background: var(--wds-interaction-pressed); }
+.menu-row .menu-icon {
+  width: 24px; height: 24px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  color: var(--wds-text-primary);
+}
+.menu-row .menu-label {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+.menu-row.destructive,
+.menu-row.destructive .menu-icon,
+.menu-row.destructive .menu-label {
+  color: var(--wds-destructive-text);
+}
+
+/* ============================================
+ * DeleteConfirmSheet
+ * ============================================ */
+.delete-confirm-body {
+  padding: 12px 20px 32px 20px;
+}
+.delete-confirm-text {
+  padding: 8px 4px 0 4px;
+}
+.delete-confirm-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--wds-text-primary);
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+}
+.delete-confirm-desc {
+  margin-top: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--wds-text-secondary);
+  line-height: 1.5;
+}
+.delete-confirm-actions {
+  margin-top: 24px;
+  display: flex;
+  gap: 6px;
+}
+.delete-confirm-actions button {
+  flex: 1;
+  height: 56px;
+  border: none;
+  border-radius: var(--wds-radius-lg);
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.12s ease;
+}
+.delete-confirm-actions button:active { opacity: 0.85; }
+.btn-cancel {
+  background: var(--sheet-cancel-btn);
+  color: var(--sheet-cancel-btn-label);
+}
+.btn-delete-confirm {
+  background: var(--wds-destructive-fill);
+  color: var(--wds-label-inverse);
+}
+
+/* ============================================
+ * Toast
+ * ============================================ */
+.toast-wrap {
+  position: absolute;
+  top: 40px;
+  left: 0; right: 0;
+  display: flex;
+  justify-content: center;
+  z-index: 20;
+  pointer-events: none;
+}
+.toast {
+  background: var(--toast-bg);
+  color: var(--toast-label);
+  padding: 10px 24px;
+  border-radius: var(--toast-radius);
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: var(--toast-shadow);
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: opacity 220ms ease, transform 220ms ease;
+}
+.toast.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ============================================
+ * Legend / labels
+ * ============================================ */
+.scene-label {
+  font-size: 12px;
+  color: var(--wds-text-tertiary);
+  text-align: center;
+  margin-top: 6px;
+  letter-spacing: 0.02em;
+}
+</style>
+</head>
+<body>
+
+<div class="control-panel" role="region" aria-label="Prototype Controls">
+  <h1>app-002 · 더보기 메뉴 + 삭제 확인 시트</h1>
+  <p>
+    세로 스와이프 피드에서 <strong>더보기 (⋯)</strong> 탭 시 노출되는 바텀시트.
+    소유자 분기 (me / other) + 삭제 확정 시 2차 Confirm sheet.
+  </p>
+  <div class="state-buttons" id="state-buttons">
+    <button data-state="default-me" class="active">default (me)</button>
+    <button data-state="default-other">default (other)</button>
+    <button data-state="delete-confirm-open">delete-confirm-open</button>
+    <button data-state="report-placeholder-toast">report-placeholder-toast</button>
+    <button data-state="closed">closed</button>
+  </div>
+  <div class="breadcrumb" id="breadcrumb">SwipeFeedScreen → SwipeFeedMoreSheet (default-me)</div>
+</div>
+
+<div class="device-frame" id="device-frame">
+
+  <!-- ======================================================
+       SwipeFeedScreen (backdrop context only — not canonical)
+       ====================================================== -->
+  <section class="swipe-feed" id="SwipeFeedScreen">
+    <div class="status-bar" aria-hidden="true">
+      <span>9:41</span>
+      <span class="icons"><span>􀖀</span><span>􀛨</span><span>􀛩</span></span>
+    </div>
+
+    <header class="swipe-feed-header">
+      <button class="back-btn" aria-label="뒤로">←</button>
+      <div class="title">피드</div>
+    </header>
+
+    <div class="swipe-feed-content">
+      <div class="creator-row">
+        <div class="creator-avatar">쨈</div>
+        <div class="creator-name">쨈</div>
+        <div class="creator-badge">✓</div>
+      </div>
+      <div class="post-caption">
+        AI 가 만든 밈 #sample — 세로 스와이프 피드 콘텐츠 (프로토타입 placeholder)
+      </div>
+    </div>
+
+    <aside class="action-bar" aria-label="피드 액션 바 (app-001)">
+      <button class="action-btn" data-action="like">
+        <span class="icon">♡</span>
+        <span class="count">8600</span>
+      </button>
+      <button class="action-btn" data-action="regenerate">
+        <span class="icon">♻</span>
+        <span class="count">8.6천</span>
+      </button>
+      <button class="action-btn" data-action="share">
+        <span class="icon">↗</span>
+      </button>
+      <button class="action-btn more highlight" data-action="more" id="more-trigger" aria-label="더보기">
+        <span class="icon">⋯</span>
+      </button>
+    </aside>
+
+    <div class="bottom-gradient" aria-hidden="true"></div>
+  </section>
+
+  <!-- ======================================================
+       Toast
+       ====================================================== -->
+  <div class="toast-wrap">
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </div>
+
+  <!-- ======================================================
+       SwipeFeedMoreSheet (me + other variants)
+       ====================================================== -->
+  <div class="sheet-overlay visible" id="more-sheet-overlay" data-screen="SwipeFeedMoreSheet">
+    <div class="sheet-backdrop" id="more-sheet-backdrop" data-close-sheet="more"></div>
+
+    <section class="sheet-body" id="swipe-feed-more-sheet" role="dialog" aria-label="더보기 메뉴">
+      <div class="sheet-handle" aria-hidden="true"></div>
+
+      <ul class="more-menu-list" id="more-menu-list" role="menu">
+        <li role="none">
+          <button class="menu-row" id="more-menu-download" role="menuitem" data-action="download">
+            <span class="menu-icon" aria-hidden="true">⤓</span>
+            <span class="menu-label">다운로드</span>
+          </button>
+        </li>
+        <li role="none">
+          <button class="menu-row" id="more-menu-feedback" role="menuitem" data-action="feedback">
+            <span class="menu-icon" aria-hidden="true">✉</span>
+            <span class="menu-label">의견 보내기</span>
+          </button>
+        </li>
+
+        <!-- Terminal row: Delete (me) OR Report (other) — mutually exclusive -->
+        <li role="none" id="terminal-row-me">
+          <button class="menu-row destructive" id="more-menu-delete" role="menuitem" data-action="delete">
+            <span class="menu-icon" aria-hidden="true">🗑</span>
+            <span class="menu-label">삭제</span>
+          </button>
+        </li>
+        <li role="none" id="terminal-row-other" style="display: none;">
+          <button class="menu-row" id="more-menu-report" role="menuitem" data-action="report">
+            <span class="menu-icon" aria-hidden="true">🚨</span>
+            <span class="menu-label">신고하기</span>
+          </button>
+        </li>
+      </ul>
+    </section>
+  </div>
+
+  <!-- ======================================================
+       DeleteConfirmSheet (stacked above MoreSheet when open)
+       ====================================================== -->
+  <div class="sheet-overlay" id="delete-confirm-overlay" data-screen="DeleteConfirmSheet">
+    <div class="sheet-backdrop" id="delete-confirm-backdrop" data-close-sheet="delete-confirm"></div>
+
+    <section class="sheet-body delete-confirm-body" id="delete-confirm-sheet" role="alertdialog" aria-labelledby="delete-confirm-title" aria-describedby="delete-confirm-desc">
+      <div class="sheet-handle" aria-hidden="true"></div>
+
+      <div class="delete-confirm-text">
+        <h2 class="delete-confirm-title" id="delete-confirm-title">콘텐츠를 삭제할까요?</h2>
+        <p class="delete-confirm-desc" id="delete-confirm-desc">삭제한 콘텐츠는 복구할 수 없어요.</p>
+      </div>
+
+      <div class="delete-confirm-actions" id="delete-confirm-actions">
+        <button class="btn-cancel" id="btn-cancel" data-action="cancel-delete">취소</button>
+        <button class="btn-delete-confirm" id="btn-delete-confirm" data-action="confirm-delete">삭제</button>
+      </div>
+    </section>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  const stateButtons = document.querySelectorAll('#state-buttons button');
+  const breadcrumb = document.getElementById('breadcrumb');
+  const moreOverlay = document.getElementById('more-sheet-overlay');
+  const deleteOverlay = document.getElementById('delete-confirm-overlay');
+  const terminalMe = document.getElementById('terminal-row-me');
+  const terminalOther = document.getElementById('terminal-row-other');
+  const toastEl = document.getElementById('toast');
+
+  let variant = 'me'; // 'me' | 'other'
+
+  function setVariant(v) {
+    variant = v;
+    if (v === 'me') {
+      terminalMe.style.display = '';
+      terminalOther.style.display = 'none';
+    } else {
+      terminalMe.style.display = 'none';
+      terminalOther.style.display = '';
+    }
+  }
+
+  function showToast(label, duration = 2000) {
+    toastEl.textContent = label;
+    toastEl.classList.add('visible');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(() => {
+      toastEl.classList.remove('visible');
+    }, duration);
+  }
+
+  function renderState(state) {
+    stateButtons.forEach(b => b.classList.toggle('active', b.dataset.state === state));
+
+    // Reset
+    moreOverlay.classList.remove('visible');
+    deleteOverlay.classList.remove('visible');
+    toastEl.classList.remove('visible');
+
+    let crumb = 'SwipeFeedScreen';
+
+    switch (state) {
+      case 'default-me':
+        setVariant('me');
+        moreOverlay.classList.add('visible');
+        crumb += ' → SwipeFeedMoreSheet (me: 다운로드/의견/삭제)';
+        break;
+      case 'default-other':
+        setVariant('other');
+        moreOverlay.classList.add('visible');
+        crumb += ' → SwipeFeedMoreSheet (other: 다운로드/의견/신고)';
+        break;
+      case 'delete-confirm-open':
+        setVariant('me');
+        moreOverlay.classList.add('visible');
+        deleteOverlay.classList.add('visible');
+        crumb += ' → SwipeFeedMoreSheet (me) → DeleteConfirmSheet';
+        break;
+      case 'report-placeholder-toast':
+        setVariant('other');
+        // sheet closed per spec; show toast
+        showToast('곧 제공될 예정이에요', 1600);
+        crumb += ' → (신고하기 tap) → Toast "곧 제공될 예정이에요"';
+        break;
+      case 'closed':
+        crumb += ' (sheet closed)';
+        break;
+    }
+    breadcrumb.textContent = crumb;
+  }
+
+  // State buttons
+  stateButtons.forEach(btn => {
+    btn.addEventListener('click', () => renderState(btn.dataset.state));
+  });
+
+  // Interactions inside frame
+  document.getElementById('more-trigger').addEventListener('click', (e) => {
+    e.preventDefault();
+    renderState(variant === 'me' ? 'default-me' : 'default-other');
+  });
+
+  document.getElementById('more-sheet-backdrop').addEventListener('click', () => renderState('closed'));
+
+  document.getElementById('more-menu-download').addEventListener('click', () => {
+    renderState('closed');
+    showToast('저장됐어요', 1600);
+  });
+  document.getElementById('more-menu-feedback').addEventListener('click', () => {
+    renderState('closed');
+    showToast('Feedback 화면으로 이동 (prototype placeholder)', 1600);
+  });
+  document.getElementById('more-menu-delete').addEventListener('click', () => {
+    renderState('delete-confirm-open');
+  });
+  document.getElementById('more-menu-report').addEventListener('click', () => {
+    renderState('report-placeholder-toast');
+  });
+
+  document.getElementById('delete-confirm-backdrop').addEventListener('click', () => {
+    renderState(variant === 'me' ? 'default-me' : 'default-other');
+  });
+  document.getElementById('btn-cancel').addEventListener('click', () => {
+    renderState(variant === 'me' ? 'default-me' : 'default-other');
+  });
+  document.getElementById('btn-delete-confirm').addEventListener('click', () => {
+    renderState('closed');
+    showToast('삭제됐어요', 1800);
+  });
+
+  // Initial
+  renderState('default-me');
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+{"ts":"2026-04-22T00:00:00Z","task":"app-001 · SwipeFeedActionBar","phase":"started","message":"프로토타입 태스크 수령","detail":null}
+{"ts":"2026-04-22T00:01:00Z","task":"app-001 · SwipeFeedActionBar","phase":"context_loaded","message":"DESIGN patterns + prev sprint tokens.css + swipe-feed-actions.tsx 구조 확인 완료","detail":null}
+{"ts":"2026-04-22T00:00:00Z","task":"app-004 publish toggle","phase":"started","message":"프로토타입 태스크 수령: PublishToggle + UnpublishConfirmSheet","detail":null}
+{"ts":"2026-04-22T01:10:00Z","task":"app-006 · 좋아요 탭 활성화","phase":"started","message":"프로토타입 태스크 수령: MyProfileScreen-LikedTab","detail":null}
+{"ts":"2026-04-22T00:00:00Z","task":"app-007 Payback Onboarding Modal","phase":"started","message":"프로토타입 태스크 수령","detail":null}
+{"ts":"2026-04-22T00:01:00Z","task":"app-007 Payback Onboarding Modal","phase":"context_loaded","message":"1 화면(BottomSheet) 식별: PaybackIntroModal","detail":null}
+{"ts":"2026-04-22T10:22:35Z","task":"app-003 CTA 분기 + 재생성 플로우","phase":"started","message":"프로토타입 태스크 수령","detail":null}
+{"ts":"2026-04-22T10:22:35Z","task":"app-003 CTA 분기 + 재생성 플로우","phase":"context_loaded","message":"컴포넌트 2개 식별: SwipeFeedCTAButton(me/other variants), FilterDeletedErrorModal; context-engine.yaml + tokens.css 기존 재사용","detail":null}
+{"ts":"2026-04-22T00:02:00Z","task":"app-001 · SwipeFeedActionBar","phase":"context_engine","message":"context-engine.yaml + tokens.css 기존재(다른 app-00X 에이전트가 선행 생성) — 재사용","detail":null}
+{"ts":"2026-04-22T19:25:00Z","task":"app-005 · Like Count Display","phase":"started","message":"프로토타입 태스크 수령 (LikeButton + ProfileGridCard-LikeBadge)","detail":null}
+{"ts":"2026-04-22T19:26:00Z","task":"app-005 · Like Count Display","phase":"context_loaded","message":"Phase 1 tokens.css + component-patterns.md §1(feed-grid)/§3(profile) + app-003/app-006 프리세던스 확인","detail":null}
+{"ts":"2026-04-22T00:02:00Z","task":"app-007 Payback Onboarding Modal","phase":"spec_complete","message":"PaybackIntroModal.spec.md 완성, completeness 1.0, fabrication low","detail":null}
+{"ts":"2026-04-22T00:03:00Z","task":"app-001 · SwipeFeedActionBar","phase":"spec_complete","message":"SwipeFeedActionBar.spec.md 완료 (accuracy 0.92, risk low)","detail":null}
+{"ts":"2026-04-22T00:05:00Z","task":"app-004 publish toggle","phase":"spec_complete","message":"2개 스펙 완성: PublishToggle + UnpublishConfirmSheet (avg accuracy 1.0, fabrication low)","detail":null}
+{"ts":"2026-04-22T00:04:00Z","task":"app-001 · SwipeFeedActionBar","phase":"html_alpha","message":"prototype-alpha.html 생성 (Structure + Components)","detail":null}
+{"ts":"2026-04-22T20:00:00Z","task":"app-009 Deferred Items Cleanup","phase":"started","message":"app-009 프로토타입 태스크 수령 (Sub-fix 1 UI 대상 only, Sub-fix 2~4 logic-only)","detail":null}
+{"ts":"2026-04-22T20:00:30Z","task":"app-009 Deferred Items Cleanup","phase":"context_loaded","message":"PRD grep: phase-2 PRD 0 matches (gear/home-header/settings), 통합 PRD 1 match (Phase 1 scope line 29)","detail":null}
+{"ts":"2026-04-22T20:01:00Z","task":"app-009 Deferred Items Cleanup","phase":"spec_complete","message":"HomeHeader-WithoutGear.spec.md 완료. Decision: REMOVE. accuracy 1.0 / completeness 1.0 / fabrication none","detail":null}
+{"ts":"2026-04-22T20:02:00Z","task":"app-009 Deferred Items Cleanup","phase":"html_final","message":"prototype.html 생성 (Before/After side-by-side + PRD grep evidence panel)","detail":null}
+{"ts":"2026-04-22T20:03:00Z","task":"app-009 Deferred Items Cleanup","phase":"completed","message":"Prototype 완료. approval-status.yaml 갱신(Sub-fix 2/3/4 status: skipped reason: logic-only)","detail":null}
+{"ts":"2026-04-22T01:20:00Z","task":"app-006 · 좋아요 탭 활성화","phase":"spec_complete","message":"MyProfileScreen-LikedTab.spec.md 완료 (22 components, 4 states, fabrication=low)","detail":null}
+{"ts":"2026-04-22T10:28:00Z","task":"app-003 CTA 분기 + 재생성 플로우","phase":"spec_complete","message":"2개 spec 완료 (SwipeFeedCTAButton, FilterDeletedErrorModal); avg accuracy 1.00, fabrication low","detail":null}
+{"ts":"2026-04-22T00:03:00Z","task":"app-007 Payback Onboarding Modal","phase":"html_final","message":"prototype.html 생성 (default/dismissing/hidden + mount anim + backdrop shake)","detail":null}
+{"ts":"2026-04-22T00:04:00Z","task":"app-007 Payback Onboarding Modal","phase":"completed","message":"프로토타입 완료, accuracy 1.0 / completeness 1.0, fabrication low (illustration + sheet choice)","detail":null}
+{"ts":"2026-04-22T00:05:00Z","task":"app-001 · SwipeFeedActionBar","phase":"html_final","message":"prototype.html 생성 (Content + States + Interactions + Polish)","detail":null}
+{"ts":"2026-04-22T00:06:00Z","task":"app-001 · SwipeFeedActionBar","phase":"completed","message":"프로토타입 완료. accuracy 0.92 / completeness 1.0 / fabrication low","detail":"approval-status.yaml merge-safe 업데이트"}
+{"ts":"2026-04-22T00:10:00Z","task":"app-004 publish toggle","phase":"html_final","message":"prototype.html 생성 완료 (iOS Switch 51×31 + UnpublishConfirmSheet + toasts)","detail":null}
+{"ts":"2026-04-22T00:11:00Z","task":"app-004 publish toggle","phase":"completed","message":"프로토타입 완료 (accuracy 1.0 / completeness 1.0 / fabrication low). approval-status appended.","detail":null}
+{"ts":"2026-04-22T01:35:00Z","task":"app-006 · 좋아요 탭 활성화","phase":"html_final","message":"prototype.html 생성 완료 (4 states: liked-default/liked-empty/loading/error)","detail":null}
+{"ts":"2026-04-22T01:36:00Z","task":"app-006 · 좋아요 탭 활성화","phase":"completed","message":"프로토타입 완료, 품질 accuracy 1.0 / completeness 1.0 / fabrication_risk low","detail":null}
+{"ts":"2026-04-22T19:28:00Z","task":"app-002 · 더보기 메뉴 + 삭제 확인","phase":"started","message":"프로토타입 태스크 수령 (SwipeFeedMoreSheet me/other variants + DeleteConfirmSheet)","detail":null}
+{"ts":"2026-04-22T19:28:30Z","task":"app-002 · 더보기 메뉴 + 삭제 확인","phase":"context_loaded","message":"component-patterns §10 BottomSheet + §8 Detail View 참조. tokens.css + context-engine.yaml 기존재(app-00X 선행) — 재사용, 덮어쓰기 안 함","detail":null}
+{"ts":"2026-04-22T19:29:00Z","task":"app-002 · 더보기 메뉴 + 삭제 확인","phase":"spec_complete","message":"2 specs 완료: SwipeFeedMoreSheet (6 comps, 5 states) + DeleteConfirmSheet (6 comps, 4 states). avg accuracy 1.0, fabrication low","detail":null}
+{"ts":"2026-04-22T19:29:30Z","task":"app-002 · 더보기 메뉴 + 삭제 확인","phase":"html_final","message":"prototype.html 생성 (5 states: default-me, default-other, delete-confirm-open, report-placeholder-toast, closed)","detail":null}
+{"ts":"2026-04-22T19:30:00Z","task":"app-002 · 더보기 메뉴 + 삭제 확인","phase":"completed","message":"프로토타입 완료. accuracy 1.0 / completeness 1.0, fabrication low. approval-status.yaml app-002 블록 추가(merge-safe).","detail":null}
+{"ts":"2026-04-22T10:35:00Z","task":"app-003 CTA 분기 + 재생성 플로우","phase":"html_alpha","message":"prototype-alpha 단계 통합 — Screen Spec 기반 Structure + Components 인라인 생성","detail":null}
+{"ts":"2026-04-22T10:35:00Z","task":"app-003 CTA 분기 + 재생성 플로우","phase":"html_final","message":"prototype.html 생성 완료 (836 lines, 3 variants + modal + dark theme footer context, Labels/States/Interactions/Polish 단일 Write)","detail":null}
+{"ts":"2026-04-22T10:35:00Z","task":"app-003 CTA 분기 + 재생성 플로우","phase":"completed","message":"프로토타입 완료. accuracy 1.00 / completeness 9/7 / fabrication low. 승인 대기: app-003/prototype.html","detail":null}
+{"ts":"2026-04-22T19:31:00Z","task":"app-005 · Like Count Display","phase":"spec_complete","message":"2 specs 완료: LikeButton (4 comps, 7 states) + ProfileGridCard-LikeBadge (6 comps, 5 states). avg accuracy 1.0, fabrication low","detail":null}
+{"ts":"2026-04-22T19:32:00Z","task":"app-005 · Like Count Display","phase":"html_final","message":"prototype.html 생성 완료 (SwipeFeedScreen + MyProfileScreen 2 섹션, heart bounce 160ms + burst 600ms, double-tap 제스처, grid 6장 카드 — zero/large/private/new variants 포함)","detail":null}
+{"ts":"2026-04-22T19:33:00Z","task":"app-005 · Like Count Display","phase":"completed","message":"프로토타입 완료. accuracy 1.0 / completeness 1.0 / fabrication low. approval-status.yaml app-005 블록 추가.","detail":null}
+{"ts":"2026-04-22T20:10:00Z","task":"app-008 · 크레딧 히스토리 페이백 행","phase":"started","message":"프로토타입 태스크 수령","detail":null}
+{"ts":"2026-04-22T20:11:00Z","task":"app-008 · 크레딧 히스토리 페이백 행","phase":"context_loaded","message":"기존 credit-history-body + my-credit-history-list-item + 썸네일 컴포넌트 구조 확인. transactionType enum (used/recharged/expired/refunded) 기준, PAYBACK 은 be-003 확장 예정.","detail":null}
+{"ts":"2026-04-22T20:12:00Z","task":"app-008 · 크레딧 히스토리 페이백 행","phase":"context_engine","message":"기존 context-engine.yaml + tokens.css 재사용 (duplicate 금지). --color-promotion alias 는 prototype.html inline 으로 zzem_violet_600 에 매핑.","detail":null}
+{"ts":"2026-04-22T20:14:00Z","task":"app-008 · 크레딧 히스토리 페이백 행","phase":"spec_complete","message":"2 specs 완료: CreditHistoryRow-Payback (8 comps, 5 states) + CreditHistoryScreen-WithPayback (10 comps, 5 states). avg accuracy 1.0, fabrication low.","detail":null}
+{"ts":"2026-04-22T20:16:00Z","task":"app-008 · 크레딧 히스토리 페이백 행","phase":"html_final","message":"prototype.html 생성 완료 (2 screens: 혼합 리스트 + row variant isolation view. 5 states, chip 인터랙션, 썸네일 fallback, skeleton loading 포함)","detail":null}
+{"ts":"2026-04-22T20:17:00Z","task":"app-008 · 크레딧 히스토리 페이백 행","phase":"completed","message":"프로토타입 완료. accuracy 1.0 / completeness 1.0 / fabrication low. approval-status.yaml app-008 블록 추가.","detail":null}
+{"ts":"2026-04-22T21:00:00Z","task":"revise/major/app/app-001","phase":"revision_started","message":"Major revision 수령: CTA 정렬 + likeCount 천단위 콤마 + footer 레이아웃","detail":null}
+{"ts":"2026-04-22T21:01:00Z","task":"revise/major/app/app-001","phase":"revision_applying","message":"Change 1/4: app-003 canonical CTA 패턴 복제 - cta-bar + cta-button (other variant: 템플릿 사용하기, 크레딧 10)","detail":null}
+{"ts":"2026-04-22T21:02:00Z","task":"revise/major/app/app-001","phase":"revision_applying","message":"Change 2/4: Creator info 정합 - sf-creator (avatar 36x36 gradient + name zzem_creator + verified + 방금 전 caption)","detail":null}
+{"ts":"2026-04-22T21:03:00Z","task":"revise/major/app/app-001","phase":"revision_applying","message":"Change 3/4: likeCount ko-KR thousand separator - formatLikeCount toLocaleString 적용 (8600-8,600 / 12345-12,345 / 0-0)","detail":null}
+{"ts":"2026-04-22T21:04:00Z","task":"revise/major/app/app-001","phase":"revision_applying","message":"Change 4/4: Layout 정렬 - sf-footer full-width (16/16), action-bar bottom 240px 상향하여 CTA 위 배치","detail":null}
+{"ts":"2026-04-22T21:05:00Z","task":"revise/major/app/app-001","phase":"revision_completed","message":"Major revision 완료. 4건 반영 (CTA 교체 / creator 정합 / likeCount 콤마 / layout 정렬)","detail":null}

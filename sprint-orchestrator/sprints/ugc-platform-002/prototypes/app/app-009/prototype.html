@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>app-009 · Sub-fix 1 — HomeHeader Before/After</title>
+<style>
+  :root {
+    --color-brand-primary: #8752FA;
+    --color-bg-normal: #FFFFFF;
+    --color-bg-alt: #F7F8F9;
+    --color-label-normal: #212228;
+    --color-label-alternative: #6B6E76;
+    --color-label-assistive: #8E9199;
+    --color-line-normal: #E4E5E9;
+    --color-fill-neutral: #F0F1F3;
+    --color-coin-bg: #FFF4D6;
+    --color-coin-text: #B8860B;
+    --color-removed: #FFE5E5;
+    --color-removed-border: #D93025;
+    --color-added: #E6F4EA;
+    --font-family-default: 'Pretendard', -apple-system, 'SF Pro', sans-serif;
+    --font-size-body2: 14px;
+    --font-size-caption: 12px;
+    --font-size-heading2: 20px;
+    --font-weight-bold: 700;
+    --font-weight-medium: 500;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-full: 9999px;
+    --spacing-1: 4px;
+    --spacing-2: 8px;
+    --spacing-3: 12px;
+    --spacing-4: 16px;
+    --spacing-6: 24px;
+    --spacing-8: 32px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font-family-default);
+    background: var(--color-bg-alt);
+    color: var(--color-label-normal);
+    padding: var(--spacing-6);
+    min-height: 100vh;
+  }
+
+  .page-title {
+    font-size: var(--font-size-heading2);
+    font-weight: var(--font-weight-bold);
+    margin-bottom: var(--spacing-1);
+  }
+  .page-subtitle {
+    font-size: var(--font-size-body2);
+    color: var(--color-label-alternative);
+    margin-bottom: var(--spacing-6);
+  }
+
+  .decision-banner {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    padding: var(--spacing-2) var(--spacing-4);
+    background: var(--color-brand-primary);
+    color: #fff;
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-body2);
+    font-weight: var(--font-weight-bold);
+    margin-bottom: var(--spacing-6);
+  }
+
+  .compare-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-6);
+    max-width: 960px;
+  }
+
+  .panel {
+    background: var(--color-bg-normal);
+    border: 1px solid var(--color-line-normal);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-4);
+  }
+
+  .panel-label {
+    font-size: var(--font-size-caption);
+    font-weight: var(--font-weight-bold);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-label-alternative);
+    margin-bottom: var(--spacing-2);
+  }
+  .panel-label.before { color: #D93025; }
+  .panel-label.after { color: #1E8E3E; }
+
+  .device-frame {
+    width: 390px;
+    height: 120px;
+    background: var(--color-bg-normal);
+    border: 1px solid var(--color-line-normal);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    margin: 0 auto;
+  }
+
+  .status-bar {
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 var(--spacing-4);
+    font-size: var(--font-size-caption);
+    color: var(--color-label-normal);
+    font-weight: var(--font-weight-medium);
+  }
+  .status-bar .right { display: flex; gap: 4px; font-size: 11px; color: var(--color-label-alternative); }
+
+  .home-header {
+    height: 56px;
+    display: flex;
+    align-items: center;
+    padding: 0 var(--spacing-4);
+    gap: var(--spacing-3);
+    border-top: 1px solid var(--color-line-normal);
+  }
+
+  .logo {
+    font-weight: var(--font-weight-bold);
+    font-size: 18px;
+    color: var(--color-brand-primary);
+    letter-spacing: -0.02em;
+  }
+
+  .spacer { flex: 1; }
+
+  .coin-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    background: var(--color-coin-bg);
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-caption);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-coin-text);
+  }
+
+  .icon-btn {
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: var(--color-label-normal);
+    cursor: pointer;
+    border-radius: var(--radius-full);
+    position: relative;
+  }
+
+  .icon-btn.removed {
+    background: var(--color-removed);
+    border: 1.5px dashed var(--color-removed-border);
+    color: var(--color-removed-border);
+    position: relative;
+  }
+  .icon-btn.removed::after {
+    content: "";
+    position: absolute;
+    inset: 6px;
+    border-top: 2px solid var(--color-removed-border);
+    transform: rotate(45deg);
+    transform-origin: center;
+    pointer-events: none;
+  }
+
+  .legend {
+    margin-top: var(--spacing-4);
+    font-size: var(--font-size-caption);
+    color: var(--color-label-alternative);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .legend .dot { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: middle; }
+  .dot.removed { background: var(--color-removed); border: 1px dashed var(--color-removed-border); }
+
+  .rationale {
+    margin-top: var(--spacing-8);
+    max-width: 960px;
+    background: var(--color-bg-normal);
+    border: 1px solid var(--color-line-normal);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-4);
+  }
+  .rationale h3 {
+    font-size: var(--font-size-body2);
+    font-weight: var(--font-weight-bold);
+    margin-bottom: var(--spacing-2);
+  }
+  .rationale ul { padding-left: 20px; font-size: var(--font-size-body2); color: var(--color-label-alternative); }
+  .rationale li { margin-bottom: 4px; }
+  .rationale code {
+    background: var(--color-fill-neutral);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: var(--font-size-caption);
+  }
+
+  .grep-evidence {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-4);
+    margin-top: var(--spacing-4);
+  }
+  .grep-box {
+    background: var(--color-fill-neutral);
+    border-radius: var(--radius-sm);
+    padding: var(--spacing-3);
+    font-size: var(--font-size-caption);
+  }
+  .grep-box .path {
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    color: var(--color-label-normal);
+    font-weight: var(--font-weight-bold);
+    margin-bottom: 4px;
+    word-break: break-all;
+  }
+  .grep-result { color: var(--color-label-alternative); }
+  .grep-result .zero { color: #D93025; font-weight: var(--font-weight-bold); }
+</style>
+</head>
+<body>
+  <h1 class="page-title">app-009 · Sub-fix 1 — Home Header Gear Icon 제거</h1>
+  <p class="page-subtitle">sprint/ugc-platform-002 · Phase 1 Deferred MINOR-G2-1 · Design Engineer Spec</p>
+
+  <div class="decision-banner">
+    <span>Decision</span><span>·</span><span>REMOVE (PRD 명시 없음)</span>
+  </div>
+
+  <div class="compare-grid">
+    <!-- BEFORE -->
+    <div class="panel">
+      <div class="panel-label before">Before · Phase 1 결과물</div>
+      <div class="device-frame">
+        <div class="status-bar">
+          <span>9:41</span>
+          <span class="right">●●● Wi-Fi 100%</span>
+        </div>
+        <div class="home-header">
+          <div class="logo">ZZEM</div>
+          <div class="spacer"></div>
+          <div class="coin-badge" aria-label="코인 잔액">🪙 1,250</div>
+          <button class="icon-btn" aria-label="알림">🔔</button>
+          <button class="icon-btn removed" aria-label="설정 (제거 대상)">⚙</button>
+        </div>
+      </div>
+      <div class="legend">
+        <span><span class="dot removed"></span>빨간 대시 박스 = 제거 대상 (SettingsGear)</span>
+        <span>우측 클러스터: CoinBadge + Bell + <s>Gear</s></span>
+      </div>
+    </div>
+
+    <!-- AFTER -->
+    <div class="panel">
+      <div class="panel-label after">After · Phase 2 Sub-fix 1</div>
+      <div class="device-frame">
+        <div class="status-bar">
+          <span>9:41</span>
+          <span class="right">●●● Wi-Fi 100%</span>
+        </div>
+        <div class="home-header">
+          <div class="logo">ZZEM</div>
+          <div class="spacer"></div>
+          <div class="coin-badge" aria-label="코인 잔액">🪙 1,250</div>
+          <button class="icon-btn" aria-label="알림">🔔</button>
+        </div>
+      </div>
+      <div class="legend">
+        <span>우측 클러스터: CoinBadge + Bell (gear 제거)</span>
+        <span>설정 진입: BottomNav → MY → header ⚙</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="rationale">
+    <h3>Rationale · PRD 재확인 결과</h3>
+    <ul>
+      <li>Phase 1 AC 2.8 "설정 진입점" canonical = <code>MY 프로필 우상단 gear</code>.</li>
+      <li>Phase 2 PRD 에 Home 헤더 / gear / 설정 진입점 언급 <strong>0건</strong>.</li>
+      <li>통합 PRD 에 "설정 화면" 은 Phase 1 범위 (MY 3탭 계열) 로만 1회 언급.</li>
+      <li>Home 헤더 gear 는 SSOT 중복 (dual entry) → 제거 default 기준 충족.</li>
+    </ul>
+    <div class="grep-evidence">
+      <div class="grep-box">
+        <div class="path">~/.zzem/kb/products/ugc-platform/phase-2-feed-payback/prd.md</div>
+        <div class="grep-result">gear: <span class="zero">0 matches</span></div>
+        <div class="grep-result">home header / 홈 헤더: <span class="zero">0 matches</span></div>
+        <div class="grep-result">settings / 설정: <span class="zero">0 matches</span></div>
+      </div>
+      <div class="grep-box">
+        <div class="path">~/.zzem/kb/products/ugc-platform/prd.md</div>
+        <div class="grep-result">gear: <span class="zero">0 matches</span></div>
+        <div class="grep-result">home header / 홈 헤더: <span class="zero">0 matches</span></div>
+        <div class="grep-result">settings: 1 match · <em>Phase 1 scope 언급 (line 29)</em></div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

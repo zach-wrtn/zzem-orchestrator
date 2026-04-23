@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>app-005 · Like Count Display Prototype</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+  <style>
+    /* =================================================
+     * Design Tokens (inlined from prototypes/context/tokens.css)
+     * ================================================= */
+    :root {
+      /* PRIMITIVE Colors */
+      --wds-color-purple-500: #8752FA;
+      --wds-color-purple-50: #F5F0FF;
+      --wds-color-neutral-0: #FFFFFF;
+      --wds-color-neutral-50: #F7F8F9;
+      --wds-color-neutral-100: #F0F1F3;
+      --wds-color-neutral-200: #E4E5E9;
+      --wds-color-neutral-300: #D1D3D8;
+      --wds-color-neutral-400: #B5B8BF;
+      --wds-color-neutral-500: #8E9199;
+      --wds-color-neutral-600: #6B6E76;
+      --wds-color-neutral-700: #4D5058;
+      --wds-color-neutral-800: #35373E;
+      --wds-color-neutral-900: #212228;
+      --wds-color-neutral-1000: #000000;
+      --wds-color-red-500: #FF3B30;
+      --wds-color-blue-500: #0080C6;
+
+      /* SEMANTIC */
+      --wds-background-normal: var(--wds-color-neutral-0);
+      --wds-surface-secondary: var(--wds-color-neutral-50);
+      --wds-label-normal: var(--wds-color-neutral-900);
+      --wds-label-alternative: var(--wds-color-neutral-600);
+      --wds-label-assistive: var(--wds-color-neutral-500);
+      --wds-line-alternative: var(--wds-color-neutral-100);
+      --wds-line-normal: var(--wds-color-neutral-200);
+      --wds-fill-brand-primary: var(--wds-color-purple-500);
+
+      /* SPACING */
+      --wds-spacing-2: 2px;
+      --wds-spacing-4: 4px;
+      --wds-spacing-6: 6px;
+      --wds-spacing-8: 8px;
+      --wds-spacing-12: 12px;
+      --wds-spacing-16: 16px;
+      --wds-spacing-20: 20px;
+
+      /* RADIUS */
+      --wds-radius-xs: 4px;
+      --wds-radius-sm: 8px;
+      --wds-radius-md: 12px;
+      --wds-radius-full: 9999px;
+
+      /* TYPOGRAPHY */
+      --wds-font-family-primary: 'Pretendard', -apple-system, 'SF Pro Display', sans-serif;
+      --wds-font-weight-regular: 400;
+      --wds-font-weight-medium: 500;
+      --wds-font-weight-semibold: 600;
+      --wds-font-weight-bold: 700;
+      --wds-font-size-xs: 12px;
+      --wds-font-size-sm: 13px;
+      --wds-font-size-md: 14px;
+      --wds-font-size-lg: 16px;
+
+      /* MY PROFILE aliases (§3) */
+      --background_primary: #FFFFFF;
+      --text_primary: #262626;
+      --text_secondary: #656565;
+      --outline_primary: #F1F1F1;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--wds-font-family-primary);
+      background: #f0f0f0;
+      display: flex; flex-direction: column; align-items: center;
+      min-height: 100vh; padding: 16px; gap: 16px;
+    }
+
+    /* =================================================
+     * Control Panel
+     * ================================================= */
+    .control-panel {
+      width: 390px; background: #1a1a2e; color: #e0e0e0;
+      border-radius: 12px 12px 0 0; padding: 12px 16px;
+      display: flex; flex-direction: column; gap: 10px; font-size: 13px;
+    }
+    .cp-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .cp-label { color: #888; font-size: 11px; min-width: 56px; }
+    .cp-select {
+      background: #2a2a3e; color: #e0e0e0; border: 1px solid #444;
+      border-radius: 6px; padding: 4px 8px; font-size: 12px; flex: 1;
+    }
+    .cp-btn {
+      background: #2a2a3e; color: #aaa; border: 1px solid #444;
+      border-radius: 6px; padding: 4px 10px; font-size: 11px; cursor: pointer;
+      transition: all 0.15s;
+    }
+    .cp-btn:hover { background: #3a3a4e; color: #e0e0e0; }
+    .cp-btn.active { background: var(--wds-color-purple-500); color: #fff; border-color: var(--wds-color-purple-500); }
+    .cp-breadcrumb { color: #888; font-size: 11px; font-style: italic; }
+
+    /* =================================================
+     * Device Frame
+     * ================================================= */
+    .device-frame {
+      width: 390px; height: 844px; background: #fff;
+      border-radius: 0 0 40px 40px; overflow: hidden; position: relative;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+    .screen { display: none; width: 100%; height: 100%; position: relative; }
+    .screen.active { display: block; }
+
+    /* =================================================
+     * SwipeFeedScreen (host for LikeButton)
+     * ================================================= */
+    #SwipeFeedScreen {
+      background: #000;
+      color: #fff;
+      display: none;
+      flex-direction: column;
+    }
+    #SwipeFeedScreen.active { display: flex; }
+
+    .sf-status-bar { height: 44px; }
+    .sf-media {
+      position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    }
+    .sf-media-cue {
+      position: absolute; top: 40%; left: 0; right: 0;
+      text-align: center; color: rgba(255,255,255,0.7);
+      font-size: 12px; letter-spacing: 0.5px;
+      user-select: none;
+    }
+    .sf-media-cue strong { color: #fff; display: block; margin-top: 4px; font-weight: 600; }
+    .sf-top-gradient {
+      position: absolute; top: 0; left: 0; right: 0; height: 120px;
+      background: linear-gradient(180deg, rgba(0,0,0,0.35), transparent);
+      pointer-events: none;
+    }
+    .sf-bottom-gradient {
+      position: absolute; bottom: 0; left: 0; right: 0; height: 240px;
+      background: linear-gradient(0deg, rgba(0,0,0,0.55), transparent);
+      pointer-events: none;
+    }
+
+    /* Creator bar (bottom-left, reference only) */
+    .sf-creator {
+      position: absolute; left: 16px; bottom: 120px;
+      display: flex; flex-direction: column; gap: 8px;
+      max-width: 260px;
+      color: #fff;
+    }
+    .sf-creator-row { display: flex; align-items: center; gap: 8px; }
+    .sf-avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: linear-gradient(135deg, #a17bff, #8752fa);
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    .sf-creator-name { font-size: 14px; font-weight: 600; }
+    .sf-template-title { font-size: 13px; opacity: 0.9; line-height: 1.4; }
+
+    /* =================================================
+     * SwipeFeedActionBar (right column) — LikeButton ★
+     * ================================================= */
+    .sf-action-bar {
+      position: absolute;
+      right: 12px;
+      bottom: 140px;
+      display: flex; flex-direction: column;
+      gap: 20px;
+      align-items: center;
+    }
+    .sf-action {
+      background: transparent; border: none; padding: 0;
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      cursor: pointer; color: #fff;
+      min-width: 52px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .sf-action-icon {
+      width: 28px; height: 28px;
+      display: flex; align-items: center; justify-content: center;
+      transition: transform 160ms ease-out;
+    }
+    .sf-action-icon svg { width: 28px; height: 28px; display: block; }
+    .sf-action-label {
+      font-size: 13px;
+      font-weight: var(--wds-font-weight-semibold);
+      line-height: 1.35;
+      color: #FFFFFF;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.35);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* LikeButton specific ★ */
+    #action-like[data-liked="true"] .sf-action-icon .heart-outline { display: none; }
+    #action-like[data-liked="true"] .sf-action-icon .heart-fill { display: block; }
+    #action-like[data-liked="false"] .sf-action-icon .heart-outline { display: block; }
+    #action-like[data-liked="false"] .sf-action-icon .heart-fill { display: none; }
+    #action-like .heart-fill { color: var(--wds-color-red-500); }
+    #action-like:active .sf-action-icon { transform: scale(0.9); }
+    #action-like.bounce .sf-action-icon { animation: heart-bounce 160ms ease-out; }
+    @keyframes heart-bounce {
+      0% { transform: scale(1); }
+      40% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+
+    /* DoubleTapLikeOverlay */
+    .sf-burst {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%) scale(0.3);
+      width: 96px; height: 96px;
+      color: var(--wds-color-red-500);
+      opacity: 0;
+      pointer-events: none;
+    }
+    .sf-burst svg { width: 96px; height: 96px; display: block; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3)); }
+    .sf-burst.play {
+      animation: burst 600ms ease-out forwards;
+    }
+    @keyframes burst {
+      0% { opacity: 0; transform: translate(-50%, -50%) scale(0.3) rotate(-10deg); }
+      30% { opacity: 1; transform: translate(-50%, -50%) scale(1.4) rotate(3deg); }
+      70% { opacity: 1; transform: translate(-50%, -50%) scale(1.0) rotate(0deg); }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(1.0); }
+    }
+
+    /* =================================================
+     * MyProfileScreen (host for ProfileGridCard-LikeBadge)
+     * ================================================= */
+    #MyProfileScreen { background: var(--background_primary); display: none; flex-direction: column; }
+    #MyProfileScreen.active { display: flex; }
+
+    .mp-status-bar { height: 44px; }
+    .mp-header {
+      height: 56px; display: flex; align-items: center; justify-content: space-between;
+      padding: 0 16px;
+      border-bottom: 1px solid var(--outline_primary);
+    }
+    .mp-header-title { font-size: 16px; font-weight: 600; color: var(--text_primary); }
+    .mp-header-gear {
+      width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+      background: transparent; border: none; cursor: pointer; color: var(--text_primary);
+    }
+    .mp-profile-block {
+      padding: 16px 20px 12px;
+      display: flex; flex-direction: column; align-items: center; gap: 10px;
+    }
+    .mp-avatar {
+      width: 72px; height: 72px; border-radius: 50%;
+      background: #e8e8e8;
+      border: 1px solid rgba(136,136,136,0.2);
+    }
+    .mp-nickname { font-size: 16px; font-weight: 600; color: var(--text_primary); }
+
+    .mp-tabs {
+      display: flex; border-bottom: 1px solid var(--outline_primary);
+      padding: 0 20px;
+    }
+    .mp-tab {
+      flex: 1; height: 44px; display: flex; align-items: center; justify-content: center;
+      background: transparent; border: none; cursor: pointer;
+      color: var(--text_secondary);
+      position: relative;
+    }
+    .mp-tab[aria-selected="true"] { color: var(--text_primary); }
+    .mp-tab[aria-selected="true"]::after {
+      content: ""; position: absolute; bottom: -1px; height: 2px;
+      background: var(--text_primary);
+      left: calc(50% - 30px); width: 60px;
+    }
+    .mp-tab svg { width: 20px; height: 20px; }
+
+    /* Feed Grid 2-col */
+    .feed-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1px;
+      background: var(--outline_primary);
+      padding: 1px 0 0 0;
+    }
+    .feed-card {
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--wds-radius-xs);
+      background: var(--wds-color-neutral-100);
+      cursor: pointer;
+    }
+    .feed-card.ratio-11 { aspect-ratio: 1 / 1; }
+    .feed-card.ratio-45 { aspect-ratio: 4 / 5; }
+
+    .fc-media { position: absolute; inset: 0; }
+    .fc-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.45) 100%);
+      pointer-events: none;
+    }
+    .fc-top {
+      position: absolute; top: 8px; left: 8px; right: 8px;
+      display: flex; justify-content: space-between; align-items: flex-start;
+    }
+    .fc-new-badge {
+      display: inline-flex; align-items: center;
+      background: var(--wds-color-blue-500);
+      color: #fff; font-size: 12px; font-weight: 600;
+      padding: 4px 8px; border-radius: var(--wds-radius-sm);
+      line-height: 1;
+    }
+    .fc-privacy-icon { color: #fff; width: 16px; height: 16px; display: inline-flex; }
+    .fc-privacy-icon svg { width: 16px; height: 16px; }
+
+    .fc-bottom {
+      position: absolute; left: 8px; right: 8px; bottom: 6px;
+      display: flex; justify-content: space-between; align-items: center;
+      color: #fff;
+    }
+    .fc-badge {
+      display: inline-flex; align-items: center; gap: 2px;
+      color: #fff;
+      font-size: 12px; font-weight: 600; line-height: 1.35;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.45);
+      opacity: 0.92;
+      font-variant-numeric: tabular-nums;
+    }
+    .fc-badge svg { width: 12px; height: 12px; display: block; }
+
+    /* =================================================
+     * Spec annotation badges
+     * ================================================= */
+    .spec-ann {
+      position: absolute;
+      background: rgba(135, 82, 250, 0.95);
+      color: #fff; font-size: 10px; font-weight: 600;
+      padding: 3px 6px; border-radius: 4px;
+      pointer-events: none;
+      z-index: 3;
+    }
+
+    /* =================================================
+     * Screen header label (for context)
+     * ================================================= */
+    .screen-caption {
+      position: absolute; top: 12px; left: 50%;
+      transform: translateX(-50%);
+      background: rgba(135,82,250,0.9); color: #fff;
+      font-size: 10px; font-weight: 600; padding: 4px 10px;
+      border-radius: 999px; z-index: 5;
+      letter-spacing: 0.3px;
+    }
+
+    /* =================================================
+     * Note panel below device frame
+     * ================================================= */
+    .note {
+      width: 390px; max-width: 100%;
+      background: #fff; border-radius: 8px; padding: 12px 16px;
+      font-size: 12px; color: #444; line-height: 1.5;
+      border: 1px solid #e4e5e9;
+    }
+    .note b { color: var(--wds-color-purple-500); }
+    .note code { background: #f0f1f3; padding: 1px 4px; border-radius: 3px; font-size: 11px; }
+
+  </style>
+</head>
+<body>
+
+  <!-- ============== Control Panel ============== -->
+  <div class="control-panel" role="region" aria-label="프로토타입 제어">
+    <div class="cp-row">
+      <span class="cp-label">Screen</span>
+      <select id="screen-select" class="cp-select" aria-label="스크린 선택">
+        <option value="SwipeFeedScreen">SwipeFeedScreen · LikeButton</option>
+        <option value="MyProfileScreen">MyProfileScreen · ProfileGridCard-LikeBadge</option>
+      </select>
+    </div>
+    <div class="cp-row">
+      <span class="cp-label">State</span>
+      <div id="state-buttons" class="cp-row" style="flex:1; gap:6px;"></div>
+    </div>
+    <div class="cp-row">
+      <span class="cp-label">Path</span>
+      <span id="breadcrumb" class="cp-breadcrumb">/SwipeFeedScreen/not-liked-with-count</span>
+    </div>
+  </div>
+
+  <!-- ============== Device Frame ============== -->
+  <div class="device-frame" aria-label="iPhone 14 Pro 프레임 390x844">
+
+    <!-- ========== SwipeFeedScreen (LikeButton) ========== -->
+    <section class="screen active" id="SwipeFeedScreen" aria-label="세로 스와이프 피드 — LikeButton 호스트">
+      <div class="screen-caption">app-005 · LikeButton (SwipeFeed)</div>
+
+      <!-- media backdrop -->
+      <div class="sf-media" id="double-tap-overlay" aria-label="콘텐츠 미디어 영역 (더블탭 좋아요)">
+        <div class="sf-top-gradient" aria-hidden="true"></div>
+        <div class="sf-bottom-gradient" aria-hidden="true"></div>
+        <div class="sf-media-cue" aria-hidden="true">
+          미디어 영역
+          <strong>더블탭하여 좋아요 / 우측 하트 버튼 탭</strong>
+        </div>
+        <!-- Double-tap burst overlay (DoubleTapLikeOverlay) -->
+        <span class="sf-burst" id="burst" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 6.5 5.5 5.5 0 0 1 21.5 12c-2.5 4.5-9.5 9-9.5 9z"/>
+          </svg>
+        </span>
+      </div>
+
+      <!-- Creator bar (reference only, app-001 영역) -->
+      <div class="sf-creator" aria-hidden="false">
+        <div class="sf-creator-row">
+          <div class="sf-avatar" aria-hidden="true"></div>
+          <span class="sf-creator-name">쨈러 (@jjamer)</span>
+        </div>
+        <p class="sf-template-title">AI 필터로 만든 여름 바다 감성 — 템플릿 이름 예시</p>
+      </div>
+
+      <!-- Action bar (우측 수직 스택) -->
+      <aside class="sf-action-bar" id="action-bar" aria-label="피드 액션 바">
+        <!-- ★ LikeButton (app-005 scope) -->
+        <button class="sf-action" id="action-like" type="button" data-liked="false" aria-label="좋아요 123" aria-pressed="false">
+          <span class="sf-action-icon" aria-hidden="true">
+            <svg class="heart-outline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+            <svg class="heart-fill" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 6.5 5.5 5.5 0 0 1 21.5 12c-2.5 4.5-9.5 9-9.5 9z"/>
+            </svg>
+          </span>
+          <span class="sf-action-label" id="like-count-label">123</span>
+        </button>
+
+        <!-- Reference: Regenerate (app-001 scope) -->
+        <button class="sf-action" id="action-regen" type="button" aria-label="재생성 8.6천" title="app-001 scope (reference)">
+          <span class="sf-action-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/>
+            </svg>
+          </span>
+          <span class="sf-action-label">8.6천</span>
+        </button>
+
+        <!-- Reference: Share -->
+        <button class="sf-action" id="action-share" type="button" aria-label="공유" title="app-001 scope (reference)">
+          <span class="sf-action-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+            </svg>
+          </span>
+        </button>
+
+        <!-- Reference: More -->
+        <button class="sf-action" id="action-more" type="button" aria-label="더보기" title="app-002 scope (reference)">
+          <span class="sf-action-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/>
+            </svg>
+          </span>
+        </button>
+      </aside>
+
+      <!-- Spec annotation -->
+      <div class="spec-ann" style="top: 120px; right: 72px;">app-005 ★ LikeButton</div>
+    </section>
+
+    <!-- ========== MyProfileScreen (ProfileGridCard-LikeBadge) ========== -->
+    <section class="screen" id="MyProfileScreen" aria-label="MY 프로필 — Grid 카드 LikeBadge 호스트">
+      <div class="screen-caption">app-005 · ProfileGridCard-LikeBadge</div>
+
+      <div class="mp-status-bar" aria-hidden="true"></div>
+      <header class="mp-header">
+        <span style="width:32px" aria-hidden="true"></span>
+        <h1 class="mp-header-title">jjamer</h1>
+        <button class="mp-header-gear" aria-label="설정" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h0a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v0a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>
+          </svg>
+        </button>
+      </header>
+
+      <div class="mp-profile-block">
+        <div class="mp-avatar" aria-hidden="true"></div>
+        <h2 class="mp-nickname">jjamer</h2>
+      </div>
+
+      <nav class="mp-tabs" role="tablist" aria-label="콘텐츠 탭">
+        <button class="mp-tab" role="tab" aria-selected="true" data-tab="public">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+          </svg>
+        </button>
+        <button class="mp-tab" role="tab" aria-selected="false" data-tab="private">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5zm-3 8V7a3 3 0 0 1 6 0v3H9z"/>
+          </svg>
+        </button>
+        <button class="mp-tab" role="tab" aria-selected="false" data-tab="liked">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 6.5 5.5 5.5 0 0 1 21.5 12c-2.5 4.5-9.5 9-9.5 9z"/>
+          </svg>
+        </button>
+      </nav>
+
+      <!-- Feed Grid with LikeBadge ★ -->
+      <div class="feed-grid" id="feed-grid" role="list">
+        <!-- Col 1 -->
+        <article class="feed-card ratio-11" role="listitem" aria-label="콘텐츠 카드 1 — 좋아요 42">
+          <div class="fc-media" style="background: linear-gradient(135deg, #a8c0ff, #3f2b96);"></div>
+          <div class="fc-overlay"></div>
+          <div class="fc-top"><span></span><span></span></div>
+          <div class="fc-bottom">
+            <span class="fc-badge" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg>
+              382
+            </span>
+            <span class="fc-badge" aria-label="좋아요 42">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 6.5 5.5 5.5 0 0 1 21.5 12c-2.5 4.5-9.5 9-9.5 9z"/></svg>
+              42
+            </span>
+          </div>
+        </article>
+        <article class="feed-card ratio-45" role="listitem" aria-label="콘텐츠 카드 2 — 좋아요 0">
+          <div class="fc-media" style="background: linear-gradient(135deg, #ff9a9e, #fad0c4);"></div>
+          <div class="fc-overlay"></div>
+          <div class="fc-top">
+            <span class="fc-new-badge" aria-label="신규">신규</span>
+            <span></span>
+          </div>
+          <div class="fc-bottom">
+            <span class="fc-badge" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg>
+              0
+            </span>
+            <!-- ★ zero-likes case — 0 반드시 노출 -->
+            <span class="fc-badge" aria-label="좋아요 0">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 6.5 5.5 5.5 0 0 1 21.5 12c-2.5 4.5-9.5 9-9.5 9z"/></svg>
+              0
+            </span>
+          </div>
+        </article>
+        <article class="feed-card ratio-45" role="listitem" aria-label="콘텐츠 카드 3 — 좋아요 8,600 (축약 없음)">
+          <div class="fc-media" style="background: linear-gradient(135deg, #fbc2eb, #a6c1ee);"></div>
+          <div class="fc-overlay"></div>
+          <div class="fc-top"><span></span><span></span></div>
+          <div class="fc-bottom">
+            <span class="fc-badge" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg>
+              1.2만
+            </span>
+            <!-- ★ large count — 축약 금지, 천단위 콤마 -->
+            <span class="fc-badge" aria-label="좋아요 8600">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 6.5 5.5 5.5 0 0 1 21.5 12c-2.5 4.5-9.5 9-9.5 9z"/></svg>
+              8,600
+            </span>
+          </div>
+        </article>
+
+        <!-- Col 2 -->
+        <article class="feed-card ratio-45" role="listitem" aria-label="콘텐츠 카드 4 — 좋아요 3">
+          <div class="fc-media" style="background: linear-gradient(135deg, #84fab0, #8fd3f4);"></div>
+          <div class="fc-overlay"></div>
+          <div class="fc-top"><span></span><span></span></div>
+          <div class="fc-bottom">
+            <span class="fc-badge" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg>
+              12
+            </span>
+            <span class="fc-badge" aria-label="좋아요 3">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 6.5 5.5 5.5 0 0 1 21.5 12c-2.5 4.5-9.5 9-9.5 9z"/></svg>
+              3
+            </span>
+          </div>
+        </article>
+        <article class="feed-card ratio-45" role="listitem" aria-label="콘텐츠 카드 5 — 비공개, 좋아요 1 (셀프)">
+          <div class="fc-media" style="background: linear-gradient(135deg, #fddb92, #d1fdff);"></div>
+          <div class="fc-overlay"></div>
+          <div class="fc-top">
+            <span></span>
+            <span class="fc-privacy-icon" aria-label="비공개">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5zm-3 8V7a3 3 0 0 1 6 0v3H9z"/></svg>
+            </span>
+          </div>
+          <div class="fc-bottom">
+            <span class="fc-badge" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg>
+              0
+            </span>
+            <!-- ★ self-like 1 on private card -->
+            <span class="fc-badge" aria-label="좋아요 1 (셀프)">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 6.5 5.5 5.5 0 0 1 21.5 12c-2.5 4.5-9.5 9-9.5 9z"/></svg>
+              1
+            </span>
+          </div>
+        </article>
+        <article class="feed-card ratio-11" role="listitem" aria-label="콘텐츠 카드 6 — 좋아요 127">
+          <div class="fc-media" style="background: linear-gradient(135deg, #cfd9df, #e2ebf0);"></div>
+          <div class="fc-overlay"></div>
+          <div class="fc-top"><span></span><span></span></div>
+          <div class="fc-bottom">
+            <span class="fc-badge" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg>
+              89
+            </span>
+            <span class="fc-badge" aria-label="좋아요 127">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 6.5 5.5 5.5 0 0 1 21.5 12c-2.5 4.5-9.5 9-9.5 9z"/></svg>
+              127
+            </span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- ============== Note ============== -->
+  <div class="note">
+    <b>app-005 · Like Count Display</b> — 좋아요 수는 <b>실제 숫자</b> (축약 금지, 0 포함).
+    재생성 수는 <code>korean-count</code> 축약 (app-001 소관) — 혼동 주의.
+    LikeButton 은 SwipeFeed 우측 액션 바 상단; outlined (not-liked) ↔ filled red (liked).
+    DoubleTap 시 heart burst (기존 <code>DoubleTapLikeOverlay</code> 재사용 — 동일 훅).
+    셀프 좋아요 허용 (AC 3.1, 비공개 카드에도 '1' 노출 가능).
+  </div>
+
+  <script>
+    // ==========================================================
+    // State management + control panel
+    // ==========================================================
+    const SCREEN_STATES = {
+      SwipeFeedScreen: ['not-liked-zero','not-liked-with-count','liked','self-liked','double-tap-burst','pending-optimistic','error-rollback'],
+      MyProfileScreen: ['card-default','card-zero-likes','card-large-count','card-private','card-new'],
+    };
+
+    const screenSel = document.getElementById('screen-select');
+    const stateBtns = document.getElementById('state-buttons');
+    const crumb = document.getElementById('breadcrumb');
+
+    function renderStateButtons(scr) {
+      stateBtns.innerHTML = '';
+      (SCREEN_STATES[scr] || []).forEach((s, i) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'cp-btn' + (i === 0 ? ' active' : '');
+        b.textContent = s;
+        b.dataset.state = s;
+        b.addEventListener('click', () => {
+          applyState(scr, s);
+          [...stateBtns.children].forEach(c => c.classList.remove('active'));
+          b.classList.add('active');
+          crumb.textContent = `/${scr}/${s}`;
+        });
+        stateBtns.appendChild(b);
+      });
+    }
+
+    function showScreen(name) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      const el = document.getElementById(name);
+      if (el) el.classList.add('active');
+      renderStateButtons(name);
+      const first = SCREEN_STATES[name][0];
+      applyState(name, first);
+      crumb.textContent = `/${name}/${first}`;
+    }
+
+    // ==========================================================
+    // LikeButton state application
+    // ==========================================================
+    const like = () => document.getElementById('action-like');
+    const likeLabel = () => document.getElementById('like-count-label');
+    const burst = () => document.getElementById('burst');
+
+    function setLike(liked, count) {
+      like().dataset.liked = String(liked);
+      like().setAttribute('aria-pressed', String(liked));
+      like().setAttribute('aria-label', (liked ? '좋아요 취소 ' : '좋아요 ') + count);
+      likeLabel().textContent = count;
+    }
+
+    function playBounce() {
+      like().classList.remove('bounce');
+      // reflow to restart animation
+      void like().offsetWidth;
+      like().classList.add('bounce');
+    }
+
+    function playBurst() {
+      burst().classList.remove('play');
+      void burst().offsetWidth;
+      burst().classList.add('play');
+    }
+
+    function applyState(scr, state) {
+      if (scr === 'SwipeFeedScreen') {
+        switch (state) {
+          case 'not-liked-zero':       setLike(false, '0'); break;
+          case 'not-liked-with-count': setLike(false, '123'); break;
+          case 'liked':                setLike(true, '124'); playBounce(); break;
+          case 'self-liked':           setLike(true, '1'); playBounce(); break;
+          case 'double-tap-burst':     setLike(true, '124'); playBurst(); playBounce(); break;
+          case 'pending-optimistic':   setLike(true, '124'); break; // UI 먼저 반영
+          case 'error-rollback':       setLike(false, '123'); break; // 롤백된 모습
+        }
+      }
+      if (scr === 'MyProfileScreen') {
+        // Grid states — visual variants only (already rendered as mixed sample).
+        // Highlight specific cards to indicate current demo.
+        const cards = document.querySelectorAll('#MyProfileScreen .feed-card');
+        cards.forEach(c => c.style.outline = 'none');
+        let idx = 0;
+        switch (state) {
+          case 'card-default':     idx = 0; break; // 좋아요 42
+          case 'card-zero-likes':  idx = 1; break; // 0
+          case 'card-large-count': idx = 2; break; // 8,600
+          case 'card-private':     idx = 4; break; // 비공개 1
+          case 'card-new':         idx = 1; break; // 신규 뱃지 + 0
+        }
+        if (cards[idx]) cards[idx].style.outline = '3px solid #8752fa';
+      }
+    }
+
+    // ==========================================================
+    // Interactions
+    // ==========================================================
+    screenSel.addEventListener('change', (e) => showScreen(e.target.value));
+
+    // Single tap on LikeButton → toggle
+    document.addEventListener('DOMContentLoaded', () => {
+      const b = like();
+      if (b) {
+        b.addEventListener('click', () => {
+          const current = b.dataset.liked === 'true';
+          const nextCount = current ? Math.max(0, parseInt((likeLabel().textContent || '0').replace(/,/g,''),10) - 1)
+                                     : parseInt((likeLabel().textContent || '0').replace(/,/g,''),10) + 1;
+          const formatted = nextCount >= 1000 ? nextCount.toLocaleString('ko-KR') : String(nextCount);
+          setLike(!current, formatted);
+          playBounce();
+        });
+      }
+
+      // Double-tap media area → always like=true + burst
+      const media = document.getElementById('double-tap-overlay');
+      if (media) {
+        let lastTap = 0;
+        media.addEventListener('click', (e) => {
+          const now = Date.now();
+          if (now - lastTap < 300) {
+            // double-tap
+            if (like().dataset.liked !== 'true') {
+              const next = parseInt((likeLabel().textContent || '0').replace(/,/g,''),10) + 1;
+              setLike(true, next >= 1000 ? next.toLocaleString('ko-KR') : String(next));
+            }
+            playBurst();
+            playBounce();
+          }
+          lastTap = now;
+        });
+      }
+
+      // Profile tabs (visual)
+      document.querySelectorAll('.mp-tab').forEach(t => {
+        t.addEventListener('click', () => {
+          document.querySelectorAll('.mp-tab').forEach(x => x.setAttribute('aria-selected','false'));
+          t.setAttribute('aria-selected','true');
+        });
+      });
+
+      // init
+      showScreen('SwipeFeedScreen');
+    });
+  </script>
+</body>
+</html>
