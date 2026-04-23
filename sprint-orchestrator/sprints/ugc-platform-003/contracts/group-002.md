@@ -151,8 +151,17 @@
 
 Seed: fetch-seed-block-target.mjs, fetch-seed-blocked-list.mjs, fetch-seed-reportable-content.mjs.
 
+## Group 001 Lessons Applied (선제 반영)
+
+- [ ] **Cursor encoding**: be-002 의 `/v2/me/blocks` list 는 `page[limit]` extra item cursor 인코딩 (reference: `me-contents-app.service.ts:buildLikedListResponse`, Group 001 `user-follow-app.service.ts:buildListResponse`). `truncated[limit-1]` 금지.
+- [ ] **E2E appId grep 게이트**: 신규 yaml 3개 (`other-user-profile-block.yaml`, `settings-block-management.yaml`, `swipe-feed-content-report.yaml`) 모두 `appId: com.wrtn.zzem.dev`. `rg '^appId:' app/apps/MemeApp/e2e/flows | awk '{print $2}' | sort -u | wc -l → 1`.
+- [ ] **Contract field-level 파일 경로 명시**: UserPublicProfile 응답 `isBlocked` 필드 추가 — 파일 경로 `backend/apps/meme-api/src/application/user-profile/dto/public-profile-response.dto.ts` (또는 실제 경로 grep 확인) + 필드 name "isBlocked: boolean" 구체 명시.
+- [ ] **Persona fallback 의도적 허용**: mapper 내 `profile.nickname ?? profile.name` 류 persona display fallback 은 Minor 예외로 유지. 사용 시 주석 `// Why: persona display fallback` 의무.
+- [ ] **rollbackFollowByPair 강제 경유**: be-002 의 block write-path 에서 UserFollow 양방향 삭제는 반드시 `FollowDomainService.rollbackFollowByPair(caller, target)` 호출 — 직접 `UserFollow.deleteMany` 금지. grep: `rg 'UserFollow.*deleteMany|userFollowRepository\.delete(?!Pair)' backend/apps/meme-api/src/domain/user-block → 0 hit`.
+
 ## Sign-off
 
-- Sprint Lead draft: 2026-04-23 (pending Group 001 PASS)
-- 조건부 sign-off: Group 001 `rollbackFollowByPair` + `BlockRelationPort` 시그니처 확정 시 재검증
-- Evaluator review: pending
+- Sprint Lead draft: 2026-04-23
+- Group 001 ACCEPTED (Round 2) — `rollbackFollowByPair` + `BlockRelationPort` 시그니처 확정 (`checkpoints/group-001-summary.md`)
+- Sprint Lead sign-off: 2026-04-23 (self-reviewed with Group 001 Lessons 선제 반영)
+- Evaluator review: R1 in §4.4 (후행)
