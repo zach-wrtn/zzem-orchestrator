@@ -117,7 +117,23 @@
 
 Seed: fetch-seed-notifications.mjs (be-004/005 구현 후 test-seed endpoint).
 
+## Group 001+002+003 Lessons Applied (선제 반영)
+
+1. **data.appLink (not deeplink)** — app-008 push handler 는 `message.data.appLink` 필드 파싱. be-006 이 `KafkaProduceService.produceNotification` 으로 발송. 기존 meme-gen-complete 핸들러 확장 — 필드 name 변경 금지.
+2. **pushAll BE-side override** — app-007 의 4 토글 렌더는 BE GET 응답 그대로 신뢰. `pushAll=false` 시 하위 3 토글 응답은 이미 BE 에서 false 강제. 클라이언트 재계산 로직 추가 금지 (Mapper fallback 금지 정신).
+3. **Settings mutation 단일 hook** (Group 003 Minor m1 확장) — 4 토글 onPress 가 단일 `useUpdateNotificationSettings` hook 호출. 개별 hook 생성 금지 (dead hook 경계 + settings gate 단일 SOT).
+4. **Bell tap semantics** — `navigation.navigate("NotificationCenter")` + `markAllRead.mutate()` parallel. Optimistic unreadCount=0 + invalidate `['notifications-unread-count']`.
+5. **NotificationItem parse** — BE 이미 skip-on-missing-required 수행. FE Zod schema required 필드 전제 + 네트워크 오류 대응 catch 여전히 필수.
+6. **Category dot color** — Phase 3 프로토타입 임시 (LIKE=primary-pink, FOLLOW=primary-blue, PAYBACK=primary-yellow). 구현 시 design-tokens/semantic color 재확인.
+7. **Cursor `page[limit]` 패턴** — app-006 infiniteQuery cursor decoding 시 BE `nextCursor` / `hasNext` 응답 그대로 사용. 클라이언트 decoding 금지 (BE 가 이미 extra item 인코딩).
+8. **MMKV only for storage** — AsyncStorage 금지 (integration storage primitive). 필요 시 `@wrtn/mmkv-kit`.
+9. **E2E appId canonical** (Group 001 Lesson) — `com.wrtn.zzem.dev` 단일 값. 신규 yaml 2개 (`home-to-notification-center.yaml`, `settings-notification-settings.yaml`) 모두 canonical.
+10. **Shared file 사전 조율** (Group 002 Lesson) — app-004 (차단 관리) 가 이미 `settings-body.tsx` + `coming-soon-settings-section.tsx` `middleSlot` 추가. app-007 는 "알림 설정" activate 를 **동일 middleSlot API 재사용 또는 별도 slot 추가** — canonical order ("알림 설정"→"차단 관리"→"고객센터") 불변 보장.
+
 ## Sign-off
 
-- Sprint Lead draft: 2026-04-23 (pending Group 003 PASS + push payload 필드명 확정)
-- Evaluator review: pending
+- Sprint Lead draft: 2026-04-23
+- Group 003 ACCEPTED (Round 1 first-try PASS) — Group 003 Lessons 반영
+- be-005/006/007 endpoint schema + Kafka data.appLink 필드명 확정
+- Sprint Lead sign-off: 2026-04-23 (self-reviewed with Group 001+002+003 Lessons 선제 반영)
+- Evaluator review: R1 in §4.4 (후행)
