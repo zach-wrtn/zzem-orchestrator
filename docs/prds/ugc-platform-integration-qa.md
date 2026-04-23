@@ -139,9 +139,65 @@ ugc-platform-003 세션에서 다음 flow 가 seed/testID/copy 이슈로 FAIL:
 
 개발자로서, 로컬 / dev / prod 환경의 URL/딥링크/인증 파이프라인 차이를 명확히 이해하고 싶다.
 
-#### AC 4.1: `.env.example` 에 dev 기본값 명시
-- `AUTH_API_URL` 이 `/apple` 포함하는지 여부 dev/prod 별 명시
-- Phase 1 부터 잠재한 misalignment (ugc-platform-003 QA 에서 발견) 문서화
+#### AC 4.1: `ApiInstance.Auth` base URL misalignment 해소 (P0 — 사용자 체감 버그)
+
+**배경**:
+앱 내 2개 독립 `ApiInstance` 가 서로 다른 base URL 사용:
+
+| Instance | base URL (.env) | `/apple` | 사용처 | hits |
+|----------|----------------|----------|--------|------|
+| `ApiInstance.Wrtn` | `WRTN_API_URL='https://api.dev.wrtn.club/apple'` | ✅ | credit, meme(home/filters), utils, dialog, survey, custom-prompt (Phase 0) | 37 |
+| `ApiInstance.Auth` | `AUTH_API_URL='https://api.dev.wrtn.club'` | ❌ | me-contents, notification, profile, user-profile, follow, user-block, content-report (**Phase 1/2/3 `/v2/*` 전부**) | 32 |
+
+실제 배포는 `/apple/meme/v2/*` 경로에 있으므로 `ApiInstance.Auth` 를 사용하는 모든 `/v2/*` endpoint 가 **404 반환**. `ApiInstance.Auth` 는 이름만 Auth 이지 실제 auth (토큰 refresh `dev-auth-api.wrtn.io`) 와 무관, 잘못된 네이밍 + 잘못된 base URL 조합.
+
+**여태 드러나지 않은 이유**:
+- `useGetMyProfileUseCase` 실패 → `myProfile === undefined` → ProfileScreen empty state 로 graceful fallback
+- `useGetMyContentsUseCase` 실패 → 빈 배열 → "아직 공개한 콘텐츠가 없어요" empty state
+- 사용자는 app crash 없이 "아직 아무것도 없는 상태" 로 인지 → **ugc-platform-003 QA 에서 Maestro 가 AC-7.4 라우팅 실패로 catch**
+
+**사용자 체감 영향 (Phase 1 배포 이후 계속)**:
+- 본인 프로필에 콘텐츠 없음 (`/v2/me/contents` 404)
+- 콘텐츠 카운트 0 (`/v2/me/contents/counts` 404)
+- 좋아요 탭 빈 상태 (`visibility=liked` 404)
+- 알림 unread-count 항상 0 (`/v2/me/notifications/unread-count` 404)
+- 본인 프로필 공유/편집 flow 의 내 프로필 조회 실패 (`/v2/me/profile` 404)
+- 팔로우 상태 표시 불가능 (follow-state 404)
+
+**해결 방안 (3가지 option 중 택1)**:
+
+**Option A — `.env.example` + prod 환경 `AUTH_API_URL` 에 `/apple` 추가 (1 line fix)**
+- Pros: 최소 변경, 즉시 모든 `/v2/*` 200
+- Cons: `ApiInstance.Auth` 네이밍 혼란 지속 (이름은 Auth 이지만 실제는 meme 서비스 base). `.env.example` / `.env.prod` / CI secret 동시 업데이트 필요
+- 권장: **이번 스프린트 AC 4.1-A** — 단기 해소
+
+**Option B — 32개 repo-impl 의 `ApiInstance.Auth` → `ApiInstance.Wrtn` 일괄 교체**
+- Pros: 아키텍처 정합 (WRTN_API_URL 이 meme 서비스 base 역할). `ApiInstance.Auth` 는 원래 목적 (인증) 로 복귀
+- Cons: 32 파일 + 관련 mock/test 일괄 변경. 회귀 위험
+- 대상 (AC 4.1-B 범위):
+  - `data/profile/profile.repository-impl.ts` (2 hits — getMyProfile, updateMyProfile)
+  - `data/user-profile/user-profile.repository-impl.ts` (1)
+  - `data/me-contents/me-contents.repository-impl.ts` (5)
+  - `data/follow/follow.repository-impl.ts` (5)
+  - `data/user-block/user-block.repository-impl.ts` (ugc-platform-003 신규)
+  - `data/content-report/content-report.repository-impl.ts` (ugc-platform-003 신규)
+  - `data/notification/notification.repository-impl.ts` (3)
+  - `data/notification-setting/notification-setting.repository-impl.ts` (ugc-platform-003 신규)
+
+**Option C — `ApiInstance.Meme` 신규 + `/v2/*` 이관 (재설계)**
+- Pros: Naming 명확 (`Wrtn`/platform, `Auth`/인증, `Meme`/meme-api v2). 향후 Phase 4+ 추가 시 혼란 없음
+- Cons: 가장 큰 변경 범위 — 별도 리팩터 스프린트 필요
+- 권장 시점: Phase 4+ 새 feature 추가 전 선행 리팩터
+
+**이번 스프린트 결정**:
+- **AC 4.1-a (필수)**: `.env.example` 에 `AUTH_API_URL` 이 **meme-api base** 로서 `/apple` 필요함을 주석으로 명시 + 실제 값 업데이트 + CI secret + 문서화 (Option A)
+- **AC 4.1-b (권장)**: 근본 해소 — Option B 적용. 32 파일 sed 스크립트 + 회귀 E2E full suite 검증
+- **AC 4.1-c (후속)**: Option C 는 별도 refactor 스프린트로 분리 (Phase 4+ 전)
+
+**검증 방법**:
+- `yarn test` 통과
+- E2E full suite PASS (AC 1.2 와 연계)
+- 수동 확인: 본인 프로필 진입 → 콘텐츠 카운트/공개 탭/좋아요 탭 전부 실제 데이터 표시 (기존 "empty" 상태가 아님)
 
 #### AC 4.2: Airbridge vs RN Linking routing 정책
 - `useNavigationLinking.ts` 의 이중 routing 전략 문서화
