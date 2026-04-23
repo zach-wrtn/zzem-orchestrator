@@ -403,6 +403,117 @@ ugc-platform-003 세션에서 다음 flow 가 seed/testID/copy 이슈로 FAIL:
 
 ---
 
+### US10: 탐색 탭 섹션별 디자인 정합 (Discovery/Explore Figma SSOT)
+
+유저(디자이너/PM)로서, 탐색 탭의 3개 섹션 (빠른 액션 / 이번주 밈 업데이트 / 밈 필터 랭킹) 이 Figma 스펙과 일치하기를 원한다.
+
+#### 배경
+
+**현재 구조** (2026-04-24 iOS 빌드 스크린샷 분석):
+- `ExploreScreen` = `HomeBody` 재사용 (탐색 = 홈 동일 body)
+- `HomeBody` 내부 섹션:
+  - `MainServiceSection` (빠른 액션 4개: 이미지 생성 / 비디오 생성 / 댄스 챌린지 / 주인공 바꾸기)
+  - `NewFilterSection` (이번주 밈 업데이트 — 가로 스크롤)
+  - `TrendingFilterSection` (밈 필터 랭킹 — 세로 리스트 + 만들기)
+  - `CurationSection` (큐레이션 — 선택)
+  - `FilterListItem` × N (grid, US9 대상)
+
+**Figma reference**:
+- 이번주 밈 업데이트: https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37160-77639
+- 밈 필터 랭킹: https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37160-77643
+
+#### 현재 빌드 관찰 (스크린샷 기반)
+
+**섹션 1 — MainServiceSection (빠른 액션 4개)**:
+- 가로 row, 각 항목: 원형 그라디언트 아이콘 + 하단 텍스트 (2줄 가능)
+- 4개 아이콘: 이미지 생성 / 비디오 생성 / 댄스 챌린지 / 주인공 바꾸기
+- 카드 배경: 흰색 둥근 rect
+
+**섹션 2 — NewFilterSection ("이번주 밈 업데이트" 가로 스크롤)**:
+- 가로 스크롤 horizontal list
+- 카드 구조: 좌상단 **신규 뱃지 (파랑)** + 정사각 1:1 썸네일 + 하단 제목 (흰 배경 + 검은 텍스트)
+- 썸네일 border-radius 적용, 모두 동일 크기
+
+**섹션 3 — TrendingFilterSection ("밈 필터 랭킹" 세로 리스트)**:
+- 각 row: `순번 숫자` + `썸네일 (작은 정사각)` + `제목` + `카테고리 (비디오/이미지)` + 우측 `[만들기]` 버튼
+- 순번: 숫자만 (1, 2, 3, 4) — 폰트 가벼움
+- 카테고리: 제목 아래 회색 작은 텍스트 "비디오" / "이미지"
+- 만들기 버튼: 둥근 검정 pill, 흰 텍스트
+- 리스트 아래 `더보기 v` (chevron down 아이콘)
+
+#### AC 10.1: MainServiceSection 아이콘/간격 Figma 정합 (P2)
+
+**대상 파일**: `apps/MemeApp/src/presentation/home/componenets/main-service/main-service-section.tsx`, `main-service-card.tsx`
+
+**검증 포인트**:
+- [ ] 각 원형 그라디언트 아이콘 색상/크기/내부 icon 선택 Figma 일치
+- [ ] 4개 row gap, 수평 padding
+- [ ] 텍스트 typography (font family, weight, size, line-height)
+- [ ] 탭 피드백 (scale or opacity transition)
+
+> 🚧 Figma 스펙 구체값은 디자이너 확인 후 PRD 재개정 (또는 Contract 작성 시점)
+
+#### AC 10.2: NewFilterSection 카드 디자인 Figma 정합 (P1)
+
+**대상 파일**: `apps/MemeApp/src/presentation/home/componenets/filter-list/new-filter-section.tsx`
+
+**Figma node**: `37160-77639`
+
+**검증 포인트**:
+- [ ] 신규 뱃지: bg 색상 (`#0080c6` 추정 — component-patterns.md §1 공통), rounded-8, padding 4×8, font SemiBold 12px white
+- [ ] 썸네일: aspect ratio (1:1 고정? 4:5 혼합? Figma 기준), border-radius
+- [ ] 제목 위치: 썸네일 내부 (그라데이션 오버레이) vs 썸네일 외부 (현재 빌드)
+- [ ] 제목 typography: Pretendard SemiBold/Regular, font size, color
+- [ ] 카드 간 gap, 좌우 padding (first/last item peek behavior)
+- [ ] 크리에이터/좋아요 수 표시 여부 (일관성: grid card 와 match — US9 AC 9.3 과 연계)
+
+#### AC 10.3: TrendingFilterSection (랭킹 리스트) Figma 정합 (P1)
+
+**대상 파일**: `apps/MemeApp/src/presentation/home/componenets/filter-list/` 하위 랭킹 관련 (`trending-filter-section.tsx` 추정)
+
+**Figma node**: `37160-77643`
+
+**검증 포인트**:
+- [ ] 순번 표시 style: 단순 숫자 vs 큰 숫자 badge vs 메달 (1/2/3 special treatment?)
+- [ ] 순번 typography (font size, weight, color — 현재 다소 가벼운 인상)
+- [ ] 썸네일: 크기 (현재 작음), border-radius
+- [ ] 제목 typography: font size, weight, line height (현재 SemiBold 추정)
+- [ ] 카테고리 라벨 ("비디오" / "이미지") 색상/위치/font — separator/dot/chip 여부
+- [ ] 만들기 버튼: shape (pill/rounded rect), bg, padding, font (현재 검정 pill)
+- [ ] Row separator (선 / 공백) + row height
+- [ ] 접기/펼치기 동작 (component-patterns.md §7 [4] 실시간 랭킹 1~8위 접기/펼치기 언급)
+
+#### AC 10.4: 더보기 버튼 + 섹션 spacing (P2)
+
+**현재**: "더보기 v" 텍스트 + 아래 chevron 아이콘, 세로 리스트 하단 중앙 정렬
+
+**검증 포인트**:
+- [ ] 버튼 인터랙션 (tap 시 더 많은 항목 로드? 또는 전체 페이지 네비?)
+- [ ] tap 영역 (현재 chevron 과 텍스트가 별개인지)
+- [ ] 섹션 간 vertical gap (MainService ↔ NewFilter ↔ Trending)
+- [ ] 헤더 + 섹션 전체 상단 spacing
+
+#### AC 10.5: component-patterns.md 업데이트
+
+**기존 상태**: `docs/designs/component-patterns.md §7 Home Screen (Full Layout)` 에 대략적 구성만 명시 (실시간 랭킹 언급). 섹션별 세부 token 부재.
+
+**업데이트**:
+- [ ] §7 섹션에 MainService / NewFilter / Trending 세부 token 추가
+- [ ] Figma node-id 레퍼런스 embed
+- [ ] Phase 3 이후 재추출 완료 날짜 업데이트
+
+#### Scope boundary
+
+- **In scope**: 탐색 탭 = 홈 탭의 `HomeBody` 섹션들 (MainService / NewFilter / Trending / 더보기)
+- **Out of scope**: chip 선택 상태에서 렌더되는 grid feed 는 US9 범위. 홈 헤더 (bell/coin/MY) 는 ugc-platform-003 에서 다룸 (bell 추가 완료). MemeCollection / Profile grid / SwipeFeed 별도.
+
+#### 연계 AC
+
+- AC 9.3 (Thumbnail 디자인) 과 공유 토큰 사용: NewFilter 카드 썸네일도 동일 스펙 (border-radius, 신규 뱃지, 크리에이터 row)
+- AC 3.1 (Typo whitelist) 와 연계: font variant 사용 시 allowed enum 내에서
+
+---
+
 ## 비즈니스 룰
 
 ### E2E 실행 룰
