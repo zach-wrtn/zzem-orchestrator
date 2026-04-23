@@ -1,0 +1,440 @@
+openapi: 3.0.3
+info:
+  title: UGC Platform — Feed Interaction & Payback API
+  version: 0.2.0-ugc-platform-002
+  description: |
+    Sprint ugc-platform-002 (UGC Platform Phase 2) API contract.
+    Extends Phase 1 (ugc-platform-001) profile/visibility endpoints with:
+      - Content visibility toggle (publish / unpublish)
+      - Regeneration tracking (sourceContentId) + regeneration count
+      - Credit payback on regeneration (1%, promotion credit, 페르소나 제외)
+      - Likes domain (toggle + my-likes list + like count / liked state)
+      - Custom-prompt content publish block (AC 1.4)
+      - Credit history payback row (AC 4.2)
+    Inherited Phase 1 endpoints MUST NOT regress.
+    All endpoints under /v2 prefix (meme-api convention).
+
+servers:
+  - url: https://api.wrtn.io
+    description: Production
+
+tags:
+  - name: me
+    description: Authenticated user's own profile and content
+  - name: users
+    description: Public view of other users
+  - name: visibility
+    description: Content publish / unpublish toggle (AC 1.1, 1.3, 1.4, 1.8)
+  - name: regeneration
+    description: Swipe-feed CTA regeneration flow (AC 1.5, 1.6)
+  - name: likes
+    description: Like toggle + liked content list (AC 3.1, 3.2, 3.3)
+  - name: credits
+    description: Credit payback entries in existing credit history (AC 4.2)
+
+security:
+  - LibUserAuth: []
+
+# ============================================================================
+# PATHS
+# ============================================================================
+paths:
+
+  # --------------------------------------------------------------------------
+  # Inherited from ugc-platform-001 (unchanged surface, extended response schemas)
+  # --------------------------------------------------------------------------
+  # - GET    /v2/me/profile                   — unchanged
+  # - PATCH  /v2/me/profile                   — unchanged
+  # - GET    /v2/me/contents                  — response `ContentSummary` extended
+  #                                             (likeCount, liked, sourceContentId, regenerateCount)
+  # - GET    /v2/me/contents/counts           — unchanged surface; `liked` now nonzero in Phase 2
+  # - GET    /v2/users/{userId}/profile       — unchanged
+  # - GET    /v2/users/{userId}/contents      — response `ContentSummary` extended
+  #
+  # Regression Guard: existing FE consumers relying on Phase 1 required fields MUST continue to work.
+
+  # --------------------------------------------------------------------------
+  # be-001 — Content visibility toggle
+  # --------------------------------------------------------------------------
+  /v2/me/contents/{contentId}/visibility:
+    patch:
+      tags: [me, visibility]
+      summary: 내 콘텐츠 공개/비공개 토글 (AC 1.1, 1.3, 1.4, 1.8)
+      description: |
+        Toggles visibility (isPublished) of the caller's own content.
+        Rules:
+          - Only the owner can toggle. Non-owner → 403.
+          - Custom-prompt content MUST NOT be published (AC 1.4). Request with
+            { isPublished: true } against a custom-prompt content → 409 with
+            errorCode = "CUSTOM_PROMPT_PUBLISH_BLOCKED".
+          - Pre-update legacy content: default remains isPublished=false until
+            the owner explicitly toggles (AC 1.1).
+          - Publish: side-effect = content enters feed pool.
+          - Unpublish: side-effect = content removed from feed pool.
+            Previously granted payback credits are NOT reclaimed (비즈니스 룰 §페이백 6).
+          - Soft delete preserves any already-granted payback (비즈니스 룰 §페이백 9).
+      operationId: updateMyContentVisibility
+      security:
+        - LibUserAuth: []
+      parameters:
+        - name: contentId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateVisibilityRequest"
+      responses:
+        "200":
+          description: OK — 토글 결과 (updated isPublished 값 포함)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContentSummary"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: 본인 소유 아님
+        "404":
+          description: Content not found / soft-deleted
+        "409":
+          description: |
+            Custom-prompt content 을 공개 요청 (errorCode=CUSTOM_PROMPT_PUBLISH_BLOCKED)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  # --------------------------------------------------------------------------
+  # be-002 — Regeneration tracking (source content id)
+  # --------------------------------------------------------------------------
+  # 기존 생성 endpoint 확장. 별도 경로 신설 X — 단일 source-of-truth 유지.
+  # FE 는 `sourceContentId` 를 CreateContentRequest / CreateCustomPromptRequest
+  # body 에 optional 로 포함. 세로 스와이프 CTA ('템플릿 사용하기') 경유만 전송.
+  # 홈 직접 생성 시 omit.
+  #
+  # Note: 본 contract 는 필드 추가만 SSOT. 기존 generate endpoint 의 전체 스펙은 wrtn-backend 참조.
+  #
+  # Extension:
+  #   CreateContentRequest (POST /v2/contents 또는 기존 generate endpoint)
+  #     + sourceContentId?: string
+  #   CreateCustomPromptRequest
+  #     + sourceContentId?: string  # (참고: custom-prompt 는 공개 불가이나 sourceContentId 는
+  #                                    편집/재생성 연결용. 다만 페이백 대상은 아님.)
+  #
+  # Validation:
+  #   - sourceContentId 가 존재할 경우, 해당 콘텐츠는 isPublished=true 여야 한다.
+  #     isPublished=false → 400 errorCode=SOURCE_CONTENT_NOT_PUBLIC
+  #   - 체인 규칙: 재생성 결과물 C 의 sourceContentId 는 부모 B 만 기록. B 가 이미
+  #     sourceContentId 를 갖고 있어도 A 까지 거슬러 올라가지 않는다 (직전 1단계).
+
+  # --------------------------------------------------------------------------
+  # be-003 — Payback trigger (server-internal event, no FE-facing endpoint)
+  # --------------------------------------------------------------------------
+  # 콘텐츠 생성 완료 이벤트 리스너에서 sourceContentId 존재 시:
+  #   1) 원본 콘텐츠 소유자 identify (Content.userId)
+  #   2) 페르소나 (UserProfile.type === INTERNAL) → skip, adopter 이벤트 미발화
+  #   3) 재생성자가 소비한 크레딧 × PAYBACK_RATE (Config env, 기본 0.01)
+  #      결과는 Math.ceil 로 올림 (AC 4.3).
+  #   4) Credit grant: source=PROMOTION, transactionType=PAYBACK.
+  #   5) CreditHistory entry:
+  #        title: "크레딧 페이백"
+  #        thumbnailUrl: 원본 콘텐츠 thumbnailUrl
+  #        amount: 페이백 크레딧
+  #        description: (optional) "{닉네임}님이 이 콘텐츠로 재생성했어요" 류
+  #
+  # Config:
+  #   PAYBACK_RATE=0.01  (env, 환경별 조정 가능. Phase 2 MVP: 마진 체크 없이 무조건 지급)
+  #   PAYBACK_MIN_RATE=0.001  (Phase 2 reserved; 본 스프린트에서 사용하지 않음)
+
+  # --------------------------------------------------------------------------
+  # be-004 — Likes domain
+  # --------------------------------------------------------------------------
+  /v2/contents/{contentId}/likes:
+    post:
+      tags: [likes]
+      summary: 콘텐츠 좋아요 추가 (AC 3.1)
+      description: |
+        Toggles on. Idempotent — 이미 좋아요 상태면 200 + 현재 상태 반환.
+        Self-like 허용 (AC 3.1).
+        Custom-prompt 콘텐츠도 좋아요 가능 (private 만 비공개 탭에 존재하나 본인만 접근).
+        Response 의 likeCount 는 총 카운트 (실제 숫자, 축약 없음).
+      operationId: likeContent
+      security:
+        - LibUserAuth: []
+      parameters:
+        - name: contentId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: OK — 현재 like 상태 및 카운트
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LikeToggleResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: Content not found
+
+    delete:
+      tags: [likes]
+      summary: 콘텐츠 좋아요 취소 (AC 3.1)
+      description: |
+        Toggles off. Idempotent — 좋아요 안 했던 상태면 200 + liked=false 반환.
+      operationId: unlikeContent
+      security:
+        - LibUserAuth: []
+      parameters:
+        - name: contentId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LikeToggleResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: Content not found
+
+  # Liked content list — 기존 /v2/me/contents?visibility=liked 를 Phase 2 에서 활성화.
+  # Phase 1 placeholder (empty) → Phase 2 실제 데이터.
+  # 정렬: liked_at DESC (좋아요 누른 시점 최신순, AC 3.2).
+  # Cursor: base64(liked_at + like_id) — Repository 쿼리는 반드시 $lte (pattern correctness-004).
+  # Response schema: 기존 ContentListResponse 재사용. ContentSummary.liked === true 보장.
+
+  # --------------------------------------------------------------------------
+  # be-005 (scope 외, 기존 유지) — Content delete
+  # --------------------------------------------------------------------------
+  # 기존 meme-api 의 DELETE /v2/contents?type=filter 와
+  # DELETE /v2/custom-prompt-contents/:contentId 를 세로 스와이프 더보기 "삭제" 액션에
+  # 매핑하여 사용. Contract 에 신규 endpoint 추가 없음.
+  # 단, 삭제 대상 검증 (본인 소유) 이 기존 Domain Service 에 존재함을 Sprint Contract Verification
+  # Method 에서 확인.
+
+# ============================================================================
+# COMPONENTS
+# ============================================================================
+components:
+  securitySchemes:
+    LibUserAuth:
+      type: apiKey
+      in: header
+      name: wrtn-user-id
+      description: LibUserGuard 헤더 인증 (기존 convention)
+
+  responses:
+    Unauthorized:
+      description: wrtn-user-id 헤더 누락 / 유효하지 않음
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+  schemas:
+
+    # ------------------------------------------------------------------------
+    # Visibility & Content (extended from Phase 1)
+    # ------------------------------------------------------------------------
+    Visibility:
+      type: string
+      enum: [public, private, liked]
+      description: MY profile tab 구분자 (Phase 1 에서 이미 정의)
+
+    UpdateVisibilityRequest:
+      type: object
+      required: [isPublished]
+      properties:
+        isPublished:
+          type: boolean
+          description: |
+            true → 공개, false → 비공개.
+            Custom-prompt content 에 true 요청 시 409 CUSTOM_PROMPT_PUBLISH_BLOCKED.
+
+    ContentSummary:
+      type: object
+      description: |
+        Phase 1 ContentSummary 확장. 기존 필수 필드 + Phase 2 추가 필드 (likeCount, liked,
+        sourceContentId, regenerateCount). Phase 1 consumer 에서는 추가 필드 무시 가능.
+      required:
+        - id
+        - thumbnailUrl
+        - isPublished
+        - createdAt
+        - likeCount
+        - liked
+        - regenerateCount
+      properties:
+        id: { type: string }
+        thumbnailUrl: { type: string }
+        isPublished: { type: boolean }
+        createdAt: { type: string, format: date-time }
+        status:
+          type: string
+          description: generation status (progress / end / error)
+        isCustomPrompt:
+          type: boolean
+          description: |
+            True 면 공개 불가 (AC 1.4). 타입 분기 시 FE 가 참조.
+        sourceContentId:
+          type: string
+          nullable: true
+          description: |
+            재생성 시 원본 콘텐츠 id (세로 스와이프 CTA 경유). 홈 직접 생성은 null.
+            직전 1단계만 기록 (체인 아님).
+        regenerateCount:
+          type: integer
+          minimum: 0
+          description: |
+            본 콘텐츠가 재생성된 횟수. 축약 표시 대상 (korean-count 포맷).
+        likeCount:
+          type: integer
+          minimum: 0
+          description: |
+            본 콘텐츠의 좋아요 총 수. 실제 숫자 그대로 노출 (AC 3.3 — 축약 없음, 0 포함).
+        liked:
+          type: boolean
+          description: |
+            현재 caller 가 이 콘텐츠에 좋아요했는지. 셀프 좋아요도 true 로 반영.
+
+    ContentListResponse:
+      type: object
+      required: [list, nextCursor]
+      properties:
+        list:
+          type: array
+          items:
+            $ref: "#/components/schemas/ContentSummary"
+        nextCursor:
+          type: string
+          nullable: true
+          description: |
+            Controller MUST NOT re-wrap Service's CursorResponseDto (KB correctness-001).
+            Field name MUST be `list` (KB integration-001).
+            Repository cursor 쿼리는 반드시 `_id: { $lte: cursorId }` 또는 compound 커서의
+            경우 `(sort_key, _id) <= cursor` (KB correctness-004, rubric C10).
+
+    ContentCountsResponse:
+      type: object
+      required: [public, private, liked]
+      properties:
+        public: { type: integer, minimum: 0 }
+        private: { type: integer, minimum: 0 }
+        liked:
+          type: integer
+          minimum: 0
+          description: |
+            Phase 2 에서 실제 값. 좋아요한 콘텐츠 개수 (counter 혹은 distinct contentId count).
+
+    # ------------------------------------------------------------------------
+    # Phase 1 inherited schemas (surface unchanged, listed for completeness)
+    # ------------------------------------------------------------------------
+    MyProfileResponse:
+      type: object
+      required:
+        - id
+        - userId
+        - nickname
+        - profileImageUrl
+        - followerCount
+        - followingCount
+        - regeneratedCount
+        - isPersona
+      properties:
+        id: { type: string }
+        userId: { type: string }
+        nickname: { type: string, minLength: 2, maxLength: 20 }
+        profileImageUrl: { type: string }
+        bio: { type: string, nullable: true }
+        link: { type: string, nullable: true }
+        followerCount: { type: integer, minimum: 0 }
+        followingCount: { type: integer, minimum: 0 }
+        regeneratedCount:
+          type: integer
+          minimum: 0
+          description: |
+            본 유저의 공개 콘텐츠가 타인에 의해 재생성된 총 횟수. Phase 2 에서
+            hardcoded 0 → 실제 누적값으로 전환 (be-002 완료 의존).
+        isPersona:
+          type: boolean
+
+    PublicProfileResponse:
+      type: object
+      required:
+        - id
+        - userId
+        - nickname
+        - profileImageUrl
+        - followerCount
+        - followingCount
+        - regeneratedCount
+      properties:
+        id: { type: string }
+        userId: { type: string }
+        nickname: { type: string }
+        profileImageUrl: { type: string }
+        bio: { type: string, nullable: true }
+        link: { type: string, nullable: true }
+        followerCount: { type: integer, minimum: 0 }
+        followingCount: { type: integer, minimum: 0 }
+        regeneratedCount:
+          type: integer
+          minimum: 0
+          description: |
+            타유저 공개 프로필 기준. Phase 2 에서 실제값 반영. isPersona 필드는
+            PublicProfileResponse 에 절대 포함되지 않는다 (Phase 1 AC 7.5 regression guard).
+
+    UpdateProfileRequest:
+      type: object
+      properties:
+        nickname:
+          type: string
+          minLength: 2
+          maxLength: 20
+        profileImageFileUuid: { type: string }
+        bio: { type: string, maxLength: 500 }
+        link: { type: string, maxLength: 500 }
+
+    # ------------------------------------------------------------------------
+    # Likes
+    # ------------------------------------------------------------------------
+    LikeToggleResponse:
+      type: object
+      required: [contentId, liked, likeCount]
+      properties:
+        contentId: { type: string }
+        liked:
+          type: boolean
+          description: 응답 시점의 좋아요 상태.
+        likeCount:
+          type: integer
+          minimum: 0
+          description: |
+            응답 시점의 좋아요 총 수 (실제 숫자 — AC 3.3 축약 없음).
+
+    # ------------------------------------------------------------------------
+    # Error
+    # ------------------------------------------------------------------------
+    ErrorResponse:
+      type: object
+      required: [statusCode, message]
+      properties:
+        statusCode: { type: integer }
+        message: { type: string }
+        errorCode:
+          type: string
+          description: |
+            Phase 2 추가. 특정 business rule 위반 식별자.
+            - CUSTOM_PROMPT_PUBLISH_BLOCKED — custom prompt 공개 불가 (AC 1.4)
+            - SOURCE_CONTENT_NOT_PUBLIC      — sourceContentId 가 비공개 콘텐츠
+            - SOURCE_CONTENT_DELETED         — sourceContentId 가 삭제된 콘텐츠 (AC 1.6 모달 사유)

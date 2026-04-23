@@ -1,0 +1,51 @@
+# Sprint Configuration — ugc-platform-003 (Phase 3: 소셜 & 알림)
+
+sprint_id: "ugc-platform-003"
+branch_prefix: "sprint"
+
+repositories:
+  backend:
+    source: ~/dev/work/wrtn-backend
+    base: "apple"
+    mode: worktree
+  app:
+    source: ~/dev/work/app-core-packages
+    base: "epic/ugc-platform-final"
+    mode: worktree
+  tokens:
+    source: ~/dev/work/wds-tokens
+    base: "main"
+    mode: symlink
+
+defaults:
+  base: "main"
+
+team:
+  teammates:
+    - be-engineer
+    - fe-engineer
+    - design-engineer
+    - evaluator
+  settings:
+    eval_retry_limit: 2
+    max_parallel_tasks: 4
+
+display:
+  title: "UGC Platform 003 — 소셜 & 알림"
+  startDate: "2026-04-23"
+  endDate: ""
+  status: "in-progress"
+  tags:
+    - ugc-platform
+    - phase-3
+    - social
+    - notification
+    - follow-up
+  summary: "팔로우/차단/신고 + 알림센터/푸시/설정. Phase 1(프로필) + Phase 2(피드·페이백) 위에 소셜 레이어와 알림 시스템을 올린다."
+
+follow_up:
+  previous_sprint: "ugc-platform-002"
+  inherited:
+    api_contract: true
+    deferred_items: 10  # 2 Phase-1 inherited manual QA + 5 G1 Minor + 1 G2 Minor + 3 G3 Minor + 1 architectural
+    patterns: 6
