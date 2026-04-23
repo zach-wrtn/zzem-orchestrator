@@ -1,0 +1,22 @@
+---
+name: Typography
+key: typography
+description: Pretendard 기반 10-step scale. H2/Title/Subtitle/Body/Label.
+tokenSource: primitive-typography.json
+order: 2
+---
+
+## 서체
+
+- **Pretendard Variable** — 한국어·라틴 모두 담당. Inter는 라틴 폴백.
+- **JetBrains Mono** — 라틴 전용 (코드·라벨·메타). 한국어 라벨은 sans.
+
+## 스케일
+
+10-step: H2-32 / Title3-18 / Subtitle 2-6 / Body 4-7 / Label5-10. 각 스텝은 size + line-height + weight가 한 쌍. size만 선택하고 line-height를 직접 조합하지 말 것.
+
+## 한국어 특화
+
+- `word-break: keep-all` + `overflow-wrap: break-word` — 단어 중간 끊김 방지
+- 헤딩에 `text-wrap: balance` — 줄바꿈 자연스러움
+- 숫자는 `font-variant-numeric: tabular-nums` — 날짜·카운트 정렬

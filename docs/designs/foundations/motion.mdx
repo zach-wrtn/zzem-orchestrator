@@ -1,0 +1,22 @@
+---
+name: Motion
+key: motion
+description: 4-curve system. ease-out 140 / spring-soft 220 / spring-handoff 320 / linear-fast 100.
+tokenSource: primitive-motion.json
+order: 5
+---
+
+## 4개 커브
+
+- **ease-out-quart 140ms** — 기본 UI (hover, reveal, 색 변화)
+- **spring-soft 220ms** — 카드 hover lift, 테마 토글
+- **spring-handoff 320ms** — 프리뷰 확장, 모달 open
+- **linear-fast 100ms** — `prefers-reduced-motion: reduce` 폴백
+
+## 원칙
+
+임의 커브 추가 금지. 이 4개로 모든 인터랙션 설명되어야 함. 새 느낌이 필요하면 duration만 조정.
+
+## reduced-motion
+
+모든 스프링 → linear-fast. shared-element transition → cross-fade 80ms. hover transform 제거, 색 변화만 유지.
