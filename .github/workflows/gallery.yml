@@ -42,6 +42,14 @@ jobs:
         working-directory: sprint-gallery
         run: pnpm exec puppeteer browsers install chrome
 
+      - name: Install Playwright browsers
+        working-directory: sprint-gallery
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: E2E tests
+        working-directory: sprint-gallery
+        run: pnpm run test:e2e
+
       - name: Test
         working-directory: sprint-gallery
         run: pnpm test
