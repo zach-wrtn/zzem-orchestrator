@@ -1,0 +1,26 @@
+{
+  "wds": {
+    "component": {
+      "radio": {
+
+        "default": {
+          "fill-off":      { "$value": "{wds.semantic.surface.primary}", "$type": "color" },
+          "fill-on":       { "$value": "{wds.semantic.fill.brand-primary}", "$type": "color" },
+          "fill-disabled": { "$value": "{wds.semantic.fill.disabled}", "$type": "color" },
+          "line-off":      { "$value": "{wds.semantic.line.normal}", "$type": "color" },
+          "line-on":       { "$value": "{wds.semantic.fill.brand-primary}", "$type": "color" },
+          "dot":           { "$value": "{wds.semantic.label.inverse}", "$type": "color" },
+          "label":         { "$value": "{wds.semantic.label.normal}", "$type": "color" },
+          "label-disabled": { "$value": "{wds.semantic.label.disabled}", "$type": "color" }
+        },
+
+        "sizing": {
+          "box-size": { "$value": "{wds.spacing.24}", "$type": "sizing" },
+          "dot-size": { "$value": "{wds.spacing.10}", "$type": "sizing" },
+          "radius":   { "$value": "{wds.radius.full}", "$type": "borderRadius" },
+          "gap":      { "$value": "{wds.spacing.8}", "$type": "spacing" }
+        }
+      }
+    }
+  }
+}

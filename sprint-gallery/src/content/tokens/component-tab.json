@@ -1,0 +1,23 @@
+{
+  "wds": {
+    "component": {
+      "tab": {
+
+        "default": {
+          "label-active":    { "$value": "{wds.semantic.label.normal}", "$type": "color" },
+          "label-inactive":  { "$value": "{wds.semantic.label.assistive}", "$type": "color" },
+          "label-disabled":  { "$value": "{wds.semantic.label.disabled}", "$type": "color" },
+          "indicator":       { "$value": "{wds.semantic.label.normal}", "$type": "color" },
+          "line":            { "$value": "{wds.semantic.line.alternative}", "$type": "color" }
+        },
+
+        "sizing": {
+          "height":            { "$value": "{wds.spacing.48}", "$type": "sizing" },
+          "indicator-height":  { "$value": "{wds.spacing.2}", "$type": "sizing" },
+          "padding-horizontal": { "$value": "{wds.spacing.16}", "$type": "spacing" },
+          "gap":               { "$value": "{wds.spacing.0}", "$type": "spacing" }
+        }
+      }
+    }
+  }
+}

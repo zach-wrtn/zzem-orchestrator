@@ -1,0 +1,24 @@
+{
+  "wds": {
+    "component": {
+      "chip": {
+
+        "default": {
+          "fill":          { "$value": "{wds.semantic.surface.secondary}", "$type": "color" },
+          "fill-selected": { "$value": "{wds.semantic.fill.brand-weak}", "$type": "color" },
+          "label":         { "$value": "{wds.semantic.label.alternative}", "$type": "color" },
+          "label-selected": { "$value": "{wds.semantic.label.brand}", "$type": "color" },
+          "line":          { "$value": "{wds.semantic.line.normal}", "$type": "color" },
+          "line-selected": { "$value": "{wds.semantic.line.brand}", "$type": "color" }
+        },
+
+        "sizing": {
+          "height":            { "$value": "{wds.spacing.32}", "$type": "sizing" },
+          "padding-horizontal": { "$value": "{wds.spacing.12}", "$type": "spacing" },
+          "radius":            { "$value": "{wds.radius.full}", "$type": "borderRadius" },
+          "gap":               { "$value": "{wds.spacing.4}", "$type": "spacing" }
+        }
+      }
+    }
+  }
+}

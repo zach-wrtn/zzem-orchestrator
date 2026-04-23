@@ -1,0 +1,25 @@
+{
+  "wds": {
+    "component": {
+      "navigation": {
+
+        "top-bar": {
+          "fill":    { "$value": "{wds.semantic.background.normal}", "$type": "color" },
+          "label":   { "$value": "{wds.semantic.label.normal}", "$type": "color" },
+          "icon":    { "$value": "{wds.semantic.label.normal}", "$type": "color" },
+          "height":  { "$value": "{wds.spacing.48}", "$type": "sizing" }
+        },
+
+        "bottom-bar": {
+          "fill":            { "$value": "{wds.semantic.background.normal}", "$type": "color" },
+          "icon-active":     { "$value": "{wds.semantic.fill.brand-primary}", "$type": "color" },
+          "icon-inactive":   { "$value": "{wds.semantic.label.assistive}", "$type": "color" },
+          "label-active":    { "$value": "{wds.semantic.fill.brand-primary}", "$type": "color" },
+          "label-inactive":  { "$value": "{wds.semantic.label.assistive}", "$type": "color" },
+          "line":            { "$value": "{wds.semantic.line.alternative}", "$type": "color" },
+          "height":          { "$value": "{wds.spacing.56}", "$type": "sizing" }
+        }
+      }
+    }
+  }
+}

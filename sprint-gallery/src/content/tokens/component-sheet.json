@@ -1,0 +1,26 @@
+{
+  "wds": {
+    "component": {
+      "sheet": {
+
+        "bottom-sheet": {
+          "fill":        { "$value": "{wds.semantic.background.elevated}", "$type": "color" },
+          "handle-fill": { "$value": "{wds.semantic.line.normal}", "$type": "color" },
+          "dimmed":      { "$value": "{wds.semantic.background.dimmed}", "$type": "color" },
+          "radius":      { "$value": "{wds.radius.xl}", "$type": "borderRadius" },
+          "padding":     { "$value": "{wds.spacing.20}", "$type": "spacing" },
+          "handle-width":  { "$value": "{wds.spacing.32}", "$type": "sizing" },
+          "handle-height": { "$value": "4px", "$type": "sizing" }
+        },
+
+        "dialog": {
+          "fill":    { "$value": "{wds.semantic.background.elevated}", "$type": "color" },
+          "dimmed":  { "$value": "{wds.semantic.background.dimmed}", "$type": "color" },
+          "radius":  { "$value": "{wds.radius.xl}", "$type": "borderRadius" },
+          "padding": { "$value": "{wds.spacing.24}", "$type": "spacing" },
+          "elevation": { "$value": "{wds.elevation.xl}" }
+        }
+      }
+    }
+  }
+}

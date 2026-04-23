@@ -1,0 +1,18 @@
+{
+  "wds": {
+    "motion": {
+      "duration": {
+        "$type": "other",
+        "fast":   { "$value": "150ms" },
+        "normal": { "$value": "250ms" },
+        "slow":   { "$value": "350ms" }
+      },
+      "easing": {
+        "$type": "other",
+        "standard":    { "$value": "cubic-bezier(0.4, 0, 0.2, 1)" },
+        "decelerate":  { "$value": "cubic-bezier(0, 0, 0.2, 1)" },
+        "accelerate":  { "$value": "cubic-bezier(0.4, 0, 1, 1)" }
+      }
+    }
+  }
+}

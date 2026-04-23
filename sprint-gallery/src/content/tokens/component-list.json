@@ -1,0 +1,32 @@
+{
+  "wds": {
+    "component": {
+      "list": {
+
+        "cell": {
+          "fill":            { "$value": "{wds.semantic.surface.primary}", "$type": "color" },
+          "fill-hover":      { "$value": "{wds.semantic.interaction.hover}", "$type": "color" },
+          "fill-pressed":    { "$value": "{wds.semantic.interaction.pressed}", "$type": "color" },
+          "label-primary":   { "$value": "{wds.semantic.label.normal}", "$type": "color" },
+          "label-secondary": { "$value": "{wds.semantic.label.alternative}", "$type": "color" },
+          "label-tertiary":  { "$value": "{wds.semantic.label.assistive}", "$type": "color" },
+          "line":            { "$value": "{wds.semantic.line.alternative}", "$type": "color" }
+        },
+
+        "sizing": {
+          "min-height":        { "$value": "{wds.spacing.48}", "$type": "sizing" },
+          "padding-horizontal": { "$value": "{wds.spacing.20}", "$type": "spacing" },
+          "padding-vertical":  { "$value": "{wds.spacing.12}", "$type": "spacing" },
+          "gap":               { "$value": "{wds.spacing.8}", "$type": "spacing" }
+        },
+
+        "divider": {
+          "thin-color":   { "$value": "{wds.semantic.line.alternative}", "$type": "color" },
+          "thin-height":  { "$value": "{wds.spacing.1}", "$type": "sizing" },
+          "thick-color":  { "$value": "{wds.semantic.surface.secondary}", "$type": "color" },
+          "thick-height": { "$value": "{wds.spacing.12}", "$type": "sizing" }
+        }
+      }
+    }
+  }
+}

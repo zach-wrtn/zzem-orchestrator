@@ -1,0 +1,19 @@
+{
+  "wds": {
+    "component": {
+      "skeleton": {
+
+        "default": {
+          "fill":      { "$value": "{wds.semantic.surface.secondary}", "$type": "color" },
+          "highlight": { "$value": "{wds.semantic.surface.tertiary}", "$type": "color" }
+        },
+
+        "sizing": {
+          "radius-text":   { "$value": "{wds.radius.xs}", "$type": "borderRadius" },
+          "radius-circle": { "$value": "{wds.radius.full}", "$type": "borderRadius" },
+          "radius-rect":   { "$value": "{wds.radius.sm}", "$type": "borderRadius" }
+        }
+      }
+    }
+  }
+}

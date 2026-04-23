@@ -1,0 +1,26 @@
+{
+  "wds": {
+    "component": {
+      "toggle": {
+
+        "track": {
+          "fill-off":      { "$value": "{wds.semantic.fill.neutral-secondary}", "$type": "color" },
+          "fill-on":       { "$value": "{wds.semantic.fill.brand-primary}", "$type": "color" },
+          "fill-disabled": { "$value": "{wds.semantic.fill.disabled}", "$type": "color" }
+        },
+
+        "knob": {
+          "fill":          { "$value": "{wds.color.neutral.0}", "$type": "color" },
+          "fill-disabled": { "$value": "{wds.color.neutral.200}", "$type": "color" }
+        },
+
+        "sizing": {
+          "width":       { "$value": "{wds.spacing.48}", "$type": "sizing" },
+          "height":      { "$value": "{wds.spacing.28}", "$type": "sizing" },
+          "knob-size":   { "$value": "{wds.spacing.24}", "$type": "sizing" },
+          "radius":      { "$value": "{wds.radius.full}", "$type": "borderRadius" }
+        }
+      }
+    }
+  }
+}

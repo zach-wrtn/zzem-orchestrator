@@ -1,0 +1,27 @@
+{
+  "wds": {
+    "component": {
+      "checkbox": {
+
+        "default": {
+          "fill-off":      { "$value": "{wds.semantic.surface.primary}", "$type": "color" },
+          "fill-on":       { "$value": "{wds.semantic.fill.brand-primary}", "$type": "color" },
+          "fill-disabled": { "$value": "{wds.semantic.fill.disabled}", "$type": "color" },
+          "line-off":      { "$value": "{wds.semantic.line.normal}", "$type": "color" },
+          "line-on":       { "$value": "{wds.semantic.fill.brand-primary}", "$type": "color" },
+          "icon":          { "$value": "{wds.semantic.label.inverse}", "$type": "color" },
+          "icon-disabled": { "$value": "{wds.semantic.label.disabled}", "$type": "color" },
+          "label":         { "$value": "{wds.semantic.label.normal}", "$type": "color" },
+          "label-disabled": { "$value": "{wds.semantic.label.disabled}", "$type": "color" }
+        },
+
+        "sizing": {
+          "box-size":  { "$value": "{wds.spacing.24}", "$type": "sizing" },
+          "icon-size": { "$value": "{wds.icon.size.sm}", "$type": "sizing" },
+          "radius":    { "$value": "{wds.radius.xs}", "$type": "borderRadius" },
+          "gap":       { "$value": "{wds.spacing.8}", "$type": "spacing" }
+        }
+      }
+    }
+  }
+}

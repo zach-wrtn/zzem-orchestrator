@@ -1,0 +1,26 @@
+{
+  "wds": {
+    "component": {
+      "avatar": {
+
+        "default": {
+          "fill":        { "$value": "{wds.semantic.surface.secondary}", "$type": "color" },
+          "icon":        { "$value": "{wds.semantic.label.assistive}", "$type": "color" },
+          "line":        { "$value": "{wds.semantic.line.alternative}", "$type": "color" },
+          "badge-fill":  { "$value": "{wds.semantic.status.success}", "$type": "color" },
+          "badge-line":  { "$value": "{wds.semantic.surface.primary}", "$type": "color" }
+        },
+
+        "sizing": {
+          "xs":         { "$value": "{wds.spacing.24}", "$type": "sizing" },
+          "sm":         { "$value": "{wds.spacing.32}", "$type": "sizing" },
+          "md":         { "$value": "{wds.spacing.40}", "$type": "sizing" },
+          "lg":         { "$value": "{wds.spacing.48}", "$type": "sizing" },
+          "xl":         { "$value": "{wds.spacing.64}", "$type": "sizing" },
+          "radius":     { "$value": "{wds.radius.full}", "$type": "borderRadius" },
+          "badge-size": { "$value": "{wds.spacing.12}", "$type": "sizing" }
+        }
+      }
+    }
+  }
+}

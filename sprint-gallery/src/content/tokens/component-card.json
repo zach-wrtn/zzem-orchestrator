@@ -1,0 +1,23 @@
+{
+  "wds": {
+    "component": {
+      "card": {
+
+        "default": {
+          "fill":       { "$value": "{wds.semantic.surface.primary}", "$type": "color" },
+          "fill-hover": { "$value": "{wds.semantic.interaction.hover}", "$type": "color" },
+          "line":       { "$value": "{wds.semantic.line.alternative}", "$type": "color" },
+          "label-primary":   { "$value": "{wds.semantic.label.normal}", "$type": "color" },
+          "label-secondary": { "$value": "{wds.semantic.label.alternative}", "$type": "color" }
+        },
+
+        "sizing": {
+          "padding":   { "$value": "{wds.spacing.16}", "$type": "spacing" },
+          "radius":    { "$value": "{wds.radius.lg}", "$type": "borderRadius" },
+          "gap":       { "$value": "{wds.spacing.12}", "$type": "spacing" },
+          "elevation": { "$value": "{wds.elevation.sm}" }
+        }
+      }
+    }
+  }
+}
