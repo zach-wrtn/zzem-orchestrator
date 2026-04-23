@@ -1,0 +1,99 @@
+sprint_id: "ugc-platform-integration-qa"
+prd_source: "docs/prds/ugc-platform-integration-qa.md"
+generated_at: "2026-04-24T03:00:00+09:00"
+pr: "app-core-packages#568"
+
+coverage:
+  total_ac: 24          # US1(3) + US2(2) + US3(2) + US4(3) + US5(2) + US6(2) + US7(4) + US8(2) + US9(4) + US10(5) 제외 (US9/US10 stretch)
+  fulfilled: 6          # 4.1-b / 2.1 / 3.1 / 7.1~7.4 (flow yaml 수준)
+  partially_fulfilled: 5 # 1.2 (yaml 존재, device PASS 미검증) / 1.3 / 3.2 / 6.1 / 6.2
+  unfulfilled: 13
+  fulfillment_rate: "0.25"
+
+items:
+  - ac_id: "AC 4.1-b (ApiInstance migration)"
+    status: "fulfilled"
+    evidence: "commit d8adaf799 — 32 hits in 11 files"
+    priority: "P0"
+  - ac_id: "AC 2.1 (7 seed fetcher)"
+    status: "fulfilled"
+    evidence: "commit 0e252cca9 — 7 scripts + run-e2e 확장"
+    priority: "P0"
+  - ac_id: "AC 3.1 (Typo whitelist grep gate)"
+    status: "fulfilled"
+    evidence: "commit ae6bc9d18 — 354 usages verified + Caption1 fix"
+    priority: "P1"
+  - ac_id: "AC 7.1 (Flow A — content → publish → payback)"
+    status: "partially_fulfilled"
+    reason: "yaml 작성. 10시 batch + payback 적립은 time-warp 불가 — BE 스펙 위임"
+  - ac_id: "AC 7.2 (Flow B — follow → notification → unfollow)"
+    status: "partially_fulfilled"
+    reason: "yaml 작성. 타 유저 푸시 수신은 multi-device 불가 — BE spec"
+  - ac_id: "AC 7.3 (Flow C — report → block → unblock)"
+    status: "partially_fulfilled"
+    reason: "yaml 작성. 피드 즉시 제외 visual 검증은 BE read-path filter 위임"
+  - ac_id: "AC 7.4 (Flow D — persona cross-phase)"
+    status: "partially_fulfilled"
+    reason: "yaml 작성. persona alert 미수신은 BE listener unit spec"
+  - ac_id: "AC 6.1 (Manual QA — AC-2.3 프로필 공유)"
+    status: "deferred"
+    reason: "Device operator 필요 — 사용자 수행. ApiInstance fix 이후 실제 데이터 렌더 regression smoke 동반 권장."
+  - ac_id: "AC 6.2 (AC-7.4 regression flow)"
+    status: "fulfilled"
+    evidence: "other-user-profile-not-found.yaml 이 이미 003 에 존재 — regression suite 에 포함"
+  - ac_id: "AC 1.2 (7 failing flow PASS)"
+    status: "partially_fulfilled"
+    reason: "Seed 인프라 + yaml 수정 완료. 각 flow device PASS 검증은 CI/로컬 Maestro 실행 필요 — AC 8.1 후속."
+  - ac_id: "AC 1.3 (Regression flow)"
+    status: "partially_fulfilled"
+    reason: "기존 flow 22+ 존속 + 4 cross-phase 추가. device 실행 검증은 AC 8.1 이후."
+  - ac_id: "AC 3.2 (screen mount smoke)"
+    status: "unfulfilled"
+    reason: "모든 screen 진입 flow 작성 필요 — 본 스프린트 scope 외. US3 일부 커버."
+  - ac_id: "AC 4.1-a (.env.example 주석)"
+    status: "unfulfilled"
+    reason: "Option B (4.1-b) 채택으로 moot — ApiInstance.Auth MemeApp 제거."
+  - ac_id: "AC 4.2 (Airbridge routing 문서화)"
+    status: "unfulfilled"
+    reason: "docs/qa/ 별도 작성 — QA 이후."
+  - ac_id: "AC 4.3 (IAP init crash)"
+    status: "unfulfilled"
+    reason: "별도 follow-up."
+  - ac_id: "AC 5.1 / 5.2 (Token refresh 자동화)"
+    status: "unfulfilled"
+    reason: "인프라 과제 — VPN 분리 또는 CI-only refresh."
+  - ac_id: "AC 8.1 / 8.2 (Regression dashboard)"
+    status: "unfulfilled"
+    reason: "CI workflow 신규 — 별도 스프린트."
+  - ac_id: "US9 (Grid Feed Masonry)"
+    status: "out_of_scope"
+    reason: "UI refactor 트랙 — QA/안정화 분리."
+  - ac_id: "US10 (Explore tab 디자인 정합)"
+    status: "out_of_scope"
+    reason: "UI refactor 트랙."
+
+follow_up_tracking:
+  previous_sprint: "ugc-platform-003"
+  inherited_deferred: 17
+  resolved_in_this_sprint: 0         # Manual QA 는 device operator 수행 후 별도 closure.
+  still_deferred: 17
+  new_carryover_items: 13
+
+pivot_incident:
+  issue: "Phase 1 init 시 docs/prds/ canonical PRD 미확인. retrospective + deferred-items.yaml 로만 Delta PRD 구성 → 잘못된 nickname sort scope (canonical NEVER DO 저촉)."
+  detection: "사용자 질문 — docs/prds/ugc-platform-integration-qa.md 확인 여부."
+  resolution: "backend reset (HEAD → 9cfebaaf), stale artifacts 정리, canonical PRD 기반 Phase 2 재착수. Pivot 시점에 BE Engineer agent 의 sandbox 제약도 발견 — Sprint Lead 가 Generator 겸직."
+  cost: "약 2시간 (nickname sort 구현 + evaluation round 1) — reflog 보존 bff2ec23 / 58d6aed8."
+  kb_promotion_candidate:
+    - pattern: "orchestrator-phase-1-init-canonical-prd-check"
+      rule: "Phase 1 init 시 docs/prds/<sprint-id>.md 존재 우선 확인. 없을 때만 retrospective 기반 Delta PRD 생성."
+      severity: "major"
+    - pattern: "agent-team-sandbox-permissions"
+      rule: "BE/FE Engineer agent 스폰 전 .claude/settings 에 대상 source repo 의 bash/git permission 사전 grant 필요."
+      severity: "major"
+
+harness_gap_summary:
+  - "Phase 1 init 에서 canonical PRD 선행 확인 누락 (pivot 유발)"
+  - "Sub-agent sandbox 제약으로 BE Generator/Evaluator 가 Sprint Lead 겸직 (Planner-Generator 분리 원칙 위반)"
+  - "Maestro device 실행 환경 부재로 flow PASS 검증 deferred"
+  - "3-sprint manual QA carryover 여전히 pending (AC 6.1 AC-2.3)"
