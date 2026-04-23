@@ -16,14 +16,16 @@ for (const s of sprints) {
   byYear.get(y)!.push(s);
 }
 ---
-<aside class="rail">
+<nav class="rail" aria-label="Sprint timeline">
   {[...byYear.entries()].map(([year, list]) => (
     <div class="year-block">
       <div class="year">{year}</div>
       <ul>
         {list.map((s) => (
           <li>
-            <a href={`#${s.slug}`}>
+            <a href={`#${s.slug}`}
+               data-sprint-target={s.slug}
+               aria-label={`Jump to ${s.title}`}>
               <span class="dot" data-status={s.status}></span>
               <span class="labels">
                 <span class="name">{s.title}</span>
@@ -35,20 +37,60 @@ for (const s of sprints) {
       </ul>
     </div>
   ))}
-</aside>
+</nav>
+
+<script>
+  const rail = document.querySelector('.rail') as HTMLElement | null;
+  if (rail) {
+    const setActive = (slug: string) => {
+      rail.querySelectorAll<HTMLElement>('[data-sprint-target]').forEach((a) => {
+        const isActive = a.dataset.sprintTarget === slug;
+        a.classList.toggle('active', isActive);
+        a.setAttribute('aria-current', isActive ? 'true' : 'false');
+      });
+    };
+
+    const stream = document.querySelector('.stream');
+    const panels = document.querySelectorAll<HTMLElement>('.panel[data-sprint-slug]');
+    if (stream && panels.length > 0) {
+      const io = new IntersectionObserver(
+        (entries) => {
+          const best = entries
+            .filter((e) => e.isIntersecting)
+            .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+          if (best) {
+            const slug = (best.target as HTMLElement).dataset.sprintSlug;
+            if (slug) setActive(slug);
+          }
+        },
+        { root: stream, threshold: [0.25, 0.55, 0.85] },
+      );
+      panels.forEach((p) => io.observe(p));
+      setActive((panels[0] as HTMLElement).dataset.sprintSlug!);
+    }
+
+    rail.addEventListener('click', (e) => {
+      const a = (e.target as HTMLElement).closest<HTMLAnchorElement>('a[data-sprint-target]');
+      if (!a) return;
+      e.preventDefault();
+      const slug = a.dataset.sprintTarget!;
+      const panel = document.querySelector<HTMLElement>(`.panel[data-sprint-slug="${slug}"]`);
+      panel?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
+</script>
 
 <style>
   .rail {
     position: sticky; top: 72px; align-self: start;
     width: var(--rail-width);
     padding-right: 16px; border-right: 1px solid var(--border);
-    font-family: var(--font-ui); font-size: 13px;
+    font-family: var(--font-sans); font-size: var(--fs-small);
     max-height: calc(100vh - 80px); overflow-y: auto;
   }
   .year-block { margin-bottom: 28px; }
   .year {
-    font-family: var(--font-mono);
-    color: var(--text-faint);
+    font-family: var(--font-mono); color: var(--text-dim);
     font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
     margin-bottom: 10px;
   }
@@ -58,24 +100,32 @@ for (const s of sprints) {
     padding: 6px 8px; margin-left: -8px;
     border-radius: 6px;
     color: var(--text-dim);
-    transition: background 120ms ease, color 120ms ease;
+    transition: background var(--dur-ui) var(--ease-out-quart),
+                color var(--dur-ui) var(--ease-out-quart);
   }
   li a:hover { background: var(--surface); color: var(--text); }
+  li a.active {
+    color: var(--text); background: var(--accent-soft);
+  }
+  li a.active .dot { background: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
   .dot {
     width: 7px; height: 7px; border-radius: 50%;
     background: var(--text-faint); flex-shrink: 0;
     margin-top: 7px;
+    transition: background var(--dur-ui) var(--ease-out-quart),
+                box-shadow var(--dur-ui) var(--ease-out-quart);
   }
-  .dot[data-status="completed"] { background: #7AC79A; }
+  .dot[data-status="completed"] { background: var(--ok); }
   .dot[data-status="in-progress"] { background: var(--accent); }
   .labels { display: flex; flex-direction: column; min-width: 0; flex: 1; }
   .name {
-    font-size: 13px; line-height: 1.3;
+    font-size: var(--fs-small); line-height: 1.3;
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    max-width: 22ch;
   }
   .date {
     font-family: var(--font-mono);
-    font-size: 10.5px; color: var(--text-faint);
+    font-size: 10.5px; color: var(--text-dim);
     margin-top: 2px; letter-spacing: 0.02em;
   }
 </style>

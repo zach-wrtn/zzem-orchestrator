@@ -5,11 +5,14 @@
   "private": true,
   "scripts": {
     "dev": "astro dev",
-    "build": "pnpm run copy:prototypes && astro build",
+    "build": "pnpm run capture:screenshots && pnpm run copy:prototypes && astro build",
     "preview": "astro preview",
     "copy:prototypes": "tsx scripts/copy-prototypes.ts",
+    "capture:screenshots": "tsx scripts/capture-screenshots.ts",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
     "@astrojs/mdx": "^3.1.0",
@@ -22,9 +25,14 @@
     "yaml": "^2.5.0"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.11.2",
+    "@playwright/test": "^1.59.1",
     "@types/node": "^20.14.0",
     "@types/react": "^18.3.0",
     "@types/react-dom": "^18.3.0",
+    "pixelmatch": "^7.1.0",
+    "pngjs": "^7.0.0",
+    "puppeteer": "^23.0.0",
     "tsx": "^4.19.0",
     "typescript": "^5.5.0",
     "vitest": "^2.1.0"

@@ -1,11 +1,11 @@
 ---
 import Layout from '@/components/Layout.astro';
 import Timeline from '@/components/Timeline.astro';
-import SprintEntry from '@/components/SprintEntry.astro';
-import PreviewModal from '@/components/PreviewModal.tsx';
+import SprintPanel from '@/components/SprintPanel.astro';
 import SearchPalette from '@/components/SearchPalette.tsx';
 import { collectSprints } from '@/lib/collect-sprints';
 import { SPRINTS_DIR } from '@/lib/paths';
+
 const sprints = await collectSprints(SPRINTS_DIR);
 const searchData = sprints.map((s) => ({
   slug: s.slug,
@@ -15,23 +15,52 @@ const searchData = sprints.map((s) => ({
 }));
 ---
 <Layout title="ZZEM Sprints">
+  <a href="#stream" class="skip-link">Skip timeline navigation</a>
   <div class="layout">
     <Timeline sprints={sprints} />
-    <div class="stream">
-      {sprints.map((s) => <SprintEntry sprint={s} />)}
+    <div class="stream" id="stream" tabindex="-1">
+      {sprints.map((s, i) => <SprintPanel sprint={s} index={i} />)}
       {sprints.length === 0 && <p class="empty">No sprints yet.</p>}
     </div>
   </div>
-  <PreviewModal client:load />
   <SearchPalette client:load data={searchData} />
 </Layout>
 
 <style>
   .layout { display: grid; grid-template-columns: var(--rail-width) 1fr; gap: 48px; }
-  .stream { min-width: 0; }
-  .empty { color: var(--text-dim); }
+  .stream {
+    min-width: 0;
+    scroll-snap-type: y mandatory;
+    scroll-snap-stop: always;
+    overflow-y: auto;
+    max-height: calc(100vh - 64px);
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+  .empty { color: var(--text-dim); padding: 48px 0; }
+
+  .skip-link {
+    position: absolute;
+    left: 16px; top: -40px;
+    background: var(--surface); color: var(--text);
+    border: 1px solid var(--accent); border-radius: var(--radius-chip);
+    padding: 8px 14px;
+    font-family: var(--font-mono); font-size: var(--fs-label);
+    z-index: 100;
+    transition: top var(--dur-ui) var(--ease-out-quart);
+  }
+  .skip-link:focus {
+    top: 12px;
+    outline: 2px solid var(--accent); outline-offset: 2px;
+  }
+
   @media (max-width: 720px) {
     .layout { grid-template-columns: 1fr; }
     .layout > :global(.rail) { display: none; }
+    .stream { max-height: calc(100svh - 56px); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .stream { scroll-behavior: auto; }
   }
 </style>

@@ -17,3 +17,6 @@ firebase-debug.log
 /app-core-packages
 /wrtn-backend
 /wds-tokens
+
+# Brainstorm companion artifacts
+.superpowers/
