@@ -12,7 +12,7 @@ import RelatedList from '@/components/system/RelatedList.astro';
 export async function getStaticPaths() {
   const entries = await getCollection('components');
   return entries.map((entry) => ({
-    params: { slug: entry.data.key },
+    params: { key: entry.data.key },
     props: { entry },
   }));
 }
@@ -57,7 +57,7 @@ const mdxFile = resolve(projectRoot, 'src/content/components', entry.id);
   {entry.data.variants.length > 0 && <VariantTable variants={entry.data.variants} />}
   {entry.data.states.length > 0 && <StatesList states={entry.data.states} />}
   {entry.data.tokens.length > 0 && <TokensList refs={entry.data.tokens} />}
-  {entry.data.relatedComponents.length > 0 && <RelatedList slugs={entry.data.relatedComponents} />}
+  {entry.data.relatedComponents.length > 0 && <RelatedList keys={entry.data.relatedComponents} />}
 </Layout>
 
 <style>

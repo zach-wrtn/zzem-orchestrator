@@ -1,9 +1,9 @@
 ---
 import { getCollection } from 'astro:content';
-interface Props { slugs: string[]; }
-const { slugs } = Astro.props;
+interface Props { keys: string[]; }
+const { keys } = Astro.props;
 const all = await getCollection('components');
-const entries = slugs
+const entries = keys
   .map((s) => all.find((e) => e.data.key === s))
   .filter(Boolean) as Awaited<ReturnType<typeof getCollection<'components'>>>;
 const base = import.meta.env.BASE_URL;

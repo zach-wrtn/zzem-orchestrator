@@ -6,7 +6,7 @@ import RelatedList from '@/components/system/RelatedList.astro';
 export async function getStaticPaths() {
   const entries = await getCollection('patterns');
   return entries.map((entry) => ({
-    params: { slug: entry.data.key },
+    params: { key: entry.data.key },
     props: { entry },
   }));
 }
@@ -31,7 +31,7 @@ const base = import.meta.env.BASE_URL;
     )}
   </header>
   <article class="prose"><Content /></article>
-  {entry.data.usesComponents.length > 0 && <RelatedList slugs={entry.data.usesComponents} />}
+  {entry.data.usesComponents.length > 0 && <RelatedList keys={entry.data.usesComponents} />}
 </Layout>
 
 <style>
