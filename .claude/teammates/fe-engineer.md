@@ -110,6 +110,8 @@ domain/ 또는 data/ 레이어 파일을 변경한 경우 **`/qa-pattern-check` 
 
 ### 6. 완료 보고
 
+**커밋 메시지 안전성 규칙**: 메시지 본문(title/body 모두)에 `"` 와 `` ` `` 를 직접 쓰지 말 것. 인용이 필요하면 애포스트로피(`'`) 또는 한국어 따옴표(`''`, `「」`)로 치환한다. 이유: 머지 후 `wrtn-cicd-template/common-cd-update.yml` 의 `git commit -m "${{ inputs.commit_message }}"` 가 squash 메시지를 재사용할 때 내부 `"` 에서 bash quoting이 깨져 배포가 실패한다. 예: `title "크레딧 페이백"` → `title '크레딧 페이백'`.
+
 ```
 git add -A && git commit -m "feat: {task-id} — {objective}"
 TaskUpdate: completed

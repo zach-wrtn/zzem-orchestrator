@@ -27,6 +27,8 @@ git checkout {branch_prefix}/{sprint-id}
 git push -u origin {branch_prefix}/{sprint-id}
 ```
 
+**PR body/title 안전성 규칙**: body에 치환하는 모든 동적 필드(`{PRD 스코프 요약}`, `{objective}`, `{eval result}` 등)에 대해 **`"` → `'`**, **`` ` `` → `'`** 치환을 선행한다. title에도 동일 적용. HEREDOC 자체는 `<<'EOF'` 로 quoted-here-doc이라 bash expansion은 안전하나, 머지 후 `wrtn-cicd-template/common-cd-update.yml` 이 squash 커밋 메시지를 `git commit -m "${{ inputs.commit_message }}"` 로 재사용하면서 내부 `"` 가 bash quoting을 깨 배포를 실패시킨다. (근본 수정은 템플릿 측 P1, 오케스트레이터 측 완화책은 이 규칙으로.)
+
 ```bash
 gh pr create \
   --base {base-branch} \
