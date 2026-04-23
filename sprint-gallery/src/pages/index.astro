@@ -1,11 +1,11 @@
 ---
 import Layout from '@/components/Layout.astro';
 import Timeline from '@/components/Timeline.astro';
-import SprintEntry from '@/components/SprintEntry.astro';
-import PreviewModal from '@/components/PreviewModal.tsx';
+import SprintPanel from '@/components/SprintPanel.astro';
 import SearchPalette from '@/components/SearchPalette.tsx';
 import { collectSprints } from '@/lib/collect-sprints';
 import { SPRINTS_DIR } from '@/lib/paths';
+
 const sprints = await collectSprints(SPRINTS_DIR);
 const searchData = sprints.map((s) => ({
   slug: s.slug,
@@ -18,20 +18,33 @@ const searchData = sprints.map((s) => ({
   <div class="layout">
     <Timeline sprints={sprints} />
     <div class="stream">
-      {sprints.map((s) => <SprintEntry sprint={s} />)}
+      {sprints.map((s, i) => <SprintPanel sprint={s} index={i} />)}
       {sprints.length === 0 && <p class="empty">No sprints yet.</p>}
     </div>
   </div>
-  <PreviewModal client:load />
   <SearchPalette client:load data={searchData} />
 </Layout>
 
 <style>
   .layout { display: grid; grid-template-columns: var(--rail-width) 1fr; gap: 48px; }
-  .stream { min-width: 0; }
-  .empty { color: var(--text-dim); }
+  .stream {
+    min-width: 0;
+    scroll-snap-type: y mandatory;
+    scroll-snap-stop: always;
+    overflow-y: auto;
+    max-height: calc(100vh - 64px);
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+  .empty { color: var(--text-dim); padding: 48px 0; }
+
   @media (max-width: 720px) {
     .layout { grid-template-columns: 1fr; }
     .layout > :global(.rail) { display: none; }
+    .stream { max-height: calc(100svh - 56px); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .stream { scroll-behavior: auto; }
   }
 </style>
