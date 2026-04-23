@@ -46,6 +46,8 @@
   --text: #EDEDEF;
   --text-dim: #B4ADA5;
   --text-faint: #8B857E;
+  /* On dark backgrounds, the default accent (#FF7A63) has sufficient contrast */
+  --accent-text: var(--accent);
 }
 
 :root[data-theme="light"] {
@@ -57,6 +59,8 @@
   --text: #1A1613;
   --text-dim: #5A544C;
   --text-faint: #867F75;
+  /* Darker accent for text on light backgrounds (meets 4.5:1 on --bg, --surface, and blockquote bg) */
+  --accent-text: #A33B24;
 }
 
 * { box-sizing: border-box; }

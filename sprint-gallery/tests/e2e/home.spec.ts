@@ -26,7 +26,8 @@ test.describe('home snap stream', () => {
     expect(vtName).toMatch(/^proto-/);
   });
 
-  test('rail marks the current panel as active when scrolled', async ({ page }) => {
+  test('rail marks the current panel as active when scrolled', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'rail is display:none on mobile');
     await page.goto('');
     const panels = page.locator('.panel[data-sprint-slug]');
     const secondSlug = await panels.nth(1).getAttribute('data-sprint-slug');

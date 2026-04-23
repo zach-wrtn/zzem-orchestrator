@@ -1,16 +1,19 @@
 ---
 import '../styles/tokens.css';
+import '../styles/transitions.css';
+import { ViewTransitions } from 'astro:transitions';
 import TopBar from './TopBar.astro';
 const { title = 'ZZEM Sprints' } = Astro.props;
 ---
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css" />
+    <ViewTransitions />
     <script is:inline>
       (function () {
         var t = localStorage.getItem('theme');
@@ -22,6 +25,21 @@ const { title = 'ZZEM Sprints' } = Astro.props;
   <body>
     <TopBar />
     <main><slot /></main>
+
+    <div id="route-announcer" aria-live="polite" aria-atomic="true"
+         style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;"></div>
+
+    <script>
+      // aria-live announcer on route changes.
+      document.addEventListener('astro:after-swap', () => {
+        const region = document.getElementById('route-announcer');
+        if (!region) return;
+        const t = document.title;
+        region.textContent = '';
+        setTimeout(() => { region.textContent = t; }, 20);
+      });
+    </script>
+
     <style>
       main { max-width: var(--max-width); margin: 0 auto; padding: 32px 24px 120px; }
     </style>

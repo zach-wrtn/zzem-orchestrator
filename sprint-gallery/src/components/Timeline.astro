@@ -16,7 +16,7 @@ for (const s of sprints) {
   byYear.get(y)!.push(s);
 }
 ---
-<aside class="rail" role="tablist" aria-label="Sprint timeline">
+<nav class="rail" aria-label="Sprint timeline">
   {[...byYear.entries()].map(([year, list]) => (
     <div class="year-block">
       <div class="year">{year}</div>
@@ -24,7 +24,6 @@ for (const s of sprints) {
         {list.map((s) => (
           <li>
             <a href={`#${s.slug}`}
-               role="tab"
                data-sprint-target={s.slug}
                aria-label={`Jump to ${s.title}`}>
               <span class="dot" data-status={s.status}></span>
@@ -38,15 +37,16 @@ for (const s of sprints) {
       </ul>
     </div>
   ))}
-</aside>
+</nav>
 
 <script>
   const rail = document.querySelector('.rail') as HTMLElement | null;
   if (rail) {
     const setActive = (slug: string) => {
       rail.querySelectorAll<HTMLElement>('[data-sprint-target]').forEach((a) => {
-        a.classList.toggle('active', a.dataset.sprintTarget === slug);
-        a.setAttribute('aria-selected', a.dataset.sprintTarget === slug ? 'true' : 'false');
+        const isActive = a.dataset.sprintTarget === slug;
+        a.classList.toggle('active', isActive);
+        a.setAttribute('aria-current', isActive ? 'true' : 'false');
       });
     };
 
@@ -90,7 +90,7 @@ for (const s of sprints) {
   }
   .year-block { margin-bottom: 28px; }
   .year {
-    font-family: var(--font-mono); color: var(--text-faint);
+    font-family: var(--font-mono); color: var(--text-dim);
     font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
     margin-bottom: 10px;
   }
@@ -125,7 +125,7 @@ for (const s of sprints) {
   }
   .date {
     font-family: var(--font-mono);
-    font-size: 10.5px; color: var(--text-faint);
+    font-size: 10.5px; color: var(--text-dim);
     margin-top: 2px; letter-spacing: 0.02em;
   }
 </style>

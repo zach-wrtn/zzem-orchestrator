@@ -1,0 +1,30 @@
+/* View Transitions defaults for the whole site. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 140ms;
+  animation-timing-function: cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* Any element with view-transition-name starting with proto- gets the spring handoff. */
+::view-transition-old(*),
+::view-transition-new(*) {
+  animation-duration: 320ms;
+  animation-timing-function: cubic-bezier(0.22, 1.5, 0.36, 1);
+}
+
+/* Sprint hero shared-element — softer. */
+::view-transition-old(sprint-hero),
+::view-transition-new(sprint-hero) {
+  animation-duration: 220ms;
+  animation-timing-function: cubic-bezier(0.34, 1.35, 0.64, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation-duration: 100ms !important;
+    animation-timing-function: linear !important;
+  }
+}

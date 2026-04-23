@@ -5,9 +5,18 @@ import { collectSprints } from '@/lib/collect-sprints';
 import { SPRINTS_DIR } from '@/lib/paths';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { marked } from 'marked';
+import { marked, Renderer } from 'marked';
 
 marked.setOptions({ gfm: true, breaks: false });
+
+// Add aria-label to task-list checkboxes so axe doesn't flag unlabeled inputs.
+const renderer = new Renderer();
+const _checkbox = renderer.checkbox.bind(renderer);
+renderer.checkbox = ({ checked }: { checked: boolean }) => {
+  const label = checked ? '완료됨' : '미완료';
+  return `<input type="checkbox" aria-label="${label}" disabled${checked ? ' checked' : ''}> `;
+};
+marked.use({ renderer });
 
 export async function getStaticPaths() {
   const sprints = await collectSprints(SPRINTS_DIR);
@@ -84,7 +93,7 @@ const heroVt = hero ? `proto-${sprint.slug}-${hero.id}` : undefined;
   .meta { display: flex; flex-wrap: wrap; gap: 10px; font-family: var(--font-mono); font-size: var(--fs-label); color: var(--text-dim); }
   .status { padding: 2px 8px; border-radius: var(--radius-chip); border: 1px solid var(--border); }
   .status-completed { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 40%, transparent); }
-  .status-in-progress { color: var(--accent); border-color: var(--accent-soft); }
+  .status-in-progress { color: var(--accent-text); border-color: var(--accent-soft); }
   .tag { color: var(--text-dim); }
 
   .hero-media {
@@ -118,7 +127,7 @@ const heroVt = hero ? `proto-${sprint.slug}-${hero.id}` : undefined;
   .prose :global(ul), .prose :global(ol) { margin: 0.6em 0; padding-left: 1.4em; color: var(--text-dim); }
   .prose :global(li) { margin: 0.25em 0; }
   .prose :global(strong) { color: var(--text); }
-  .prose :global(a) { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+  .prose :global(a) { color: var(--accent-text); text-decoration: underline; text-underline-offset: 2px; }
   .prose :global(code) {
     font-family: var(--font-mono); font-size: 0.88em;
     background: var(--surface-hover); border: 1px solid var(--border);
