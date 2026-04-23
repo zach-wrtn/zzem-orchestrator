@@ -5,9 +5,10 @@
   "private": true,
   "scripts": {
     "dev": "astro dev",
-    "build": "pnpm run copy:prototypes && astro build",
+    "build": "pnpm run capture:screenshots && pnpm run copy:prototypes && astro build",
     "preview": "astro preview",
     "copy:prototypes": "tsx scripts/copy-prototypes.ts",
+    "capture:screenshots": "tsx scripts/capture-screenshots.ts",
     "test": "vitest run",
     "test:watch": "vitest"
   },
@@ -25,6 +26,7 @@
     "@types/node": "^20.14.0",
     "@types/react": "^18.3.0",
     "@types/react-dom": "^18.3.0",
+    "puppeteer": "^23.0.0",
     "tsx": "^4.19.0",
     "typescript": "^5.5.0",
     "vitest": "^2.1.0"

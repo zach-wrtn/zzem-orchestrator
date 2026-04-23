@@ -38,6 +38,10 @@ jobs:
         working-directory: sprint-gallery
         run: pnpm install --frozen-lockfile
 
+      - name: Install Chromium for Puppeteer
+        working-directory: sprint-gallery
+        run: pnpm exec puppeteer browsers install chrome
+
       - name: Test
         working-directory: sprint-gallery
         run: pnpm test
