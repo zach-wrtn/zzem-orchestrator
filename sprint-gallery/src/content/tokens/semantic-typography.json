@@ -1,0 +1,19 @@
+{
+  "wds": {
+    "semantic": {
+      "typography": {
+        "$type": "typography",
+        "display":  { "$value": "{wds.typography.heading.h1}" },
+        "heading":  { "$value": "{wds.typography.heading.h2}" },
+        "title":    { "$value": "{wds.typography.subtitle.subtitle1}" },
+        "subtitle": { "$value": "{wds.typography.subtitle.subtitle3}" },
+        "body":     { "$value": "{wds.typography.body.body2}" },
+        "body-strong": { "$value": "{wds.typography.body.body1}" },
+        "detail":   { "$value": "{wds.typography.body.body4}" },
+        "caption":  { "$value": "{wds.typography.caption.caption2}" },
+        "label":    { "$value": "{wds.typography.label.label1}" },
+        "button":   { "$value": "{wds.typography.label.label1}" }
+      }
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "wds": {
+    "icon": {
+      "size": {
+        "$type": "sizing",
+        "xs": { "$value": "16px" },
+        "sm": { "$value": "20px" },
+        "md": { "$value": "24px" },
+        "lg": { "$value": "32px" },
+        "xl": { "$value": "40px" }
+      }
+    }
+  }
+}

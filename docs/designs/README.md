@@ -49,4 +49,9 @@ Open the deployed browser: `https://zach-wrtn.github.io/zzem-orchestrator/system
 
 ## Tokens
 
-Token values live in the external `wds-tokens` repo (DTCG format). `sprint-gallery/scripts/sync-tokens.ts` copies them into `sprint-gallery/src/content/tokens/` at build time. Reference tokens by dotted path in MDX frontmatter (`wds.color.purple.500`); the renderers resolve them via `src/lib/token-resolve.ts`.
+Token values live in the external `wds-tokens` repo (private, `github.wrtn.club/pepper/wds-tokens`, DTCG format). Because CI has no access to that host, the synced JSONs are **committed as a snapshot** at `sprint-gallery/src/content/tokens/`. When `wds-tokens` changes:
+
+1. Run `pnpm run sync:tokens` locally (defaults to `~/dev/work/wds-tokens`, override via `WDS_TOKENS_DIR`).
+2. Inspect the diff, commit, open a PR.
+
+Reference tokens by dotted path in MDX frontmatter (`wds.color.purple.500`); the renderers resolve them via `src/lib/token-resolve.ts`. Missing references render as a `missing` badge — `pnpm run test:e2e -- a11y` scans for these in light + dark themes.

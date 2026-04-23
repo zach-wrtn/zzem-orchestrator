@@ -1,0 +1,169 @@
+{
+  "wds": {
+    "typography": {
+      "$type": "typography",
+
+      "font-family": {
+        "primary":  { "$value": "Pretendard", "$type": "fontFamily" },
+        "system":   { "$value": "SF Pro Display", "$type": "fontFamily" }
+      },
+
+      "font-weight": {
+        "regular":  { "$value": "400", "$type": "fontWeight" },
+        "medium":   { "$value": "500", "$type": "fontWeight" },
+        "semibold": { "$value": "600", "$type": "fontWeight" },
+        "bold":     { "$value": "700", "$type": "fontWeight" }
+      },
+
+      "font-size": {
+        "3xs": { "$value": "10px", "$type": "fontSize" },
+        "2xs": { "$value": "11px", "$type": "fontSize" },
+        "xs":  { "$value": "12px", "$type": "fontSize" },
+        "sm":  { "$value": "13px", "$type": "fontSize" },
+        "md":  { "$value": "14px", "$type": "fontSize" },
+        "lg":  { "$value": "16px", "$type": "fontSize" },
+        "xl":  { "$value": "18px", "$type": "fontSize" },
+        "2xl": { "$value": "20px", "$type": "fontSize" },
+        "3xl": { "$value": "24px", "$type": "fontSize" },
+        "4xl": { "$value": "27px", "$type": "fontSize" },
+        "5xl": { "$value": "32px", "$type": "fontSize" },
+        "6xl": { "$value": "36px", "$type": "fontSize" }
+      },
+
+      "line-height": {
+        "tight":   { "$value": "1.2", "$type": "lineHeight" },
+        "snug":    { "$value": "1.35", "$type": "lineHeight" },
+        "normal":  { "$value": "1.4", "$type": "lineHeight" },
+        "relaxed": { "$value": "1.5", "$type": "lineHeight" },
+        "loose":   { "$value": "1.6", "$type": "lineHeight" }
+      },
+
+      "heading": {
+        "h1": {
+          "$value": {
+            "fontFamily": "{wds.typography.font-family.primary}",
+            "fontWeight": "{wds.typography.font-weight.bold}",
+            "fontSize": "{wds.typography.font-size.5xl}",
+            "lineHeight": "{wds.typography.line-height.tight}"
+          }
+        },
+        "h2": {
+          "$value": {
+            "fontFamily": "{wds.typography.font-family.primary}",
+            "fontWeight": "{wds.typography.font-weight.bold}",
+            "fontSize": "{wds.typography.font-size.4xl}",
+            "lineHeight": "{wds.typography.line-height.snug}"
+          }
+        },
+        "h3": {
+          "$value": {
+            "fontFamily": "{wds.typography.font-family.primary}",
+            "fontWeight": "{wds.typography.font-weight.bold}",
+            "fontSize": "{wds.typography.font-size.3xl}",
+            "lineHeight": "{wds.typography.line-height.snug}"
+          }
+        }
+      },
+
+      "subtitle": {
+        "subtitle1": {
+          "$value": {
+            "fontFamily": "{wds.typography.font-family.primary}",
+            "fontWeight": "{wds.typography.font-weight.semibold}",
+            "fontSize": "{wds.typography.font-size.2xl}",
+            "lineHeight": "{wds.typography.line-height.relaxed}"
+          }
+        },
+        "subtitle2": {
+          "$value": {
+            "fontFamily": "{wds.typography.font-family.primary}",
+            "fontWeight": "{wds.typography.font-weight.semibold}",
+            "fontSize": "{wds.typography.font-size.xl}",
+            "lineHeight": "{wds.typography.line-height.relaxed}"
+          }
+        },
+        "subtitle3": {
+          "$value": {
+            "fontFamily": "{wds.typography.font-family.primary}",
+            "fontWeight": "{wds.typography.font-weight.semibold}",
+            "fontSize": "{wds.typography.font-size.lg}",
+            "lineHeight": "{wds.typography.line-height.relaxed}"
+          }
+        }
+      },
+
+      "body": {
+        "body1": {
+          "$value": {
+            "fontFamily": "{wds.typography.font-family.primary}",
+            "fontWeight": "{wds.typography.font-weight.medium}",
+            "fontSize": "{wds.typography.font-size.lg}",
+            "lineHeight": "{wds.typography.line-height.relaxed}"
+          }
+        },
+        "body2": {
+          "$value": {
+            "fontFamily": "{wds.typography.font-family.primary}",
+            "fontWeight": "{wds.typography.font-weight.regular}",
+            "fontSize": "{wds.typography.font-size.lg}",
+            "lineHeight": "{wds.typography.line-height.relaxed}"
+          }
+        },
+        "body3": {
+          "$value": {
+            "fontFamily": "{wds.typography.font-family.primary}",
+            "fontWeight": "{wds.typography.font-weight.medium}",
+            "fontSize": "{wds.typography.font-size.md}",
+            "lineHeight": "{wds.typography.line-height.normal}"
+          }
+        },
+        "body4": {
+          "$value": {
+            "fontFamily": "{wds.typography.font-family.primary}",
+            "fontWeight": "{wds.typography.font-weight.regular}",
+            "fontSize": "{wds.typography.font-size.md}",
+            "lineHeight": "{wds.typography.line-height.normal}"
+          }
+        }
+      },
+
+      "caption": {
+        "caption1": {
+          "$value": {
+            "fontFamily": "{wds.typography.font-family.primary}",
+            "fontWeight": "{wds.typography.font-weight.medium}",
+            "fontSize": "{wds.typography.font-size.sm}",
+            "lineHeight": "{wds.typography.line-height.relaxed}"
+          }
+        },
+        "caption2": {
+          "$value": {
+            "fontFamily": "{wds.typography.font-family.primary}",
+            "fontWeight": "{wds.typography.font-weight.regular}",
+            "fontSize": "{wds.typography.font-size.xs}",
+            "lineHeight": "{wds.typography.line-height.relaxed}"
+          }
+        }
+      },
+
+      "label": {
+        "label1": {
+          "$value": {
+            "fontFamily": "{wds.typography.font-family.primary}",
+            "fontWeight": "{wds.typography.font-weight.semibold}",
+            "fontSize": "{wds.typography.font-size.md}",
+            "lineHeight": "{wds.typography.line-height.normal}"
+          }
+        },
+        "label2": {
+          "$value": {
+            "fontFamily": "{wds.typography.font-family.primary}",
+            "fontWeight": "{wds.typography.font-weight.semibold}",
+            "fontSize": "{wds.typography.font-size.xs}",
+            "lineHeight": "{wds.typography.line-height.relaxed}"
+          }
+        }
+      }
+    }
+  }
+}

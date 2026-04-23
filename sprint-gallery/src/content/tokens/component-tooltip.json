@@ -1,0 +1,21 @@
+{
+  "wds": {
+    "component": {
+      "tooltip": {
+
+        "default": {
+          "fill":  { "$value": "{wds.semantic.fill.inverse}", "$type": "color" },
+          "label": { "$value": "{wds.semantic.label.inverse}", "$type": "color" }
+        },
+
+        "sizing": {
+          "padding-horizontal": { "$value": "{wds.spacing.12}", "$type": "spacing" },
+          "padding-vertical":   { "$value": "{wds.spacing.8}", "$type": "spacing" },
+          "radius":             { "$value": "{wds.radius.sm}", "$type": "borderRadius" },
+          "arrow-size":         { "$value": "{wds.spacing.6}", "$type": "sizing" },
+          "max-width":          { "$value": "240px", "$type": "sizing" }
+        }
+      }
+    }
+  }
+}

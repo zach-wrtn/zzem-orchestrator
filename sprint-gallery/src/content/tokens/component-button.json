@@ -1,0 +1,49 @@
+{
+  "wds": {
+    "component": {
+      "button": {
+
+        "primary": {
+          "fill":          { "$value": "{wds.semantic.fill.brand-primary}", "$type": "color" },
+          "fill-hover":    { "$value": "{wds.semantic.fill.brand-strong}", "$type": "color" },
+          "fill-pressed":  { "$value": "{wds.semantic.fill.brand-strong}", "$type": "color" },
+          "fill-disabled": { "$value": "{wds.semantic.fill.disabled}", "$type": "color" },
+          "label":         { "$value": "{wds.semantic.label.inverse}", "$type": "color" },
+          "label-disabled": { "$value": "{wds.semantic.label.disabled}", "$type": "color" }
+        },
+
+        "secondary": {
+          "fill":          { "$value": "{wds.semantic.fill.neutral-secondary}", "$type": "color" },
+          "fill-hover":    { "$value": "{wds.semantic.line.normal}", "$type": "color" },
+          "fill-disabled": { "$value": "{wds.semantic.fill.disabled}", "$type": "color" },
+          "label":         { "$value": "{wds.semantic.label.normal}", "$type": "color" },
+          "label-disabled": { "$value": "{wds.semantic.label.disabled}", "$type": "color" }
+        },
+
+        "ghost": {
+          "fill":          { "$value": "rgba(0,0,0,0)", "$type": "color" },
+          "fill-hover":    { "$value": "{wds.semantic.interaction.hover}", "$type": "color" },
+          "label":         { "$value": "{wds.semantic.label.normal}", "$type": "color" },
+          "label-disabled": { "$value": "{wds.semantic.label.disabled}", "$type": "color" }
+        },
+
+        "destructive": {
+          "fill":          { "$value": "{wds.semantic.status.error}", "$type": "color" },
+          "fill-hover":    { "$value": "{wds.color.red.600}", "$type": "color" },
+          "fill-disabled": { "$value": "{wds.semantic.fill.disabled}", "$type": "color" },
+          "label":         { "$value": "{wds.semantic.label.inverse}", "$type": "color" },
+          "label-disabled": { "$value": "{wds.semantic.label.disabled}", "$type": "color" }
+        },
+
+        "sizing": {
+          "height-lg":   { "$value": "{wds.spacing.56}", "$type": "sizing" },
+          "height-md":   { "$value": "{wds.spacing.48}", "$type": "sizing" },
+          "height-sm":   { "$value": "{wds.spacing.40}", "$type": "sizing" },
+          "padding-horizontal": { "$value": "{wds.spacing.24}", "$type": "spacing" },
+          "radius":      { "$value": "{wds.radius.lg}", "$type": "borderRadius" },
+          "gap":         { "$value": "{wds.spacing.8}", "$type": "spacing" }
+        }
+      }
+    }
+  }
+}

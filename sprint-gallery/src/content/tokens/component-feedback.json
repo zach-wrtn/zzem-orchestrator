@@ -1,0 +1,30 @@
+{
+  "wds": {
+    "component": {
+      "feedback": {
+
+        "toast": {
+          "fill":   { "$value": "{wds.semantic.fill.inverse}", "$type": "color" },
+          "label":  { "$value": "{wds.semantic.label.inverse}", "$type": "color" },
+          "radius": { "$value": "{wds.radius.md}", "$type": "borderRadius" },
+          "padding-horizontal": { "$value": "{wds.spacing.16}", "$type": "spacing" },
+          "padding-vertical":   { "$value": "{wds.spacing.12}", "$type": "spacing" }
+        },
+
+        "badge": {
+          "fill":   { "$value": "{wds.semantic.status.error}", "$type": "color" },
+          "label":  { "$value": "{wds.semantic.label.inverse}", "$type": "color" },
+          "radius": { "$value": "{wds.radius.full}", "$type": "borderRadius" },
+          "min-size": { "$value": "{wds.spacing.20}", "$type": "sizing" }
+        },
+
+        "snackbar": {
+          "fill":   { "$value": "{wds.semantic.fill.inverse}", "$type": "color" },
+          "label":  { "$value": "{wds.semantic.label.inverse}", "$type": "color" },
+          "action": { "$value": "{wds.color.purple.300}", "$type": "color" },
+          "radius": { "$value": "{wds.radius.md}", "$type": "borderRadius" }
+        }
+      }
+    }
+  }
+}

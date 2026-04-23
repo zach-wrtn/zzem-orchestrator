@@ -1,0 +1,29 @@
+{
+  "wds": {
+    "component": {
+      "input": {
+
+        "textfield": {
+          "fill":           { "$value": "{wds.semantic.surface.secondary}", "$type": "color" },
+          "fill-focused":   { "$value": "{wds.semantic.surface.primary}", "$type": "color" },
+          "fill-disabled":  { "$value": "{wds.semantic.fill.neutral-tertiary}", "$type": "color" },
+          "label":          { "$value": "{wds.semantic.label.normal}", "$type": "color" },
+          "placeholder":    { "$value": "{wds.semantic.label.assistive}", "$type": "color" },
+          "label-disabled": { "$value": "{wds.semantic.label.disabled}", "$type": "color" },
+          "line-default":   { "$value": "{wds.semantic.line.normal}", "$type": "color" },
+          "line-focused":   { "$value": "{wds.semantic.line.focused}", "$type": "color" },
+          "line-error":     { "$value": "{wds.semantic.status.error}", "$type": "color" },
+          "helper-default": { "$value": "{wds.semantic.label.assistive}", "$type": "color" },
+          "helper-error":   { "$value": "{wds.semantic.status.error}", "$type": "color" }
+        },
+
+        "sizing": {
+          "height":            { "$value": "{wds.spacing.48}", "$type": "sizing" },
+          "padding-horizontal": { "$value": "{wds.spacing.16}", "$type": "spacing" },
+          "padding-vertical":  { "$value": "{wds.spacing.12}", "$type": "spacing" },
+          "radius":            { "$value": "{wds.radius.md}", "$type": "borderRadius" }
+        }
+      }
+    }
+  }
+}

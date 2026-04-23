@@ -3,5 +3,8 @@ dist
 .astro
 public/prototypes
 
-# Synced tokens (source: wds-tokens repo, populated by scripts/sync-tokens.ts)
-src/content/tokens/
+# Synced tokens committed as a snapshot — source-of-truth stays in the private
+# wds-tokens repo (github.wrtn.club), but CI doesn't have access to clone it.
+# Run `pnpm run sync:tokens` locally and commit the updated JSONs when
+# wds-tokens changes. See docs/designs/README.md § Tokens.
+# src/content/tokens/
