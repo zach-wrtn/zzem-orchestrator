@@ -5,6 +5,7 @@ const { tokenSource } = Astro.props;
 const tokens = await loadTokenMap('src/content/tokens');
 const entries = Object.entries(tokens)
   .filter(([, v]) => v.source === tokenSource)
+  .filter(([k]) => k.startsWith('wds.spacing.'))
   .map(([k, v]) => [k, v, parseInt(String(v.value).replace('px', ''), 10)] as const)
   .filter(([, , px]) => Number.isFinite(px))
   .sort((a, b) => a[2] - b[2]);

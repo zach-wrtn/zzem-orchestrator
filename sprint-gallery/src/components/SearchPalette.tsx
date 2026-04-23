@@ -65,7 +65,7 @@ export default function SearchPalette({ data }: Props) {
                }} />
         <ul style={{ listStyle: 'none', margin: 0, padding: 6, maxHeight: '60vh', overflowY: 'auto' }}>
           {hits.length === 0 && (
-            <li style={{ padding: 12, color: 'var(--text-faint)', fontSize: 13 }}>No matches</li>
+            <li style={{ padding: 12, color: 'var(--text-dim)', fontSize: 13 }}>No matches</li>
           )}
           {hits.map((s) => (
             <li key={s.slug}>
@@ -85,7 +85,7 @@ export default function SearchPalette({ data }: Props) {
                     </span>
                   )}
                 </span>
-                <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-faint)', fontSize: 12 }}>
+                <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-dim)', fontSize: 12 }}>
                   {s.tags.map((t) => `#${t}`).join(' ')}
                 </span>
               </a>

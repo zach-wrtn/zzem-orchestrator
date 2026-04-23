@@ -252,11 +252,11 @@ Sprint Lead가 TaskCreate Description에 pressure 힌트를 주입하여 Enginee
 
 > Ref: Hermes Agent frozen snapshot
 
-Teammate 스폰 시 참조 문서(DESIGN.md, component-patterns.md, KB 패턴)를 **1회만 로드**하여 TaskCreate Description에 인라인 제공. Teammate는 이 파일들을 별도로 Read하지 않는다.
+Teammate 스폰 시 참조 문서(DESIGN.md, docs/designs/README.md, KB 패턴)를 **1회만 로드**하여 TaskCreate Description에 인라인 제공. Teammate는 이 파일들을 별도로 Read하지 않는다.
 
 ```
 Sprint Lead (1회):
-  Read DESIGN.md + component-patterns.md + KB patterns
+  Read DESIGN.md + docs/designs/README.md (+ components/*.mdx) + KB patterns
   → Frozen Snapshot 조립
 
 TaskCreate:

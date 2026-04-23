@@ -47,9 +47,13 @@ const defaultVariant = variants[0]?.name ?? '';
         if (!iframe) return;
         const v = pill.dataset.variantName ?? '';
         iframe.dataset.variant = v;
+        // Sandboxed iframes (allow-scripts only) have null origin so
+        // history.replaceState is blocked and location.search is always empty.
+        // Instead, inline the variant value directly into the srcdoc so the
+        // demo script's URLSearchParams lookup sees it without any replaceState.
         const vDoc = originalSrcdoc.replace(
-          '</body>',
-          `<script>history.replaceState(null, '', '?variant=${v}');<\/script></body>`,
+          'new URLSearchParams(location.search).get(\'variant\')',
+          JSON.stringify(v),
         );
         iframe.srcdoc = vDoc;
       });

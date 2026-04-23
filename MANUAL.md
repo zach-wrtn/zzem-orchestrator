@@ -97,7 +97,7 @@ Sprint Lead(Planner)가 수행하는 작업:
 - 모든 app 태스크에 `Screens / Components` 섹션 없음
 - `sprint-config.yaml`에 `prototype: skip`
 
-**Frozen Snapshot 조립**: Sprint Lead가 첫 Design Engineer 태스크 생성 전에 DESIGN.md + component-patterns.md + KB 디자인 패턴을 1회 읽고 snapshot을 조립한다. 이 snapshot은 모든 Design Engineer 태스크의 Description에 `--- FROZEN SNAPSHOT ---` 블록으로 인라인 제공된다.
+**Frozen Snapshot 조립**: Sprint Lead가 첫 Design Engineer 태스크 생성 전에 DESIGN.md + docs/designs/README.md (+ components/*.mdx) + KB 디자인 패턴을 1회 읽고 snapshot을 조립한다. 이 snapshot은 모든 Design Engineer 태스크의 Description에 `--- FROZEN SNAPSHOT ---` 블록으로 인라인 제공된다.
 
 **PTC 2-Phase HTML 생성**: Design Engineer는 6-pass 대신 2-phase로 HTML을 생성한다:
 - Phase α: Screen Spec → prototype-alpha.html (구조 + 컴포넌트)

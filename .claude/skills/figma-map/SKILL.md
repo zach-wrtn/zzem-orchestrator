@@ -156,17 +156,17 @@ AC_{N.M}:
 1. figma-mapping.yaml — AC별 Figma URL 매핑
 2. figma-refs/summary.md — 추출된 디자인 요약
 3. diff-report.md — 프로토타입 vs Figma 괴리점 (있는 경우)
-4. docs/designs/component-patterns.md — 기존 컴포넌트 패턴
+4. docs/designs/README.md — 기존 컴포넌트 패턴 (개별 컴포넌트 상세: docs/designs/components/*.mdx)
 ```
 
-## component-patterns.md 갱신
+## component patterns 갱신
 
-보정 과정에서 새로운 컴포넌트 패턴이 발견되면 `docs/designs/component-patterns.md`에 추가한다. 이는 다음 스프린트에서 Figma 없이도 높은 품질의 프로토타입을 생성하기 위한 누적 학습 메커니즘이다.
+보정 과정에서 새로운 컴포넌트 패턴이 발견되면 `docs/designs/README.md` 및 해당 `docs/designs/components/*.mdx`에 추가한다. 이는 다음 스프린트에서 Figma 없이도 높은 품질의 프로토타입을 생성하기 위한 누적 학습 메커니즘이다.
 
 ```
 보정 완료 후:
 1. 보정 diff에서 새로운 패턴 식별
-2. component-patterns.md에 패턴 추가/업데이트
+2. docs/designs/README.md 및 docs/designs/components/*.mdx에 패턴 추가/업데이트
 3. 패턴 라이브러리가 충분히 쌓이면 Figma 보정 없이 생성 가능
 ```
 
