@@ -294,6 +294,115 @@ ugc-platform-003 세션에서 다음 flow 가 seed/testID/copy 이슈로 FAIL:
 
 ---
 
+### US9: Grid Feed 디자인 정합 (Figma SSOT 재반영)
+
+유저(디자이너/PM)로서, 홈 그리드 피드의 레이아웃/칩/썸네일이 Figma 스펙과 일치하기를 원한다.
+
+#### 배경
+
+**현재 빌드 상태** (2026-04-24 육안 확인):
+- 홈 탭 그리드: `FlatList + numColumns=2` (uniform grid, 모든 카드 동일 높이)
+- 칩: pill 형태 (`BORDER_RADIUS: 999`, padding 10×6)
+- 썸네일: uniform 정사각 크롭 — 인물/배경 비율이 손실됨
+
+**Figma 스펙** (`docs/designs/component-patterns.md` §1, 이미 문서화됨):
+- 2열 **매거진/Masonry 레이아웃** (Pinterest 스타일)
+- 열 간격: 1px (모자이크)
+- 카드 비율: **1:1 과 4:5 교차** (같은 열 내에서 번갈아)
+- 카드 border-radius: 4px
+- 신규 뱃지: bg `#0080c6`, rounded-8, Pretendard SemiBold 12px white, padding 4×8
+- 크리에이터 프로필 (카드 하단): 18px 원형 아바타 + 닉네임 (SemiBold 12px white) + 인증 뱃지 (12px 파란 체크) + 우측 하트 + 좋아요 수
+
+**Figma reference**:
+- https://www.figma.com/design/7hozJ6Pvs09q98BxvChj08/Wrtn-X_%EC%A8%88_Sprint-File?node-id=37160-76515
+
+**Gap 원인 추정**: Phase 1 구현 당시 component-patterns.md 가 역추출 전이었거나, 이후 Figma 개정이 빌드에 반영 안 됨. ugc-platform-001/002/003 스프린트는 각각 신규 기능 추가에 집중하고 홈 피드 시각 정합은 scope 외였음.
+
+#### AC 9.1: Grid Feed Masonry Layout 적용 (P0 — 시각 정합)
+
+**대상 파일**:
+- `apps/MemeApp/src/presentation/home/componenets/filter-list/grid-filter-list.tsx` (line 99: `numColumns={CONFIG.NUM_COLUMNS}`)
+- 동일 레이아웃 사용하는 기타 home/free body 파일 (grep 대상)
+
+**구현 방향**:
+- `FlatList + numColumns=2` → **`@shopify/flash-list` 의 `MasonryFlashList`** 교체
+  - 이미 Phase 2 에서 `flash-list` 사용 precedent 있을 수 있음 (grep 필요)
+  - 또는 `react-native-masonry-list` 대안
+- 각 카드의 aspect ratio 를 **데이터 기반** (콘텐츠 실제 비율) 또는 **1:1 / 4:5 교차 패턴** 으로 지정
+- 열 간격: 1px (모자이크, 시각적으로 거의 붙은 느낌)
+- 카드 border-radius: 4px
+
+**Done Criteria**:
+- [ ] 2열 masonry 렌더 (카드 높이 교차 확인)
+- [ ] 1:1 과 4:5 aspect ratio 교차 (같은 열 내 번갈아)
+- [ ] 열 간격 1px, 행 간격 1px (모자이크)
+- [ ] border-radius 4px
+- [ ] 기존 scroll/end-reached/pull-refresh 동작 회귀 없음
+- [ ] 성능 회귀 없음 (60fps 유지, FlashList recycle 활용)
+
+#### AC 9.2: Chip 디자인 Figma 정합 (P1)
+
+**현재 구현** (`filter-chips-item.tsx`):
+- `PADDING_HORIZONTAL: 10`, `PADDING_VERTICAL: 6`
+- `BORDER_RADIUS: 999` (pill)
+- `BORDER_WIDTH: 1`, `GAP: 4`
+- `ICON_SIZE: 16`
+
+**Figma 스펙 확인 필요 (`docs/designs/component-patterns.md` 업데이트 대상)**:
+- [ ] chip shape (pill? rounded rect?)
+- [ ] padding / height / font size / weight
+- [ ] 선택 상태 색상 (active bg, active text, inactive bg, inactive text)
+- [ ] border (유/무, 색, 두께)
+- [ ] icon 크기 + 위치 (좌/우, gap)
+- [ ] 스크롤/sticky 동작 (Figma 에서 sticky 여부)
+
+**Done Criteria**:
+- [ ] Figma 스펙과 육안 비교 → 차이 0
+- [ ] 선택 transition 애니메이션 정합
+- [ ] 다크/라이트 모드 토큰 사용 (하드코딩 색상 금지)
+
+#### AC 9.3: Grid Thumbnail 디자인 Figma 정합 (P0)
+
+**현재 관찰**:
+- 신규 뱃지 좌상단 파란 박스 (대략적 렌더)
+- 카드 하단에 제목만 표시 (흰 배경 + 검은 텍스트) — Figma 는 이미지 위 그라데이션 오버레이 + 흰 텍스트
+- 크리에이터 프로필 + 좋아요 수 **미표시** (Figma 기준 필수)
+
+**Figma 스펙 (component-patterns.md §1 참조)**:
+```
+┌─────────────────────┐
+│ [신규 뱃지]          │  ← 좌상단, 선택적
+│                     │
+│   (이미지/그라데이션)  │
+│                     │
+│ ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓│  ← 하단 그라데이션 오버레이
+│ 템플릿 이름           │  ← Pretendard SemiBold 14px white
+│ 🟣 쨈 ✅    ♡ 42    │  ← 크리에이터(좌) + 좋아요(우)
+└─────────────────────┘
+```
+
+**Done Criteria**:
+- [ ] 신규 뱃지: bg `#0080c6`, rounded-8, SemiBold 12px white, padding 4×8
+- [ ] 하단 그라데이션 오버레이 (투명 → 검정 60%)
+- [ ] 제목 텍스트: Pretendard SemiBold 14px white, 1-line truncate
+- [ ] 크리에이터 프로필 row (18px 원형 아바타 + 닉네임 + 인증 뱃지)
+- [ ] 우측 하트 + 좋아요 수 (SemiBold 12px white, opacity 0.8)
+- [ ] border-radius 4px (AC 9.1 과 일치)
+- [ ] 탭 → 세로 스와이프 뷰어 진입 유지 (기존 동작 회귀 없음)
+
+#### AC 9.4: `component-patterns.md` SSOT 재확정 + CI 검증
+
+- [ ] 이번 스프린트 변경 후 `docs/designs/component-patterns.md` 에 최종 스펙 반영
+- [ ] Figma MCP extract 재실행 (available 시) or 수동 patch
+- [ ] CI 에서 시각 regression 검증 (선택 — Maestro 스크린샷 baseline 비교 or 별도 visual regression tool)
+
+#### Scope boundary
+
+- **In scope**: 홈 탭 `ProfileTab` / `HomeTab` (recommend/free variant) 의 grid feed
+- **Out of scope**: SwipeFeed (세로 스와이프 뷰어) — 이미 Phase 2 에서 다룸. MemeCollection (내 컬렉션) — 별도 레이아웃. 프로필 탭 내 grid (이건 Phase 1 profile 소관, 별도 검토)
+
+---
+
 ## 비즈니스 룰
 
 ### E2E 실행 룰
