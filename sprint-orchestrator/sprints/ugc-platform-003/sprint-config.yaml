@@ -33,8 +33,8 @@ team:
 display:
   title: "UGC Platform 003 — 소셜 & 알림"
   startDate: "2026-04-23"
-  endDate: ""
-  status: "in-progress"
+  endDate: "2026-04-23"
+  status: "completed"
   tags:
     - ugc-platform
     - phase-3

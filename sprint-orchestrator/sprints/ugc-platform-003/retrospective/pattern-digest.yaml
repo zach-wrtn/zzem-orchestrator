@@ -1,0 +1,108 @@
+sprint_id: "ugc-platform-003"
+generated_at: "2026-04-23T00:00:00+09:00"
+
+patterns:
+  - pattern: "Cursor encoding semantic 이탈 — truncated[last-shown] vs reference 규약 page[limit] (extra item). `$lt` grep gate 통과하나 createdAt tie 시 page boundary 중복 가능. Group 001 M1 — Group 002/003 Contract 에 reference 파일 경로 지정으로 선제 방지"
+    category: "correctness"
+    frequency: 1
+    groups: ["group-001"]
+    severity: "major"
+    systemic_fix: "Contract Done Criteria 에 단순 grep gate 외에 reference 파일 경로 명시 (reference: me-contents-app.service.ts:buildLikedListResponse). 형식적 gate 보완 — Group 002 user-block + Group 003 notification 에 선제 반영되어 재발 없음."
+    detection: "Group 001 Round 1 — buildListResponse last-shown (truncated[limit-1]) 사용. Evaluator active trace 로 createdAt tie 케이스 repro. KB correctness-004 semantic 위반 — grep gate (`$lt`) 는 formal 만 커버, semantic 은 reference 경로로 보완."
+    source_sprint: "ugc-platform-003"
+    source_group: "group-001"
+    contract_clause: "Cursor encoding 시 reference 파일 경로 명시 (`me-contents-app.service.ts:buildLikedListResponse` 또는 previous group 의 `buildListResponse`). `page[limit]` extra item 사용. truncated[last-shown] 금지."
+    skill_candidate: false
+
+  - pattern: "E2E appId inconsistency — 신규 yaml 에서 canonical 값 확인 누락 (Group 001 M2: io.wrtn.meme vs com.wrtn.zzem.dev)"
+    category: "completeness"
+    frequency: 1
+    groups: ["group-001"]
+    severity: "major"
+    systemic_fix: "Contract §E2E 에 appId uniformity grep gate 명시: `rg '^appId:' app/apps/MemeApp/e2e/flows | awk '{print \\$2}' | sort -u | wc -l → 1`. Group 002/003/004 Contract 선제 반영으로 재발 없음."
+    detection: "Group 001 Round 1 — my-profile-follower-list.yaml / my-profile-following-list.yaml 에서 appId: io.wrtn.meme 사용. Evaluator 가 기존 30+개 flow 대조하여 canonical 값 (com.wrtn.zzem.dev) 불일치 발견. Maestro 실행 실패 가능성."
+    source_sprint: "ugc-platform-003"
+    source_group: "group-001"
+    contract_clause: "신규 E2E yaml 작성 시 canonical appId (`com.wrtn.zzem.dev`) 사용. Contract §Done Criteria 에 grep gate 포함: `rg '^appId:' e2e/flows | sort -u | wc -l → 1`."
+    skill_candidate: false
+
+  - pattern: "Test assertion drift — production constant (typed import) 대신 hardcoded literal 사용. Group 004 M1: usePushNotificationHandler.test.tsx 가 `['notifications']` literal 로 assert, 실제 handler 는 `notificationQueryKey.myNotifications` (= `['@notification', 'getMyNotifications']`) 사용"
+    category: "completeness"
+    frequency: 1
+    groups: ["group-004"]
+    severity: "major"
+    systemic_fix: "테스트 파일이 production 상수 (query keys, event types, enum values) 를 hardcoded string/array 로 복제하지 않음. 반드시 typed import. Contract 조항: '테스트 파일에서 queryKey / eventType / enum literal 사용 금지 — production module 에서 import'."
+    detection: "Group 004 Round 1 — notificationQueryKey reconciliation 후 test 에서 old hardcoded literal 미업데이트. Evaluator active trace 로 assertion failure 감지."
+    source_sprint: "ugc-platform-003"
+    source_group: "group-004"
+    contract_clause: "테스트 파일에서 queryKey / eventType / enum / URL pattern 등 production 상수를 literal 로 복제 금지. 반드시 production module 에서 typed import. Spec 수정 시 reconciliation checklist 에 test 파일도 포함."
+    skill_candidate: true
+
+  - pattern: "BlockRelationPort dual-provider pattern — circular DI 회피 pragmatic 선택 (useFactory in UserFollowDomainModule + useExisting alias in UserBlockDomainModule). 두 인스턴스 병존하나 동일 repository 경유 → 결과 동치. 장기적 DI 단일화 필요 (Group 002 Minor m2)"
+    category: "integration"
+    frequency: 1
+    groups: ["group-002"]
+    severity: "minor"
+    systemic_fix: "DI port 와 concrete impl 이 circular 관계일 때 pragmatic dual-provider pattern 허용 + 주석 의무. 장기적으로 3-layer factorization (port / adapter / service) 으로 refactor."
+    detection: "Group 002 be-002 — UserBlockDomainService 가 BlockRelationPort 를 impl 해야 하나, UserFollowDomainModule 이 BlockRelationPort 를 require + UserBlockDomainService 가 UserFollowDomainService (rollbackFollowByPair) 를 require → circular. useFactory wrapping UserBlockRepository 로 회피. Evaluator 가 pragmatic 으로 수용."
+    source_sprint: "ugc-platform-003"
+    source_group: "group-002"
+    contract_clause: "DI circular 발견 시 (a) 공통 repository 경유 useFactory dual-provider, (b) 필요 시 dedicated port module 분리. 선택 후 반드시 주석 / reflection 남김."
+    skill_candidate: false
+
+  - pattern: "Pragmatic persona display fallback — `profile.nickname ?? profile.name` 류 intended fallback 은 KB completeness-008 경계 예외. `// Why: persona display fallback` 주석 의무화로 gate 통과"
+    category: "code_quality"
+    frequency: 1
+    groups: ["group-001", "group-002"]
+    severity: "minor"
+    systemic_fix: "`?? / ||` fallback 중 '의도적 display' / 'render gate' 는 예외. 반드시 `// Why:` 주석 + reason category (persona-display | render-gate | contract-compliance). Evaluator 는 주석 유무 check 로 distinguish."
+    detection: "Group 001 be-001 app service: `profile.nickname ?? profile.name` (persona display). Group 002 be-002 동일 패턴 재현. 양쪽 모두 `// Why:` 주석 명시. Evaluator Minor 분류."
+    source_sprint: "ugc-platform-003"
+    source_group: "group-001"
+    contract_clause: "`?? / ||` fallback 사용 시 반드시 `// Why:` 주석 + category (persona-display, render-gate, contract-compliance). 주석 없으면 Major; 주석 있으면 Minor."
+    skill_candidate: false
+
+  - pattern: "Settings gate 단일 SOT — shouldNotify (persist gate) vs shouldPush (push gate) 역할 분리 원칙이 불완전 적용 (Group 003 Minor m1: be-006 가 be-007 shouldNotify 위임 대신 inline settings read 유지)"
+    category: "integration"
+    frequency: 1
+    groups: ["group-003"]
+    severity: "minor"
+    systemic_fix: "`shouldNotify(persist)` + `shouldPush(push)` 2-layer helper 의 single SOT 원칙 명시. be-006 이 be-007 helper 를 직접 위임. integration-002 확장 — notification-domain 까지 cross-path cleanup 범위 확대. KB 승격 후보."
+    detection: "Group 003 Round 1 — be-006 push-notification.service 가 settings read + inline 분기. be-007 shouldNotify helper 가 있으나 위임 안 함. Minor m1 (동작 정합 but 원칙 위반)."
+    source_sprint: "ugc-platform-003"
+    source_group: "group-003"
+    contract_clause: "settings/permission gate 는 single helper SOT. cross-layer 호출은 직접 위임 (inline 재구현 금지). integration-002 확장 조항 — notification-domain 에도 적용."
+    skill_candidate: false
+
+  - pattern: "ComingSoonSettingsSection slot-based coordination — canonical menu order 보존하면서 동적 activation. app-004 middleSlot + app-007 topSlot additive design 으로 merge conflict 없이 2 메뉴 activation. Phase 2 UnpublishConfirmSheet + Phase 3 BlockConfirmSheet/UnblockConfirmSheet 의 useBottomConfirmSheet 공유 패턴 연장선"
+    category: "integration"
+    frequency: 1
+    groups: ["group-002", "group-004"]
+    severity: "minor"
+    systemic_fix: "Settings body 류 공유 컴포넌트에서 순서 보존이 중요할 때, slot (topSlot/middleSlot/bottomSlot) prop additive 확장으로 병렬 수정 coordinate. 직접 구조 수정 대신 composition."
+    detection: "Group 002 app-004 차단 관리 activate (middleSlot 추가) + Group 004 app-007 알림 설정 activate (topSlot 추가). Evaluator positive pattern 명시 — canonical order ('알림 설정'→'차단 관리'→'고객센터') 보존."
+    source_sprint: "ugc-platform-003"
+    source_group: "group-002"
+    contract_clause: "Shared component 병렬 수정 시 slot-based composition 우선. 직접 children 구조 수정 금지. 카테고리 / section header / menu 류에 한해."
+    skill_candidate: true
+
+metrics:
+  total_groups: 4
+  first_pass_rate: 0.50               # 2/4 (Group 002 + Group 003)
+  avg_fix_cycles: 0.50                # G1:1, G2:0, G3:0, G4:1
+  critical_issues_found: 0
+  major_issues_found: 3               # G1:2 (cursor, E2E appId), G4:1 (test assertion)
+  minor_issues_found: 14              # G1:4, G2:4, G3:3, G4:3
+  issues_fixed: 3                     # All Major
+  issues_deferred: 14                 # All Minor
+  amendments_applied: 0               # Phase 3 auto-skipped
+
+  # Follow-up 지표 (vs ugc-platform-002)
+  improvement_trend:
+    first_pass_rate: "0.33 → 0.50 (+0.17)"
+    avg_fix_cycles: "0.67 → 0.50 (-0.17)"
+    critical_issues: "0 → 0"
+    major_issues: "10 → 3 (-7, 큰 폭 감소)"
+    fulfillment_rate: "1.00 → 0.85 (new AC only — AC 6.2 nickname sort + AC 7.4 PA dependency)"
+    new_patterns_detected: 7
+    prior_lessons_prevented: 4         # Group 001 cursor M1 + E2E appId M2 lessons → Group 002/003 선제 반영. KB completeness-008/009/010 + correctness-004 + integration-002 모두 0 hit.
