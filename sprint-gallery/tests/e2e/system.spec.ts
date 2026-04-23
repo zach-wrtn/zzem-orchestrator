@@ -60,3 +60,23 @@ test.describe('system components', () => {
     expect(n).toBeGreaterThan(0);
   });
 });
+
+test.describe('system nav + home', () => {
+  test('TopBar System link navigates to /system/', async ({ page }) => {
+    await page.goto('');
+    await page.locator('a.sys-link').click();
+    await expect(page).toHaveURL(/\/system\/?$/);
+  });
+
+  test('/system home shows foundations + components sections', async ({ page }) => {
+    await page.goto('system/');
+    const sections = page.locator('main > section');
+    await expect(sections).toHaveCount(2);
+  });
+
+  test('/system/patterns renders empty state with deferred list', async ({ page }) => {
+    await page.goto('system/patterns/');
+    const deferred = page.locator('.deferred li');
+    await expect(deferred).toHaveCount(7);
+  });
+});

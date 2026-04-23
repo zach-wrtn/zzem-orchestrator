@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 
-interface SearchItem { slug: string; title: string; tags: string[]; prototypes: string[]; }
+interface SearchItem { slug: string; title: string; tags: string[]; prototypes: string[]; type?: 'sprint' | 'component' | 'foundation'; href?: string; }
 interface Props { data: SearchItem[]; }
 
 export default function SearchPalette({ data }: Props) {
@@ -69,7 +69,7 @@ export default function SearchPalette({ data }: Props) {
           )}
           {hits.map((s) => (
             <li key={s.slug}>
-              <a href={`#${s.slug}`} onClick={() => setOpen(false)}
+              <a href={s.href ?? `#${s.slug}`} onClick={() => setOpen(false)}
                  style={{
                    display: 'flex', justifyContent: 'space-between',
                    padding: '10px 12px', borderRadius: 8,
@@ -77,7 +77,14 @@ export default function SearchPalette({ data }: Props) {
                  }}
                  onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--surface-hover)')}
                  onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}>
-                <span>{s.title}</span>
+                <span>
+                  {s.title}
+                  {s.type && s.type !== 'sprint' && (
+                    <span style={{ fontFamily: 'monospace', fontSize: '10px', opacity: 0.6, marginLeft: 8 }}>
+                      {s.type}
+                    </span>
+                  )}
+                </span>
                 <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-faint)', fontSize: 12 }}>
                   {s.tags.map((t) => `#${t}`).join(' ')}
                 </span>

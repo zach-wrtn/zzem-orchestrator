@@ -48,6 +48,9 @@
   --text-faint: #8B857E;
   /* On dark backgrounds, the default accent (#FF7A63) has sufficient contrast */
   --accent-text: var(--accent);
+  /* Status badge text — meets contrast on dark surfaces */
+  --ok-text: var(--ok);
+  --warn-text: var(--warn);
 }
 
 :root[data-theme="light"] {
@@ -61,6 +64,9 @@
   --text-faint: #867F75;
   /* Darker accent for text on light backgrounds (meets 4.5:1 on --bg, --surface, and blockquote bg) */
   --accent-text: #A33B24;
+  /* Status badge text — darker variants that meet 4.5:1 on --surface (#F2EDE5) */
+  --ok-text: #2A7A4A;
+  --warn-text: #7A4A10;
 }
 
 * { box-sizing: border-box; }

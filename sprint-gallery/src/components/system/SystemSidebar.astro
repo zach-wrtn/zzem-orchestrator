@@ -1,0 +1,42 @@
+---
+import { getCollection } from 'astro:content';
+const foundations = (await getCollection('foundations')).sort((a, b) => a.data.order - b.data.order);
+const components = (await getCollection('components')).sort((a, b) => a.data.name.localeCompare(b.data.name));
+const base = import.meta.env.BASE_URL;
+const p = (s: string) => `${base}/${s}`.replace(/\/+/g, '/');
+---
+<aside class="sys-sidebar" aria-label="System navigation">
+  <section>
+    <h4><a href={p('system/foundations/')}>Foundations</a></h4>
+    <ul>
+      {foundations.map((e) => (
+        <li><a href={p(`system/foundations/${e.data.key}/`)}>{e.data.name}</a></li>
+      ))}
+    </ul>
+  </section>
+  <section>
+    <h4><a href={p('system/components/')}>Components</a></h4>
+    <ul>
+      {components.map((c) => (
+        <li><a href={p(`system/components/${c.data.key}/`)}>{c.data.name}</a></li>
+      ))}
+    </ul>
+  </section>
+  <section>
+    <h4><a href={p('system/patterns/')}>Patterns</a></h4>
+    <p class="empty">coming soon</p>
+  </section>
+</aside>
+
+<style>
+  .sys-sidebar { position: sticky; top: 72px; padding-right: 16px; border-right: 1px solid var(--border); max-height: calc(100vh - 80px); overflow-y: auto; width: var(--rail-width); }
+  section { margin-bottom: 24px; }
+  h4 { font-family: var(--font-mono); font-size: var(--fs-label); color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 8px; font-weight: 500; }
+  h4 a { color: var(--text-dim); }
+  h4 a:hover { color: var(--text); }
+  ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 2px; }
+  li a { display: block; padding: 5px 8px; margin-left: -8px; border-radius: 6px; color: var(--text-dim); font-size: var(--fs-small); transition: background var(--dur-ui) var(--ease-out-quart), color var(--dur-ui) var(--ease-out-quart); }
+  li a:hover { background: var(--surface); color: var(--text); }
+  .empty { font-family: var(--font-mono); font-size: 11px; color: var(--text-dim); margin: 0; padding: 5px 8px 5px 0; }
+  @media (max-width: 720px) { .sys-sidebar { display: none; } }
+</style>

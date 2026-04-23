@@ -41,9 +41,9 @@ const base = import.meta.env.BASE_URL;
     transition: transform var(--dur-spring-soft) var(--spring-soft), border-color var(--dur-spring-soft) var(--spring-soft);
   }
   .card:hover { transform: translateY(-2px); border-color: var(--accent); }
-  .cat { font-family: var(--font-mono); font-size: var(--fs-label); color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.08em; }
+  .cat { font-family: var(--font-mono); font-size: var(--fs-label); color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; }
   .name { font-size: var(--fs-h3); color: var(--text); font-weight: 600; }
   .status { font-family: var(--font-mono); font-size: 10px; padding: 2px 7px; align-self: flex-start; border-radius: var(--radius-chip); border: 1px solid var(--border); }
-  .status.stable { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 40%, transparent); }
-  .status.draft { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 40%, transparent); }
+  .status.stable { color: var(--ok-text); border-color: color-mix(in srgb, var(--ok-text) 40%, transparent); }
+  .status.draft { color: var(--warn-text); border-color: color-mix(in srgb, var(--warn-text) 40%, transparent); }
 </style>

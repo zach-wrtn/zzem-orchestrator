@@ -66,9 +66,9 @@ const defaultVariant = variants[0]?.name ?? '';
     padding: 6px 12px; font-family: var(--font-mono); font-size: var(--fs-label);
     cursor: pointer; transition: all var(--dur-spring-soft) var(--spring-soft);
   }
-  .variant-pill:hover { color: var(--text); border-color: var(--accent); }
+  .variant-pill:hover { color: var(--text); border-color: var(--accent-text); }
   .variant-pill[aria-pressed="true"] {
-    background: var(--accent-soft); color: var(--accent); border-color: var(--accent);
+    background: var(--accent-soft); color: var(--accent-text); border-color: var(--accent-text);
   }
   .frame {
     border-radius: var(--radius-device);

@@ -4,6 +4,7 @@ import ThemeToggle from './ThemeToggle.tsx';
 <header class="topbar">
   <a href={import.meta.env.BASE_URL} class="brand">ZZEM Sprints</a>
   <div class="spacer"></div>
+  <a href={`${import.meta.env.BASE_URL}/system/`.replace(/\/+/g, '/')} class="sys-link">System</a>
   <button id="open-search" class="search-btn" aria-label="Search">
     <span>Search</span>
     <kbd>⌘K</kbd>
@@ -34,4 +35,10 @@ import ThemeToggle from './ThemeToggle.tsx';
     border: 1px solid var(--border); border-radius: 4px;
     padding: 0 4px; font-size: 11px; color: var(--text-dim);
   }
+  .sys-link {
+    font-family: var(--font-mono); font-size: var(--fs-label);
+    color: var(--text-dim); padding: 6px 10px; border-radius: var(--radius-chip);
+    transition: color var(--dur-ui) var(--ease-out-quart);
+  }
+  .sys-link:hover { color: var(--accent); }
 </style>
