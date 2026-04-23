@@ -1,0 +1,9 @@
+{"ts":"2026-04-22T00:00:00Z","task":"impl/backend/be-001","phase":"started","message":"be-001 visibility toggle 구현 시작","detail":null}
+{"ts":"2026-04-22T00:00:10Z","task":"impl/backend/be-001","phase":"implementing","message":"Content/CustomPromptContent schema + ContentSummaryDto 확장 + Like 도메인 신설 + MeContentsController PATCH","detail":null}
+{"ts":"2026-04-22T00:05:00Z","task":"impl/backend/be-002","phase":"implementing","message":"be-002 regeneration tracking DTO + RegenerationEventListener + Content domain validateSourceContent","detail":null}
+{"ts":"2026-04-22T00:10:00Z","task":"impl/backend/be-003","phase":"implementing","message":"be-003 payback: CREDIT_TRANSACTION_TYPE.PAYBACK + CreditDomainService.grantPayback + PaybackEventListener","detail":null}
+{"ts":"2026-04-22T00:15:00Z","task":"impl/backend/be-004","phase":"implementing","message":"be-004 likes: schema + repository + domain + controller + counts.liked invariant","detail":null}
+{"ts":"2026-04-22T00:20:00Z","task":"impl/backend/group-001","phase":"build_check","message":"Bash 샌드박스 제약으로 git commit / lint / typecheck 실행 불가 — 파일 edits 만료","detail":"Sprint Lead에 git commit 요청 필요"}
+{"ts":"2026-04-23T10:00:00Z","task":"fix/backend/group-001-r1","phase":"started","message":"Evaluator ISSUES 판정 수신 — 3 Major + M4 수정 시작","detail":null}
+{"ts":"2026-04-23T10:30:00Z","task":"fix/backend/group-001-r1","phase":"implementing","message":"Major1 sourceContentId persist (Content/CustomPromptContent createOne), Major2 FeedResponseDto + LikeDomainService DI + grid/swipe content 매퍼, Major3 custom-prompt validateSourceContent 연결, M4 동일 liked_at e2e 보강","detail":null}
+{"ts":"2026-04-23T10:45:00Z","task":"fix/backend/group-001-r1","phase":"build_check","message":"yarn tsc 신규 에러 0 (pre-existing Model<..> InjectModel / filter-admin / pino-logger 제외)","detail":null}

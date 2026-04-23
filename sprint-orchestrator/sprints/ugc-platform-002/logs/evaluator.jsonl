@@ -1,0 +1,38 @@
+{"ts":"2026-04-22T10:00:00","task":"contract-review/group-001","phase":"started","message":"Starting contract review for Group 001 Backend Foundation","detail":null}
+{"ts":"2026-04-22T10:10:00","task":"contract-review/group-001","phase":"context_loaded","message":"Loaded contract, 4 task files, api-contract, criteria, rubric v3, and phase 1 retrospectives","detail":null}
+{"ts":"2026-04-22T10:10:30","task":"contract-review/group-001","phase":"reviewing","message":"Analyzing contract for ambiguity, missing edge cases, untestable criteria, scope disputes","detail":null}
+{"ts":"2026-04-22T10:25:00","task":"contract-review/group-001","phase":"completed","message":"Group 001 contract review Round 1: ISSUES (Critical 0, Major 7, Minor 8)","detail":null}
+{"ts":"2026-04-23T09:00:00","task":"contract-review/group-001-r2","phase":"started","message":"Starting Round 2 contract review for Group 001 (Patches 1-8 + Minor M1/M2/M3/M5/M6/M7)","detail":null}
+{"ts":"2026-04-23T09:05:00","task":"contract-review/group-001-r2","phase":"r2_verifying","message":"Verifying 7 Major + 6 key Minor resolutions against Round 2 contract submission","detail":null}
+{"ts":"2026-04-23T09:15:00","task":"contract-review/group-001-r2","phase":"completed","message":"Group 001 Round 2: APPROVE (Major 7/7 resolved, Minor 6/6 resolved, Patch 8 regression fully specified)","detail":"Evaluator approved 2026-04-23; sign-off appended to group-001.md and group-001-review.md"}
+{"ts":"2026-04-22T00:00:00Z","task":"eval/backend/group-001","phase":"started","message":"Evaluation started","detail":null}
+{"ts":"2026-04-22T00:01:00Z","task":"eval/backend/group-001","phase":"context_loaded","message":"Contract + 5 commits loaded","detail":null}
+{"ts":"2026-04-22T00:15:00Z","task":"eval/backend/group-001","phase":"evaluating","message":"Traces complete, 2 Major + 1 Critical found","detail":null}
+{"ts":"2026-04-22T00:20:00Z","task":"eval/backend/group-001","phase":"completed","message":"Group 001: ISSUES (Critical 0, Major 3, Minor 5)","detail":null}
+{"ts":"2026-04-22T02:20:00Z","task":"re-eval/backend/group-001-r2","phase":"started","message":"Round 2 re-evaluation started","detail":"Fix commit 0fdf846c — verify 3 Major + M4"}
+{"ts":"2026-04-22T02:22:00Z","task":"re-eval/backend/group-001-r2","phase":"r2_verifying","message":"Verifying Major 1+2+3 + M4 fix traces","detail":"content.repository createOne / feed-app service+dto / custom-prompt validation / e2e seed"}
+{"ts":"2026-04-22T02:26:00Z","task":"re-eval/backend/group-001-r2","phase":"completed","message":"Group 001 Round 2: PASS (3/3 Major resolved + M4 resolved, typecheck 0 new errors)","detail":"Sign-off appended to group-001.md; Group 002 진입 가능"}
+{"ts":"2026-04-22T00:00:00Z","event":"started","task":"contract-review/group-002"}
+{"ts":"2026-04-22T00:01:00Z","event":"context_loaded","task":"contract-review/group-002"}
+{"ts":"2026-04-22T00:10:00Z","event":"reviewing","task":"contract-review/group-002"}
+{"ts":"2026-04-22T00:30:00Z","event":"completed","task":"contract-review/group-002","verdict":"ISSUES","counts":{"critical":0,"major":4,"minor":5}}
+{"ts":"2026-04-23T00:00:00Z","event":"started","task":"contract-review/group-002-r2"}
+{"ts":"2026-04-23T00:00:01Z","event":"r2_verifying","patches_claimed":"1-6","majors":4,"minors_addressed":["m2","m3","m4"]}
+{"ts":"2026-04-23T00:00:02Z","event":"completed","task":"contract-review/group-002-r2","verdict":"APPROVE","majors_resolved":"4/4","minors_resolved":"3/5","minors_deferred":["m1","m5"]}
+{"ts":"2026-04-23T03:14:00+09:00","task":"Group 002 Evaluation — FE App 피드 인터랙션","phase":"started","message":"Group 002 평가 시작","detail":null}
+{"ts":"2026-04-23T03:20:00+09:00","task":"Group 002 Evaluation — FE App 피드 인터랙션","phase":"context_loaded","message":"Contract + criteria + commits + key files 로드 완료","detail":null}
+{"ts":"2026-04-23T03:25:00+09:00","task":"Group 002 Evaluation — FE App 피드 인터랙션","phase":"evaluating","message":"Active evaluation: trace owner 분기, sourceContentId threading, publish toggle optimistic, more sheet owner 분기","detail":null}
+{"ts":"2026-04-23T03:40:00+09:00","task":"Group 002 Evaluation — FE App 피드 인터랙션","phase":"completed","message":"Group 002: ISSUES (Critical 0, Major 3, Minor 3). Report: evaluations/group-002.md","detail":"Major 1 kind=me ownership threading; Major 2 FilterDeletedErrorModal Toast fallback; Major 3 신규 e2e flow 3개 미생성"}
+{"ts":"2026-04-22T00:00:00Z","event":"started","round":2,"sprint":"ugc-platform-002","group":"group-002","pressure":"caution"}
+{"ts":"2026-04-22T00:00:01Z","event":"r2_verifying","round":2,"sprint":"ugc-platform-002","group":"group-002","fix_commit":"51a01d645"}
+{"ts":"2026-04-22T00:00:02Z","event":"completed","round":2,"sprint":"ugc-platform-002","group":"group-002","verdict":"PASS","majors_resolved":3,"typecheck_regression":0,"fix_commit":"51a01d645"}
+{"ts":"2026-04-22T00:00:00Z","event":"started","task":"contract-review/group-003"}
+{"ts":"2026-04-22T00:05:00Z","event":"context_loaded","task":"contract-review/group-003","inputs":["group-003.md","005-009 tasks","api-contract.yaml","criteria.md","rubric v3","group-001-summary","group-002-summary","prototype specs","userStorage grep"]}
+{"ts":"2026-04-22T00:05:30Z","event":"reviewing","task":"contract-review/group-003"}
+{"ts":"2026-04-22T00:15:00Z","event":"completed","task":"contract-review/group-003","verdict":"ISSUES","counts":{"critical":0,"major":4,"minor":6},"output":"contracts/group-003-review.md"}
+{"ts":"2026-04-23T00:00:00Z","event":"started","task":"contract-review/group-003-r2"}
+{"ts":"2026-04-23T00:00:01Z","event":"r2_verifying","task":"contract-review/group-003-r2","patches":["P1:M1","P2:M2","P3:M3","P4:M4","P5:m1","P6:m3+m4","P7:m6","P8:m5","m2-inP1"]}
+{"ts":"2026-04-23T00:00:02Z","event":"completed","task":"contract-review/group-003-r2","verdict":"APPROVE","resolved":{"major":"4/4","minor":"6/6","total":"10/10"}}
+{"ts":"2026-04-22T00:00:00Z","task":"eval/app/group-003","phase":"started","message":"Group 003 평가 시작","detail":null}
+{"ts":"2026-04-22T00:30:00Z","task":"eval/app/group-003","phase":"evaluating","message":"9 critical checks completed","detail":null}
+{"ts":"2026-04-22T00:45:00Z","task":"eval/app/group-003","phase":"completed","message":"Group 003: PASS (Critical 0 / Major 0 / Minor 3)","detail":null}

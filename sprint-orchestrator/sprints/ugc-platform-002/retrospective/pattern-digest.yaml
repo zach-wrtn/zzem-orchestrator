@@ -1,0 +1,95 @@
+sprint_id: "ugc-platform-002"
+generated_at: "2026-04-23T00:00:00+09:00"
+
+patterns:
+  - pattern: "Entity/DTO 확장 시 semantic-breaking fallback (userProfile.id='', likeCount ?? 0, liked ?? false) 로 isOwn/self-like 오판 + ContentSummary.sourceContentId 가 DB persist 없이 null 반환 — core feature stubbing 근접"
+    category: "correctness"
+    frequency: 2
+    groups: ["group-001", "group-002"]
+    severity: "major"
+    systemic_fix: "Contract Done Criteria 에 'Mapper fallback 금지 (`?? 0` / `?? false` / `|| \"\"`) grep 게이트' 조항 필수화. Zod 필수 필드 강제 + 파싱 실패 시 item skip. Group 003 에서 Contract patches 로 선제 방지 성공 (first-try PASS)."
+    detection: "Group 001: createOne input 에 sourceContentId 누락으로 DB 저장 안 됨 (Evaluator Major 1). Group 002: isOwn 이 MY profile path 에서 항상 false (PublishToggle 미렌더, CTA 오표시)."
+    source_sprint: "ugc-platform-002"
+    source_group: "group-001"
+    contract_clause: "Mapper fallback 금지 — `rg 'likeCount\\s*\\?\\?\\s*0|liked\\s*\\?\\?\\s*false' src → 0 hit`. Zod schema 필수 필드 강제. 파싱 실패 시 feed item 제외."
+    skill_candidate: false
+
+  - pattern: "Dead hook / dead method / dead factory — 신규 훅/팩토리 생성되나 callsite 0. Contract 의 'DTO 추가' 가 'behavior 호출' 을 포함하는지 불명확할 때 발생"
+    category: "completeness"
+    frequency: 2
+    groups: ["group-001", "group-002"]
+    severity: "major"
+    systemic_fix: "Contract Verification Method 에 `rg '{hookName}\\(' app/src --glob '*.tsx' --glob '*.ts' → ≥ 1 hit` 게이트 필수화. Group 002/003 Contract 에 적용되어 Group 003 에서 재발 없음."
+    detection: "Group 001: setSourceContentId 존재하나 0 callsite (createOne 이 받지 않음). custom-prompt buildGenerationCompletedEvent factory 정의 but 0 callsite. Group 002: FilterDeletedErrorModal 컴포넌트 Contract 요구하나 Toast fallback 구현."
+    source_sprint: "ugc-platform-002"
+    source_group: "group-001"
+    contract_clause: "신규 hook/factory/컴포넌트 추가 시 callsite ≥ 1 grep 게이트 의무. Contract 가 'DTO 추가' 를 넘어 'behavior 호출 경로' 를 명시."
+    skill_candidate: true
+
+  - pattern: "Cross-component 적용 범위 전수 명시 누락 — Contract 가 '모든 피드/진입 path' 를 언급하지만 구현자가 일부만 반영 (FeedResponseDto 누락, 3 SwipeFeed variant 중 1개만 반영)"
+    category: "completeness"
+    frequency: 2
+    groups: ["group-001", "group-002"]
+    severity: "major"
+    systemic_fix: "Contract Scope 또는 Cross-group Integration 섹션에 '영향 받는 컴포넌트/entrypoint 전수 나열' 의무. 예: '이 entity 확장은 3 path 모두 동일 mapper 경유 — (a) MY 3-tab, (b) ProfileToSwipeFeed, (c) legacy 홈 — 각 path 의 queryFn trace 필수.'"
+    detection: "Group 001: FeedResponseDto 에 Phase 2 신규 5 필드 0개 (FeedAppService LikeDS 미의존). Group 002: SwipeFeed ownership MY profile path 미포함."
+    source_sprint: "ugc-platform-002"
+    source_group: "group-001"
+    contract_clause: "Entity/DTO 확장은 영향 받는 모든 endpoint/path 를 Contract §Scope 또는 Cross-group Integration 에서 전수 나열. 각 path 의 매퍼 경유 정합 trace 의무."
+    skill_candidate: false
+
+  - pattern: "E2E flow 파일 Contract 요구 대비 생성 누락 — Contract §Scope 에 명시된 신규 flow 3개 전부 부재"
+    category: "completeness"
+    frequency: 1
+    groups: ["group-002"]
+    severity: "major"
+    systemic_fix: "Contract §Scope 에 E2E flow 목록 명시 + Done Criteria 에 'flow 파일 존재 + appId/deeplink/assertVisible 구조' 체크리스트. FE Engineer 프롬프트에도 명시."
+    detection: "Group 002 Round 1 Evaluator: swipe-feed-publish-toggle / swipe-feed-custom-prompt-block / swipe-feed-more-sheet.yaml 3 파일 전부 미생성. fix loop R1 에서 생성."
+    source_sprint: "ugc-platform-002"
+    source_group: "group-002"
+    contract_clause: "Contract §Scope 에 'E2E flows' 섹션 명시 (신규 + 확장). Done Criteria 에 각 flow 파일 존재 + 구조 (appId + deeplink + assertVisible) 체크."
+    skill_candidate: false
+
+  - pattern: "Storage primitive 혼동 — Contract 또는 task spec 이 AsyncStorage (async I/O) 로 기술했으나 codebase 실제는 MMKV (동기 I/O). Provider preload / race 처리 과설계 위험"
+    category: "integration"
+    frequency: 1
+    groups: ["group-003"]
+    severity: "minor"
+    systemic_fix: "Contract 또는 task spec 에서 storage layer 언급 시 codebase 실제 (`@wrtn/mmkv-kit` 여부) 확인 후 API 패턴 명시. 기존 callsite 1-2개 참조 (bottom-confirm-sheet.tsx, useWatermarkRemovalChecker.tsx)."
+    detection: "Group 003 Round 1 Evaluator: userStorage AsyncStorage wrapper 기술 vs 실제 MMKV. Patch 2 로 해소."
+    source_sprint: "ugc-platform-002"
+    source_group: "group-003"
+    contract_clause: "Storage primitive 언급 시 실제 codebase 래퍼 명시 (`@wrtn/mmkv-kit` = MMKV 동기 I/O)."
+    skill_candidate: false
+
+  - pattern: "Contract Round 2 patches 가 다음 그룹 Round 1 에서 선제 반영되어 fix loop 감소 — Contract 품질 누적 효과"
+    category: "completeness"
+    frequency: 3
+    groups: ["group-001", "group-002", "group-003"]
+    severity: "minor"
+    systemic_fix: "각 그룹 checkpoint 의 Lessons for Next Group 을 다음 그룹 Contract drafting 에 적극 반영. Evaluator 가 prior summary 를 Contract review 시 우선 검토."
+    detection: "Group 001 fix loop 1회 → Group 002 fix loop 1회 (Group 001 lessons 3개 prevented 재발 중 1건만 재발) → Group 003 fix loop 0회 (모든 Group 002 lesson 적용, first-try PASS)."
+    source_sprint: "ugc-platform-002"
+    source_group: "group-003"
+    contract_clause: "Contract drafting 시 prior group checkpoint 의 Lessons for Next Group 을 필수 참조 섹션으로 포함. Evaluator 는 Round 1 에서 lesson 재발 위험을 체계적으로 확인."
+    skill_candidate: false
+
+metrics:
+  total_groups: 3
+  first_pass_rate: 0.33               # 1/3 (Group 003 only)
+  avg_fix_cycles: 0.67                # G1: 1, G2: 1, G3: 0 — trend 감소
+  critical_issues_found: 0
+  major_issues_found: 10              # G1 Round1: 3, G2 Round1: 3, G2 fix-loop R1 기반: 3 (ownership/Modal/e2e), G3: 0 + Minor 3 (non-blocking)
+  minor_issues_found: 14              # G1: 5 (Like hard-delete, overfetch, countO(N), payback regex, custom-prompt emit), G2: 1, G3: 3, + Contract Minor accumulation
+  issues_fixed: 10                    # all Major resolved in fix loops
+  issues_deferred: 10                 # all Minor non-blocking (each group checkpoint 참조)
+  amendments_applied: 2               # DRIFT-01 / DRIFT-02
+
+  # Follow-up 지표 (vs ugc-platform-001)
+  improvement_trend:
+    first_pass_rate: "0.00 → 0.33 (+0.33)"
+    avg_fix_cycles: "1.67 → 0.67 (-1.00)"
+    critical_issues: "0 → 0"
+    fulfillment_rate: "0.88 → 1.00 (new AC)"
+    new_patterns_detected: 6
+    prior_lessons_prevented: 4         # Group 003 에서 Group 001/002 lesson 재발 방지

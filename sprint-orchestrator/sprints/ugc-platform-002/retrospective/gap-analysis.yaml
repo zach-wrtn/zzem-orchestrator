@@ -1,0 +1,245 @@
+sprint_id: "ugc-platform-002"
+prd_source: "sprint-orchestrator/sprints/ugc-platform-002/PRD.md + KB products/ugc-platform/phase-2-feed-payback/prd.md"
+generated_at: "2026-04-23T00:00:00+09:00"
+
+coverage:
+  total_ac: 15
+  fulfilled: 15
+  partially_fulfilled: 0
+  unfulfilled: 0
+  fulfillment_rate: "1.00"
+
+# Inherited from ugc-platform-001 (regression guard track)
+inherited_deferred:
+  total: 2
+  resolved_in_this_sprint: 0       # Still pending manual QA
+  still_deferred: 2                 # AC-2.3 / AC-7.4 manual QA not yet performed
+  trend:
+    fulfillment_rate: "0.88 → 1.00 (new AC only)"
+    first_pass_rate: "0.00 → 0.33"
+    avg_fix_cycles: "1.67 → 0.67"
+
+prototype_amendments:
+  total: 2
+  applied: 2
+  deferred: 0
+  dismissed: 0
+  categories:
+    new_ac: 0
+    clarify_ac: 1        # DRIFT-01 thousand separator
+    add_ui_spec: 1       # DRIFT-02 SwipeFeed footer canonical
+    implicit_req: 0
+    add_rule: 0
+
+items:
+  # US1 — 피드 공개 (8 AC)
+  - ac_id: "AC-1.1"
+    ac_text: "공개 기본 정책 (자동 공개, 기능 업데이트 이전 콘텐츠는 비공개 유지, 워터마크 없음)"
+    task_id: "be-001, app-004"
+    group: "group-001, group-002"
+    status: "fulfilled"
+    reason: "Content.isPublished default=false (legacy) + 새 콘텐츠는 app-004 PublishToggle OFF→ON 즉시 공개. AI 라벨 보존."
+    evidence: "evaluations/group-001.md § be-001 + evaluations/group-002.md § app-004"
+    root_cause: null
+    recommendation: null
+    priority: "critical"
+
+  - ac_id: "AC-1.2"
+    ac_text: "페이백 조건 (1%, sourceContentId 추적, 직전 1단계만)"
+    task_id: "be-002, be-003"
+    group: "group-001"
+    status: "fulfilled"
+    reason: "be-002 sourceContentId Content persistence + be-003 PaybackEventListener: ceil(used × 0.01), 체인 transitive 없음, 페르소나/self skip, idempotency (newContentId, sourceContentId) tuple."
+    evidence: "evaluations/group-001.md § be-002 + § be-003"
+    root_cause: null
+    recommendation: null
+    priority: "critical"
+
+  - ac_id: "AC-1.3"
+    ac_text: "비공개 전환 확인 바텀시트"
+    task_id: "app-004"
+    group: "group-002"
+    status: "fulfilled"
+    reason: "UnpublishConfirmSheet horizontal 2-button + PRD 직역 title/desc ('피드에서 사라지고 나만 볼 수 있어요. 이미 받은 페이백 크레딧은 유지돼요.'). ON→OFF 탭 시 확정 후 PATCH."
+    evidence: "evaluations/group-002.md § app-004"
+    root_cause: null
+    recommendation: null
+    priority: "high"
+
+  - ac_id: "AC-1.4"
+    ac_text: "커스텀 프롬프트 결과물 공개 불가"
+    task_id: "be-001, app-004"
+    group: "group-001, group-002"
+    status: "fulfilled"
+    reason: "be-001 PATCH visibility 409 CUSTOM_PROMPT_PUBLISH_BLOCKED (double-layer) + app-004 Toast PRD 직역. defensive 409 핸들링."
+    evidence: "evaluations/group-001.md § be-001 + evaluations/group-002.md § app-004"
+    root_cause: null
+    recommendation: null
+    priority: "high"
+
+  - ac_id: "AC-1.5"
+    ac_text: "CTA 버튼 분기 (템플릿 사용하기 / 다시 생성하기)"
+    task_id: "app-003"
+    group: "group-002"
+    status: "fulfilled"
+    reason: "SwipeFeedCTAButton isOwn 분기 — 동일 size/color/radius (brand-primary, 56h, 16px). isOwnOverride threading 으로 MY profile path 도 정확 동작."
+    evidence: "evaluations/group-002.md § app-003 + fix-loop R1 Major 1"
+    root_cause: null
+    recommendation: null
+    priority: "high"
+
+  - ac_id: "AC-1.6"
+    ac_text: "재생성 플로우 (MIXED 프리뷰, 삭제된 필터 에러 모달)"
+    task_id: "app-003"
+    group: "group-002"
+    status: "fulfilled"
+    reason: "sourceContentId threading (route → usecase → generate body). MIXED 필터 프리뷰 경유 유지. FilterDeletedErrorModal 신규 컴포넌트 (fix-loop R1)."
+    evidence: "evaluations/group-002.md § app-003 Round 2"
+    root_cause: null
+    recommendation: null
+    priority: "critical"
+
+  - ac_id: "AC-1.7"
+    ac_text: "액션바 4버튼 + 더보기 메뉴 (소유자 분기)"
+    task_id: "app-001, app-002"
+    group: "group-002"
+    status: "fulfilled"
+    reason: "SwipeFeedActionBar 4버튼 수직 스택 + 소유자 분기 MoreSheet (me: 다운/의견/삭제 destructive / other: 다운/의견/신고 placeholder). 댓글 버튼 미노출."
+    evidence: "evaluations/group-002.md § app-001, app-002"
+    root_cause: null
+    recommendation: null
+    priority: "critical"
+
+  - ac_id: "AC-1.8"
+    ac_text: "게시 토글 (내 콘텐츠만 노출)"
+    task_id: "app-004"
+    group: "group-002"
+    status: "fulfilled"
+    reason: "PublishToggleRow CTA 위쪽 row (space-between) + isOwn=false 시 unmount. iOS-style Switch 51×31."
+    evidence: "evaluations/group-002.md § app-004"
+    root_cause: null
+    recommendation: null
+    priority: "high"
+
+  # US3 — 좋아요 (3 AC)
+  - ac_id: "AC-3.1"
+    ac_text: "셀프 좋아요 허용"
+    task_id: "app-005, be-004"
+    group: "group-001, group-003"
+    status: "fulfilled"
+    reason: "be-004 POST /likes self-like 허용 + app-005 LikeButton disable 없음. likeCount +1/-1 반영."
+    evidence: "evaluations/group-001.md § be-004 + evaluations/group-003.md § app-005"
+    root_cause: null
+    recommendation: null
+    priority: "high"
+
+  - ac_id: "AC-3.2"
+    ac_text: "좋아요 탭 (최신순, 경로 통합)"
+    task_id: "app-006, be-004"
+    group: "group-001, group-003"
+    status: "fulfilled"
+    reason: "be-004 /me/contents?visibility=liked 활성화 + compound cursor (liked_at DESC, _id DESC) + $lte. app-006 isLikedPhase1 제거 + SwipeFeed liked variant 분화."
+    evidence: "evaluations/group-003.md § app-006 cross-variant trace"
+    root_cause: null
+    recommendation: null
+    priority: "high"
+
+  - ac_id: "AC-3.3"
+    ac_text: "좋아요 수 표시 (실제 숫자, 축약 없음, 0 포함)"
+    task_id: "app-005"
+    group: "group-003"
+    status: "fulfilled"
+    reason: "likeCount.toLocaleString('ko-KR') — 1000+ 콤마, 0 포함. korean-count import 0 (재생성은 축약 유지). DRIFT-01 amendment 반영."
+    evidence: "evaluations/group-003.md § app-005"
+    root_cause: null
+    recommendation: null
+    priority: "critical"
+
+  # US4 — 크레딧 페이백 (4 AC)
+  - ac_id: "AC-4.1"
+    ac_text: "페이백 조건 (Phase 1 MVP 1%, 페르소나 제외)"
+    task_id: "be-003"
+    group: "group-001"
+    status: "fulfilled"
+    reason: "PaybackEventListener: PAYBACK_RATE env (default 0.01), UserProfile.type === INTERNAL skip, caller === owner self-skip, idempotent via (newContentId, sourceContentId) tuple."
+    evidence: "evaluations/group-001.md § be-003 Round 2"
+    root_cause: null
+    recommendation: null
+    priority: "critical"
+
+  - ac_id: "AC-4.2"
+    ac_text: "크레딧 히스토리 페이백 row (썸네일 + 타이틀 + amount)"
+    task_id: "app-008, be-003"
+    group: "group-001, group-003"
+    status: "fulfilled"
+    reason: "be-003 CreditHistory entry title='크레딧 페이백' + thumbnailUrl=원본 Content + amount + transactionType=PAYBACK + source=PROMOTION. app-008 PaybackHistoryRow variant + '적립' chip 에 PAYBACK 포함."
+    evidence: "evaluations/group-003.md § app-008"
+    root_cause: null
+    recommendation: null
+    priority: "high"
+
+  - ac_id: "AC-4.3"
+    ac_text: "크레딧 페이백 세부 정책 (promotion, 올림, config)"
+    task_id: "be-003"
+    group: "group-001"
+    status: "fulfilled"
+    reason: "Math.ceil(used × rate). PAYBACK_RATE env override. CREDIT_SOURCE.PROMOTION 재사용. CREDIT_TRANSACTION_TYPE.PAYBACK enum 추가. 공개→비공개/삭제 시 회수 없음 (negative test)."
+    evidence: "evaluations/group-001.md § be-003"
+    root_cause: null
+    recommendation: null
+    priority: "high"
+
+  - ac_id: "AC-4.4"
+    ac_text: "최초 진입 UX (1회성 안내 모달)"
+    task_id: "app-007"
+    group: "group-003"
+    status: "fulfilled"
+    reason: "usePaybackIntro() hook + MMKV PAYBACK_INTRO_SHOWN flag (createStorageBuilder 패턴 재사용). 동기 I/O → Provider preload 불필요. PRD 직역 문구. Primary trigger onGenerate success + secondary fallback PublishToggle OFF→ON. callsite 3개 (dead-hook grep 통과)."
+    evidence: "evaluations/group-003.md § app-007"
+    root_cause: null
+    recommendation: null
+    priority: "medium"
+
+# PRD Amendments 적용 결과
+amendments:
+  - amendment_id: "DRIFT-01"
+    description: "좋아요 카운트 ko-KR thousand separator — AC 3.3 '실제 숫자' 를 1000+ 콤마 포맷 (예: 8,600) 으로 구체화"
+    applied_in: "group-002/app-001, group-003/app-005"
+    status: "applied"
+  - amendment_id: "DRIFT-02"
+    description: "SwipeFeed footer canonical — app-003 `.sf-creator` + `.sf-footer` + `.cta-button` 구조 SSOT. action bar 는 별도 레이어 (bottom 240px)."
+    applied_in: "group-002/app-001 (Revision 1), app-003, app-004 (PublishToggleRow 위치)"
+    status: "applied"
+
+# Follow-up 연계 (ugc-platform-001 deferred)
+follow_up_tracking:
+  previous_sprint: "ugc-platform-001"
+  inherited_deferred: 7               # Phase 1 retrospective 에서 2 PRD AC + 5 Minor
+  resolved_in_this_sprint: 4           # MINOR-G2-1 (Home gear), MINOR-G2-2 (landingTab race), MINOR-G3-3 (Clipboard), MINOR-G3-4 (initialContentId fallback)
+  still_deferred: 3                    # AC-2.3 (manual QA 대기), AC-7.4 (manual QA 대기), MINOR-G2-3 (Clean Architecture refactor — 별도 스프린트)
+  trend:
+    fulfillment_rate: "0.88 → 1.00 (new AC only; inherited still pending manual QA)"
+    first_pass_rate: "0.00 → 0.33"
+    avg_fix_cycles: "1.67 → 0.67"
+    critical_issues_found: "0 → 0"
+    major_issues_found: "5 → 9 (G1:3, G2:3+3, G3:0)"
+
+# Inherited Phase 1 deferred AC (still pending manual QA)
+inherited_items:
+  - ac_id: "AC-2.3 (Phase 1)"
+    ac_text: "프로필 공유 native 시트 (zzem://profile/{userId} 딥링크)"
+    original_sprint: "ugc-platform-001"
+    status: "partially_fulfilled"
+    reason: "Phase 1 에서 코드 배선 완료 (useShareMyProfile + buildProfileShareUrl 3/3 pass). Manual QA (iOS + Android native sheet 동작 확인) Phase 2 PR 머지 전 수행 필요."
+    root_cause: "technical_limit"
+    recommendation: "Manual QA 체크리스트 (Phase 5 PR body 포함됨). 머지 전 iOS + Android 양쪽에서 공유 시트 동작 + URL 정확 포함 확인."
+    priority: "medium"
+
+  - ac_id: "AC-7.4 (Phase 1)"
+    ac_text: "존재하지 않는 userId → 404 에러 화면"
+    original_sprint: "ugc-platform-001"
+    status: "partially_fulfilled"
+    reason: "Phase 1 에서 404 핸들링 + ErrorNotFound 컴포넌트 존재 확인. Manual QA (임의 userId 딥링크 → 에러 렌더) 미수행."
+    root_cause: "technical_limit"
+    recommendation: "Manual QA 체크리스트. 임의의 존재하지 않는 userId 로 zzem://profile/:userId 진입 → ErrorNotFound 렌더 확인."
+    priority: "medium"

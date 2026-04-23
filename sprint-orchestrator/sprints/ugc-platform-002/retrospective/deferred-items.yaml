@@ -1,0 +1,188 @@
+sprint_id: "ugc-platform-002"
+generated_at: "2026-04-23T00:00:00+09:00"
+
+deferred:
+  # Phase 1 inherited — still pending (AC-2.3, AC-7.4 manual QA)
+  - ac_id: "AC-2.3 (Phase 1 inherited)"
+    original_task: "ugc-platform-001/tasks/app/007-profile-share.md"
+    group: "inherited"
+    status: "partially_fulfilled"
+    reason: "Phase 1 코드 배선 완료 (Phase 1 Evaluator 확인). Phase 2 PR 머지 전 수동 QA 미수행 — iOS + Android native sheet 동작 + zzem://profile/{userId} 문자열 검증 필요."
+    root_cause: "technical_limit"
+    prior_attempts: 1
+    evaluator_notes: "Phase 1 evaluations/group-003-evaluation.md — useShareMyProfile + buildProfileShareUrl 3/3 pass. Phase 2 PR body 에 수동 QA 체크리스트 포함됨."
+    suggested_approach: "PR #799 / #562 머지 전 수동 QA. iOS 시뮬레이터 + Android 에뮬레이터에서 본인 프로필 공유 탭 → native sheet 에서 URL 포함 확인."
+    priority: "medium"
+    estimated_complexity: "small"
+
+  - ac_id: "AC-7.4 (Phase 1 inherited)"
+    original_task: "ugc-platform-001/tasks/app/006-other-user-profile.md"
+    group: "inherited"
+    status: "partially_fulfilled"
+    reason: "Phase 1 코드 배선 완료 (404 핸들링 + ErrorNotFound 컴포넌트). Phase 2 PR 머지 전 수동 QA — 임의 userId 딥링크 진입 → 에러 화면 렌더 검증 필요."
+    root_cause: "technical_limit"
+    prior_attempts: 1
+    evaluator_notes: "Phase 1 evaluations/group-003-evaluation.md — ErrorNotFound 컴포넌트 존재 + profile.screen.tsx 404 핸들링 분기 확인."
+    suggested_approach: "PR 머지 전 수동 QA. 존재하지 않는 userId 로 zzem://profile/:userId 딥링크 진입 → ErrorNotFound 렌더 스크린샷."
+    priority: "medium"
+    estimated_complexity: "small"
+
+  # Group 001 Minor (5건, non-blocking)
+  - ac_id: "MINOR-G1-1"
+    original_task: "group-001 (evaluator Minor M1)"
+    group: "group-001"
+    status: "unfulfilled"
+    reason: "LikeSchema 에 deletedAt prop + partialFilterExpression unique index 있으나 deleteByUserAndContent 는 hard-delete (deleteOne). 스키마 hint 와 실동작 불일치 — Contract 는 hard-delete 허용이므로 blocking 아님."
+    root_cause: "scope_creep"
+    prior_attempts: 0
+    evaluator_notes: "group-001 evaluation Minor M1"
+    suggested_approach: "schema 에서 deletedAt 필드/index 제거 또는 updateOne({deletedAt}) 로 전환. Contract 가 hard-delete 허용이므로 현 동작 유지 가능."
+    priority: "low"
+    estimated_complexity: "small"
+
+  - ac_id: "MINOR-G1-2"
+    original_task: "group-001 (evaluator Minor M2)"
+    group: "group-001"
+    status: "unfulfilled"
+    reason: "findMyLikesWithCursor overfetch → app 레이어 findLikedContents 가 private/deleted 후필터링. 필터링된 items 수만큼 list 길이가 limit 보다 작아질 수 있음 (hasNext 판정 부정확, MVP 한계 주석 명시됨)."
+    root_cause: "technical_limit"
+    prior_attempts: 0
+    evaluator_notes: "group-001 evaluation Minor M2"
+    suggested_approach: "다음 스프린트에서 aggregation pipeline 기반 consistent paging 구현 (Like → Content $lookup + filter). MVP 범위에서 over-fetch + retry 로 MVP 허용."
+    priority: "low"
+    estimated_complexity: "medium"
+
+  - ac_id: "MINOR-G1-3"
+    original_task: "group-001 (evaluator Minor M3)"
+    group: "group-001"
+    status: "unfulfilled"
+    reason: "countVisibleLikedByUser 가 findMyLikesWithCursor(1M, null) 후 per-like Content 쿼리 loop — O(N) round-trip. 좋아요 많은 유저에서 cost."
+    root_cause: "technical_limit"
+    prior_attempts: 0
+    evaluator_notes: "group-001 evaluation Minor M3"
+    suggested_approach: "Aggregation pipeline 1 round-trip 전환. MVP 에서는 count 호출이 드물어 허용."
+    priority: "low"
+    estimated_complexity: "small"
+
+  - ac_id: "MINOR-G1-5"
+    original_task: "group-001 (evaluator Minor M5)"
+    group: "group-001"
+    status: "unfulfilled"
+    reason: "Payback idempotency lookup $regex 비앵커 패턴. newContentId 가 다른 id 의 접두사가 될 때 오탐 위험. ObjectId 고정 길이라 실제 충돌은 희박."
+    root_cause: "technical_limit"
+    prior_attempts: 0
+    evaluator_notes: "group-001 evaluation Minor M5"
+    suggested_approach: "CreditDetailHistory 에 별도 newContentId/sourceContentId 필드 추가 후 indexed lookup 으로 전환. 방어적 개선."
+    priority: "low"
+    estimated_complexity: "medium"
+
+  - ac_id: "MINOR-G1-6"
+    original_task: "group-001 (deferred in fix-loop)"
+    group: "group-001"
+    status: "unfulfilled"
+    reason: "Custom-prompt GenerationCompleted event emit site dead factory — buildGenerationCompletedEvent 팩토리 정의되나 emit 되는 곳 미발견. Custom-prompt 재생성 런타임 트리거 미작동 (validation 만 활성)."
+    root_cause: "scope_creep"
+    prior_attempts: 0
+    evaluator_notes: "Sprint Lead 커밋 9a922fa6 본인 명시"
+    suggested_approach: "Custom-prompt 생성 파이프라인의 완료 시점 (예: replicate callback handler) 에 event emit 추가. Custom-prompt 재생성 페이백 / regenerateCount 증분 활성화."
+    priority: "medium"
+    estimated_complexity: "small"
+
+  # Group 002 Minor (1건)
+  - ac_id: "MINOR-G2-R1"
+    original_task: "group-002 (evaluator Minor m1, Round 1)"
+    group: "group-002"
+    status: "unfulfilled"
+    reason: "meme.mapper 의 ContentSummary → FeedItemEntity 변환 unit test 미보강. Zod 필수 필드 강제로 fallback 파싱 실패 시 item skip 동작 — 자동 검증 부족."
+    root_cause: "scope_creep"
+    prior_attempts: 0
+    evaluator_notes: "group-002 Round 1 Minor m1"
+    suggested_approach: "meme.mapper.spec.ts 에 필드 누락 → skip + happy path 케이스 추가."
+    priority: "low"
+    estimated_complexity: "small"
+
+  # Group 003 Minor (3건)
+  - ac_id: "MINOR-G3-1"
+    original_task: "group-003 (evaluator Minor m1)"
+    group: "group-003"
+    status: "unfulfilled"
+    reason: "use-payback-intro.tsx 가 useBottomConfirmSheet 공용 훅 사용 → enablePanDownToClose=true 하드코딩. Contract 는 CTA tap only close 요구."
+    root_cause: "technical_limit"
+    prior_attempts: 0
+    evaluator_notes: "group-003 evaluation Minor m1 — markShown() 즉시 호출로 regression 안전."
+    suggested_approach: "useBottomConfirmSheet 에 enablePanDownToClose option 추가 or PaybackIntroModal 전용 BottomSheet 직접 구현 (dismiss 비허용)."
+    priority: "low"
+    estimated_complexity: "small"
+
+  - ac_id: "MINOR-G3-2"
+    original_task: "group-003 (evaluator Minor m2)"
+    group: "group-003"
+    status: "unfulfilled"
+    reason: "CreditMapper.EARNED_CHIP_TRANSACTION_TYPES 상수 추가됐으나 callsite 0 — BE chip aggregation 의존 (Phase 3 소관)."
+    root_cause: "dependency"
+    prior_attempts: 0
+    evaluator_notes: "group-003 evaluation Minor m2"
+    suggested_approach: "BE 에서 chip aggregation 엔드포인트 확정 후 해당 상수 wiring. 또는 Phase 3 에서 chip filter BE 응답 확정."
+    priority: "low"
+    estimated_complexity: "small"
+
+  - ac_id: "MINOR-G3-3"
+    original_task: "group-003 (evaluator Minor m3)"
+    group: "group-003"
+    status: "unfulfilled"
+    reason: "Primary trigger showPaybackIntro() 가 generateMeme onSuccess 후 무조건 호출 (result.isPublished === true 조건 체크 미구현). 현행 auto-publish 정책 전제에서 정상."
+    root_cause: "scope_creep"
+    prior_attempts: 0
+    evaluator_notes: "group-003 evaluation Minor m3"
+    suggested_approach: "향후 사용자 '생성 후 자동 공개 해제' 옵션 도입 시 isPublished 조건 체크 보강. 현재는 AC 1.1 auto-publish 기본 정책 유지."
+    priority: "low"
+    estimated_complexity: "small"
+
+  # 이전 스프린트에서 이월된 Clean Architecture refactor (별도 스프린트 scope)
+  - ac_id: "MINOR-G2-3 (inherited, not resolved)"
+    original_task: "ugc-platform-001/MINOR-G2-3"
+    group: "inherited"
+    status: "unfulfilled"
+    reason: "Domain 레이어 react-query import — 기존 codebase 22+2 파일. Clean Architecture 엄격 해석 시 확대."
+    root_cause: "scope_creep"
+    prior_attempts: 0
+    evaluator_notes: "ugc-platform-001 deferred-items.yaml MINOR-G2-3 — 별도 스프린트 scope 재확인"
+    suggested_approach: "전체 codebase Clean Architecture refactor 전용 스프린트에서 react-query import 위치 정리. UGC Platform 스프린트 scope 외."
+    priority: "low"
+    estimated_complexity: "large"
+
+improvements:
+  - description: "Contract Verification Method 에 'Mapper fallback 금지 grep' 게이트 표준화 — `rg 'likeCount\\s*\\?\\?\\s*0|liked\\s*\\?\\?\\s*false' src → 0 hit`. Group 003 에서 first-try PASS 기여 증명."
+    source: "pattern_digest"
+    priority: "high"
+    rationale: "Group 001/002 Major class (fallback semantic 훼손) 을 Group 003 에서 선제 방지. 3회 관측 → `completeness-008` rubric 승격 후보."
+
+  - description: "Contract Verification Method 에 'Dead hook/method/factory grep' 게이트 표준화 — `rg '{hookName}\\(' src → ≥ 1 hit`. Group 002 부터 적용되어 Group 003 에서도 효과."
+    source: "pattern_digest"
+    priority: "high"
+    rationale: "Group 001 Major class (setSourceContentId dead, buildGenerationCompletedEvent dead) → Group 002/003 Contract 에 게이트 반영. 2회 관측."
+
+  - description: "Contract Scope / Cross-group Integration 섹션에 'Entity/DTO 확장 영향 범위 전수 나열' 조항. 특히 discriminated union 3+ variant 추가 시 각 path 매퍼 경유 trace 의무."
+    source: "pattern_digest"
+    priority: "high"
+    rationale: "Group 001 Major 2 (FeedResponseDto 누락) + Group 002 Major 1 (MY profile ownership 누락) + Group 003 Round 1 Patch 3 (liked variant 3-path cross-mapper) — 2회 관측."
+
+  - description: "Contract §Scope 에 'E2E flows' 섹션 명시 (신규 + 확장) + Done Criteria 에 각 flow 파일 존재 + 구조 체크리스트."
+    source: "pattern_digest"
+    priority: "medium"
+    rationale: "Group 002 Major 3 재발 방지. 1회 관측. FE Engineer 프롬프트에도 명시."
+
+  - description: "Contract / task spec 에서 storage layer 언급 시 codebase 실제 (`@wrtn/mmkv-kit` = MMKV 동기 I/O) 확인 후 API 패턴 명시."
+    source: "pattern_digest"
+    priority: "low"
+    rationale: "Group 003 Round 1 Patch 2. 1회 관측. KB pattern 으로 승격 고려 (`integration-002`)."
+
+  - description: "Contract drafting 시 prior group checkpoint 의 Lessons for Next Group 을 필수 참조. Evaluator 는 Round 1 에서 lesson 재발 위험을 체계적으로 확인."
+    source: "pattern_digest"
+    priority: "high"
+    rationale: "Group 003 first-try PASS 는 Group 001/002 lessons (isOwnOverride, userStorage MMKV, dead-hook grep, fallback 금지) 선제 반영의 결과. 누적 learning 효과 입증."
+
+  - description: "Manual QA 체크리스트 (AC-2.3, AC-7.4) Phase 5 PR body 포함 유지. 다음 스프린트에서는 PR 머지 전 수동 QA 수행 후 결과를 PR comment 에 기록."
+    source: "user_feedback"
+    priority: "medium"
+    rationale: "Phase 1/2 2 스프린트 연속 manual QA pending. Phase 3 Retrospective 에서 fulfillment 확정 필요."
