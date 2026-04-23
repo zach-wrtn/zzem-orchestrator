@@ -5,7 +5,8 @@
   "private": true,
   "scripts": {
     "dev": "astro dev",
-    "build": "pnpm run sync:tokens && pnpm run capture:screenshots && pnpm run copy:prototypes && astro build",
+    "validate:tokens": "tsx scripts/validate-tokens.ts",
+    "build": "pnpm run sync:tokens && pnpm run validate:tokens && pnpm run capture:screenshots && pnpm run copy:prototypes && astro build",
     "preview": "astro preview",
     "copy:prototypes": "tsx scripts/copy-prototypes.ts",
     "capture:screenshots": "tsx scripts/capture-screenshots.ts",

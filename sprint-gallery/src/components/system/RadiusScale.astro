@@ -1,27 +1,46 @@
 ---
+import { loadTokenMap } from '@/lib/token-resolve';
 interface Props { tokenSource: string; }
-const scale = [
-  { key: 'radius-xs',     px: 4,   label: 'input, tag' },
-  { key: 'radius-sm',     px: 8,   label: 'chip, badge' },
-  { key: 'radius-md',     px: 12,  label: 'card, button' },
-  { key: 'radius-lg',     px: 16,  label: 'CTA button' },
-  { key: 'radius-device', px: 22,  label: 'device frame' },
-  { key: 'radius-sheet',  px: 28,  label: 'bottom sheet top' },
-  { key: 'radius-pill',   px: 999, label: 'pill, avatar' },
-];
+const { tokenSource } = Astro.props;
+
+const LABEL_MAP: Record<string, string> = {
+  'wds.radius.none': 'no rounding',
+  'wds.radius.xs':   'input, tag',
+  'wds.radius.sm':   'chip, badge',
+  'wds.radius.md':   'card, button',
+  'wds.radius.lg':   'CTA button',
+  'wds.radius.xl':   'panel',
+  'wds.radius.2xl':  'bottom sheet top',
+  'wds.radius.full': 'pill, avatar',
+};
+
+const map = await loadTokenMap('src/content/tokens');
+const scale = Object.entries(map)
+  .filter(([, v]) => v.source === tokenSource)
+  .filter(([k]) => k.startsWith('wds.radius.'))
+  .map(([k, v]) => ({
+    key: k,
+    px: parseInt(v.value, 10),
+    label: LABEL_MAP[k] ?? '',
+  }))
+  .sort((a, b) => a.px - b.px);
 ---
-<section class="scale">
-  {scale.map((r) => (
-    <div class="row">
-      <div class="sample" style={`border-radius: ${r.px}px;`}></div>
-      <div class="meta">
-        <span class="key">{r.key}</span>
-        <span class="val">{r.px === 999 ? '999px (full)' : `${r.px}px`}</span>
-        <span class="lbl">{r.label}</span>
+{scale.length === 0 ? (
+  <p class="empty">No radius tokens found.</p>
+) : (
+  <section class="scale">
+    {scale.map((r) => (
+      <div class="row">
+        <div class="sample" style={`border-radius: ${r.px}px;`}></div>
+        <div class="meta">
+          <span class="key">{r.key.replace('wds.radius.', 'radius-')}</span>
+          <span class="val">{r.px >= 9999 ? '9999px (full)' : `${r.px}px`}</span>
+          <span class="lbl">{r.label}</span>
+        </div>
       </div>
-    </div>
-  ))}
-</section>
+    ))}
+  </section>
+)}
 
 <style>
   .scale { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; }
@@ -31,4 +50,5 @@ const scale = [
   .key { font-family: var(--font-mono); font-size: 12px; color: var(--text); }
   .val { font-family: var(--font-mono); font-size: 11px; color: var(--text-dim); }
   .lbl { font-size: 12px; color: var(--text-dim); }
+  .empty { color: var(--text-dim); font-family: var(--font-mono); }
 </style>
