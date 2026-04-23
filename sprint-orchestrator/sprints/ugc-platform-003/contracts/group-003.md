@@ -129,7 +129,20 @@
 - [ ] Phase 2 PaybackEventListener 크레딧 적립 동작 회귀 없음 — 본 그룹은 batch reporter 만 추가.
 - [ ] Phase 2 Like 엔드포인트 성능 회귀 없음 (listener emit 만 추가, sync 로직 미변경).
 
+## Group 002 Lessons Applied (선제 반영)
+
+1. **Event emit-only on new creation** (Group 002 be-003 패턴): be-004 PaybackBatchScheduler 의 `(ownerUserId, bucket=YYYY-MM-DD)` unique 제약 위반 시 emit + persist 둘 다 skip (기존 row 있으면 early return). 11000 race case 도 동일.
+2. **Set union hidden-users 확장**: be-004 listener persist 직전 `UserBlockDomainService.getBlockedPairs(ownerId)` 체크 — actor 가 owner 를 block (또는 owner 가 actor 를 block) 한 경우 Notification persist skip. 이는 AC 7.2 "차단 시 알림 미통지" 정신을 Notification 레이어까지 확장. BlockRelationPort dual-provider caveat 인지 — `BLOCK_RELATION_PORT` 주입 시 UserBlockDomainModule exports 경유 권장 (단일 SOT).
+3. **Mapper fallback 의도 분류 주석화**: settings 값 fallback 시 `// Why: persona default OFF` 또는 `// Why: write-through lazy default` 주석 의무. `?? false / ?? true` 패턴 사용 시 반드시 주석.
+4. **Contract field-level 파일 경로 명시**: NotificationItem 응답 DTO 경로 확정 — `backend/apps/meme-api/src/application/notification/dto/notification-item.dto.ts` (또는 실제 경로 grep 확인). 필드 name list: `notificationId, type, title, body, unread, deeplink, thumbnailUrl, actorUserId, createdAt`.
+5. **BlockRelationPort dual-provider caveat**: be-004 listener 가 BlockRelationPort 를 주입받을 때, UserBlockDomainModule 의 `useExisting` alias 를 통해 접근 (UserFollowDomainModule inline factory 는 고립 사용). 신규 import source `@domain/user-block/user-block-domain.module`.
+6. **Cursor extra-item pattern** 재확인: be-005 `/v2/me/notifications` list 도 `page[limit]` 인코딩 (reference: `user-follow-app.service.buildListResponse`, `user-block-app.service.buildListResponse`).
+
 ## Sign-off
 
-- Sprint Lead draft: 2026-04-23 (pending Group 001 PASS + Phase 2 event emit 경로 확인)
-- Evaluator review: pending
+- Sprint Lead draft: 2026-04-23
+- Group 002 ACCEPTED (Round 1 first-try PASS) — Group 002 Lessons 반영
+- Group 001 `EVENT_TYPE.FOLLOW_CREATED` payload 확정 (shouldNotify=false for persona target)
+- Phase 2 `EVENT_TYPE.LIKE_CREATED` + `EVENT_TYPE.CONTENT_GENERATION_COMPLETED` (payback batch source) 확인됨
+- Sprint Lead sign-off: 2026-04-23 (self-reviewed with Group 001 + Group 002 Lessons 선제 반영)
+- Evaluator review: R1 in §4.4 (후행)
