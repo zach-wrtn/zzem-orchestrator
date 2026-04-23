@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  body { margin: 0; padding: 0; background: rgba(0,0,0,0.4); font-family: 'Pretendard Variable', sans-serif; display: flex; justify-content: center; align-items: flex-end; min-height: 100vh; }
+  .sheet {
+    width: 100%; max-width: 430px; background: #FFF; border-radius: 28px 28px 0 0;
+    padding: 12px 0 24px;
+  }
+  .handle { width: 40px; height: 4px; border-radius: 2px; background: #A7A7A7; margin: 0 auto 14px; }
+  .item { display: flex; align-items: center; gap: 12px; padding: 16px 20px; font-size: 16px; color: #262626; cursor: pointer; }
+  .item:hover { background: #F7F7F7; }
+  .item.destructive { color: #D92800; }
+  .icon { width: 24px; height: 24px; border-radius: 6px; background: #E2E2E2; }
+  .actions { display: flex; gap: 6px; padding: 12px 16px 4px; }
+  .actions button {
+    flex: 1; padding: 14px; border-radius: 16px; border: none;
+    font-family: inherit; font-size: 16px; font-weight: 600; cursor: pointer;
+  }
+  .actions .cancel { background: rgba(0,0,0,0.1); color: #262626; }
+  .actions .confirm { background: #262626; color: #FFF; }
+  .text { padding: 14px 20px 8px; font-size: 16px; color: #262626; font-weight: 500; text-align: center; }
+</style>
+</head>
+<body>
+<div class="sheet" id="sheet"></div>
+<script>
+  const variant = new URLSearchParams(location.search).get('variant') || 'menu';
+  const sheet = document.getElementById('sheet');
+  const handle = '<div class="handle"></div>';
+  if (variant === 'menu') {
+    sheet.innerHTML = handle +
+      '<div class="item"><div class="icon"></div>다운로드</div>' +
+      '<div class="item"><div class="icon"></div>의견보내기</div>' +
+      '<div class="item destructive"><div class="icon"></div>신고하기</div>';
+  } else if (variant === 'confirm') {
+    sheet.innerHTML = handle +
+      '<div class="text">이 사진을 삭제하시겠습니까?</div>' +
+      '<div class="actions"><button class="cancel">취소</button><button class="confirm">삭제</button></div>';
+  } else {
+    sheet.innerHTML = handle +
+      '<div class="item"><div class="icon"></div>카메라/앨범</div>' +
+      '<div class="item destructive"><div class="icon"></div>사진 삭제</div>';
+  }
+</script>
+</body>
+</html>

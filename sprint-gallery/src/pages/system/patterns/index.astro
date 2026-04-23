@@ -1,0 +1,41 @@
+---
+import Layout from '@/components/Layout.astro';
+const base = import.meta.env.BASE_URL;
+const deferred = [
+  'Feed Grid', 'Profile Header', 'Settings Screen', 'Profile Edit',
+  'Other User Profile', 'Home Screen', 'Detail View',
+];
+---
+<Layout title="Patterns · System">
+  <nav class="crumb">
+    <a href={`${base}/system/`.replace(/\/+/g, '/')}>System</a>
+    <span> / </span>
+    <span class="cur">Patterns</span>
+  </nav>
+  <header class="head">
+    <h1>Patterns</h1>
+    <p class="sub">Screen-level compositions made of components. Coming post-MVP.</p>
+  </header>
+  <section class="deferred">
+    <h2>Planned</h2>
+    <ul>
+      {deferred.map((p) => <li>{p}</li>)}
+    </ul>
+    <p class="note">
+      Track the roadmap in <code>docs/superpowers/specs/2026-04-23-design-system-v2-design.md</code>
+      § Follow-ups.
+    </p>
+  </section>
+</Layout>
+
+<style>
+  .crumb { font-family: var(--font-mono); font-size: var(--fs-label); color: var(--text-dim); margin: 24px 0 6px; }
+  .crumb a { color: var(--text-dim); }
+  .crumb .cur { color: var(--text); }
+  .head h1 { font-size: var(--fs-h1); letter-spacing: var(--ls-h1); margin: 6px 0 6px; }
+  .head .sub { color: var(--text-dim); margin: 0 0 32px; }
+  .deferred ul { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; padding: 0; list-style: none; margin: 0 0 20px; }
+  .deferred li { padding: 12px 14px; background: var(--surface); border: 1px dashed var(--border); border-radius: var(--radius-card); font-size: var(--fs-small); color: var(--text-dim); }
+  .note { font-family: var(--font-mono); font-size: var(--fs-label); color: var(--text-dim); }
+  .note code { color: var(--text-dim); }
+</style>

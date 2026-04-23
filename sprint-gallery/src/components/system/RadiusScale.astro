@@ -1,0 +1,34 @@
+---
+interface Props { tokenSource: string; }
+const scale = [
+  { key: 'radius-xs',     px: 4,   label: 'input, tag' },
+  { key: 'radius-sm',     px: 8,   label: 'chip, badge' },
+  { key: 'radius-md',     px: 12,  label: 'card, button' },
+  { key: 'radius-lg',     px: 16,  label: 'CTA button' },
+  { key: 'radius-device', px: 22,  label: 'device frame' },
+  { key: 'radius-sheet',  px: 28,  label: 'bottom sheet top' },
+  { key: 'radius-pill',   px: 999, label: 'pill, avatar' },
+];
+---
+<section class="scale">
+  {scale.map((r) => (
+    <div class="row">
+      <div class="sample" style={`border-radius: ${r.px}px;`}></div>
+      <div class="meta">
+        <span class="key">{r.key}</span>
+        <span class="val">{r.px === 999 ? '999px (full)' : `${r.px}px`}</span>
+        <span class="lbl">{r.label}</span>
+      </div>
+    </div>
+  ))}
+</section>
+
+<style>
+  .scale { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; }
+  .row { display: flex; flex-direction: column; gap: 10px; padding: 14px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); }
+  .sample { width: 100%; aspect-ratio: 4/3; background: var(--accent-grad); }
+  .meta { display: flex; flex-direction: column; gap: 2px; }
+  .key { font-family: var(--font-mono); font-size: 12px; color: var(--text); }
+  .val { font-family: var(--font-mono); font-size: 11px; color: var(--text-dim); }
+  .lbl { font-size: 12px; color: var(--text-dim); }
+</style>

@@ -1,0 +1,62 @@
+---
+import Layout from '@/components/Layout.astro';
+import { getCollection } from 'astro:content';
+import SwatchGrid from '@/components/system/SwatchGrid.astro';
+import TypeSpecimen from '@/components/system/TypeSpecimen.astro';
+import SpacingScale from '@/components/system/SpacingScale.astro';
+import RadiusScale from '@/components/system/RadiusScale.astro';
+import MotionPlayer from '@/components/system/MotionPlayer.astro';
+import ElevationStack from '@/components/system/ElevationStack.astro';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('foundations');
+  return entries.map((entry) => ({
+    params: { key: entry.data.key },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await entry.render();
+
+const renderers = {
+  color: SwatchGrid,
+  typography: TypeSpecimen,
+  spacing: SpacingScale,
+  radius: RadiusScale,
+  motion: MotionPlayer,
+  elevation: ElevationStack,
+};
+const Renderer = renderers[entry.data.key];
+const base = import.meta.env.BASE_URL;
+const backHref = `${base}/system/foundations/`.replace(/\/+/g, '/');
+---
+<Layout title={`${entry.data.name} · System`}>
+  <nav class="crumb">
+    <a href={`${base}/system/`.replace(/\/+/g, '/')}>System</a>
+    <span> / </span>
+    <a href={backHref}>Foundations</a>
+    <span> / </span>
+    <span class="cur">{entry.data.name}</span>
+  </nav>
+  <header class="head">
+    <h1>{entry.data.name}</h1>
+    <p class="sub">{entry.data.description}</p>
+  </header>
+  <article class="prose"><Content /></article>
+  <Renderer tokenSource={entry.data.tokenSource} />
+</Layout>
+
+<style>
+  .crumb { font-family: var(--font-mono); font-size: var(--fs-label); color: var(--text-dim); margin: 24px 0 6px; }
+  .crumb a { color: var(--text-dim); }
+  .crumb a:hover { color: var(--accent); }
+  .crumb .cur { color: var(--text); }
+  .head h1 { font-size: var(--fs-h1); letter-spacing: var(--ls-h1); margin: 6px 0 6px; }
+  .head .sub { color: var(--text-dim); max-width: 60ch; margin: 0 0 24px; }
+  .prose { color: var(--text-dim); max-width: 68ch; margin: 0 0 32px; line-height: var(--lh-body); }
+  .prose :global(h2), .prose :global(h3) { color: var(--text); margin: 1.4em 0 0.5em; }
+  .prose :global(p) { margin: 0.8em 0; max-width: 68ch; }
+  .prose :global(ul) { padding-left: 1.4em; }
+  .prose :global(code) { font-family: var(--font-mono); font-size: 0.88em; background: var(--surface-hover); border: 1px solid var(--border); padding: 1px 5px; border-radius: 4px; color: var(--text); }
+</style>

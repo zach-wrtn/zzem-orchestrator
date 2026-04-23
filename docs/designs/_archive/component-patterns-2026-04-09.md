@@ -1,3 +1,9 @@
+> **Archived 2026-04-23.** This file is preserved for history. See `docs/designs/README.md` for the current structure and `/system/` on the deployed gallery for the rendered browser.
+>
+> Individual components are now MDX files under `docs/designs/components/`, foundations under `docs/designs/foundations/`.
+
+---
+
 # ZZEM Component Patterns
 > Figma 보정에서 역추출된 컴포넌트 패턴. Design Engineer가 프로토타입 생성 시 참조.
 > 각 패턴은 실제 Figma 디자인에서 검증된 것이며, PRD만으로 생성 시 이 패턴을 따르면 Figma와의 괴리를 최소화할 수 있다.

@@ -2,7 +2,15 @@ import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
 test.describe('axe a11y scan', () => {
-  const routes = ['', 'sprints/ugc-platform-002/', 'prototypes/ugc-platform-002/app-001/'];
+  const routes = [
+    '',
+    'sprints/ugc-platform-002/',
+    'prototypes/ugc-platform-002/app-001/',
+    'system/',
+    'system/foundations/color/',
+    'system/components/button/',
+    'system/patterns/',
+  ];
 
   for (const path of routes) {
     test(`no critical/serious violations on /${path}`, async ({ page }) => {

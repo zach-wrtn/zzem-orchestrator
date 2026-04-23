@@ -1,0 +1,46 @@
+---
+import Layout from '@/components/Layout.astro';
+import { getCollection } from 'astro:content';
+const entries = (await getCollection('foundations')).sort((a, b) => a.data.order - b.data.order);
+const base = import.meta.env.BASE_URL;
+---
+<Layout title="Foundations · System">
+  <nav class="crumb">
+    <a href={`${base}/system/`.replace(/\/+/g, '/')}>System</a>
+    <span> / </span>
+    <span class="cur">Foundations</span>
+  </nav>
+  <header class="head">
+    <h1>Foundations</h1>
+    <p class="sub">Color · Typography · Spacing · Radius · Motion · Elevation.</p>
+  </header>
+  <div class="grid">
+    {entries.map((e) => (
+      <a class="card" data-foundation-card href={`${base}/system/foundations/${e.data.key}/`.replace(/\/+/g, '/')}>
+        <span class="key">{e.data.key}</span>
+        <span class="name">{e.data.name}</span>
+        <span class="desc">{e.data.description}</span>
+      </a>
+    ))}
+  </div>
+</Layout>
+
+<style>
+  .crumb { font-family: var(--font-mono); font-size: var(--fs-label); color: var(--text-dim); margin: 24px 0 6px; }
+  .crumb a { color: var(--text-dim); }
+  .crumb a:hover { color: var(--accent); }
+  .crumb .cur { color: var(--text); }
+  .head h1 { font-size: var(--fs-h1); letter-spacing: var(--ls-h1); margin: 6px 0 6px; }
+  .head .sub { color: var(--text-dim); margin: 0 0 24px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+  .card {
+    display: flex; flex-direction: column; gap: 6px;
+    padding: 18px 20px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: var(--radius-card);
+    transition: transform var(--dur-spring-soft) var(--spring-soft), border-color var(--dur-spring-soft) var(--spring-soft);
+  }
+  .card:hover { transform: translateY(-2px); border-color: var(--accent); }
+  .key { font-family: var(--font-mono); font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; }
+  .name { font-size: var(--fs-h3); color: var(--text); font-weight: 600; }
+  .desc { font-size: var(--fs-small); color: var(--text-dim); }
+</style>

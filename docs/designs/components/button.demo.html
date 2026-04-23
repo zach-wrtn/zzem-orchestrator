@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  body { margin: 0; padding: 24px; background: #FFFFFF; font-family: 'Pretendard Variable', -apple-system, sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+  .row { display: flex; flex-direction: column; gap: 14px; align-items: center; }
+  button {
+    min-height: 44px; padding: 0 20px; border-radius: 12px; border: none;
+    font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer;
+  }
+  button.primary { background: #262626; color: #FFF; }
+  button.secondary { background: #F1F1F1; color: #262626; }
+  button.destructive { background: transparent; color: #D92800; }
+  button.disabled { background: #F1F1F1; color: #595959; pointer-events: none; }
+</style>
+</head>
+<body>
+<div class="row">
+  <button class="primary">저장</button>
+  <button class="secondary">취소</button>
+  <button class="destructive">삭제하기</button>
+  <button class="disabled">저장</button>
+</div>
+<script>
+  const variant = new URLSearchParams(location.search).get('variant');
+  if (variant) {
+    document.querySelectorAll('button').forEach((b) => b.style.display = 'none');
+    const show = document.querySelector(`button.${variant}`);
+    if (show) show.style.display = 'inline-flex';
+  }
+</script>
+</body>
+</html>

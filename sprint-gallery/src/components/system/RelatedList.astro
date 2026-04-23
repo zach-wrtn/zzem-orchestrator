@@ -1,0 +1,38 @@
+---
+import { getCollection } from 'astro:content';
+interface Props { slugs: string[]; }
+const { slugs } = Astro.props;
+const all = await getCollection('components');
+const entries = slugs
+  .map((s) => all.find((e) => e.data.key === s))
+  .filter(Boolean) as Awaited<ReturnType<typeof getCollection<'components'>>>;
+const base = import.meta.env.BASE_URL;
+---
+{entries.length > 0 && (
+  <section class="related">
+    <h2>Related</h2>
+    <div class="list">
+      {entries.map((e) => (
+        <a href={`${base}/system/components/${e!.data.key}/`.replace(/\/+/g, '/')}>
+          <span class="name">{e!.data.name}</span>
+          <span class="cat">{e!.data.category}</span>
+        </a>
+      ))}
+    </div>
+  </section>
+)}
+
+<style>
+  .related { margin: 24px 0; }
+  h2 { font-size: var(--fs-h2); margin: 0 0 12px; }
+  .list { display: flex; flex-wrap: wrap; gap: 10px; }
+  a {
+    display: flex; flex-direction: column; gap: 4px;
+    padding: 12px 16px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: var(--radius-card);
+    transition: border-color var(--dur-ui) var(--ease-out-quart);
+  }
+  a:hover { border-color: var(--accent); }
+  .name { font-weight: 600; color: var(--text); }
+  .cat { font-family: var(--font-mono); font-size: var(--fs-label); color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.06em; }
+</style>

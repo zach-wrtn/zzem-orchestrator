@@ -1,0 +1,36 @@
+---
+name: Card
+key: card
+category: surface
+status: stable
+tokens:
+  - wds.color.neutral.0
+  - wds.color.neutral.900
+variants:
+  - name: feed
+    purpose: 2열 피드 카드. 이미지 + 하단 그라디언트 오버레이 + 크리에이터 바.
+  - name: template
+    purpose: 신규 템플릿 작은 카드 (100×100).
+  - name: ranking
+    purpose: 실시간 랭킹 썸네일 (40×40 + 이름).
+states:
+  - name: new
+    rule: 좌상단 pill "신규" (#0080c6 bg, Pretendard SemiBold 12 white).
+  - name: generating
+    rule: dark gradient overlay + "생성중..." + 회전 로고 스피너.
+  - name: failed
+    rule: dark gradient overlay + "생성 실패" + CancelStroke X 버튼.
+relatedComponents: [chip]
+demoFile: ./card.demo.html
+---
+
+## Anatomy
+피드 카드는 1:1과 4:5 비율 교차 (Pinterest magazine). 카드 간격 1px (모자이크 느낌). border-radius 4px.
+
+## Variants
+- **feed** — 썸네일 + 하단 그라디언트 + 18px 아바타 + 닉네임(SemiBold 12 white) + 하트/좋아요 수(우측)
+- **template** — 이미지 + 이름(Medium 12, 1줄 말줄임). 가로 스크롤 rail에 사용.
+- **ranking** — 순위 번호 + 40px 썸네일 + 이름 + 타입 뱃지.
+
+## States
+피드 카드는 생성중/실패 상태를 자체적으로 표현 — 부모가 별도 처리 금지.

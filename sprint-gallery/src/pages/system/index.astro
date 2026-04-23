@@ -1,0 +1,87 @@
+---
+import Layout from '@/components/Layout.astro';
+import SystemSidebar from '@/components/system/SystemSidebar.astro';
+import { getCollection } from 'astro:content';
+const foundations = (await getCollection('foundations')).sort((a, b) => a.data.order - b.data.order);
+const components = await getCollection('components');
+const base = import.meta.env.BASE_URL;
+const p = (s: string) => `${base}/${s}`.replace(/\/+/g, '/');
+---
+<Layout title="System">
+  <div class="layout">
+    <SystemSidebar />
+    <main>
+      <header class="hero">
+        <p class="eyebrow">ZZEM Design System</p>
+        <h1>Foundations and components — single source of truth.</h1>
+        <p class="sub">
+          Design tokens live in <a href="https://github.com/wrtn-corp/wds-tokens" target="_blank" rel="noopener">wds-tokens</a>,
+          patterns live in <code>docs/designs/</code>, and this browser renders both.
+        </p>
+      </header>
+
+      <section>
+        <div class="section-head">
+          <h2>Foundations</h2>
+          <a class="more" href={p('system/foundations/')}>See all →</a>
+        </div>
+        <div class="grid">
+          {foundations.map((e) => (
+            <a class="card" href={p(`system/foundations/${e.data.key}/`)}>
+              <span class="key">{e.data.key}</span>
+              <span class="name">{e.data.name}</span>
+              <span class="desc">{e.data.description}</span>
+            </a>
+          ))}
+        </div>
+      </section>
+
+      <section>
+        <div class="section-head">
+          <h2>Components</h2>
+          <a class="more" href={p('system/components/')}>See all →</a>
+        </div>
+        <div class="grid">
+          {components.map((e) => (
+            <a class="card" href={p(`system/components/${e.data.key}/`)}
+               style={`view-transition-name: system-component-${e.data.key};`}>
+              <span class="cat">{e.data.category}</span>
+              <span class="name">{e.data.name}</span>
+              <span class={`status ${e.data.status}`}>{e.data.status}</span>
+            </a>
+          ))}
+        </div>
+      </section>
+    </main>
+  </div>
+</Layout>
+
+<style>
+  .layout { display: grid; grid-template-columns: var(--rail-width) 1fr; gap: 48px; }
+  @media (max-width: 720px) { .layout { grid-template-columns: 1fr; } }
+  main { min-width: 0; }
+  .hero { margin: 32px 0 40px; }
+  .eyebrow { font-family: var(--font-mono); font-size: var(--fs-label); color: var(--text-dim); letter-spacing: 0.08em; text-transform: uppercase; margin: 0 0 10px; }
+  .hero h1 { font-size: var(--fs-display); line-height: var(--lh-display); letter-spacing: var(--ls-display); margin: 0 0 12px; max-width: 18ch; }
+  .hero .sub { color: var(--text-dim); max-width: 60ch; margin: 0; line-height: var(--lh-lead); font-size: var(--fs-lead); }
+  .hero a { color: var(--accent-text); text-decoration: underline; }
+  section { margin: 32px 0; }
+  .section-head { display: flex; justify-content: space-between; align-items: baseline; margin: 0 0 14px; }
+  h2 { font-size: var(--fs-h2); margin: 0; }
+  .more { font-family: var(--font-mono); font-size: var(--fs-small); color: var(--text-dim); }
+  .more:hover { color: var(--accent); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+  .card {
+    display: flex; flex-direction: column; gap: 6px;
+    padding: 18px 20px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: var(--radius-card);
+    transition: transform var(--dur-spring-soft) var(--spring-soft), border-color var(--dur-spring-soft) var(--spring-soft);
+  }
+  .card:hover { transform: translateY(-2px); border-color: var(--accent); }
+  .key, .cat { font-family: var(--font-mono); font-size: var(--fs-label); color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; }
+  .name { font-size: var(--fs-h3); color: var(--text); font-weight: 600; }
+  .desc { font-size: var(--fs-small); color: var(--text-dim); }
+  .status { font-family: var(--font-mono); font-size: 10px; padding: 2px 7px; align-self: flex-start; border-radius: var(--radius-chip); border: 1px solid var(--border); }
+  .status.stable { color: var(--ok-text); border-color: color-mix(in srgb, var(--ok-text) 40%, transparent); }
+  .status.draft { color: var(--warn-text); border-color: color-mix(in srgb, var(--warn-text) 40%, transparent); }
+</style>

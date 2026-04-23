@@ -1,0 +1,33 @@
+---
+import { loadTokenMap } from '@/lib/token-resolve';
+interface Props { tokenSource: string; }
+const { tokenSource } = Astro.props;
+const tokens = await loadTokenMap('src/content/tokens');
+const entries = Object.entries(tokens)
+  .filter(([, v]) => v.source === tokenSource)
+  .filter(([k]) => k.startsWith('wds.spacing.'))
+  .map(([k, v]) => [k, v, parseInt(String(v.value).replace('px', ''), 10)] as const)
+  .filter(([, , px]) => Number.isFinite(px))
+  .sort((a, b) => a[2] - b[2]);
+---
+<section>
+  <div class="scale">
+    {entries.map(([path, tok, px]) => (
+      <div class="row">
+        <span class="key">{path}</span>
+        <span class="bar" style={`width: ${Math.min(px * 4, 520)}px; height: ${Math.min(px, 64)}px;`}></span>
+        <span class="val">{tok.value}</span>
+      </div>
+    ))}
+  </div>
+  {entries.length === 0 && <p class="empty">No spacing tokens found.</p>}
+</section>
+
+<style>
+  .scale { display: flex; flex-direction: column; gap: 8px; }
+  .row { display: grid; grid-template-columns: 240px 1fr 60px; align-items: center; gap: 14px; padding: 6px 0; border-bottom: 1px dashed var(--border); }
+  .key { font-family: var(--font-mono); font-size: 11px; color: var(--text); }
+  .val { font-family: var(--font-mono); font-size: 11px; color: var(--text-dim); }
+  .bar { background: var(--accent); border-radius: 3px; min-width: 4px; }
+  .empty { color: var(--text-dim); }
+</style>

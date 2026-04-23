@@ -1,0 +1,17 @@
+---
+name: Elevation
+key: elevation
+description: 3-step depth. 그림자는 중립색이 아닌 accent-tinted.
+tokenSource: primitive-elevation.json
+order: 6
+---
+
+## 3-step
+
+- **e0 resting** — 그림자 없음. 기본 상태.
+- **e1 hover** — `0 2px 8px rgba(0,0,0,0.35)`. 중립 깊이.
+- **e2 active** — `0 14px 32px rgba(255,122,99,0.22), 0 2px 8px rgba(0,0,0,0.5)`. coral-tinted glow.
+
+## 철학
+
+elevation은 위계 신호이지 시각 장식이 아니다. e2는 사용자가 선택·조작 중인 요소에만 — 동시에 여러 개 뜨지 않도록.

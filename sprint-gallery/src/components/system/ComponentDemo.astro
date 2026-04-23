@@ -1,0 +1,91 @@
+---
+import { readFile } from 'node:fs/promises';
+import { resolve, dirname } from 'node:path';
+
+interface Variant { name: string; purpose: string; }
+interface Props {
+  demoPath: string;       // relative to the MDX entry file, like './button.demo.html'
+  mdxFile: string;        // absolute path to the MDX file, for resolving demoPath
+  variants: Variant[];
+}
+const { demoPath, mdxFile, variants } = Astro.props;
+
+const absDemo = resolve(dirname(mdxFile), demoPath);
+const demoHtml = await readFile(absDemo, 'utf8');
+const defaultVariant = variants[0]?.name ?? '';
+---
+<div class="component-demo">
+  {variants.length > 0 && (
+    <div class="pills">
+      {variants.map((v, i) => (
+        <button class="variant-pill" data-variant-name={v.name} aria-pressed={i === 0 ? 'true' : 'false'}>
+          {v.name}
+        </button>
+      ))}
+    </div>
+  )}
+  <div class="frame">
+    <iframe
+      srcdoc={demoHtml}
+      data-variant={defaultVariant}
+      title="Component demo"
+      sandbox="allow-scripts"
+      loading="lazy"
+    ></iframe>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>('.component-demo').forEach((demo) => {
+    const iframe = demo.querySelector<HTMLIFrameElement>('iframe');
+    const pills = demo.querySelectorAll<HTMLButtonElement>('.variant-pill');
+    const originalSrcdoc = iframe?.srcdoc ?? '';
+    pills.forEach((pill) => {
+      pill.addEventListener('click', () => {
+        pills.forEach((p) => p.setAttribute('aria-pressed', 'false'));
+        pill.setAttribute('aria-pressed', 'true');
+        if (!iframe) return;
+        const v = pill.dataset.variantName ?? '';
+        iframe.dataset.variant = v;
+        // Sandboxed iframes (allow-scripts only) have null origin so
+        // history.replaceState is blocked and location.search is always empty.
+        // Instead, inline the variant value directly into the srcdoc so the
+        // demo script's URLSearchParams lookup sees it without any replaceState.
+        const vDoc = originalSrcdoc.replace(
+          'new URLSearchParams(location.search).get(\'variant\')',
+          JSON.stringify(v),
+        );
+        iframe.srcdoc = vDoc;
+      });
+    });
+  });
+</script>
+
+<style>
+  .component-demo { display: flex; flex-direction: column; gap: 12px; margin: 16px 0 28px; }
+  .pills { display: flex; flex-wrap: wrap; gap: 6px; }
+  .variant-pill {
+    background: var(--surface); color: var(--text-dim);
+    border: 1px solid var(--border); border-radius: var(--radius-pill);
+    padding: 6px 12px; font-family: var(--font-mono); font-size: var(--fs-label);
+    cursor: pointer; transition: all var(--dur-spring-soft) var(--spring-soft);
+  }
+  .variant-pill:hover { color: var(--text); border-color: var(--accent-text); }
+  .variant-pill[aria-pressed="true"] {
+    background: var(--accent-soft); color: var(--accent-text); border-color: var(--accent-text);
+  }
+  .frame {
+    border-radius: var(--radius-device);
+    background: var(--accent-grad);
+    padding: 16px;
+    box-shadow: 0 10px 32px rgba(0,0,0,0.35);
+  }
+  .frame iframe {
+    width: 100%; height: 520px; border: 0;
+    border-radius: var(--radius-card);
+    background: #FFF;
+  }
+  @media (max-width: 720px) {
+    .frame iframe { height: 420px; }
+  }
+</style>

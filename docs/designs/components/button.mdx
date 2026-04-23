@@ -1,0 +1,36 @@
+---
+name: Button
+key: button
+category: control
+status: stable
+tokens:
+  - wds.color.neutral.0
+  - wds.color.neutral.900
+  - wds.color.purple.500
+  - wds.color.red.500
+variants:
+  - name: primary
+    purpose: 기본 CTA. #262626 배경 + white 텍스트. "저장" · "확인" 등 주 완료 액션.
+  - name: secondary
+    purpose: 보조 액션. #f1f1f1 배경 + #262626 텍스트. "취소" · 프로필 공유 등.
+  - name: destructive
+    purpose: 파괴적 액션. #d92800 텍스트. 바텀시트 안 "삭제하기" 등.
+states:
+  - name: disabled
+    rule: bg #f1f1f1, text opacity 0.5, pointer-events none
+  - name: loading
+    rule: 스피너 inline, 텍스트 숨김, aria-busy=true
+relatedComponents: [bottom-sheet]
+demoFile: ./button.demo.html
+---
+
+## Anatomy
+버튼 터치 타겟 최소 44px (iOS HIG 준수). border-radius는 일반 12px, CTA·저장 16px, h-56 하단 고정은 16px.
+
+## Usage
+- **Primary는 한 화면에 하나만.** 완료·저장 같은 주요 액션 전용.
+- **Secondary는 취소 또는 보조.** 듀얼 액션 시트에서 취소/확인 페어.
+- **Destructive는 바텀시트 안에서만.** 인라인 리스트에 섞지 말 것.
+
+## Why it looks this way
+MY 프로필의 "프로필 편집"/"프로필 공유"는 둘 다 secondary(회색) — 브랜드 퍼플이 아닌 이유는 CTA 위계를 강조하지 않는 디자인 의도. 피드 상세의 "재생성" 버튼만 퍼플.

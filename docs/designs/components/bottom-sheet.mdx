@@ -1,0 +1,35 @@
+---
+name: Bottom Sheet
+key: bottom-sheet
+category: surface
+status: stable
+tokens:
+  - wds.color.neutral.0
+  - wds.color.neutral.900
+  - wds.color.red.500
+variants:
+  - name: confirm
+    purpose: 텍스트 + 듀얼 액션 버튼 (취소 + 확인). gap-6.
+  - name: menu
+    purpose: 아이콘 + 텍스트 리스트 (다운로드, 신고 등). py-16 per item.
+  - name: image-source
+    purpose: 프로필 사진 선택 (카메라/앨범/삭제). 위험 액션(삭제) red text.
+states:
+  - name: open
+    rule: 딤 오버레이 rgba(0,0,0,0.4), sheet slide up from bottom.
+  - name: dragging
+    rule: 핸들 바(40x4, #a7a7a7) 터치 중 opacity 1.0 (기본 0.6).
+relatedComponents: [button]
+demoFile: ./bottom-sheet.demo.html
+---
+
+## Anatomy
+surface_elevated(white) bg, rounded-28 (상단만), 핸들 바 40×4 #a7a7a7 상단 중앙.
+
+## Dim overlay
+배경 딤 rgba(0,0,0,0.4). 탭하면 시트 닫힘 (sheet 자체는 드래그 down도 닫힘 동작).
+
+## Variant 차이
+- **confirm** — 파괴적 동작 확인용. "이 사진을 삭제하시겠습니까?" 같은 패턴.
+- **menu** — 액션 메뉴. 아이콘 inline, 위험 액션은 red text.
+- **image-source** — 프로필 이미지 편집 시. 카메라/앨범 + 삭제(빨강) 3-아이템 세트.

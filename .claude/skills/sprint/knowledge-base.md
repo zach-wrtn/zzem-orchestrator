@@ -117,7 +117,7 @@ severity: "{fabrication_risk 수준에 따라}"
 description: |
   {프로토타입에서 발견된 디자인 문제 설명}
 prevention: |
-  {component-patterns.md 참조 또는 Figma 레퍼런스 강화 방법}
+  {docs/designs/README.md 참조 또는 Figma 레퍼런스 강화 방법}
 ```
 
 ---

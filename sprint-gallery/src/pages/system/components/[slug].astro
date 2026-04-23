@@ -1,0 +1,81 @@
+---
+import Layout from '@/components/Layout.astro';
+import { getCollection } from 'astro:content';
+import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import ComponentDemo from '@/components/system/ComponentDemo.astro';
+import VariantTable from '@/components/system/VariantTable.astro';
+import StatesList from '@/components/system/StatesList.astro';
+import TokensList from '@/components/system/TokensList.astro';
+import RelatedList from '@/components/system/RelatedList.astro';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('components');
+  return entries.map((entry) => ({
+    params: { slug: entry.data.key },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await entry.render();
+const base = import.meta.env.BASE_URL;
+
+// Resolve MDX file path for ComponentDemo to read sibling .demo.html.
+// entry.id is the Astro-internal filename relative to the collection root
+// (e.g., "button.mdx"), which is authoritative even if data.key differs.
+const projectRoot = fileURLToPath(new URL('../../../../', import.meta.url));
+const mdxFile = resolve(projectRoot, 'src/content/components', entry.id);
+---
+<Layout title={`${entry.data.name} · System`}>
+  <nav class="crumb">
+    <a href={`${base}/system/`.replace(/\/+/g, '/')}>System</a>
+    <span> / </span>
+    <a href={`${base}/system/components/`.replace(/\/+/g, '/')}>Components</a>
+    <span> / </span>
+    <span class="cur">{entry.data.name}</span>
+  </nav>
+  <header class="head" style={`view-transition-name: system-component-${entry.data.key};`}>
+    <div class="title-row">
+      <h1>{entry.data.name}</h1>
+      <div class="meta">
+        <span class={`status ${entry.data.status}`}>{entry.data.status}</span>
+        <span class="cat">{entry.data.category}</span>
+      </div>
+    </div>
+    {entry.data.figmaFrame && (
+      <a class="figma" href={entry.data.figmaFrame} target="_blank" rel="noopener">Open in Figma ↗</a>
+    )}
+  </header>
+
+  {entry.data.demoFile && (
+    <ComponentDemo demoPath={entry.data.demoFile} mdxFile={mdxFile} variants={entry.data.variants} />
+  )}
+
+  <article class="prose"><Content /></article>
+
+  {entry.data.variants.length > 0 && <VariantTable variants={entry.data.variants} />}
+  {entry.data.states.length > 0 && <StatesList states={entry.data.states} />}
+  {entry.data.tokens.length > 0 && <TokensList refs={entry.data.tokens} />}
+  {entry.data.relatedComponents.length > 0 && <RelatedList slugs={entry.data.relatedComponents} />}
+</Layout>
+
+<style>
+  .crumb { font-family: var(--font-mono); font-size: var(--fs-label); color: var(--text-dim); margin: 24px 0 6px; }
+  .crumb a { color: var(--text-dim); }
+  .crumb a:hover { color: var(--accent); }
+  .crumb .cur { color: var(--text); }
+  .head { margin: 6px 0 24px; }
+  .title-row { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; }
+  h1 { font-size: var(--fs-h1); letter-spacing: var(--ls-h1); margin: 6px 0; }
+  .meta { display: flex; gap: 8px; }
+  .status { font-family: var(--font-mono); font-size: var(--fs-label); padding: 2px 8px; border: 1px solid var(--border); border-radius: var(--radius-chip); color: var(--text-dim); }
+  .status.stable { color: var(--ok-text); border-color: color-mix(in srgb, var(--ok-text) 40%, transparent); }
+  .status.draft { color: var(--warn-text); border-color: color-mix(in srgb, var(--warn-text) 40%, transparent); }
+  .cat { font-family: var(--font-mono); font-size: var(--fs-label); color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.06em; }
+  .figma { font-family: var(--font-mono); font-size: var(--fs-label); color: var(--accent-text); text-decoration: underline; display: inline-block; margin-top: 6px; }
+  .prose { color: var(--text-dim); max-width: 68ch; line-height: var(--lh-body); margin: 24px 0; }
+  .prose :global(h2), .prose :global(h3) { color: var(--text); margin: 1.4em 0 0.5em; }
+  .prose :global(p) { margin: 0.8em 0; max-width: 68ch; }
+  .prose :global(code) { font-family: var(--font-mono); font-size: 0.88em; background: var(--surface-hover); border: 1px solid var(--border); padding: 1px 5px; border-radius: 4px; color: var(--text); }
+</style>

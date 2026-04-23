@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  body { margin: 0; padding: 20px; background: #FFF; font-family: 'Pretendard Variable', sans-serif; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; }
+  .grid { display: grid; grid-template-columns: repeat(2, 160px); gap: 1px; }
+  .card {
+    position: relative; background: linear-gradient(135deg, #FF7A63, #4B2F88);
+    aspect-ratio: 1/1; border-radius: 4px; overflow: hidden;
+  }
+  .card.tall { aspect-ratio: 4/5; }
+  .new-badge {
+    position: absolute; top: 8px; left: 8px;
+    background: #0080C6; color: #FFF; padding: 4px 8px;
+    font-size: 12px; font-weight: 600; border-radius: 8px;
+  }
+  .overlay {
+    position: absolute; left: 0; right: 0; bottom: 0; padding: 10px;
+    background: linear-gradient(to top, rgba(0,0,0,0.6), transparent);
+    color: #FFF;
+  }
+  .overlay .title { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+  .creator { display: flex; align-items: center; gap: 6px; font-size: 12px; }
+  .creator .av { width: 18px; height: 18px; border-radius: 50%; background: #FFF; }
+  .likes { position: absolute; right: 10px; bottom: 10px; color: #FFF; font-size: 12px; font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="grid">
+  <div class="card tall">
+    <div class="new-badge">신규</div>
+    <div class="overlay">
+      <div class="title">AI Video Template</div>
+      <div class="creator"><span class="av"></span><span>zzem_creator</span></div>
+    </div>
+    <div class="likes">♡ 42</div>
+  </div>
+  <div class="card">
+    <div class="overlay">
+      <div class="title">Dance Challenge</div>
+      <div class="creator"><span class="av"></span><span>user_name</span></div>
+    </div>
+    <div class="likes">♡ 8.6K</div>
+  </div>
+</div>
+<script>
+  const variant = new URLSearchParams(location.search).get('variant');
+  if (variant === 'template') document.querySelector('.grid').style.gridTemplateColumns = 'repeat(3, 100px)';
+</script>
+</body>
+</html>
