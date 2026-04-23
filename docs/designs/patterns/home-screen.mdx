@@ -1,0 +1,35 @@
+---
+name: Home Screen
+key: home-screen
+purpose: 앱 홈 전체 스크롤 레이아웃 — 헤더·카테고리 칩·신규 템플릿·랭킹·필터·피드 그리드.
+usesComponents: [card, chip, bottom-nav]
+---
+
+## 전체 구조 (스크롤 순서)
+
+1. **헤더** — ZZEM 로고 (좌) + 크레딧·알림 (우)
+2. **카테고리 칩** — 가로 스크롤 pill 버튼. 상세는 [Chip](/zzem-orchestrator/system/components/chip/) 참조.
+3. **신규 템플릿** — "쨈 신규 템플릿" 타이틀 + 가로 스크롤 100×100 카드
+4. **실시간 랭킹** — 1~8위 리스트, 접기/펼치기 토글
+5. **필터 탭** — 추천/무료/비디오/이미지/조합 (가로 스크롤, sticky)
+6. **피드 그리드** — 2열 매거진 (무한 스크롤). 상세는 [Feed Grid](/zzem-orchestrator/system/patterns/feed-grid/) 참조.
+
+## 카테고리 칩
+
+- pill shape, border `1px #e8e8e8`, padding 8px 14px
+- Pretendard Medium 13px, rounded-full
+- 일부 칩에 green "NEW" dot badge (우상단)
+
+## 신규 템플릿 카드
+
+- 100×100px, rounded-12, 하단: 이름 (Medium 12px, 1줄 말줄임)
+- 가로 스크롤, gap 8px, px-16
+
+## 실시간 랭킹
+
+- 순위 번호 (Bold 16px) + 40px 썸네일 (rounded-8) + 이름 (Medium 14px) + 타입 뱃지 + "만들기" 버튼 (보라색 outline pill)
+- "닫기 ∧" / "더보기 ∨" 토글
+
+## 하단 네비게이션
+
+상세는 [Bottom Nav](/zzem-orchestrator/system/components/bottom-nav/) 참조.

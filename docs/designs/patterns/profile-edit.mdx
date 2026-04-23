@@ -1,0 +1,41 @@
+---
+name: Profile Edit
+key: profile-edit
+purpose: 닉네임·프로필 이미지 편집 화면 + 이미지 소스 시트 + 나가기 확인 시트.
+usesComponents: [button, bottom-sheet]
+---
+
+## Layout
+
+헤더 (`←` + "프로필 편집" 중앙 SemiBold 18px, h-48px) → 100px 프로필 이미지 (카메라 배지) → 닉네임 입력 필드 → 하단 고정 저장 버튼.
+
+## 입력 필드
+
+- filled rounded box, bg `#f7f7f7`, border `1px #f1f1f1`, rounded-16px, px-16 py-12
+- 라벨: "닉네임" (Pretendard Medium 14px)
+
+## 카메라 배지
+
+- 우하단, 24×24, bg `#e2e2e2`, border 4px white, CameraFill 아이콘
+
+## 저장 버튼
+
+- h-56, rounded-16, 하단 고정
+- **비활성**: bg `#f1f1f1`, text `#8a8a8a`
+- **활성**: bg `#262626`, text white (닉네임 변경 or 사진 변경 시 활성화)
+
+상세는 [Bottom Sheet](/zzem-orchestrator/system/components/bottom-sheet/) 참조.
+
+## 이미지 소스 바텀시트
+
+- "카메라/앨범" (ImageStroke 아이콘 + 텍스트, gap-12)
+- "사진 삭제" (TrashStroke 아이콘, 빨간 텍스트 `#d92800`)
+
+## 나가기 확인 바텀시트
+
+미저장 변경사항 있을 때 뒤로가기 시 노출. 듀얼 버튼: 취소 + 확인 (`#262626` bg), gap-6.
+
+## 사진 크롭 / 앨범 선택
+
+- 크롭: 4 corner handles, 완료 버튼 (dark bottom bar)
+- 앨범: 3-column grid, 120px row, 2px gap. 선택 시 `#8752fa` border + filled checkbox

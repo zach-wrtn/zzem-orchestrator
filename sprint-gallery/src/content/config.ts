@@ -4,7 +4,7 @@ const foundations = defineCollection({
   type: 'content',
   schema: z.object({
     name: z.string(),
-    key: z.enum(['color', 'typography', 'spacing', 'radius', 'motion', 'elevation']),
+    key: z.enum(['color', 'typography', 'spacing', 'radius', 'motion', 'elevation', 'icon']),
     description: z.string(),
     tokenSource: z.string(),
     order: z.number().default(99),

@@ -8,8 +8,10 @@ test.describe('axe a11y scan', () => {
     'prototypes/ugc-platform-002/app-001/',
     'system/',
     'system/foundations/color/',
+    'system/foundations/icon/',
     'system/components/button/',
     'system/patterns/',
+    'system/patterns/feed-grid/',
   ];
 
   for (const scheme of ['light', 'dark'] as const) {

@@ -1,0 +1,41 @@
+---
+name: Detail View
+key: detail-view
+purpose: 세로 스와이프 풀스크린 피드 — blur PostCard + 사이드 액션 + 크리에이터 정보.
+usesComponents: [card, button, bottom-sheet]
+---
+
+## PostCard
+
+- Full-screen, blur 배경 20~30px
+- 상단·하단 그라데이션 디밍 (투명 방향 반대)
+- 배경색: `#090909`
+
+## Side Action Buttons (우측 하단 세로 컬럼)
+
+HeartStroke/Fill (토글) → RegenerateStroke + 카운트 → UploadStroke (공유) → MorehStroke (더보기) → 썸네일 (선택적). 세로 28px 간격.
+
+## Creator Info (좌측 하단)
+
+36px 원형 아바타 + verified badge, 닉네임 SemiBold 14px white, ShinyFill AI 뱃지.
+
+## 공개 토글
+
+34×20px, rounded-62.5px. ON: `#8752fa` / OFF: white 40% opacity.
+
+## Feed Variants
+
+| 진입 탭 | 하단 CTA |
+|---------|---------|
+| 게시물(기본) | 재생성 버튼 + 공개 토글 |
+| 비공개 | 프롬프트 텍스트 + mask + "프롬프트 편집하기" |
+| 좋아요(타유저) | "템플릿 사용하기" CTA 단독 |
+| 좋아요(내것) | 재생성 버튼 + 공개 토글 |
+
+## 더보기 바텀시트
+
+다운로드 / 의견보내기 / 신고. 각 아이템: 아이콘 + 텍스트 gap-12. 상세는 [Bottom Sheet](/zzem-orchestrator/system/components/bottom-sheet/) 참조.
+
+## Toast
+
+bg `#171717`, rounded-40, shadow `0 0 20px rgba(0,0,0,0.2)`, SemiBold 14px white, px-24 py-8, top-40 중앙. 2초 후 자동 소멸.

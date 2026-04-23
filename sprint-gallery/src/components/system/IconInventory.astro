@@ -1,0 +1,36 @@
+---
+import { loadTokenMap } from '@/lib/token-resolve';
+interface Props { tokenSource: string; }
+const { tokenSource } = Astro.props;
+const tokens = await loadTokenMap('src/content/tokens');
+const entries = Object.entries(tokens)
+  .filter(([, v]) => v.source === tokenSource)
+  .sort();
+---
+<section class="icon-inv">
+  {entries.length > 0 ? (
+    <div class="grid">
+      {entries.map(([path, tok]) => (
+        <div class="item">
+          <div class="tile" aria-hidden="true"></div>
+          <span class="key">{path.split('.').slice(2).join('.')}</span>
+          <span class="val">{tok.value}</span>
+        </div>
+      ))}
+    </div>
+  ) : (
+    <p class="empty">
+      No icon entries found in <code>{tokenSource}</code>. Icon SVGs are sourced from the private wrtn-corp icon package and not carried in DTCG tokens; this page currently has no inventory to render.
+    </p>
+  )}
+</section>
+
+<style>
+  .icon-inv { margin-top: 16px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+  .item { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 14px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); }
+  .tile { width: 32px; height: 32px; border-radius: 6px; background: var(--accent-grad); }
+  .key { font-family: var(--font-mono); font-size: 11px; color: var(--text); }
+  .val { font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-align: center; word-break: break-all; }
+  .empty { color: var(--text-dim); font-family: var(--font-mono); max-width: 60ch; }
+</style>

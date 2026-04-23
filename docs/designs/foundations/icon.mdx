@@ -1,0 +1,21 @@
+---
+name: Icon
+key: icon
+description: Code Connect 기반 아이콘 세트. Stroke / Fill 변형으로 쌍을 이룸.
+tokenSource: primitive-icon.json
+order: 7
+---
+
+## 체계
+
+아이콘은 **Stroke** (outline, 기본) 과 **Fill** (채워짐, active/selected 상태) 두 variant로 쌍을 이룬다. Code Connect 매핑으로 Figma ↔ code 간 1:1 대응.
+
+## 사용 규칙
+
+- Active 상태 = Fill, inactive = Stroke. 토글/탭/네비게이션에 주로 사용.
+- 24px 기본, 16px/28px 파생.
+- 색은 토큰(`wds.color.*`)을 상속받는 SVG currentColor.
+
+## Available icons
+
+이 페이지의 리스트는 `wds-tokens/primitive/icon.json` 스냅샷에서 파싱됨. 실제 SVG 파일은 wrtn-corp 아이콘 패키지에 있고 이 사이트는 인벤토리만 노출.
