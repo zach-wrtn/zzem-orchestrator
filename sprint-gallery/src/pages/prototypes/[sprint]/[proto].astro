@@ -1,0 +1,29 @@
+---
+import Layout from '@/components/Layout.astro';
+import PreviewShell from '@/components/PreviewShell.astro';
+import { collectSprints } from '@/lib/collect-sprints';
+import { SPRINTS_DIR } from '@/lib/paths';
+
+export async function getStaticPaths() {
+  const sprints = await collectSprints(SPRINTS_DIR);
+  const paths: Array<{ params: { sprint: string; proto: string }; props: any }> = [];
+  for (const s of sprints) {
+    for (const p of s.prototypes) {
+      paths.push({
+        params: { sprint: s.slug, proto: p.id },
+        props: { sprintSlug: s.slug, proto: p, sprintTitle: s.title },
+      });
+    }
+  }
+  return paths;
+}
+
+const { sprintSlug, proto, sprintTitle } = Astro.props as {
+  sprintSlug: string;
+  proto: import('@/lib/types').Prototype;
+  sprintTitle: string;
+};
+---
+<Layout title={`${proto.title} · ${sprintTitle} · ZZEM Sprints`}>
+  <PreviewShell sprintSlug={sprintSlug} proto={proto} />
+</Layout>
