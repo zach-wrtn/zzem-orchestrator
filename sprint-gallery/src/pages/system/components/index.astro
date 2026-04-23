@@ -1,0 +1,49 @@
+---
+import Layout from '@/components/Layout.astro';
+import { getCollection } from 'astro:content';
+const entries = await getCollection('components');
+const base = import.meta.env.BASE_URL;
+---
+<Layout title="Components · System">
+  <nav class="crumb">
+    <a href={`${base}/system/`.replace(/\/+/g, '/')}>System</a>
+    <span> / </span>
+    <span class="cur">Components</span>
+  </nav>
+  <header class="head">
+    <h1>Components</h1>
+    <p class="sub">{entries.length}개 atomic 컴포넌트 (Button · Card · Chip · BottomNav · BottomSheet).</p>
+  </header>
+  <div class="grid">
+    {entries.map((e) => (
+      <a class="card" data-component-card
+         href={`${base}/system/components/${e.data.key}/`.replace(/\/+/g, '/')}
+         style={`view-transition-name: system-component-${e.data.key};`}>
+        <span class="cat">{e.data.category}</span>
+        <span class="name">{e.data.name}</span>
+        <span class={`status ${e.data.status}`}>{e.data.status}</span>
+      </a>
+    ))}
+  </div>
+</Layout>
+
+<style>
+  .crumb { font-family: var(--font-mono); font-size: var(--fs-label); color: var(--text-dim); margin: 24px 0 6px; }
+  .crumb a { color: var(--text-dim); }
+  .crumb .cur { color: var(--text); }
+  .head h1 { font-size: var(--fs-h1); letter-spacing: var(--ls-h1); margin: 6px 0 6px; }
+  .head .sub { color: var(--text-dim); margin: 0 0 24px; max-width: 60ch; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+  .card {
+    display: flex; flex-direction: column; gap: 8px;
+    padding: 18px 20px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: var(--radius-card);
+    transition: transform var(--dur-spring-soft) var(--spring-soft), border-color var(--dur-spring-soft) var(--spring-soft);
+  }
+  .card:hover { transform: translateY(-2px); border-color: var(--accent); }
+  .cat { font-family: var(--font-mono); font-size: var(--fs-label); color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.08em; }
+  .name { font-size: var(--fs-h3); color: var(--text); font-weight: 600; }
+  .status { font-family: var(--font-mono); font-size: 10px; padding: 2px 7px; align-self: flex-start; border-radius: var(--radius-chip); border: 1px solid var(--border); }
+  .status.stable { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 40%, transparent); }
+  .status.draft { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 40%, transparent); }
+</style>

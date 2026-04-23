@@ -1,0 +1,33 @@
+---
+name: Bottom Nav
+key: bottom-nav
+category: nav
+status: stable
+tokens:
+  - wds.color.neutral.0
+  - wds.color.neutral.900
+  - wds.color.purple.500
+variants:
+  - name: three-tab
+    purpose: 3-tab (홈 / 탐색 / MY). 아이콘만, 텍스트 라벨 없음.
+states:
+  - name: active
+    rule: 채워진 아이콘 (Fill variant). color #262626.
+  - name: inactive
+    rule: outline 아이콘 (Stroke variant). color #8a8a8a.
+  - name: badge-my
+    rule: MY 탭 우상단 보라색 dot badge (8px, #8752fa).
+relatedComponents: []
+demoFile: ./bottom-nav.demo.html
+---
+
+## Anatomy
+높이 pt-10 pb-26 px-12 (iOS safe area 고려). 상단 border 0.5px #f1f1f1. 3 탭 균등 분할.
+
+## Why no labels
+텍스트 라벨 없이 아이콘만 — ZZEM의 minimal design language. 아이콘이 universal하지 않다면 라벨 고려 대상이지만, 3개 핵심 탭은 유저가 금방 학습.
+
+## Icon mapping
+- 홈: 집 아이콘 (내부에 ZZEM 미니 로고)
+- 탐색: 돋보기 (SearchStroke/Fill)
+- MY: 사람 실루엣 (ProfileStroke/Fill)

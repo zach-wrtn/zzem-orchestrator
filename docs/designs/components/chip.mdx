@@ -1,0 +1,31 @@
+---
+name: Chip
+key: chip
+category: control
+status: stable
+tokens:
+  - wds.color.purple.500
+  - wds.color.neutral.200
+variants:
+  - name: filter
+    purpose: 홈 카테고리 pill. border 1px #e8e8e8, padding 8px 14px, rounded-full.
+  - name: tab
+    purpose: 프로필 탭 underline (텍스트만, active시 2px 밑줄).
+  - name: status
+    purpose: 스프린트 status badge (in-progress/completed/archived).
+states:
+  - name: active
+    rule: 필터=배경 #262626 + text white / 탭=하단 2px 밑줄 w-60px #262626.
+  - name: new-dot
+    rule: 일부 필터 칩에 green NEW dot (우상단, 8px).
+relatedComponents: []
+demoFile: ./chip.demo.html
+---
+
+## Anatomy
+Pill chip은 border-radius 9999px. height 32px 기준. text Pretendard Medium 13px.
+
+## Usage
+- **filter** — 가로 스크롤 rail에서 다중 선택. 한 번에 여러 활성 가능.
+- **tab** — 프로필/상세뷰 섹션 전환용 단일 선택.
+- **status** — 읽기 전용 식별 뱃지. 클릭 불가.

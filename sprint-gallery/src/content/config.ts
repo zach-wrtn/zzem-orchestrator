@@ -15,7 +15,7 @@ const components = defineCollection({
   type: 'content',
   schema: z.object({
     name: z.string(),
-    slug: z.string().regex(/^[a-z0-9-]+$/),
+    key: z.string().regex(/^[a-z0-9-]+$/),
     category: z.enum(['layout', 'nav', 'surface', 'control', 'feedback']),
     status: z.enum(['stable', 'draft']).default('draft'),
     figmaFrame: z.string().url().optional(),
@@ -41,7 +41,7 @@ const patterns = defineCollection({
   type: 'content',
   schema: z.object({
     name: z.string(),
-    slug: z.string().regex(/^[a-z0-9-]+$/),
+    key: z.string().regex(/^[a-z0-9-]+$/),
     purpose: z.string(),
     usesComponents: z.array(z.string()).default([]),
     figmaFrame: z.string().url().optional(),

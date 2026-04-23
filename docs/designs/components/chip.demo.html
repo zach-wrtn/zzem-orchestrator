@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  body { margin: 0; padding: 20px; background: #FFF; font-family: 'Pretendard Variable', sans-serif; display: flex; flex-direction: column; gap: 16px; align-items: center; justify-content: center; min-height: 100vh; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; max-width: 400px; }
+  .chip {
+    border-radius: 9999px; padding: 8px 14px; font-size: 13px; font-weight: 500;
+    border: 1px solid #E8E8E8; background: #FFF; color: #262626;
+    position: relative;
+  }
+  .chip.active { background: #262626; color: #FFF; border-color: #262626; }
+  .chip .dot { position: absolute; top: -2px; right: -2px; width: 8px; height: 8px; border-radius: 50%; background: #22C55E; }
+</style>
+</head>
+<body>
+<div class="row">
+  <span class="chip active">추천</span>
+  <span class="chip">비디오 생성</span>
+  <span class="chip">이미지 생성<span class="dot"></span></span>
+  <span class="chip">댄스 챌린지</span>
+  <span class="chip">AI 포트레이트</span>
+</div>
+</body>
+</html>

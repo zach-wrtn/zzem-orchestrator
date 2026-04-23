@@ -27,3 +27,36 @@ test.describe('system foundations', () => {
     await expect(plays.first()).toBeVisible();
   });
 });
+
+test.describe('system components', () => {
+  test('components list renders 5 entries', async ({ page }) => {
+    await page.goto('system/components/');
+    const cards = page.locator('[data-component-card]');
+    await expect(cards).toHaveCount(5);
+  });
+
+  test('button detail renders demo iframe + variants', async ({ page }) => {
+    await page.goto('system/components/button/');
+    await expect(page.locator('.component-demo iframe')).toBeVisible();
+    const variants = page.locator('.variant-pill');
+    const n = await variants.count();
+    expect(n).toBeGreaterThan(1);
+  });
+
+  test('variant pill updates iframe data-variant attribute', async ({ page }) => {
+    await page.goto('system/components/button/');
+    const secondPill = page.locator('.variant-pill').nth(1);
+    const pillText = (await secondPill.textContent())?.trim() || '';
+    await secondPill.click();
+    await page.waitForTimeout(200);
+    const dataVariant = await page.locator('.component-demo iframe').getAttribute('data-variant');
+    expect(dataVariant?.toLowerCase()).toBe(pillText.toLowerCase());
+  });
+
+  test('tokens list shows resolved values', async ({ page }) => {
+    await page.goto('system/components/button/');
+    const rows = page.locator('.tokens-list li');
+    const n = await rows.count();
+    expect(n).toBeGreaterThan(0);
+  });
+});
