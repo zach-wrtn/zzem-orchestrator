@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>Broken Fixture</title>
+</head>
+<body>
+  <div class="device-frame">
+    <section class="screen active" id="Home">
+      <button id="broken-btn" onclick="nonExistentFunction()">Click me (broken)</button>
+      <button id="null-access" onclick="document.getElementById('ghost').classList.add('x')">Null access</button>
+    </section>
+  </div>
+</body>
+</html>

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>Good Fixture</title>
+  <style>
+    .device-frame { width: 390px; height: 844px; border: 1px solid #000; }
+    .screen { display: none; padding: 16px; }
+    .screen.active { display: block; }
+    [data-state="loading"] { display: none; }
+    [data-state="loading"].active { display: block; }
+  </style>
+</head>
+<body>
+  <div class="device-frame">
+    <section class="screen active" id="Home">
+      <h1>Home</h1>
+      <button id="go-detail" onclick="document.getElementById('Home').classList.remove('active'); document.getElementById('Detail').classList.add('active');">Go Detail</button>
+      <button id="toggle-loading" class="state-toggle" data-target="loading">Toggle Loading</button>
+      <div data-state="loading">Loading…</div>
+    </section>
+    <section class="screen" id="Detail">
+      <h1>Detail</h1>
+      <button id="go-back" onclick="document.getElementById('Detail').classList.remove('active'); document.getElementById('Home').classList.add('active');">Back</button>
+    </section>
+  </div>
+  <script>
+    document.querySelectorAll('.state-toggle').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const target = btn.dataset.target;
+        document.querySelector(`[data-state="${target}"]`).classList.toggle('active');
+      });
+    });
+  </script>
+</body>
+</html>
