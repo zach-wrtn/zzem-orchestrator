@@ -424,12 +424,12 @@ Step C 진입 전 Sprint Lead가 early-review 할 수 있도록 `intent.md` 를 
 
 **작성 원칙**:
 - Screen Spec 각 섹션을 다시 나열하지 않는다 — Spec에 **없던** 결정만 기록
-- `inferred_layout` 항목이 0개이고 `placeholders.needs_real_content: true`가 0개면 preview 생성을 **스킵**하고 로그만 남김 (`phase: preview_skipped`)
+- 트리거가 하나도 해당하지 않고 + `inferred_layout` 항목이 0개 + `placeholders.needs_real_content: true`가 0개일 때만 preview 생성을 **스킵**하고 로그만 남김 (`phase: preview_skipped`). 트리거가 하나라도 해당하면 반드시 intent.md를 산출한다 (본문이 짧아도 무방).
 - 한 태스크가 여러 Screen을 포함하면 화면별로 파일 분리
 
 **Gate 동작**:
 - Step C는 Sprint Lead로부터 `proceed` 수신 시에만 진행
-- `adjust` 수신 시 지정된 항목만 Screen Spec에 반영 후 preview 재생성 (최대 2회까지 루프; 초과 시 Sprint Lead에 escalation)
+- `adjust` 수신 시 지정된 항목만 Screen Spec에 반영 후 preview 재생성 (최대 2회까지 루프; 초과 시 Sprint Lead에 escalation — 옵션은 `.claude/skills/sprint/phase-prototype.md` §3.2.5 Adjust 루프 상한 참조)
 - `stop` 수신 시 `TaskUpdate: blocked` + Sprint Lead에게 PRD 갭 보고
 
 **로깅 포인트** (Activity Logging 표에 다음 행 추가):
