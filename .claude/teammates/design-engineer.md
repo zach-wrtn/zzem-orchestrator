@@ -669,6 +669,7 @@ sprint-orchestrator/sprints/{sprint-id}/prototypes/
 ├── app/
 │   ├── {task-id}/
 │   │   ├── {ScreenName}.spec.md         # Step B 산출물 (machine-readable + quality_score)
+│   │   ├── {ScreenName}.intent.md       # Step B.6 산출물 (조건부 — Assumption Preview)
 │   │   ├── prototype.html               # Step C 산출물 (self-contained HTML)
 │   │   ├── prototype.png                # 대표 스크린샷 (첫 스크린 default)
 │   │   └── screenshots/
