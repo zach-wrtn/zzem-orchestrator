@@ -408,6 +408,36 @@ quality_score:
 - `medium`: PRD에 명시되지 않은 UI 요소를 추론하여 추가
 - `high`: 비즈니스 로직이나 데이터 구조를 추측 — **허용하지 않음, 반드시 Sprint Lead에 질의**
 
+### B.6 Assumption Preview 산출 (조건부)
+
+Step C 진입 전 Sprint Lead가 early-review 할 수 있도록 `intent.md` 를 산출한다. **아래 트리거 조건 중 하나라도 해당하면 필수, 그렇지 않으면 스킵 가능**:
+
+- `quality_score.fabrication_risk` in `[low, medium]`
+- `quality_score.context_coverage.why_linked < 1.0` (UI에 영향을 주는 AC 중 연결되지 않은 것이 있음)
+- 태스크 Description에 `preview_required: true` 명시
+- 새 컴포넌트(`(new)` 표시)가 2개 이상 등장
+
+**템플릿**: `sprint-orchestrator/templates/assumption-preview-template.md`
+
+**저장 경로**:
+`sprints/{sprint-id}/prototypes/app/{task-id}/{ScreenName}.intent.md`
+
+**작성 원칙**:
+- Screen Spec 각 섹션을 다시 나열하지 않는다 — Spec에 **없던** 결정만 기록
+- `inferred_layout` 항목이 0개이고 `placeholders.needs_real_content: true`가 0개면 preview 생성을 **스킵**하고 로그만 남김 (`phase: preview_skipped`)
+- 한 태스크가 여러 Screen을 포함하면 화면별로 파일 분리
+
+**Gate 동작**:
+- Step C는 Sprint Lead로부터 `proceed` 수신 시에만 진행
+- `adjust` 수신 시 지정된 항목만 Screen Spec에 반영 후 preview 재생성 (최대 2회까지 루프; 초과 시 Sprint Lead에 escalation)
+- `stop` 수신 시 `TaskUpdate: blocked` + Sprint Lead에게 PRD 갭 보고
+
+**로깅 포인트** (Activity Logging 표에 다음 행 추가):
+
+| B.6 Preview 생성 | `preview_generated` | "{ScreenName}.intent.md 생성, gate_questions {N}개" |
+| B.6 Preview 스킵 | `preview_skipped` | "fabrication_risk none + 전부 PRD 기반 — preview 불필요" |
+| B.6 Adjust 수신 | `preview_adjusting` | "Sprint Lead adjust 피드백 {N}건 반영 중" |
+
 ---
 
 ## Step C: Prototype Generation (Screen Spec → HTML)
@@ -703,6 +733,9 @@ echo '{"ts":"<현재시각 ISO8601>","task":"<태스크 subject>","phase":"<phas
 | A. Context Engine 조립 | `context_engine` | "WHY 3 stories / WHAT 12 tokens / HOW 4 rules 조립 완료" |
 | B. Spec 작성 시작 | `spec_writing` | "ProfileScreen spec 작성 중" |
 | B. Spec 작성 완료 | `spec_complete` | "3개 화면 spec 완료, avg accuracy 0.92, fabrication none" |
+| B.6 Preview 생성 | `preview_generated` | "{ScreenName}.intent.md 생성, gate_questions {N}개" |
+| B.6 Preview 스킵 | `preview_skipped` | "fabrication_risk none — preview 불필요" |
+| B.6 Adjust 수신 | `preview_adjusting` | "Sprint Lead adjust 피드백 {N}건 반영 중" |
 | A. tokens.css 생성 | `tokens_generated` | "tokens.css 생성 완료 (42 variables)" |
 | C. Phase α 완료 | `html_alpha` | "prototype-alpha.html 생성 (Structure + Components)" |
 | C. Phase β 완료 | `html_final` | "prototype.html 생성 (Content + States + Interactions + Polish)" |
