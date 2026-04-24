@@ -258,6 +258,42 @@ HTML 프로토타입이 이 파일을 inline으로 포함한다.
 
 **Zero-Contamination**: 토큰 값은 `design-tokens/` JSON에서 직접 변환한다. 값을 추측하거나 보완하지 않는다.
 
+### A.5 Asset Layer 조립 (v1 추가)
+
+시각적 품질을 좌우하는 **이미지 슬롯**(피드 썸네일·아바타·밈 이미지·hero banner)을 placeholder로 때우면 Figma 수준 품질에서 멀어진다. Step A 산출물인 `context-engine.yaml`에 `assets:` 레이어를 조립한다.
+
+**5개 슬롯 카테고리 + fallback 순서**:
+
+| 카테고리 | fallback 우선순위 | placeholder 허용 여부 |
+|---------|------------------|-------------------|
+| `avatars` | user-provided → KB sample → `app-core-packages/ds/avatars/` → Sprint Lead 질의 | ✗ 주 콘텐츠 위치면 금지 |
+| `feed_thumbnails` | user-provided → Figma node screenshot → Sprint Lead 질의 | ✗ |
+| `meme_images` | user-provided → KB `sample_image` 패턴 → Sprint Lead 질의 | ✗ |
+| `icons` | `@wrtn/icons` inline SVG → 기호 placeholder(`←`, `⋮`, `♡`, `+`) | ✓ 기호 placeholder는 허용 |
+| `hero_banners` | user-provided → Sprint Lead 질의 | ✗ |
+
+**조립 규칙 (stop-and-ask 원칙)**:
+- 슬롯에 실제 src 경로가 확정된 경우에만 `assets:` 에 기록. 추측 경로 금지
+- 확정되지 않은 슬롯은 키를 **생략**하고 Sprint Lead에 보고:
+  ```
+  ⚠ Asset missing: {slot_category} for task {task-id}.
+  Fallback chain exhausted. 다음 중 하나 필요:
+    - 실제 이미지 파일 경로
+    - Figma node URL
+    - "placeholder 허용" 명시 승인
+  ```
+- Sprint Lead의 명시적 "placeholder 허용" 승인이 있을 때만 Pass 6 audit #6을 `needs_real_content: false`로 기록하여 통과
+
+**Pass 6 Anti-Slop Audit 체크 6과의 연결**:
+- `prototype.html`에서 `<div class="placeholder-image">`가 화면의 주 콘텐츠 슬롯에 존재 + `context-engine.yaml assets.{slot}.needs_real_content: true` → **Pass 6 실패** → HTML 저장 금지
+- `needs_real_content: false` (명시 승인) → 통과
+
+**저장 경로**: `sprints/{sprint-id}/prototypes/context/context-engine.yaml` 의 `assets:` 블록.
+
+**템플릿 참조**: `sprint-orchestrator/templates/context-engine-template.yaml` § `assets`.
+
+**Zero-Contamination**: asset 경로는 파일시스템에서 존재 확인된 것만. 가상 경로/미래 경로/"나중에 채워질" 경로를 `source:` 에 쓰지 않는다.
+
 ---
 
 ## Step B: UX Decomposition (PRD → Screen Spec)
@@ -628,7 +664,7 @@ HTML 생성이 실패하면:
 ```
 sprint-orchestrator/sprints/{sprint-id}/prototypes/
 ├── context/
-│   ├── context-engine.yaml              # Step A 산출물 (Context Engine)
+│   ├── context-engine.yaml              # Step A 산출물 (WHY/WHAT/HOW + assets 4-layer)
 │   └── tokens.css                       # Step A 산출물 (디자인 토큰 CSS)
 ├── app/
 │   ├── {task-id}/
@@ -731,6 +767,8 @@ echo '{"ts":"<현재시각 ISO8601>","task":"<태스크 subject>","phase":"<phas
 | 2. 컨텍스트 수집 | `context_loaded` | "화면 3개 식별: ProfileScreen, EditScreen, SettingsScreen" |
 | 2. Snapshot 활용 | `snapshot_used` | "Frozen Snapshot 활용: DESIGN.md + patterns 3개 + KB 2개" |
 | A. Context Engine 조립 | `context_engine` | "WHY 3 stories / WHAT 12 tokens / HOW 4 rules 조립 완료" |
+| A.5 Asset 조립 | `assets_resolved` | "assets: avatars({N}) feed_thumbs({M}) icons({K}) — {P}건 Sprint Lead 질의 대기" |
+| A.5 Asset 미해결 | `assets_pending` | "⚠ {slot_category} src 미확정 — fallback 체인 소진" |
 | B. Spec 작성 시작 | `spec_writing` | "ProfileScreen spec 작성 중" |
 | B. Spec 작성 완료 | `spec_complete` | "3개 화면 spec 완료, avg accuracy 0.92, fabrication none" |
 | B.6 Preview 생성 | `preview_generated` | "{ScreenName}.intent.md 생성, gate_questions {N}개" |
