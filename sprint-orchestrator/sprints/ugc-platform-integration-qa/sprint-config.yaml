@@ -1,0 +1,56 @@
+# Sprint Configuration — ugc-platform-integration-qa
+# Follow-up of ugc-platform-003. Focus: Manual QA carryover 종결 + AC-6.2 nickname sort.
+
+sprint_id: "ugc-platform-integration-qa"
+branch_prefix: "sprint"
+
+repositories:
+  backend:
+    source: ~/dev/work/wrtn-backend
+    base: "apple"
+    mode: worktree
+  app:
+    source: ~/dev/work/app-core-packages
+    base: "epic/ugc-platform-final"
+    mode: worktree
+  tokens:
+    source: ~/dev/work/wds-tokens
+    base: "main"
+    mode: symlink
+
+defaults:
+  base: "main"
+
+team:
+  teammates:
+    - be-engineer
+    - fe-engineer
+    - design-engineer
+    - evaluator
+  settings:
+    eval_retry_limit: 2
+    max_parallel_tasks: 4
+
+display:
+  title: "UGC Platform Integration QA — 3-Sprint Carryover 종결 + Nickname Sort"
+  startDate: "2026-04-24"
+  endDate: "2026-04-24"
+  status: "active"
+  tags:
+    - ugc-platform
+    - integration-qa
+    - manual-qa
+    - follow-up
+    - nickname-sort
+  summary: |
+    Phase 1/2/3 통합 QA 스프린트.
+    P0: AC-2.3 (프로필 공유 시트) + AC-7.4 Phase 1 (ErrorNotFound 404) — 3-sprint manual QA carryover 종결.
+    P0: AC-6.2 (nickname ASC 정렬) — BE $lookup(UserProfile) aggregation.
+    Regression Guard: 003 fulfilled AC 11건 회귀 검증.
+
+follow_up:
+  previous_sprint: "ugc-platform-003"
+  inherited:
+    api_contract: true
+    deferred_items: 17  # 2 manual QA + AC-6.2 + AC-7.4 PA + 13 Minor
+    patterns: 6

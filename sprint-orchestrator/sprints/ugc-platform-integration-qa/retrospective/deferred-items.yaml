@@ -1,0 +1,86 @@
+sprint_id: "ugc-platform-integration-qa"
+generated_at: "2026-04-24T03:00:00+09:00"
+
+deferred:
+  - ac_id: "AC 6.1 Manual QA (프로필 공유 native sheet)"
+    original_sprint: "ugc-platform-001"
+    carryover_sprints: 4
+    status: "pending_device_operator"
+    reason: "Device 기반 수동 QA — agent 수행 불가. ApiInstance fix 후 실제 데이터 렌더 regression smoke 동반 권장."
+    priority: "high"
+
+  - ac_id: "AC-7.4 Phase 1 Manual QA (존재하지 않는 userId 404)"
+    original_sprint: "ugc-platform-001"
+    carryover_sprints: 4
+    status: "pending_device_operator"
+    reason: "본 스프린트에서 other-user-profile-not-found.yaml Maestro flow 가 이미 존재 — device 실행으로 자동화 대체 가능."
+    priority: "medium"
+
+  - ac_id: "AC 1.2 (7 failing flow PASS verification)"
+    status: "infra_pending"
+    reason: "Seed + yaml fix 완료. CI/로컬 Maestro 실행 필요."
+    priority: "high"
+    suggested_approach: "AC 8.1 Regression dashboard 스프린트에서 CI workflow 로 통합."
+
+  - ac_id: "AC 3.2 (screen mount smoke flow)"
+    status: "unfulfilled"
+    reason: "모든 screen 진입 flow 필요 — 개별 screen 목록 작성 + Maestro composition."
+    priority: "medium"
+
+  - ac_id: "AC 4.1-b AC-6.2 nickname sort (from canonical PRD §580)"
+    status: "stashed"
+    reason: "초기 잘못된 scope 해석으로 구현 → revert. canonical PRD §545 NEVER DO #1 저촉. reflog 보존 bff2ec23 / 58d6aed8."
+    suggested_approach: "별도 기능 스프린트 (UGC Platform Phase 4 등) 에서 BE-only task 로 cherry-pick 재개."
+    priority: "low"
+
+  - ac_id: "AC 4.3 (IAP init crash 방어)"
+    status: "unfulfilled"
+    reason: "boot blocking 해소 — try/catch wrap + red banner."
+    priority: "medium"
+
+  - ac_id: "AC 5.1 / 5.2 (Token refresh 자동화 VPN 분리)"
+    status: "unfulfilled"
+    reason: "인프라 과제. VPN 의존성 제거 또는 CI-only refresh."
+    priority: "medium"
+
+  - ac_id: "AC 8.1 / 8.2 (Regression dashboard)"
+    status: "unfulfilled"
+    reason: "CI workflow 신규 — 별도 스프린트."
+    priority: "high"
+
+  - ac_id: "US9 (Grid Feed Masonry Layout + Chip + Thumbnail)"
+    status: "out_of_scope"
+    reason: "UI refactor 트랙 — QA/안정화 분리."
+    priority: "low"
+    suggested_approach: "별도 `ugc-platform-feed-polish` 스프린트."
+
+  - ac_id: "US10 (Explore tab 섹션 디자인 정합)"
+    status: "out_of_scope"
+    reason: "UI refactor 트랙 분리."
+    priority: "low"
+
+  # 003 에서 이월된 minor 들 (14건) — 본 스프린트에서도 미착수
+  - ac_id: "003-minor-cluster (14건 미해소)"
+    status: "inherited_still_deferred"
+    reason: "Minor polish 는 기능 QA scope 외. 별도 polish 스프린트 또는 개별 fix 커밋."
+
+improvements:
+  - description: "Phase 1 init 체크리스트에 'docs/prds/<sprint-id>.md 선행 확인' 추가"
+    source: "pivot_incident"
+    priority: "high"
+    rationale: "canonical PRD 존재 시 Delta PRD 생성 전 반드시 확인. 본 스프린트 pivot 비용 ~2h."
+
+  - description: "Agent Teams sub-agent 권한 pre-grant 가이드 문서화"
+    source: "harness_gap"
+    priority: "high"
+    rationale: ".claude/settings 에 `Bash(git -C backend*)`, `Bash(pnpm --prefix backend*)` 등 사전 허용. Sprint 스킬 phase-build.md 에 명시."
+
+  - description: "Manual QA carryover 4 sprint 연속 — 다음 sprint start 전 반드시 device 실행 종결"
+    source: "accumulated_carryover"
+    priority: "critical"
+    rationale: "AC-2.3 / AC-7.4 Phase 1 이 4 스프린트 연속 pending. 회귀 검증 빈틈."
+
+  - description: "Maestro CI 통합 (AC 8.1) 우선순위 상승"
+    source: "user_feedback_implied"
+    priority: "high"
+    rationale: "본 스프린트에서 flow yaml 인프라 완성 — 자동 실행 필수. 별도 full-suite 스프린트 권장."

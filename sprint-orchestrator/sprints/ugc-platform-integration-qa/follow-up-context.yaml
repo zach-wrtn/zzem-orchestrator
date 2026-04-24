@@ -1,0 +1,86 @@
+# Follow-Up Context: ugc-platform-integration-qa
+# Inherits from ugc-platform-003 (소셜 & 알림)
+
+previous_sprint: "ugc-platform-003"
+generated_at: "2026-04-24T00:00:00+09:00"
+
+inherited_from:
+  deferred_items: 17           # see sprints/ugc-platform-003/retrospective/deferred-items.yaml
+  api_contract: true           # copy in Phase 2 spec
+  patterns: 6                  # pattern-digest.yaml (2 new from 003 + 4 inherited)
+
+previous_metrics:
+  fulfillment_rate: 0.85        # 11/13 new AC (2 partial: AC 6.2, AC 7.4)
+  first_pass_rate: 0.50         # 2/4 groups
+  avg_fix_cycles: 0.50
+  critical_issues_found: 0
+  major_issues_found: 3
+  minor_issues_found: 14
+
+# Selected scope for this sprint (user-confirmed 2026-04-24)
+selected_scope:
+  group_001:
+    name: "Manual QA Execution"
+    items:
+      - "AC-2.3 (Phase 1): 프로필 공유 native 시트 — iOS + Android QA"
+      - "AC-7.4 Phase 1: ErrorNotFound 404 — deeplink QA"
+    target: "3-sprint carryover 종결"
+  group_002:
+    name: "BE Nickname Sort"
+    items:
+      - "AC-6.2: user-follow-domain.service $lookup(UserProfile) nickname ASC aggregation"
+    target: "신규 cross-domain join 패턴 precedent 수립"
+
+# Regression Guard — 003 fulfilled AC 11건 회귀 검증
+regression_guard:
+  - "AC-6.1: FollowState 양방향 동작"
+  - "AC-6.3: FollowCreatedEvent emit (PA signal)"
+  - "AC-7.2: 차단 양방향 + 팔로우 해제 + 미통지"
+  - "AC-7.3: 신고 100자 + 미통지"
+  - "AC-7.5: 페르소나 알림 수신 불가"
+  - "AC-7.6: 차단 관리 / 해제 + follow 복원 없음"
+  - "AC-5.1: 알림 카테고리 + 페이백 배치 10시 KST"
+  - "AC-5.2: 팔로우 알림 즉시"
+  - "AC-5.3: 알림센터 + Red dot + 푸시 배너"
+  - "AC-5.4: 푸시 템플릿 3종 + deeplink fallback"
+  - "AC-5.5: 알림 설정 4 토글 + pushAll gate"
+
+# KB patterns inherited — Phase 2 Sprint Contract 자동 반영
+high_priority_patterns:
+  - id: "correctness/mapper-fallback"
+    title: "Entity/DTO 확장 시 semantic-breaking fallback"
+    freq: 2
+    contract_clause: "Mapper fallback 금지 — rg 'likeCount\\s*\\?\\?\\s*0|liked\\s*\\?\\?\\s*false' src → 0 hit"
+  - id: "completeness/dead-hook"
+    title: "Dead hook/factory/method — callsite 0"
+    freq: 2
+    contract_clause: "신규 hook/factory/컴포넌트 callsite ≥ 1 grep 게이트 의무"
+  - id: "completeness/cross-component-scope"
+    title: "Cross-component 적용 범위 전수 명시 누락"
+    freq: 2
+    contract_clause: "Entity/DTO 확장은 영향 받는 모든 endpoint/path Contract §Scope 에서 전수 나열"
+  - id: "completeness/contract-accumulation"
+    title: "Prior group lessons 누적 Contract 반영"
+    freq: 3
+    contract_clause: "Contract drafting 시 prior group checkpoint Lessons 필수 참조"
+  - id: "correctness/reference-path"
+    title: "Cursor encoding / reference 구현 경로 Contract 명시"
+    freq: 1
+    contract_clause: "Contract Done Criteria 에 reference 파일 경로 (예: me-contents-app.service.ts:buildLikedListResponse) 명시"
+  - id: "completeness/test-literal-drift"
+    title: "테스트 파일에서 production 상수 literal 복제 drift"
+    freq: 1
+    contract_clause: "queryKey/eventType/enum/URL pattern 은 typed import 강제. test 파일도 spec reconciliation 대상"
+
+# Phase 1 manual QA carryover — 본 스프린트의 P0 그룹
+manual_qa_carryover:
+  - ac_id: "AC-2.3 (Phase 1)"
+    description: "프로필 공유 native 시트 (zzem://profile/{userId})"
+    verification: "iOS + Android 본인 프로필 공유 탭 → native sheet 에 URL 포함 확인"
+    carryover_sprints: 3
+    pr_reference: "#563 body Test plan"
+  - ac_id: "AC-7.4 (Phase 1)"
+    description: "존재하지 않는 userId → 404 ErrorNotFound 화면"
+    verification: "임의 userId 로 zzem://profile/:userId 딥링크 → ErrorNotFound 렌더"
+    carryover_sprints: 3
+    pr_reference: "#563 body Test plan"
