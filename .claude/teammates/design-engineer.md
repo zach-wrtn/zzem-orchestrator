@@ -478,6 +478,31 @@ Phase β (단일 Write — 기계적 변환):
   → prototype.html 저장 (prototype-alpha.html 기반 최종본)
 ```
 
+### C.2.1 Pass 6 Anti-Slop Self-Audit (필수)
+
+Pass 6 "Polish" 완료 조건. 아래 7개 체크 중 하나라도 실패하면 prototype.html을 저장하지 않고 원인을 수정한 뒤 재실행한다.
+
+| # | 체크 | 실패 시 조치 |
+|---|------|------------|
+| 1 | `#[0-9A-Fa-f]{6}` hex 색상이 tokens.css에 정의되지 않은 값으로 HTML에 등장하는가 | 해당 hex → `var(--color-*)` 로 교체. 매핑이 없으면 DE가 임의 생성 금지 → Sprint Lead에 토큰 누락 보고 |
+| 2 | Unicode emoji가 인터랙티브 요소(button, tab, nav)의 아이콘으로 사용되었는가 (`<button>🔔</button>` 등) | 기호 placeholder(`←`, `⋮`, `♡`, `+`) 또는 inline SVG로 교체. body 텍스트 내 이모지는 허용 |
+| 3 | `.card` 계열 요소에 `border-left: Npx solid var(--*)` 스타일이 있는가 (Material/Tailwind slop) | 제거. 강조가 필요하면 `box-shadow` 또는 배경 fill 사용 |
+| 4 | `font-family`를 `Pretendard` 외로 명시한 CSS 규칙이 있는가 (인라인 스타일 포함) | `--font-family-default` 로 통일. `JetBrains Mono`는 라틴 전용 mono 블록에 한해 허용 |
+| 5 | `linear-gradient(... #8752FA ...)` 등 브랜드 보라색을 그라디언트로 배경 전면에 사용했는가 | 단색 fill 또는 토큰화된 표면으로 교체. 그라디언트는 DESIGN.md §4에 명시된 경우에만 |
+| 6 | `<img src>` 없이 `<div class="placeholder-image">`가 화면의 **주 콘텐츠** 위치(피드 카드 썸네일, 프로필 아바타, 밈 이미지)를 차지하고 있는가 | Phase 4의 Asset Layer(`context-engine.yaml` `assets:`)가 있으면 실제 파일 경로로 교체; 없으면 Sprint Lead에 stop-and-ask |
+| 7 | Pass 1~5에서 생성된 DOM 중 `[onclick]` 또는 `addEventListener`로 바인딩된 요소 수가 Screen Spec `interactions` 엔트리 수와 불일치하는가 | 누락된 이벤트 바인딩을 추가하거나, 스펙의 interaction을 삭제하여 정합성 맞춤 |
+
+**자동화 힌트**: 체크 1·2·4는 `grep -E`로 기계 검출 가능 (아래 shell 블록 참조). 체크 3·5·6은 DE가 수동 검토. 체크 7은 DOM 파싱 필요 — Phase 3의 `verify-prototype.ts`가 커버.
+
+```bash
+# Pass 6 시작 직전 DE가 실행할 수 있는 자가 검사 커맨드(제안):
+grep -oE '#[0-9A-Fa-f]{6}' prototype.html | sort -u > /tmp/proto-hex.txt
+grep -oE '#[0-9A-Fa-f]{6}' ../../prototypes/context/tokens.css | sort -u > /tmp/tokens-hex.txt
+comm -23 /tmp/proto-hex.txt /tmp/tokens-hex.txt   # 차집합이 비어있어야 통과
+```
+
+**결과 기록**: audit 완료 시 `approval-status.yaml` 의 해당 스크린 엔트리에 `anti_slop_audit: passed` 필드 추가. 실패 수정 이력이 있으면 `anti_slop_fixes: ["item-N: 설명", ...]`에 누적.
+
 **Phase α 입력/출력**:
 | 입력 | 출력 |
 |------|------|
@@ -681,6 +706,7 @@ echo '{"ts":"<현재시각 ISO8601>","task":"<태스크 subject>","phase":"<phas
 | A. tokens.css 생성 | `tokens_generated` | "tokens.css 생성 완료 (42 variables)" |
 | C. Phase α 완료 | `html_alpha` | "prototype-alpha.html 생성 (Structure + Components)" |
 | C. Phase β 완료 | `html_final` | "prototype.html 생성 (Content + States + Interactions + Polish)" |
+| C. Pass 6 audit 통과 | `anti_slop_audit` | "Anti-slop audit passed (7/7)" 또는 "Anti-slop audit: {N}건 수정 후 통과" |
 | 완료 보고 | `completed` | "프로토타입 완료, 품질 accuracy 0.95 / completeness 1.0" |
 | 품질 이상 | `nudge` | "⚠ fabrication_risk medium on FollowerList" |
 | 오류 | `error` | 오류 설명 (detail에 상세) |
