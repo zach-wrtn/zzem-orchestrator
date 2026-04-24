@@ -6,9 +6,10 @@
   "scripts": {
     "dev": "astro dev",
     "validate:tokens": "tsx scripts/validate-tokens.ts",
-    "build": "pnpm run sync:tokens && pnpm run validate:tokens && pnpm run capture:screenshots && pnpm run copy:prototypes && astro build",
+    "build": "pnpm run sync:tokens && pnpm run validate:tokens && pnpm run verify:prototypes && pnpm run capture:screenshots && pnpm run copy:prototypes && astro build",
     "preview": "astro preview",
     "copy:prototypes": "tsx scripts/copy-prototypes.ts",
+    "verify:prototypes": "tsx scripts/verify-prototype.ts",
     "capture:screenshots": "tsx scripts/capture-screenshots.ts",
     "sync:tokens": "tsx scripts/sync-tokens.ts",
     "test": "vitest run",
