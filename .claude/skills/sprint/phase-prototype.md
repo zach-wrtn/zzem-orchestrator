@@ -63,6 +63,8 @@ TaskCreate:
     --- END SNAPSHOT ---
 
     태스크: tasks/app/{task-id}.md
+    Assumption Preview 산출 경로: sprints/{sprint-id}/prototypes/app/{task-id}/{ScreenName}.intent.md
+    Preview 템플릿: sprint-orchestrator/templates/assumption-preview-template.md
     Screen Spec 템플릿: sprint-orchestrator/templates/screen-spec-template.md
     HTML 템플릿: sprint-orchestrator/templates/html-prototype-template.html
     디자인 토큰: design-tokens/
@@ -72,6 +74,43 @@ TaskCreate:
 ```
 
 Design Engineer가 HTML 프로토타입을 생성 후 `TaskUpdate: completed`.
+
+### 3.2.5 Assumption Preview Gate (조건부)
+
+Step C 진입 전에 DE가 산출한 `{ScreenName}.intent.md`를 사용자에게 제시하여 가정을 조기 검증한다. 조건 및 템플릿은 `.claude/teammates/design-engineer.md` §B.6 참조.
+
+**실행 흐름**:
+
+1. DE가 `{ScreenName}.intent.md`를 생성하면 Sprint Lead는 해당 파일을 Read
+2. `gate_questions` 블록을 사용자에게 요약 제시 (3문장 이내):
+   ```
+   [{ScreenName} 가정 미리보기]
+   - 추론 레이아웃 {N}건: {한 줄 요약}
+   - Placeholder 위치 {M}건: {한 줄 요약}
+   질문:
+   - {gate_question 1}
+   - {gate_question 2}
+   proceed / adjust / stop?
+   ```
+3. 사용자 응답 처리:
+
+| 선택 | 동작 |
+|------|------|
+| **proceed** | DE에게 "preview approved, proceed to Step C" 전달. `TaskUpdate: in_progress` 유지. |
+| **adjust** | 사용자의 지시를 DE 태스크 Description에 append: `### Preview Adjustments` 블록. DE가 Screen Spec 수정 → intent.md 재생성 → 본 gate 재실행. |
+| **stop** | `TaskUpdate: blocked`. PRD 갭 기록: `sprints/{sprint-id}/prototypes/prd-gaps.md`에 갭 항목 append. Phase 3.4 Amendment 추출 대상으로 자동 합류. |
+
+**Auto-Skip 조건**:
+- DE 로그에 `phase: preview_skipped` 기록 → gate 통과 간주 (DE가 자체 판단으로 스킵한 케이스)
+- `sprint-config.yaml`에 `preview_gate: skip` → 전역 스킵 (CI/배치 모드)
+
+**Adjust 루프 상한**: 동일 Screen에 대해 adjust 2회 초과 시 Sprint Lead가 escalation 결정:
+- **continue**: 3회차 허용 (사용자가 명시 동의)
+- **switch-to-stop**: preview 포기하고 Step C 직행 (사용자가 "일단 그려보자" 수락)
+- **abandon**: Phase 3에서 해당 화면 제외 → rejected 처리
+
+**로깅**: Sprint Lead는 다음을 `logs/events.jsonl`에 append:
+- `{"phase":"preview_gate","screen":"{ScreenName}","action":"proceed|adjust|stop","iteration":{N}}`
 
 ### 3.3 리뷰 (Sprint Lead ↔ 사용자)
 
