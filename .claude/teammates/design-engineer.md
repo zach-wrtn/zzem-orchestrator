@@ -361,9 +361,9 @@ HTML 프로토타입이 이 파일을 inline으로 포함한다.
 
 ### B.1.1 Archetype 분류 (필수)
 
-각 화면에 대해 `screen_spec.yaml > Meta.screen_archetype` 을 6 enum 중 하나로 결정한다.
+각 화면에 대해 `screen_spec.yaml > Meta.screen_archetype` 을 7 enum 중 하나로 결정한다.
 
-**6 archetypes**: `feed | detail | onboarding | form | modal | empty_state` — 각각의 정의·강제 룰·Good/Anti-Pattern 은 `.claude/teammates/design-engineer-archetypes/{archetype}.md` 참조.
+**7 archetypes**: `feed | detail | onboarding | form | modal | empty_state | nav_list` — 각각의 정의·강제 룰·Good/Anti-Pattern 은 `.claude/teammates/design-engineer-archetypes/{archetype}.md` 참조.
 
 **분류 흐름**:
 
@@ -402,6 +402,12 @@ HTML 프로토타입이 이 파일을 inline으로 포함한다.
    | form ↔ nav_list | OK | instant_save 토글 vs navigation row 혼동 흔함 |
    | modal subtype 변경 (dialog↔picker↔action_sheet) | OK | Meta.modal_subtype 만 변경 |
    | 그 외 두 단계 이상 (예: feed → modal, detail → onboarding) | **escalated: true** — Sprint Lead 질의 필수 |
+
+**`nav_list` vs `form` 구분 가이드** (자주 혼동됨):
+
+- 화면이 "다른 화면으로 가는 진입점" 모음이면 → `nav_list`
+- 화면 내에서 값을 변경/제출하면 → `form` (즉시 저장이면 `instant_save: true`)
+- 두 패턴 혼합 (상단 toggle + 하단 nav row) → 시각 면적 큰 영역 기준 (Meta 룰)
 
 **Activity Logging**:
 
