@@ -21,4 +21,18 @@ describe('verifyPrototype', () => {
     const joined = result.clickErrors.join('\n');
     expect(joined).toMatch(/nonExistentFunction|ghost|null/i);
   }, 30_000);
+
+  it('handles alert() blocking dialogs without hanging (auto-dismiss)', async () => {
+    const result = await verifyPrototype(join(FIXTURES, 'prototype-alert.html'));
+    expect(result.clickedElements).toBe(3);
+    expect(result.durationMs).toBeLessThan(15_000);
+    expect(result.status).toBe('pass');
+  }, 20_000);
+
+  it('discovers ZZEM convention selectors ([data-tab], [data-state-only])', async () => {
+    const result = await verifyPrototype(join(FIXTURES, 'prototype-tabs.html'));
+    expect(result.status).toBe('pass');
+    expect(result.clickedElements).toBeGreaterThanOrEqual(3);
+    expect(result.clickErrors).toEqual([]);
+  }, 30_000);
 });

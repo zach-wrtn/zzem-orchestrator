@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>Tabs Fixture (ZZEM convention)</title>
+  <style>
+    .tab[data-tab] { padding: 8px; }
+    .tab.active { border-bottom: 2px solid #000; }
+    [data-state-only] { display: none; }
+  </style>
+</head>
+<body>
+  <div class="device-frame">
+    <section class="screen active" id="Profile">
+      <nav class="tab-bar">
+        <button class="tab active" data-tab="public">공개</button>
+        <button class="tab" data-tab="private">비공개</button>
+        <button class="tab" data-tab="liked">좋아요</button>
+      </nav>
+      <div data-state-only="loading">Loading…</div>
+    </section>
+  </div>
+  <script>
+    document.querySelectorAll('[data-tab]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('[data-tab]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>

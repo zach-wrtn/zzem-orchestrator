@@ -28,9 +28,10 @@ export interface VerifyResult {
   durationMs: number;
 }
 
-const CLICK_SELECTORS = ['[onclick]', '.state-toggle', '[data-state-toggle]'];
+const CLICK_SELECTORS = ['[onclick]', '.state-toggle', '[data-state-toggle]', '[data-tab]'];
 const LOAD_TIMEOUT_MS = 15_000;
 const WAIT_AFTER_LOAD_MS = 300;
+const PER_CLICK_TIMEOUT_MS = 2_000;
 
 export async function verifyPrototype(htmlPath: string): Promise<VerifyResult> {
   const start = Date.now();
@@ -69,6 +70,11 @@ export async function verifyPrototype(htmlPath: string): Promise<VerifyResult> {
     const page = await browser.newPage();
     await page.setViewport({ width: 430, height: 985 });
 
+    // Auto-dismiss alert/confirm/prompt — they block click protocol otherwise.
+    page.on('dialog', (dialog) => {
+      dialog.dismiss().catch(() => {});
+    });
+
     page.on('console', (msg) => {
       if (msg.type() === 'error') result.consoleErrors.push(msg.text());
     });
@@ -99,11 +105,15 @@ export async function verifyPrototype(htmlPath: string): Promise<VerifyResult> {
     result.clickedElements = count;
 
     for (let i = 0; i < count; i++) {
+      const clickPromise = page.evaluate((h, idx) => {
+        const el = (h as unknown as Element[])[idx] as HTMLElement;
+        el.click();
+      }, handles, i);
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error(`click timeout (>${PER_CLICK_TIMEOUT_MS}ms)`)), PER_CLICK_TIMEOUT_MS),
+      );
       try {
-        await page.evaluate((h, idx) => {
-          const el = (h as unknown as Element[])[idx] as HTMLElement;
-          el.click();
-        }, handles, i);
+        await Promise.race([clickPromise, timeoutPromise]);
         await new Promise((r) => setTimeout(r, 50));
       } catch (err: unknown) {
         result.clickErrors.push(`#${i}: ${err instanceof Error ? err.message : String(err)}`);
