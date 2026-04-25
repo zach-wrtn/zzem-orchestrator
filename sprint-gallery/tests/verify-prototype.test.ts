@@ -35,4 +35,17 @@ describe('verifyPrototype', () => {
     expect(result.clickedElements).toBeGreaterThanOrEqual(3);
     expect(result.clickErrors).toEqual([]);
   }, 30_000);
+
+  it('clicks data-action / data-nav / data-close-sheet selectors', async () => {
+    const result = await verifyPrototype(join(FIXTURES, 'prototype-data-action.html'));
+    expect(result.status).toBe('pass');
+    expect(result.clickedElements).toBe(4); // like, share, home, close
+  }, 30_000);
+
+  it('clicks role=menuitem and role=tab selectors', async () => {
+    const result = await verifyPrototype(join(FIXTURES, 'prototype-aria-roles.html'));
+    expect(result.status).toBe('pass');
+    // 2 menuitems + 2 tabs = 4 (data-tab 중복 제거 후에도 4 — 중복은 Set 으로 단일화)
+    expect(result.clickedElements).toBe(4);
+  }, 30_000);
 });

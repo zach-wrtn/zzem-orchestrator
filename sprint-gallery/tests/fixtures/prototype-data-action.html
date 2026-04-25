@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head><meta charset="UTF-8"><title>data-action fixture</title></head>
+<body>
+  <button data-action="like">Like</button>
+  <button data-action="share">Share</button>
+  <div data-nav="home">Home</div>
+  <button data-close-sheet>닫기</button>
+  <script>
+    document.querySelectorAll('[data-action], [data-nav], [data-close-sheet]').forEach(el => {
+      el.addEventListener('click', () => { /* no-op */ });
+    });
+  </script>
+</body>
+</html>

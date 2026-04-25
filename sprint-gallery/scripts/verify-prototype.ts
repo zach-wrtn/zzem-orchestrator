@@ -28,7 +28,17 @@ export interface VerifyResult {
   durationMs: number;
 }
 
-const CLICK_SELECTORS = ['[onclick]', '.state-toggle', '[data-state-toggle]', '[data-tab]'];
+const CLICK_SELECTORS = [
+  '[onclick]',
+  '.state-toggle',
+  '[data-state-toggle]',
+  '[data-tab]',
+  '[data-action]',
+  '[data-nav]',
+  '[data-close-sheet]',
+  '[role="menuitem"]',
+  // role="tab" 은 거의 항상 [data-tab] 과 중복 — 추가 안 함 (false positive 우려)
+];
 const LOAD_TIMEOUT_MS = 15_000;
 const WAIT_AFTER_LOAD_MS = 300;
 const PER_CLICK_TIMEOUT_MS = 2_000;
