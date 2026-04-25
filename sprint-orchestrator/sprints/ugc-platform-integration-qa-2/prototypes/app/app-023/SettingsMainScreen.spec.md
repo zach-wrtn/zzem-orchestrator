@@ -5,11 +5,12 @@
 
 meta:
   screen_name: "SettingsMainScreen"
-  screen_archetype: "form"   # task description 분류 — 실질은 nav-list (misfit)
-  archetype_misfit_note: |
-    "settings main menu" 는 form 의 input/submit 모델과 본질적 부정합.
-    각 row 가 즉시 navigation trigger — 6 archetype enum 모두 fit 안 함.
-    Sprint Lead 후속: archetype enum 에 'nav_list' (또는 'settings_list') 신규 검토.
+  screen_archetype: "nav_list"   # post-#41 — archetype enum 6→7 확장으로 nav_list 정식 분류
+  archetype_reclassified:
+    from: "form (dogfood 시점 misfit)"
+    to: "nav_list"
+    reason: "post-#41 PR (archetype enum 6→7) — settings/menu 화면의 정식 archetype. form persona 0/4 미적용 → nav_list persona 적용."
+    pr_ref: "zzem-orchestrator#41"
   archetype_dogfood_case: true
   task_id: "app-023"
   sprint_id: "ugc-platform-integration-qa-2"
