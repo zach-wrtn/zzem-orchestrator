@@ -321,6 +321,24 @@ HTML 프로토타입이 이 파일을 inline으로 포함한다.
 1. `### Screens / Components`에서 최상위 화면을 추출 (이름이 `Screen`, `View`, `BottomSheet`로 끝나는 항목)
 2. 하위 컴포넌트를 부모 화면에 그룹화
 
+### B.1.1 Archetype 분류 (필수)
+
+각 화면에 대해 `screen_spec.yaml > Meta.screen_archetype` 을 6 enum 중 하나로 결정한다.
+
+**6 archetypes**: `feed | detail | onboarding | form | modal | empty_state` — 각각의 정의·강제 룰·Good/Anti-Pattern 은 `.claude/teammates/design-engineer-archetypes/{archetype}.md` 참조.
+
+**분류 흐름**:
+
+1. screen-spec-template.md `Meta` 섹션의 분류 가이드 표를 참조
+2. 가장 우세한 패턴 1개 선택 (복합 화면이면 시각 면적 큰 영역 기준)
+3. 모호 시 Sprint Lead 에 질의 — default 분류 금지
+4. 결정된 archetype 의 persona 파일을 본 task working memory 에 인라인 (Step C 시작 전까지 유지). phase-prototype.md §3.2 Step 1 이 미리 인라인 했으면 재 read 불필요.
+
+**Activity Logging**:
+
+| B.1.1 archetype 분류 | `archetype_classified` | "{ScreenName}: {archetype} (대안 검토: {alt or none})" |
+| B.1.1 archetype 모호 | `archetype_ambiguous` | "{ScreenName}: {a vs b} — Sprint Lead 질의 대기" |
+
 ### B.2 Screen Spec 작성
 
 `sprint-orchestrator/templates/screen-spec-template.md` 형식을 따라 **화면별 1파일**을 생성한다.
@@ -496,6 +514,8 @@ Step C 진입 전 Sprint Lead가 early-review 할 수 있도록 `intent.md` 를 
 
 작성된 screen spec 파일과 tokens.css를 읽어 self-contained HTML 프로토타입을 생성한다.
 
+**Persona 룰 적용**: B.1.1 에서 결정된 `screen_archetype` 의 persona 파일 (`.claude/teammates/design-engineer-archetypes/{archetype}.md`) 에 정의된 강제 룰을 본 Step C 의 모든 Pass (1~6) 에 추가 제약으로 적용한다. Persona 강제 룰은 Pass 6 Anti-Slop Audit 와 동급의 STOP 조건 — 미충족 시 prototype.html 저장 금지. 권장 룰 거절 시 quality-report 에 `archetype_recommendation_skipped` 로깅.
+
 ### Script-First Generation Protocol
 
 > Ref: Hermes Agent PTC — 중간 tool call 결과가 컨텍스트를 먹지 않도록 스크립트로 일괄 처리.
@@ -562,7 +582,7 @@ Phase β (단일 Write — 기계적 변환):
 
 ### C.2.1 Pass 6 Anti-Slop Self-Audit (필수)
 
-Pass 6 "Polish" 완료 조건. 아래 8개 체크 중 하나라도 실패하면 prototype.html을 저장하지 않고 원인을 수정한 뒤 재실행한다.
+Pass 6 "Polish" 완료 조건. 아래 9개 체크 중 하나라도 실패하면 prototype.html을 저장하지 않고 원인을 수정한 뒤 재실행한다.
 
 **검사 범위**: 모든 체크는 `.screen` 후손 요소(실제 화면)에만 적용. `.control-panel` (리뷰어용 device frame 외부 컨트롤)은 모든 체크에서 제외 — 이 영역은 monospace font, 테스트용 버튼 등 디자인 시스템과 무관한 요소를 의도적으로 포함한다.
 
@@ -576,6 +596,7 @@ Pass 6 "Polish" 완료 조건. 아래 8개 체크 중 하나라도 실패하면 
 | 6 | `<img src>` 없이 `<div class="placeholder-image">`가 화면의 **주 콘텐츠** 위치(피드 카드 썸네일, 프로필 아바타, 밈 이미지)를 차지하고 있는가 | Phase 4의 Asset Layer(`context-engine.yaml` `assets:`)가 있으면 실제 파일 경로로 교체; 없으면 Sprint Lead에 stop-and-ask |
 | 7 | Pass 1~5에서 생성된 DOM 중 `[onclick]` 또는 `addEventListener`로 바인딩된 요소 수가 Screen Spec `interactions` 엔트리 수와 불일치하는가 | 누락된 이벤트 바인딩을 추가하거나, 스펙의 interaction을 삭제하여 정합성 맞춤 |
 | 8 | `onclick` 핸들러에 `alert()` / `confirm()` / `prompt()` 가 사용되었는가 | 인터랙티브 데모로 표현 (`toggleState`, console.log + visual feedback 등). 이 패턴은 puppeteer click 프로토콜을 블로킹하여 verifier hang 의 직접 원인 (free-tab/app-002 18분 hang 사례) |
+| 9 | `screen_archetype` 의 persona 강제 룰 (`.claude/teammates/design-engineer-archetypes/{archetype}.md`) 모든 항목 통과했는가 | 미통과 항목 STOP. persona md 의 "강제 룰" 표 참조. archetype 별 4개 강제 룰 (총 24개 가능) 중 본 화면 적용분 모두 통과 필요 |
 
 **자동화 힌트**: 체크 1·2·4·8은 `grep -E`로 기계 검출 가능 (아래 shell 블록 참조). 체크 3·5·6은 DE가 수동 검토. 체크 7은 DOM 파싱 필요 — Phase 3의 `verify-prototype.ts`가 커버 (verifier는 alert를 자동 dismiss + 클릭당 2초 timeout 적용하므로 #8의 hang은 verifier 단계에서도 차단됨).
 
@@ -804,7 +825,9 @@ echo '{"ts":"<현재시각 ISO8601>","task":"<태스크 subject>","phase":"<phas
 | A. tokens.css 생성 | `tokens_generated` | "tokens.css 생성 완료 (42 variables)" |
 | C. Phase α 완료 | `html_alpha` | "prototype-alpha.html 생성 (Structure + Components)" |
 | C. Phase β 완료 | `html_final` | "prototype.html 생성 (Content + States + Interactions + Polish)" |
-| C. Pass 6 audit 통과 | `anti_slop_audit` | "Anti-slop audit passed (7/7)" 또는 "Anti-slop audit: {N}건 수정 후 통과" |
+| C. Pass 6 audit 통과 | `anti_slop_audit` | "Anti-slop audit passed (9/9)" 또는 "Anti-slop audit: {N}건 수정 후 통과" |
+| C.2.1 archetype persona 통과 | `archetype_persona_passed` | "{archetype} persona 강제 룰 {N}/{N} 통과" |
+| C.2.1 archetype persona 거절 권장 | `archetype_recommendation_skipped` | "{archetype} 권장 #{N} 거절: {사유}" |
 | 완료 보고 | `completed` | "프로토타입 완료, 품질 accuracy 0.95 / completeness 1.0" |
 | 품질 이상 | `nudge` | "⚠ fabrication_risk medium on FollowerList" |
 | 오류 | `error` | 오류 설명 (detail에 상세) |
