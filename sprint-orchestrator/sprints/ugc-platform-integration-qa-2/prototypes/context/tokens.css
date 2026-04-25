@@ -1,0 +1,182 @@
+/* ugc-platform-integration-qa-2 — sprint-level tokens.css (v2 dogfood)
+ * Source: WDS primitives + ugc-platform-002/003 baseline
+ * Aliases destructive/status registered for confirm-modal use cases (block / report / delete).
+ */
+
+:root {
+  /* === PRIMITIVE - Color Purple (Brand) === */
+  --wds-color-purple-50:  #F5F0FF;
+  --wds-color-purple-100: #EBE1FF;
+  --wds-color-purple-400: #A17BFF;
+  --wds-color-purple-500: #8752FA;
+  --wds-color-purple-600: #7040E0;
+  --wds-color-purple-700: #5A30C0;
+
+  /* === PRIMITIVE - Color Neutral === */
+  --wds-color-neutral-0:   #FFFFFF;
+  --wds-color-neutral-50:  #F7F8F9;
+  --wds-color-neutral-100: #F0F1F3;
+  --wds-color-neutral-200: #E4E5E9;
+  --wds-color-neutral-300: #D1D3D8;
+  --wds-color-neutral-400: #B5B8BF;
+  --wds-color-neutral-500: #8E9199;
+  --wds-color-neutral-600: #6B6E76;
+  --wds-color-neutral-700: #46474C;
+  --wds-color-neutral-900: #212228;
+  --wds-color-neutral-1000: #000000;
+
+  /* === PRIMITIVE - Status === */
+  --wds-color-red-100:    #FFE5E3;
+  --wds-color-red-500:    #FF3B30;
+  --wds-color-red-600:    #E0241A;
+  --wds-color-green-500:  #34C759;
+  --wds-color-yellow-500: #FFCC00;
+
+  /* === SEMANTIC - Background === */
+  --wds-background-normal:    var(--wds-color-neutral-0);
+  --wds-background-elevated:  var(--wds-color-neutral-0);
+  --wds-background-dimmed:    rgba(0, 0, 0, 0.50);  /* modal backdrop ≥0.4 */
+
+  /* === SEMANTIC - Surface === */
+  --wds-surface-primary:   var(--wds-color-neutral-0);
+  --wds-surface-secondary: var(--wds-color-neutral-50);
+  --wds-surface-tertiary:  var(--wds-color-neutral-100);
+
+  /* === SEMANTIC - Fill === */
+  --wds-fill-brand-primary: var(--wds-color-purple-500);
+  --wds-fill-brand-weak:    var(--wds-color-purple-50);
+  --wds-fill-brand-strong:  var(--wds-color-purple-600);
+  --wds-fill-neutral:       var(--wds-color-neutral-100);
+  --wds-fill-status-error:  var(--wds-color-red-500);
+  --wds-fill-status-error-strong: var(--wds-color-red-600);
+  --wds-fill-status-error-weak:   var(--wds-color-red-100);
+
+  /* === SEMANTIC - Label === */
+  --wds-label-normal:       var(--wds-color-neutral-900);
+  --wds-label-alternative:  var(--wds-color-neutral-600);
+  --wds-label-assistive:    var(--wds-color-neutral-500);
+  --wds-label-disabled:     var(--wds-color-neutral-300);
+  --wds-label-inverse:      var(--wds-color-neutral-0);
+  --wds-label-brand:        var(--wds-color-purple-500);
+  --wds-label-error:        var(--wds-color-red-500);
+
+  /* === SEMANTIC - Line === */
+  --wds-line-normal:       var(--wds-color-neutral-200);
+  --wds-line-alternative:  var(--wds-color-neutral-100);
+
+  /* === SEMANTIC - Status === */
+  --wds-status-error: var(--wds-color-red-500);
+
+  /* === COMPONENT - Button (Primary destructive registered for block/delete confirms) === */
+  --component-button-primary-fill:        var(--wds-fill-brand-primary);
+  --component-button-primary-label:       var(--wds-label-inverse);
+  --component-button-destructive-fill:    var(--wds-fill-status-error);
+  --component-button-destructive-label:   var(--wds-label-inverse);
+  --component-button-destructive-fill-pressed: var(--wds-fill-status-error-strong);
+  --component-button-secondary-ghost-fill:  transparent;
+  --component-button-secondary-ghost-label: var(--wds-label-alternative);
+  --component-button-radius:              12px;
+
+  /* === COMPONENT - Bottom Sheet === */
+  --component-bottom-sheet-fill:    var(--wds-background-elevated);
+  --component-bottom-sheet-radius:  20px;  /* top-only */
+  --component-bottom-sheet-handle:  var(--wds-color-neutral-300);
+
+  /* === COMPONENT - Avatar === */
+  --component-avatar-fill: var(--wds-surface-tertiary);
+  --component-avatar-ring: var(--wds-line-normal);
+
+  /* === COMPONENT - Info Row Icon (안내 row 아이콘 컨테이너) === */
+  --component-info-icon-fill:  var(--wds-fill-status-error-weak);
+  --component-info-icon-color: var(--wds-fill-status-error);
+
+  /* === COMPONENT - Notice Block (Group 003 - 알림센터 시스템 안내) ===
+   * 휴대폰 알림 OFF 시 노출되는 인라인 alert 블록.
+   * Figma 37211:167443 (Box) 색상 추출: surface-secondary tint.
+   */
+  --component-notice-fill:    var(--wds-surface-secondary);
+  --component-notice-label:   var(--wds-label-normal);
+  --component-notice-icon:    var(--wds-label-alternative);
+  --component-notice-action:  var(--wds-label-brand);
+  --component-notice-radius:  var(--wds-radius-md);
+
+  /* === COMPONENT - Empty State (Group 003 - 알림센터 노데이터) ===
+   * empty_state archetype 강제 룰 — 시각 앵커 컨테이너 80-120px.
+   */
+  --component-empty-icon-fill:    var(--wds-fill-brand-weak);
+  --component-empty-icon-color:   var(--wds-fill-brand-primary);
+  --component-empty-icon-size:    96px;
+
+  /* === PROFILE EDIT (Group 001) — concrete aliases ===
+   * Source: docs/designs/patterns/profile-edit.mdx + components/button.mdx
+   */
+  --pe-input-fill: #F7F7F7;            /* 닉네임 filled rounded box bg */
+  --pe-input-border: #F1F1F1;          /* 닉네임 box border */
+  --pe-save-disabled: #F1F1F1;         /* 저장 비활성 배경 (button.mdx disabled rule) */
+  --pe-save-disabled-label: #8A8A8A;   /* 저장 비활성 라벨 (pattern §5) */
+  --pe-save-active: #262626;           /* 저장 활성 배경 (pattern §5) */
+  --pe-save-active-label: #FFFFFF;     /* 저장 활성 라벨 */
+  --pe-camera-badge-fill: #E2E2E2;     /* 카메라 배지 (pattern §5) */
+  --pe-camera-badge-border: #FFFFFF;   /* 카메라 배지 border 4px white */
+  --pe-destructive-text: #D92800;      /* "사진 삭제" 빨간 텍스트 */
+  --pe-confirm-btn: #262626;           /* 나가기 확인 "확인" 버튼 */
+  --pe-surface-hover: #F1F1F1;         /* 나가기 확인 "취소" 버튼 배경 */
+  --pe-text-primary: #262626;          /* 헤더 타이틀 / 일반 텍스트 */
+  --pe-text-secondary: #656565;        /* 보조 텍스트 */
+  --pe-text-tertiary: #8A8A8A;         /* placeholder */
+  --pe-avatar-empty-bg: #F5F3FF;       /* avatar 비어있을 때 (MY 프로필 §3) */
+  --pe-avatar-border: rgba(136, 136, 136, 0.2);  /* avatar ring */
+
+  /* === SPACING (4px grid) === */
+  --wds-spacing-0:  0px;
+  --wds-spacing-1:  1px;
+  --wds-spacing-2:  2px;
+  --wds-spacing-4:  4px;
+  --wds-spacing-6:  6px;
+  --wds-spacing-8:  8px;
+  --wds-spacing-10: 10px;
+  --wds-spacing-12: 12px;
+  --wds-spacing-14: 14px;
+  --wds-spacing-16: 16px;
+  --wds-spacing-20: 20px;
+  --wds-spacing-24: 24px;
+  --wds-spacing-28: 28px;
+  --wds-spacing-32: 32px;
+  --wds-spacing-40: 40px;
+  --wds-spacing-48: 48px;
+  --wds-spacing-56: 56px;
+  --wds-spacing-64: 64px;
+  --wds-spacing-80: 80px;
+
+  /* === RADIUS === */
+  --wds-radius-none: 0px;
+  --wds-radius-xs:   4px;
+  --wds-radius-sm:   8px;
+  --wds-radius-md:   12px;
+  --wds-radius-lg:   16px;
+  --wds-radius-xl:   20px;
+  --wds-radius-2xl:  24px;
+  --wds-radius-full: 9999px;
+
+  /* === TYPOGRAPHY === */
+  --wds-font-family-primary: 'Pretendard', -apple-system, 'SF Pro Display', sans-serif;
+  --wds-font-weight-regular:  400;
+  --wds-font-weight-medium:   500;
+  --wds-font-weight-semibold: 600;
+  --wds-font-weight-bold:     700;
+  --wds-font-size-2xs: 11px;
+  --wds-font-size-xs:  12px;
+  --wds-font-size-sm:  13px;
+  --wds-font-size-md:  14px;
+  --wds-font-size-lg:  16px;
+  --wds-font-size-xl:  18px;
+  --wds-font-size-2xl: 20px;
+  --wds-font-size-3xl: 24px;
+
+  /* === Brand convenience aliases (호환) === */
+  --color-brand-primary:   var(--wds-color-purple-500);
+  --color-bg-normal:       var(--wds-color-neutral-0);
+  --color-fill-neutral:    var(--wds-color-neutral-100);
+  --color-label-normal:    var(--wds-color-neutral-900);
+  --color-label-assistive: var(--wds-color-neutral-500);
+}

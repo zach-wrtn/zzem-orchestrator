@@ -1,0 +1,209 @@
+# Context Engine — ugc-platform-integration-qa-2 / app-016
+# Generated: 2026-04-25 (DE Step A output)
+# Schema: v1.0
+# Note: per-task context (avoid overwriting sprint-level context-engine.yaml currently scoped to app-005)
+
+meta:
+  sprint_id: "ugc-platform-integration-qa-2"
+  task_id: "app-016"
+  generated_at: "2026-04-25T00:00:00Z"
+  schema_version: "1.0"
+  figma_frame: "37211:162146"
+  figma_file: "7hozJ6Pvs09q98BxvChj08"
+  archetype: "detail"
+  exemplar_refs: []   # detail archetype — no exemplar inlined
+
+# ─────────────────────────────
+# Layer 1: WHY (Business Intent)
+# ─────────────────────────────
+why:
+  product_intent: "차단을 해제한 직후 타유저 프로필이 정상 상태로 복원되었음을 즉각 시각·인지로 확인하게 하여 차단 해제 액션의 결과를 1-step에 검증한다."
+  target_user: "타유저를 차단했다가 다시 해제한 ZZEM 사용자"
+  success_metric: "AC-2.3 + AC-2.5 통과 — 차단됨 indicator 제거 + 콘텐츠 정상 노출 + Toast 1회 표시 후 자동 dismiss"
+  user_stories:
+    - id: "US-1"
+      as_a: "차단을 해제한 사용자"
+      i_want: "프로필 화면이 정상 콘텐츠로 즉시 복원된 것을 확인하고 싶다"
+      so_that: "해제 액션이 실제로 적용됐음을 별도 새로고침 없이 검증한다"
+  acceptance_criteria:
+    - id: "AC-2.3"
+      given: "차단된 사용자 프로필을 보고 있다 (app-014 차단됨 상태)"
+      when: "더보기(app-015) → '차단 해제' tap → 해제 API 성공"
+      then: "동일 프로필 화면이 정상 상태로 복원되어 콘텐츠/메타가 보인다"
+      ui_impact: "차단됨 indicator/안내 카드 제거 + 콘텐츠 그리드 표시 + 팔로우/메시지 버튼 활성"
+    - id: "AC-2.5"
+      given: "해제가 성공적으로 적용되었다"
+      when: "프로필 복원 직후"
+      then: "'{nickname}님 차단을 해제했어요' Toast 가 표시되고 3s 내 auto-dismiss"
+      ui_impact: "Toast component (sticky bottom-area, single line, role=status) — 3s timer"
+
+# ─────────────────────────────
+# Layer 2: WHAT (Design System)
+# ─────────────────────────────
+what:
+  tokens_needed:
+    colors:
+      - "wds-background-normal"
+      - "wds-surface-secondary"
+      - "wds-surface-tertiary"
+      - "wds-label-normal"
+      - "wds-label-alternative"
+      - "wds-label-assistive"
+      - "wds-label-inverse"
+      - "wds-fill-brand-primary"
+      - "wds-line-alternative"
+      - "wds-line-normal"
+      - "component-button-primary-fill"
+      - "component-button-primary-label"
+      - "component-button-secondary-ghost-label"
+      - "pe-text-primary"
+      - "pe-text-secondary"
+      - "pe-avatar-empty-bg"
+      - "pe-avatar-border"
+    typography:
+      - "wds-font-size-2xs (11px) — toast caption / count label"
+      - "wds-font-size-xs (12px) — count label"
+      - "wds-font-size-sm (13px) — toast body"
+      - "wds-font-size-md (14px) — button label"
+      - "wds-font-size-lg (16px) — header title"
+      - "wds-font-size-xl (18px) — nickname"
+      - "wds-font-weight-semibold (600)"
+      - "wds-font-weight-bold (700)"
+    spacing:
+      - "wds-spacing-4"
+      - "wds-spacing-6"
+      - "wds-spacing-8"
+      - "wds-spacing-12"
+      - "wds-spacing-16"
+      - "wds-spacing-20"
+      - "wds-spacing-24"
+    radius:
+      - "wds-radius-xs (4px) — feed card"
+      - "wds-radius-md (12px) — secondary button"
+      - "wds-radius-lg (16px) — toast"
+      - "wds-radius-full — avatar / primary follow chip"
+
+  components_needed:
+    - name: "HeaderBar"
+      category: "navigation"
+      pattern_ref: "ugc-platform-002 app-006 .header-bar"
+    - name: "ProfileHero"
+      category: "content"
+      pattern_ref: "ugc-platform-002 app-006 .profile-header (avatar + nickname + count-row + dual-btn)"
+      detail_persona_role: "Hero region (height ≥320px requirement) — avatar 100px + nickname + 3-tile count + CTA row"
+    - name: "FollowButton"
+      category: "input"
+      pattern_ref: "primary CTA (component-button-primary-fill, full-pill, 14px semibold)"
+    - name: "MessageButton"
+      category: "input"
+      pattern_ref: "secondary ghost (border + label-normal)"
+    - name: "MoreButton"
+      category: "input"
+      pattern_ref: "icon-button (lucide MoreVertical, 24px, 44hit)"
+    - name: "ContentTabBar"
+      category: "navigation"
+      pattern_ref: "ugc-platform-002 app-006 .tab-bar (icon-only sticky)"
+    - name: "ContentGrid"
+      category: "layout"
+      pattern_ref: "ugc-platform-002 app-006 .feed-grid (2-col, 1px gutter, mixed 1:1 / 4:5)"
+    - name: "BottomNav"
+      category: "navigation"
+      pattern_ref: "ugc-platform-002 app-006 .bottom-nav (5-tab — search active context)"
+    - name: "Toast"
+      category: "feedback"
+      pattern_ref: "ugc-platform-002 toast (bottom 96px, neutral-900 fill, label-inverse, 3s auto-dismiss)"
+
+  patterns_needed:
+    - name: "Profile detail hero"
+      description: "Avatar(100px circle) + Nickname(18px bold) + 3-tile count row + 2-col CTA — 합산 높이 ≥320px"
+    - name: "Icon-only sticky tab bar"
+      description: "공개 / 비공개 / 좋아요 — 아이콘 + active 하단 underline 2px"
+    - name: "2-col mixed-ratio feed grid"
+      description: "1:1 / 4:5 비율 혼합, 1px gutter, border-radius 4px (feed-grid pattern 표준)"
+    - name: "Auto-dismiss bottom toast"
+      description: "neutral-900 fill, label-inverse, 3s 후 fade-out (alert/confirm 미사용 — verifier-safe)"
+
+# ─────────────────────────────
+# Layer 3: HOW (Orchestration)
+# ─────────────────────────────
+how:
+  composition_rules:
+    - rule: "HeaderBar(48) → ProfileHero(~320) → ContentTabBar(44, sticky) → ContentGrid(scroll) → BottomNav(64)"
+      applies_to: ["OtherProfileScreen-Unblocked"]
+    - rule: "Hero 영역 단일 시각 앵커 — 320px 이상, 다른 메타 행 4개 이내 (detail persona 강제 룰 #1·#3)"
+      applies_to: ["ProfileHero"]
+    - rule: "Primary CTA 1개 (팔로우) + secondary 1-2개 (메시지 + 더보기) — 위계 명확 (detail persona 강제 룰 #4)"
+      applies_to: ["ProfileHero CTA cluster"]
+    - rule: "back 1-way: 좌상단 ← 만 노출 (detail persona 강제 룰 #2)"
+      applies_to: ["HeaderBar"]
+    - rule: "Toast 는 default 진입 시 표시 후 3s 자동 dismiss — 별도 닫기 버튼 없음"
+      applies_to: ["Toast"]
+    - rule: "alert/confirm/prompt 절대 사용 금지 (Pass 6 #8 + verifier hang 방지)"
+      applies_to: ["all interactions"]
+  conditional_rendering:
+    - condition: "state == default (toast-visible)"
+      variant_a: "Toast 표시 + 그리드 정상 콘텐츠"
+      variant_b: null
+    - condition: "state == toast-dismissed"
+      variant_a: "Toast 숨김 + 그리드 정상 (영구 상태)"
+      variant_b: null
+    - condition: "팔로우 button tap → 즉시 '팔로잉' 으로 토글 (시각 변화만 — actual API 별도)"
+      variant_a: "label '팔로우' → '팔로잉', fill brand → secondary"
+      variant_b: null
+  constraints:
+    - "BottomNav 항상 sticky-bottom"
+    - "차단됨 indicator/안내 카드는 DOM 에 존재하지 않음 (이전 차단 상태와 시각적 차이 명확화)"
+    - "Toast bottom: 80px (BottomNav 위로 16px 여백)"
+    - "ContentTabBar sticky-top: HeaderBar(48) 아래"
+    - "Avatar placeholder: pe-avatar-empty-bg + pe-avatar-border ring (실 이미지 미사용 — gradient-token kind)"
+    - "Feed cell 비율 mix: 1:1 / 4:5 — meme-card 패턴 (asset Layer kind=gradient-token)"
+  priority_order:
+    - "1. Toast (해제 결과 즉시 인지) — 자동 사라짐 전 1순위 시각 신호"
+    - "2. Profile Hero (정상 복원 확인)"
+    - "3. Content Grid (콘텐츠 노출 = 차단 해제 검증)"
+    - "4. Follow CTA (다음 행동 enabling)"
+    - "5. ContentTabBar / BottomNav (이동 경로)"
+
+# ─────────────────────────────
+# Layer 4: ASSETS (v1)
+# ─────────────────────────────
+assets:
+  avatars:
+    kind: gradient-token
+    source: "inline solid (--pe-avatar-empty-bg + initial 'M' centered, brand purple)"
+    count: 1
+    license: "internal-test"
+    needs_real_content: false
+    note: "타유저 아바타 — 실 이미지 미존재. detail persona hero 시각 앵커 충족용 단색 + initial."
+  feed_thumbnails:
+    kind: gradient-token
+    source: |
+      Feed cell 별 카테고리 그라디언트 (ugc-platform-002 app-006 패턴 답습):
+      - card-1: linear-gradient(135deg, #FFF3E0, #FFCC80 60%, #FB8C00)  # warm
+      - card-2: linear-gradient(135deg, #E1F5FE, #81D4FA 60%, #0288D1)  # cool
+      - card-3: linear-gradient(135deg, #FCE4EC, #F48FB1 60%, #C2185B)  # pink
+      - card-4: linear-gradient(135deg, #F1F8E9, #AED581 60%, #558B2F)  # green
+      - card-5: linear-gradient(135deg, #EDE7F6, #B39DDB 60%, #512DA8)  # purple
+      - card-6: linear-gradient(135deg, #FFFDE7, #FFF176 60%, #F9A825)  # yellow
+    count: 6
+    license: "internal-test"
+    needs_real_content: false
+    note: |
+      Pass 6 #6 면제 (gradient-token kind). 단 Pass 6 #1 hex 검사를 위해 본 그라디언트 색상은
+      sprint tokens.css 부재 — local @sprint-aliases section 으로 등재 필요.
+      ugc-platform-002 app-006 에서 raw hex 사용 사례 — 본 스프린트는 prototype 자체 :root 에 alias 정의로 통과.
+  meme_images:
+    kind: gradient-token
+    source: null
+    needs_real_content: false
+    note: "본 화면에서 단독 meme-image 슬롯 없음 (feed_thumbnails 가 cover)"
+  icons:
+    kind: illustration
+    source: "lucide inline SVG (ArrowLeft, MoreVertical, Grid, Lock, Heart, Home, Search, Bell, User)"
+    fallback: "text-placeholder"
+    needs_real_content: false
+  hero_banners:
+    kind: gradient-token
+    source: null
+    needs_real_content: false
+    note: "프로필 hero 배경은 단색 background-normal — 별도 banner 그라디언트 없음"

@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>app-001 · 프로필편집_메인 (ugc-platform-integration-qa-2)</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+<style>
+  /* === tokens.css inline (Step A output — sprint-level) === */
+  :root {
+    /* PRIMITIVE — Color Purple */
+    --wds-color-purple-50:  #F5F0FF;
+    --wds-color-purple-100: #EBE1FF;
+    --wds-color-purple-400: #A17BFF;
+    --wds-color-purple-500: #8752FA;
+    --wds-color-purple-600: #7040E0;
+    --wds-color-purple-700: #5A30C0;
+    /* PRIMITIVE — Color Neutral */
+    --wds-color-neutral-0:   #FFFFFF;
+    --wds-color-neutral-50:  #F7F8F9;
+    --wds-color-neutral-100: #F0F1F3;
+    --wds-color-neutral-200: #E4E5E9;
+    --wds-color-neutral-300: #D1D3D8;
+    --wds-color-neutral-400: #B5B8BF;
+    --wds-color-neutral-500: #8E9199;
+    --wds-color-neutral-600: #6B6E76;
+    --wds-color-neutral-700: #46474C;
+    --wds-color-neutral-900: #212228;
+    --wds-color-neutral-1000: #000000;
+    /* Status */
+    --wds-color-red-100: #FFE5E3;
+    --wds-color-red-500: #FF3B30;
+    --wds-color-red-600: #E0241A;
+    --wds-color-green-500: #34C759;
+
+    /* SEMANTIC */
+    --wds-background-normal:    var(--wds-color-neutral-0);
+    --wds-background-elevated:  var(--wds-color-neutral-0);
+    --wds-background-dimmed:    rgba(0, 0, 0, 0.50);
+    --wds-surface-primary:   var(--wds-color-neutral-0);
+    --wds-surface-secondary: var(--wds-color-neutral-50);
+    --wds-surface-tertiary:  var(--wds-color-neutral-100);
+    --wds-fill-brand-primary: var(--wds-color-purple-500);
+    --wds-fill-brand-weak:    var(--wds-color-purple-50);
+    --wds-fill-brand-strong:  var(--wds-color-purple-600);
+    --wds-fill-neutral:       var(--wds-color-neutral-100);
+    --wds-fill-status-error:  var(--wds-color-red-500);
+    --wds-label-normal:       var(--wds-color-neutral-900);
+    --wds-label-alternative:  var(--wds-color-neutral-600);
+    --wds-label-assistive:    var(--wds-color-neutral-500);
+    --wds-label-disabled:     var(--wds-color-neutral-300);
+    --wds-label-inverse:      var(--wds-color-neutral-0);
+    --wds-label-error:        var(--wds-color-red-500);
+    --wds-line-normal:        var(--wds-color-neutral-200);
+    --wds-line-alternative:   var(--wds-color-neutral-100);
+    --wds-status-error:       var(--wds-color-red-500);
+
+    /* PROFILE EDIT (Group 001) */
+    --pe-input-fill: #F7F7F7;
+    --pe-input-border: #F1F1F1;
+    --pe-save-disabled: #F1F1F1;
+    --pe-save-disabled-label: #8A8A8A;
+    --pe-save-active: #262626;
+    --pe-save-active-label: #FFFFFF;
+    --pe-camera-badge-fill: #E2E2E2;
+    --pe-camera-badge-border: #FFFFFF;
+    --pe-destructive-text: #D92800;
+    --pe-confirm-btn: #262626;
+    --pe-surface-hover: #F1F1F1;
+    --pe-text-primary: #262626;
+    --pe-text-secondary: #656565;
+    --pe-text-tertiary: #8A8A8A;
+    --pe-avatar-empty-bg: #F5F3FF;
+    --pe-avatar-border: rgba(136,136,136,0.2);
+
+    /* SPACING */
+    --wds-spacing-0: 0px; --wds-spacing-1: 1px; --wds-spacing-2: 2px;
+    --wds-spacing-4: 4px; --wds-spacing-6: 6px; --wds-spacing-8: 8px;
+    --wds-spacing-10: 10px; --wds-spacing-12: 12px; --wds-spacing-14: 14px;
+    --wds-spacing-16: 16px; --wds-spacing-20: 20px; --wds-spacing-24: 24px;
+    --wds-spacing-28: 28px; --wds-spacing-32: 32px; --wds-spacing-40: 40px;
+    --wds-spacing-48: 48px; --wds-spacing-56: 56px; --wds-spacing-64: 64px;
+    --wds-spacing-80: 80px;
+
+    /* RADIUS */
+    --wds-radius-none: 0px; --wds-radius-xs: 4px; --wds-radius-sm: 8px;
+    --wds-radius-md: 12px; --wds-radius-lg: 16px; --wds-radius-xl: 20px;
+    --wds-radius-2xl: 24px; --wds-radius-full: 9999px;
+
+    /* TYPOGRAPHY */
+    --wds-font-family-primary: 'Pretendard', -apple-system, 'SF Pro Display', sans-serif;
+    --wds-font-weight-regular: 400;
+    --wds-font-weight-medium: 500;
+    --wds-font-weight-semibold: 600;
+    --wds-font-weight-bold: 700;
+    --wds-font-size-2xs: 11px; --wds-font-size-xs: 12px; --wds-font-size-sm: 13px;
+    --wds-font-size-md: 14px;  --wds-font-size-lg: 16px; --wds-font-size-xl: 18px;
+    --wds-font-size-2xl: 20px; --wds-font-size-3xl: 24px;
+
+    /* Convenience */
+    --color-brand-primary:   var(--wds-color-purple-500);
+    --color-bg-normal:       var(--wds-color-neutral-0);
+    --color-fill-neutral:    var(--wds-color-neutral-100);
+    --color-label-normal:    var(--wds-color-neutral-900);
+    --color-label-assistive: var(--wds-color-neutral-500);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--wds-font-family-primary);
+    background: #f0f0f0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 16px;
+    color: var(--wds-label-normal);
+  }
+
+  /* === Control Panel (외부 — Pass 6 audit 제외 영역) === */
+  .control-panel {
+    width: 390px;
+    background: #1a1a2e;
+    color: #e0e0e0;
+    border-radius: 12px 12px 0 0;
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 13px;
+    font-family: ui-monospace, monospace;
+  }
+  .control-panel__row { display: flex; align-items: center; gap: 8px; }
+  .control-panel__label { color: #888; font-size: 11px; min-width: 56px; }
+  .control-panel select {
+    background: #2a2a3e; color: #e0e0e0; border: 1px solid #444;
+    border-radius: 6px; padding: 4px 8px; font-size: 12px; flex: 1;
+    font-family: ui-monospace, monospace;
+  }
+  .control-panel__states { display: flex; gap: 4px; flex-wrap: wrap; flex: 1; }
+  .control-panel__state-btn {
+    background: #2a2a3e; color: #bbb; border: 1px solid #444;
+    border-radius: 6px; padding: 4px 10px; font-size: 11px; cursor: pointer;
+    transition: all 0.15s;
+    font-family: ui-monospace, monospace;
+  }
+  .control-panel__state-btn.active {
+    background: var(--color-brand-primary); color: #fff; border-color: var(--color-brand-primary);
+  }
+  .control-panel__breadcrumb { color: #666; font-size: 11px; font-family: ui-monospace, monospace; }
+  .control-panel__hint { color: #999; font-size: 10px; font-style: italic; }
+
+  /* === Device Frame === */
+  .device-frame {
+    width: 390px;
+    height: 844px;
+    background: var(--wds-background-normal);
+    overflow: hidden;
+    position: relative;
+    border: 1px solid #ddd;
+    border-radius: 0 0 12px 12px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .screen { display: flex; flex-direction: column; height: 100%; }
+
+  /* === Status Bar === */
+  .status-bar {
+    height: 44px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 var(--wds-spacing-24);
+    font-size: var(--wds-font-size-md);
+    font-weight: var(--wds-font-weight-semibold);
+    flex-shrink: 0;
+    color: var(--wds-label-normal);
+  }
+  .status-bar__icons { display: flex; gap: 6px; align-items: center; }
+  .status-bar__icons svg { display: block; }
+
+  /* === Header Bar === */
+  .header-bar {
+    height: 48px;
+    display: grid;
+    grid-template-columns: 44px 1fr 44px;
+    align-items: center;
+    padding: 0 var(--wds-spacing-4);
+    background: var(--wds-background-normal);
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .header-bar__back {
+    width: 44px; height: 44px;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: none; border: none; cursor: pointer;
+    color: var(--pe-text-primary);
+    font-family: inherit;
+  }
+  .header-bar__title {
+    text-align: center;
+    font-size: var(--wds-font-size-xl);
+    font-weight: var(--wds-font-weight-semibold);
+    color: var(--pe-text-primary);
+    letter-spacing: -0.2px;
+  }
+
+  /* === Contents === */
+  .contents {
+    flex: 1;
+    overflow-y: auto;
+    padding-bottom: var(--wds-spacing-32);
+  }
+
+  /* === Profile === */
+  .profile {
+    padding: var(--wds-spacing-12) var(--wds-spacing-16) var(--wds-spacing-12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .profile-img-trigger {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    border-radius: var(--wds-radius-full);
+    font-family: inherit;
+  }
+  .avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: var(--wds-radius-full);
+    background: var(--pe-avatar-empty-bg);
+    border: 1px solid var(--pe-avatar-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--wds-color-purple-400);
+    overflow: hidden;
+  }
+  .avatar svg { display: block; }
+  .camera-badge {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: var(--wds-radius-full);
+    background: var(--pe-camera-badge-fill);
+    border: 4px solid var(--pe-camera-badge-border);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--pe-text-primary);
+    box-sizing: content-box;
+  }
+  .camera-badge svg { width: 14px; height: 14px; }
+
+  /* === Input section === */
+  .input-section {
+    padding: var(--wds-spacing-8) var(--wds-spacing-16) 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--wds-spacing-8);
+  }
+  .input-label {
+    padding-left: var(--wds-spacing-4);
+    font-size: var(--wds-font-size-md);
+    font-weight: var(--wds-font-weight-medium);
+    color: var(--pe-text-primary);
+    line-height: 20px;
+  }
+  .input-field {
+    position: relative;
+    height: 44px;
+    background: var(--pe-input-fill);
+    border: 1px solid var(--pe-input-border);
+    border-radius: var(--wds-radius-lg);
+    display: flex;
+    align-items: center;
+    transition: border-color 0.15s;
+  }
+  .input-field.is-error {
+    border-color: var(--wds-label-error);
+    background: var(--wds-color-red-100);
+  }
+  .input-field__input {
+    flex: 1;
+    height: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    padding: 12px 16px;
+    padding-right: 60px;
+    font-family: inherit;
+    font-size: var(--wds-font-size-lg);
+    font-weight: var(--wds-font-weight-medium);
+    color: var(--pe-text-primary);
+  }
+  .input-field__input::placeholder { color: var(--pe-text-tertiary); }
+  .char-counter {
+    position: absolute;
+    right: var(--wds-spacing-12);
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: var(--wds-font-size-xs);
+    color: var(--pe-text-tertiary);
+    font-weight: var(--wds-font-weight-medium);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .char-counter.is-visible { opacity: 1; }
+  .char-counter.is-error { color: var(--wds-label-error); }
+
+  .nickname-error {
+    padding: var(--wds-spacing-6) var(--wds-spacing-4) 0;
+    font-size: var(--wds-font-size-xs);
+    color: var(--wds-label-error);
+    font-weight: var(--wds-font-weight-medium);
+    display: none;
+  }
+  .nickname-error.is-visible { display: block; }
+
+  /* === Bottom Action === */
+  .bottom-action {
+    padding: var(--wds-spacing-12) var(--wds-spacing-16) var(--wds-spacing-32);
+    flex-shrink: 0;
+    background: var(--wds-background-normal);
+  }
+  .save-button {
+    width: 100%;
+    height: 56px;
+    border: none;
+    border-radius: var(--wds-radius-lg);
+    background: var(--pe-save-disabled);
+    color: var(--pe-save-disabled-label);
+    font-family: inherit;
+    font-size: var(--wds-font-size-lg);
+    font-weight: var(--wds-font-weight-semibold);
+    cursor: not-allowed;
+    transition: background 0.15s, color 0.15s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--wds-spacing-8);
+  }
+  .save-button.is-enabled {
+    background: var(--pe-save-active);
+    color: var(--pe-save-active-label);
+    cursor: pointer;
+  }
+  .save-button.is-loading {
+    background: var(--pe-save-active);
+    color: var(--pe-save-active-label);
+    cursor: progress;
+  }
+  .save-spinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-top-color: var(--pe-save-active-label);
+    border-radius: var(--wds-radius-full);
+    animation: spin 0.8s linear infinite;
+    display: none;
+  }
+  .save-button.is-loading .save-spinner { display: inline-block; }
+  .save-button.is-loading .save-label { display: none; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* === Toast === */
+  .toast {
+    display: none;
+    position: absolute;
+    bottom: 110px;
+    left: 16px;
+    right: 16px;
+    background: var(--wds-color-neutral-900);
+    color: var(--wds-label-inverse);
+    padding: var(--wds-spacing-12) var(--wds-spacing-16);
+    border-radius: var(--wds-radius-md);
+    font-size: var(--wds-font-size-sm);
+    z-index: 50;
+    text-align: center;
+  }
+  .toast.show { display: block; }
+
+  /* === STATE OVERRIDES (data-state on .device-frame) === */
+  .device-frame[data-state="default"] .char-counter { opacity: 0; }
+  .device-frame[data-state="default"] .nickname-error { display: none; }
+  .device-frame[data-state="default"] .save-button {
+    background: var(--pe-save-disabled); color: var(--pe-save-disabled-label); cursor: not-allowed;
+  }
+  .device-frame[data-state="default"] .input-field { border-color: var(--pe-input-border); background: var(--pe-input-fill); }
+
+  .device-frame[data-state="focused"] .char-counter { opacity: 1; }
+  .device-frame[data-state="focused"] .save-button {
+    background: var(--pe-save-disabled); color: var(--pe-save-disabled-label); cursor: not-allowed;
+  }
+  .device-frame[data-state="focused"] .input-field { border-color: var(--pe-text-primary); background: var(--wds-color-neutral-0); }
+
+  .device-frame[data-state="dirty"] .char-counter { opacity: 1; }
+  .device-frame[data-state="dirty"] .save-button {
+    background: var(--pe-save-active); color: var(--pe-save-active-label); cursor: pointer;
+  }
+  .device-frame[data-state="dirty"] .input-field { border-color: var(--pe-input-border); background: var(--pe-input-fill); }
+
+  .device-frame[data-state="error"] .char-counter { opacity: 1; color: var(--wds-label-error); }
+  .device-frame[data-state="error"] .nickname-error { display: block; }
+  .device-frame[data-state="error"] .save-button {
+    background: var(--pe-save-disabled); color: var(--pe-save-disabled-label); cursor: not-allowed;
+  }
+  .device-frame[data-state="error"] .input-field { border-color: var(--wds-label-error); background: var(--wds-color-red-100); }
+
+  .device-frame[data-state="loading"] .char-counter { opacity: 1; }
+  .device-frame[data-state="loading"] .save-button {
+    background: var(--pe-save-active); color: var(--pe-save-active-label); cursor: progress;
+  }
+  .device-frame[data-state="loading"] .save-spinner { display: inline-block; }
+  .device-frame[data-state="loading"] .save-label { display: none; }
+
+  @media (max-width: 480px) {
+    body { padding: 0; align-items: stretch; min-height: 100dvh; }
+    .control-panel { display: none; }
+    .device-frame {
+      width: 100dvw;
+      height: 100dvh;
+      border: none;
+      border-radius: 0;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- Control Panel (verifier-friendly, Pass 6 audit 제외 영역) -->
+<div class="control-panel">
+  <div class="control-panel__row">
+    <span class="control-panel__label">Screen</span>
+    <select id="screen-select">
+      <option value="profile-edit">프로필편집_메인</option>
+    </select>
+  </div>
+  <div class="control-panel__row">
+    <span class="control-panel__label">State</span>
+    <div class="control-panel__states" id="state-toggles">
+      <button class="control-panel__state-btn active" data-state="default" data-state-toggle>default</button>
+      <button class="control-panel__state-btn" data-state="focused" data-state-toggle>focused</button>
+      <button class="control-panel__state-btn" data-state="dirty" data-state-toggle>dirty</button>
+      <button class="control-panel__state-btn" data-state="error" data-state-toggle>error</button>
+      <button class="control-panel__state-btn" data-state="loading" data-state-toggle>loading</button>
+    </div>
+  </div>
+  <div class="control-panel__row">
+    <span class="control-panel__breadcrumb" id="breadcrumb">profile-edit · default</span>
+  </div>
+  <div class="control-panel__row">
+    <span class="control-panel__hint">v2 dogfood — form archetype persona enforced (4/4 forced rules)</span>
+  </div>
+</div>
+
+<!-- Device Frame -->
+<div class="device-frame" id="device-frame" data-state="default">
+  <section class="screen" id="profile-edit">
+
+    <!-- Status Bar -->
+    <div class="status-bar" id="status-bar">
+      <span>9:41</span>
+      <span class="status-bar__icons">
+        <svg width="16" height="11" viewBox="0 0 16 11" fill="none" aria-hidden="true"><path d="M1 6.5a6.5 6.5 0 0 1 13 0v3.75a.75.75 0 0 1-.75.75H1.75A.75.75 0 0 1 1 10.25z" fill="currentColor"/></svg>
+        <svg width="16" height="11" viewBox="0 0 16 11" fill="none" aria-hidden="true"><rect x="0.5" y="0.5" width="13" height="9" rx="1.5" stroke="currentColor"/><rect x="14.25" y="3.5" width="1.25" height="3" rx="0.5" fill="currentColor"/><rect x="2" y="2" width="10" height="6" rx="0.5" fill="currentColor"/></svg>
+      </span>
+    </div>
+
+    <!-- Header -->
+    <header class="header-bar" id="header-bar">
+      <button class="header-bar__back" id="back-button" type="button" data-action="back" onclick="onBack()" aria-label="뒤로 가기">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+      </button>
+      <h1 class="header-bar__title" id="header-title">프로필 편집</h1>
+      <span aria-hidden="true"></span>
+    </header>
+
+    <!-- Contents -->
+    <main class="contents" id="contents">
+
+      <!-- Profile (avatar + camera badge) -->
+      <section class="profile" id="profile" aria-label="프로필 사진">
+        <button class="profile-img-trigger" id="profile-img-trigger" type="button"
+                data-action="open-photo-sheet" onclick="onOpenPhotoSheet()" aria-label="프로필 사진 변경">
+          <span class="avatar" id="avatar" aria-hidden="false">
+            <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+          </span>
+          <span class="camera-badge" id="camera-badge" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/>
+              <circle cx="12" cy="13" r="3"/>
+            </svg>
+          </span>
+        </button>
+      </section>
+
+      <!-- Input section -->
+      <section class="input-section" id="input-section">
+        <label class="input-label" for="nickname-input" id="nickname-label">닉네임</label>
+        <div class="input-field" id="nickname-field">
+          <input class="input-field__input" id="nickname-input" type="text"
+                 value="지구 정복하는 까망콩" placeholder="닉네임을 입력해주세요"
+                 maxlength="40" aria-describedby="char-counter nickname-error"
+                 oninput="onNicknameInput(this.value)" onfocus="onNicknameFocus()">
+          <span class="char-counter" id="char-counter" aria-live="polite">11/20</span>
+        </div>
+        <p class="nickname-error" id="nickname-error" role="alert">20자 이내로 입력해주세요</p>
+      </section>
+
+    </main>
+
+    <!-- Bottom Action -->
+    <div class="bottom-action" id="bottom-action">
+      <button class="save-button" id="save-button" type="button"
+              data-action="save" onclick="onSave()" aria-label="변경 사항 저장" disabled>
+        <span class="save-spinner" aria-hidden="true"></span>
+        <span class="save-label" id="save-label">저장</span>
+      </button>
+    </div>
+
+    <!-- Toast (시각 피드백 — alert/confirm/prompt 미사용) -->
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  </section>
+</div>
+
+<script>
+  // === DOM refs ===
+  const frame = document.getElementById('device-frame');
+  const breadcrumb = document.getElementById('breadcrumb');
+  const stateButtons = document.querySelectorAll('.control-panel__state-btn');
+  const toast = document.getElementById('toast');
+  const nickInput = document.getElementById('nickname-input');
+  const counter = document.getElementById('char-counter');
+  const errorBlock = document.getElementById('nickname-error');
+  const saveBtn = document.getElementById('save-button');
+  const saveLabel = document.getElementById('save-label');
+
+  // === Initial state ===
+  const INITIAL_NICKNAME = '지구 정복하는 까망콩';
+  let isPhotoChanged = false;
+  let isLoading = false;
+
+  // === State management ===
+  function setState(state) {
+    frame.setAttribute('data-state', state);
+    stateButtons.forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.state === state);
+    });
+    breadcrumb.textContent = 'profile-edit · ' + state;
+    // Sync per-state demos for state-toggle clicks
+    if (state === 'default') {
+      nickInput.value = INITIAL_NICKNAME;
+      isPhotoChanged = false;
+      saveBtn.disabled = true;
+      saveBtn.classList.remove('is-enabled', 'is-loading');
+      counter.classList.remove('is-error');
+      counter.textContent = INITIAL_NICKNAME.length + '/20';
+      errorBlock.classList.remove('is-visible');
+    } else if (state === 'focused') {
+      nickInput.value = INITIAL_NICKNAME;
+      counter.textContent = INITIAL_NICKNAME.length + '/20';
+      counter.classList.remove('is-error');
+      errorBlock.classList.remove('is-visible');
+      saveBtn.disabled = true;
+      saveBtn.classList.remove('is-enabled', 'is-loading');
+      try { nickInput.focus(); } catch (e) {}
+    } else if (state === 'dirty') {
+      nickInput.value = '까망콩 V2';
+      counter.textContent = nickInput.value.length + '/20';
+      counter.classList.remove('is-error');
+      errorBlock.classList.remove('is-visible');
+      saveBtn.disabled = false;
+      saveBtn.classList.add('is-enabled');
+      saveBtn.classList.remove('is-loading');
+    } else if (state === 'error') {
+      nickInput.value = '아주 긴 닉네임을 입력했을 때 표시되는 사례';
+      counter.textContent = nickInput.value.length + '/20';
+      counter.classList.add('is-error');
+      errorBlock.classList.add('is-visible');
+      saveBtn.disabled = true;
+      saveBtn.classList.remove('is-enabled', 'is-loading');
+    } else if (state === 'loading') {
+      nickInput.value = '까망콩 V2';
+      counter.textContent = nickInput.value.length + '/20';
+      counter.classList.remove('is-error');
+      errorBlock.classList.remove('is-visible');
+      saveBtn.disabled = true;
+      saveBtn.classList.add('is-enabled', 'is-loading');
+    }
+    console.log('[state]', state);
+  }
+
+  stateButtons.forEach(btn => {
+    btn.addEventListener('click', () => setState(btn.dataset.state));
+  });
+
+  // === Validation + state transitions (live) ===
+  function evaluateState() {
+    const v = nickInput.value;
+    const isOver = v.length > 20;
+    const isDirty = (v !== INITIAL_NICKNAME) || isPhotoChanged;
+    counter.textContent = v.length + '/20';
+    if (isOver) {
+      counter.classList.add('is-error');
+      errorBlock.classList.add('is-visible');
+      saveBtn.disabled = true;
+      saveBtn.classList.remove('is-enabled');
+      frame.setAttribute('data-state', 'error');
+      stateButtons.forEach(b => b.classList.toggle('active', b.dataset.state === 'error'));
+      breadcrumb.textContent = 'profile-edit · error';
+      return;
+    }
+    counter.classList.remove('is-error');
+    errorBlock.classList.remove('is-visible');
+    if (isDirty) {
+      saveBtn.disabled = false;
+      saveBtn.classList.add('is-enabled');
+      frame.setAttribute('data-state', 'dirty');
+      stateButtons.forEach(b => b.classList.toggle('active', b.dataset.state === 'dirty'));
+      breadcrumb.textContent = 'profile-edit · dirty';
+    } else {
+      saveBtn.disabled = true;
+      saveBtn.classList.remove('is-enabled');
+      const focusedNow = (document.activeElement === nickInput);
+      const next = focusedNow ? 'focused' : 'default';
+      frame.setAttribute('data-state', next);
+      stateButtons.forEach(b => b.classList.toggle('active', b.dataset.state === next));
+      breadcrumb.textContent = 'profile-edit · ' + next;
+    }
+  }
+
+  function onNicknameInput(value) {
+    console.log('[input] nickname=', value);
+    evaluateState();
+  }
+
+  function onNicknameFocus() {
+    console.log('[focus] nickname-input');
+    if (frame.getAttribute('data-state') === 'default') {
+      frame.setAttribute('data-state', 'focused');
+      stateButtons.forEach(b => b.classList.toggle('active', b.dataset.state === 'focused'));
+      breadcrumb.textContent = 'profile-edit · focused';
+    }
+  }
+
+  // === Interactions (verifier-safe — no alert/confirm/prompt) ===
+  function onBack() {
+    const v = nickInput.value;
+    const isDirty = (v !== INITIAL_NICKNAME) || isPhotoChanged;
+    if (isDirty) {
+      console.log('[nav] open-confirm-modal app-003/app-007 (dirty)');
+      showToast('변경사항이 있어요 — 나가기 확인 시트 (app-003 / app-007)');
+    } else {
+      console.log('[nav] back (clean)');
+      showToast('이전 화면으로 이동');
+    }
+  }
+
+  function onOpenPhotoSheet() {
+    console.log('[overlay] open app-005 photo source sheet');
+    isPhotoChanged = true;
+    showToast('이미지 소스 바텀시트 (app-005) 오픈');
+    evaluateState();
+  }
+
+  function onSave() {
+    if (saveBtn.disabled) {
+      console.log('[save] blocked — disabled');
+      return;
+    }
+    if (isLoading) return;
+    isLoading = true;
+    saveBtn.classList.add('is-loading');
+    saveBtn.disabled = true;
+    frame.setAttribute('data-state', 'loading');
+    stateButtons.forEach(b => b.classList.toggle('active', b.dataset.state === 'loading'));
+    breadcrumb.textContent = 'profile-edit · loading';
+    showToast('저장 중…');
+    setTimeout(() => {
+      isLoading = false;
+      saveBtn.classList.remove('is-loading');
+      const v = nickInput.value;
+      const dest = (v !== INITIAL_NICKNAME) ? 'app-002 (닉네임 결과)' : 'app-006 (사진 결과)';
+      console.log('[nav] →', dest);
+      showToast('저장 완료 → ' + dest);
+      // Reset to default for demo loop
+      setTimeout(() => setState('default'), 1100);
+    }, 1200);
+  }
+
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2200);
+  }
+
+  // === Init ===
+  setState('default');
+</script>
+
+</body>
+</html>

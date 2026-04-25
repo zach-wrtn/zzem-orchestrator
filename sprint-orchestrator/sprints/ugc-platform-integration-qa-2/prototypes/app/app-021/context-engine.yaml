@@ -1,0 +1,180 @@
+# Context Engine — ugc-platform-integration-qa-2 / app-021 (알림센터_노데이터)
+# Generated: 2026-04-25 (DE Step A output)
+# Schema: v1.0 (template: sprint-orchestrator/templates/context-engine-template.yaml)
+# Note: Per-task context-engine to avoid clobbering app-005 sprint-level file.
+
+meta:
+  sprint_id: "ugc-platform-integration-qa-2"
+  task_id: "app-021"
+  generated_at: "2026-04-25T00:00:00Z"
+  schema_version: "1.0"
+  figma_frame: "37211:167434"
+  figma_file: "7hozJ6Pvs09q98BxvChj08"
+  archetype: "empty_state"
+  archetype_persona_path: ".claude/teammates/design-engineer-archetypes/empty_state.md"
+  exemplar_refs: []   # empty_state archetype에는 본 sprint에서 인라인된 exemplar 없음
+
+# ─────────────────────────────
+# Layer 1: WHY (Business Intent)
+# ─────────────────────────────
+why:
+  product_intent: |
+    알림 0건 상태에서 사용자에게 "버그가 아닌 정상 상태"임을 시각적으로 안내하고,
+    다음 행동 (홈 탐색 또는 시스템 알림 활성화) 으로 부드럽게 유도하여
+    빈 화면 좌절을 최소화한다.
+  target_user: "ZZEM 신규/저활동 사용자 — 팔로우 0명이거나 활동 미참여 시 가장 빈번 노출"
+  success_metric: "AC-3.2 통과 — empty 화면에서 CTA tap 비율 (홈 복귀 또는 알림 활성화)"
+  user_stories:
+    - id: "US-3.2"
+      as_a: "알림센터를 처음 또는 다시 열어본 사용자"
+      i_want: "알림이 비어있을 때 막막하지 않게 다음 행동을 안내받고 싶다"
+      so_that: "앱이 정지되거나 빈 상태에서 이탈하지 않는다"
+    - id: "US-3.2a"
+      as_a: "휴대폰 시스템 알림이 꺼져 있는 사용자"
+      i_want: "알림 미수신의 진짜 원인이 OS 설정임을 알고 한 번에 켜고 싶다"
+      so_that: "앱 측 버그로 오해하지 않는다"
+  acceptance_criteria:
+    - id: "AC-3.2"
+      given: "알림 items.length == 0"
+      when: "알림센터 진입"
+      then: "empty_state 화면 + 재진입 유도 CTA"
+      ui_impact: |
+        empty_state archetype: 시각 앵커 (illustration/icon 80px+) 중앙, headline 1, body 1-2,
+        primary CTA 1개 (다음 행동 명확). 부정 어조 금지.
+    - id: "AC-3.2-system-alert"
+      given: "OS 알림 권한 == denied"
+      when: "알림센터 진입"
+      then: "상단 인라인 안내 (notifications_off icon + '알림 켜기' 버튼)"
+      ui_impact: |
+        Figma 명시: Body 최상단 inline notice 블록 (surface-secondary fill, 좌측 icon + 라벨 + 우측 brand-color text 버튼).
+        시스템 설정으로 deeplink. empty_state CTA 와는 독립적 진입점.
+
+# ─────────────────────────────
+# Layer 2: WHAT (Design System)
+# ─────────────────────────────
+what:
+  tokens_needed:
+    colors:
+      - "wds.color.purple.500"        # brand
+      - "wds.color.purple.50"         # empty icon fill (weak)
+      - "wds.color.neutral.0"         # bg
+      - "wds.color.neutral.50"        # notice block fill
+      - "wds.color.neutral.100"       # divider weak
+      - "wds.color.neutral.200"       # divider normal
+      - "wds.color.neutral.500"       # label assistive
+      - "wds.color.neutral.600"       # label alternative (notice icon)
+      - "wds.color.neutral.900"       # label normal
+    typography:
+      - "wds.font.size.xs"            # 12px - body desc
+      - "wds.font.size.sm"            # 13px - notice label, button
+      - "wds.font.size.md"            # 14px - body
+      - "wds.font.size.lg"            # 16px - empty headline / header title
+      - "wds.font.weight.semibold"    # 600
+      - "wds.font.weight.bold"        # 700
+    spacing:
+      - "wds.spacing.4"
+      - "wds.spacing.8"
+      - "wds.spacing.12"
+      - "wds.spacing.16"
+      - "wds.spacing.20"
+      - "wds.spacing.24"
+      - "wds.spacing.32"
+      - "wds.spacing.48"
+    radius:
+      - "wds.radius.md"     # notice block (12px)
+      - "wds.radius.lg"     # primary CTA (16px)
+      - "wds.radius.full"   # icon container
+
+  components_needed:
+    - name: "Header"
+      category: "navigation"
+      pattern_ref: "docs/designs/patterns/profile-edit.mdx (헤더 패턴)"
+    - name: "NotificationsOffNotice"
+      category: "feedback"
+      note: "Figma 명시 인라인 alert. notifications_off icon + label + 'text-only' brand button"
+    - name: "EmptyStateView"
+      category: "feedback"
+      pattern_ref: "empty_state archetype"
+      note: "시각 앵커(96px bell-off icon container) + headline + body + primary CTA"
+    - name: "PrimaryCTA"
+      category: "action"
+      pattern_ref: "docs/designs/components/button.mdx#primary"
+    - name: "BottomNav"
+      category: "navigation"
+      pattern_ref: "docs/designs/components/bottom-nav.mdx"
+
+  patterns_needed:
+    - name: "Inline system notice"
+      description: "OS-level 권한 안내. body 상단, surface-secondary fill, 우측 brand-text 버튼."
+    - name: "Centered empty state"
+      description: "수직/수평 중앙 정렬, 시각 앵커 → headline → body → CTA 순."
+
+# ─────────────────────────────
+# Layer 3: HOW (Orchestration)
+# ─────────────────────────────
+how:
+  composition_rules:
+    - rule: "Header (back + 알림 + 설정) → NotificationsOffNotice (조건부) → EmptyStateView (수직 중앙)"
+      applies_to: ["NotificationsEmptyScreen"]
+    - rule: "EmptyStateView 는 body 의 사용 가능 영역 정중앙 (header + notice 제외)"
+      applies_to: ["NotificationsEmptyScreen"]
+    - rule: "NotificationsOffNotice 는 body 최상단, sticky 아님"
+      applies_to: ["NotificationsEmptyScreen"]
+    - rule: "Primary CTA 는 EmptyStateView 내부 (bottom-action sticky 아님) — empty_state persona 시각 앵커-CTA 인접 원칙"
+      applies_to: ["NotificationsEmptyScreen"]
+  conditional_rendering:
+    - condition: "OS 알림 권한 denied"
+      variant_a: "NotificationsOffNotice 표시"
+      variant_b: "NotificationsOffNotice 숨김 (granted 상태)"
+    - condition: "items.length == 0 (이 화면 자체)"
+      variant_a: "EmptyStateView 표시"
+      variant_b: "(다른 화면 — app-020 알림센터_기본 으로 분기)"
+  constraints:
+    - "Bell-off icon container 는 96px (component-empty-icon-size 토큰), brand-weak fill + brand color stroke"
+    - "Headline + body 합쳐 3 문장 이내 (empty_state persona 강제 룰 #2)"
+    - "부정 어조 금지: '없어요/실패/못함' 키워드 위주 문장 회피 (persona 강제 룰 #4)"
+    - "Primary CTA 1개만 (강제 룰 #3) — secondary text-link 는 옵션"
+    - "어떤 인터랙티브 요소도 alert/confirm/prompt 사용 금지 (Pass 6 #8)"
+    - "tokens-only — raw hex 금지 (Pass 6 #1)"
+    - "Lucide-style inline SVG (bell-off / sparkles / search) 사용 (Pass 6 #2)"
+  priority_order:
+    - "1. EmptyStateView (메인 안내 — 화면의 정체성)"
+    - "2. Header (현재 위치 + 설정 진입점)"
+    - "3. NotificationsOffNotice (조건부 — 시스템 권한 환기)"
+    - "4. BottomNav (전역 이동)"
+
+# ─────────────────────────────
+# Layer 4: ASSETS (v1)
+# ─────────────────────────────
+# 본 화면은 이미지 슬롯이 없음 — 모든 시각 요소는 inline SVG (Lucide style) 또는 토큰화된 색.
+assets:
+  avatars:
+    kind: illustration
+    source: null
+    needs_real_content: false
+    note: "본 화면 avatar 슬롯 없음 (empty 상태)"
+  feed_thumbnails:
+    kind: illustration
+    source: null
+    needs_real_content: false
+    note: "본 화면 thumbnail 슬롯 없음 (empty 상태)"
+  meme_images:
+    kind: illustration
+    source: null
+    needs_real_content: false
+  icons:
+    kind: illustration
+    source: |
+      Lucide inline SVG:
+      - bell-off (empty state 시각 앵커, 48px stroke)
+      - bell-off (notice 좌측 아이콘, 20px stroke) — Figma name: notifications_off
+      - chevron-left (header back, 24px)
+      - settings (header right action, 22px) — 또는 Figma 텍스트 "설정" 그대로
+      - home / search / plus / bell / user (bottom nav, 22px)
+    fallback: "기호 placeholder (←)"
+    needs_real_content: false
+  hero_banners:
+    kind: illustration
+    source: null
+    needs_real_content: false
+    note: "본 화면 hero banner 슬롯 없음"

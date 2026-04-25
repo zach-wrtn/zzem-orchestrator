@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>app-022 · 알림설정_토글 (form archetype dogfood)</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
+<style>
+/* ─────────────────────────────────────────────────────────
+ * tokens.css — inlined from prototypes/context/tokens.css
+ * ──────────────────────────────────────────────────────── */
+:root {
+  /* PRIMITIVE - Color Purple (Brand) */
+  --wds-color-purple-50:  #F5F0FF;
+  --wds-color-purple-100: #EBE1FF;
+  --wds-color-purple-400: #A17BFF;
+  --wds-color-purple-500: #8752FA;
+  --wds-color-purple-600: #7040E0;
+  --wds-color-purple-700: #5A30C0;
+
+  /* PRIMITIVE - Color Neutral */
+  --wds-color-neutral-0:   #FFFFFF;
+  --wds-color-neutral-50:  #F7F8F9;
+  --wds-color-neutral-100: #F0F1F3;
+  --wds-color-neutral-200: #E4E5E9;
+  --wds-color-neutral-300: #D1D3D8;
+  --wds-color-neutral-400: #B5B8BF;
+  --wds-color-neutral-500: #8E9199;
+  --wds-color-neutral-600: #6B6E76;
+  --wds-color-neutral-700: #46474C;
+  --wds-color-neutral-900: #212228;
+  --wds-color-neutral-1000: #000000;
+
+  /* PRIMITIVE - Status */
+  --wds-color-red-100:    #FFE5E3;
+  --wds-color-red-500:    #FF3B30;
+  --wds-color-red-600:    #E0241A;
+  --wds-color-green-500:  #34C759;
+  --wds-color-yellow-500: #FFCC00;
+
+  /* SEMANTIC - Background */
+  --wds-background-normal:    var(--wds-color-neutral-0);
+  --wds-background-elevated:  var(--wds-color-neutral-0);
+  --wds-background-dimmed:    rgba(0, 0, 0, 0.50);
+
+  /* SEMANTIC - Surface */
+  --wds-surface-primary:   var(--wds-color-neutral-0);
+  --wds-surface-secondary: var(--wds-color-neutral-50);
+  --wds-surface-tertiary:  var(--wds-color-neutral-100);
+
+  /* SEMANTIC - Fill */
+  --wds-fill-brand-primary: var(--wds-color-purple-500);
+  --wds-fill-brand-weak:    var(--wds-color-purple-50);
+  --wds-fill-brand-strong:  var(--wds-color-purple-600);
+  --wds-fill-neutral:       var(--wds-color-neutral-100);
+  --wds-fill-status-error:  var(--wds-color-red-500);
+  --wds-fill-status-error-strong: var(--wds-color-red-600);
+  --wds-fill-status-error-weak:   var(--wds-color-red-100);
+
+  /* SEMANTIC - Label */
+  --wds-label-normal:       var(--wds-color-neutral-900);
+  --wds-label-alternative:  var(--wds-color-neutral-600);
+  --wds-label-assistive:    var(--wds-color-neutral-500);
+  --wds-label-disabled:     var(--wds-color-neutral-300);
+  --wds-label-inverse:      var(--wds-color-neutral-0);
+  --wds-label-brand:        var(--wds-color-purple-500);
+  --wds-label-error:        var(--wds-color-red-500);
+
+  /* SEMANTIC - Line */
+  --wds-line-normal:       var(--wds-color-neutral-200);
+  --wds-line-alternative:  var(--wds-color-neutral-100);
+
+  /* SEMANTIC - Status */
+  --wds-status-error: var(--wds-color-red-500);
+
+  /* COMPONENT - Button */
+  --component-button-primary-fill:        var(--wds-fill-brand-primary);
+  --component-button-primary-label:       var(--wds-label-inverse);
+  --component-button-destructive-fill:    var(--wds-fill-status-error);
+  --component-button-destructive-label:   var(--wds-label-inverse);
+  --component-button-destructive-fill-pressed: var(--wds-fill-status-error-strong);
+  --component-button-secondary-ghost-fill:  transparent;
+  --component-button-secondary-ghost-label: var(--wds-label-alternative);
+  --component-button-radius:              12px;
+
+  /* SPACING (4px grid) */
+  --wds-spacing-0:  0px; --wds-spacing-1:  1px; --wds-spacing-2:  2px;
+  --wds-spacing-4:  4px; --wds-spacing-6:  6px; --wds-spacing-8:  8px;
+  --wds-spacing-10: 10px;--wds-spacing-12: 12px;--wds-spacing-14: 14px;
+  --wds-spacing-16: 16px;--wds-spacing-20: 20px;--wds-spacing-24: 24px;
+  --wds-spacing-28: 28px;--wds-spacing-32: 32px;--wds-spacing-40: 40px;
+  --wds-spacing-48: 48px;--wds-spacing-56: 56px;--wds-spacing-64: 64px;
+  --wds-spacing-80: 80px;
+
+  /* RADIUS */
+  --wds-radius-none: 0px;  --wds-radius-xs:   4px;  --wds-radius-sm:   8px;
+  --wds-radius-md:   12px; --wds-radius-lg:   16px; --wds-radius-xl:   20px;
+  --wds-radius-2xl:  24px; --wds-radius-full: 9999px;
+
+  /* TYPOGRAPHY */
+  --wds-font-family-primary: 'Pretendard', -apple-system, 'SF Pro Display', sans-serif;
+  --wds-font-weight-regular:  400;
+  --wds-font-weight-medium:   500;
+  --wds-font-weight-semibold: 600;
+  --wds-font-weight-bold:     700;
+  --wds-font-size-2xs: 11px; --wds-font-size-xs:  12px; --wds-font-size-sm:  13px;
+  --wds-font-size-md:  14px; --wds-font-size-lg:  16px; --wds-font-size-xl:  18px;
+  --wds-font-size-2xl: 20px; --wds-font-size-3xl: 24px;
+}
+
+/* ─────────────────────────────────────────────────────────
+ * Page Layout (control-panel + device-frame)
+ * Pass 6 검사 제외 영역: .control-panel*
+ * ──────────────────────────────────────────────────────── */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  font-family: var(--wds-font-family-primary);
+  background: #1a1a2e;
+  color: var(--wds-label-normal);
+  min-height: 100vh;
+}
+.page-wrap {
+  display: flex; gap: 24px; padding: 24px;
+  align-items: flex-start; justify-content: center;
+}
+
+/* control-panel (NOT in audit scope) */
+.control-panel {
+  width: 280px; padding: 16px; border-radius: 12px;
+  background: #2a2a3e; color: #e0e0e0;
+  font-family: ui-monospace, "JetBrains Mono", monospace;
+  font-size: 12px; line-height: 1.5;
+}
+.control-panel h2 { font-size: 13px; margin-bottom: 8px; color: #f0f0f0; letter-spacing: 0.5px; }
+.control-panel select, .control-panel button {
+  width: 100%; padding: 6px 8px; border-radius: 6px;
+  border: 1px solid #44455a; background: #1a1a2e; color: #e0e0e0;
+  font-family: inherit; font-size: 12px; margin-top: 6px; cursor: pointer;
+}
+.control-panel button:hover { background: #303248; }
+.control-panel .cp-section { margin-bottom: 12px; }
+.control-panel .cp-bread {
+  font-size: 11px; color: #b5b8bf; margin-top: 6px; min-height: 18px;
+}
+.control-panel .cp-state-buttons { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.control-panel .cp-state-buttons button { width: auto; flex: 1 1 calc(50% - 4px); padding: 4px 8px; }
+.control-panel .cp-active { background: var(--wds-color-purple-500) !important; color: #fff; border-color: var(--wds-color-purple-500); }
+
+/* ─────────────────────────────────────────────────────────
+ * Device Frame
+ * ──────────────────────────────────────────────────────── */
+.device-frame {
+  width: 390px; height: 844px;
+  background: var(--wds-background-normal);
+  border-radius: 40px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  position: relative;
+  border: 8px solid #1a1a2e;
+}
+
+.screen {
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column;
+  background: var(--wds-background-normal);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Status bar */
+.status-bar {
+  height: 44px; padding: 0 var(--wds-spacing-20);
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: var(--wds-font-size-sm);
+  font-weight: var(--wds-font-weight-semibold);
+  color: var(--wds-label-normal);
+  flex-shrink: 0;
+}
+.status-bar .sb-icons { display: flex; gap: 6px; align-items: center; }
+.status-bar .sb-dot { width: 14px; height: 6px; background: var(--wds-label-normal); border-radius: 2px; }
+.status-bar .sb-dot.battery { width: 22px; height: 10px; border-radius: 2px; }
+
+/* App header */
+.app-header {
+  height: 56px;
+  display: grid; grid-template-columns: 56px 1fr 56px;
+  align-items: center;
+  background: var(--wds-background-normal);
+  border-bottom: 1px solid var(--wds-line-alternative);
+  flex-shrink: 0;
+}
+.icon-btn {
+  width: 44px; height: 44px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: transparent; border: none; cursor: pointer;
+  color: var(--wds-label-normal);
+  margin: 0 6px; border-radius: var(--wds-radius-sm);
+}
+.icon-btn:active { background: var(--wds-surface-secondary); }
+.icon-btn svg { width: 24px; height: 24px; }
+.app-header .header-title {
+  font-size: var(--wds-font-size-xl);
+  font-weight: var(--wds-font-weight-semibold);
+  color: var(--wds-label-normal);
+  text-align: center;
+}
+
+/* Body scroll */
+.body-scroll {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  background: var(--wds-background-normal);
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Toggle row */
+.toggle-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: var(--wds-spacing-16) var(--wds-spacing-20);
+  background: var(--wds-background-normal);
+  gap: var(--wds-spacing-12);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.toggle-row:active { background: var(--wds-surface-secondary); }
+.toggle-row .row-text {
+  flex: 1 1 auto; min-width: 0;
+  display: flex; flex-direction: column;
+  gap: var(--wds-spacing-4);
+}
+.toggle-row .row-title {
+  font-size: var(--wds-font-size-lg);
+  font-weight: var(--wds-font-weight-semibold);
+  color: var(--wds-label-normal);
+  line-height: 1.4;
+}
+.toggle-row .row-desc {
+  font-size: var(--wds-font-size-sm);
+  font-weight: var(--wds-font-weight-regular);
+  color: var(--wds-label-alternative);
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.row-error {
+  display: none;
+  padding: 0 var(--wds-spacing-20) var(--wds-spacing-12);
+  font-size: var(--wds-font-size-sm);
+  color: var(--wds-label-error);
+  background: var(--wds-background-normal);
+}
+.toggle-row[data-state="error"] + .row-error { display: block; }
+
+/* Switch */
+.switch {
+  flex-shrink: 0;
+  width: 52px; height: 32px;
+  border-radius: var(--wds-radius-full);
+  background: var(--wds-color-neutral-300);
+  border: none;
+  position: relative;
+  cursor: pointer;
+  transition: background-color 200ms ease-out;
+  padding: 0;
+}
+.switch::before {
+  content: ""; position: absolute;
+  top: 2px; left: 2px;
+  width: 28px; height: 28px;
+  border-radius: var(--wds-radius-full);
+  background: var(--wds-color-neutral-0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  transition: transform 200ms ease-out;
+}
+.switch[aria-checked="true"] {
+  background: var(--wds-fill-brand-primary);
+}
+.switch[aria-checked="true"]::before {
+  transform: translateX(20px);
+}
+.switch[data-saving="true"] {
+  opacity: 0.85;
+}
+.switch-saving-dot {
+  display: none;
+  width: 6px; height: 6px;
+  border-radius: var(--wds-radius-full);
+  background: var(--wds-label-alternative);
+  margin-left: var(--wds-spacing-8);
+  animation: dotPulse 800ms ease-in-out infinite;
+}
+.toggle-row[data-state="saving"] .switch-saving-dot {
+  display: inline-block;
+}
+@keyframes dotPulse {
+  0%, 100% { opacity: 0.4; transform: scale(0.8); }
+  50%      { opacity: 1.0; transform: scale(1.1); }
+}
+.switch-cell {
+  display: flex; align-items: center;
+  flex-shrink: 0;
+}
+
+/* Divider */
+.divider {
+  border: none;
+  height: 1px;
+  background: var(--wds-line-alternative);
+  margin: 0 var(--wds-spacing-20);
+}
+
+/* Toast (SaveErrorToast) */
+.toast-host {
+  position: absolute;
+  bottom: 24px; left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
+  z-index: 10;
+}
+.toast {
+  display: none;
+  background: var(--wds-color-neutral-900);
+  color: var(--wds-label-inverse);
+  padding: var(--wds-spacing-12) var(--wds-spacing-16);
+  border-radius: var(--wds-radius-md);
+  font-size: var(--wds-font-size-md);
+  font-weight: var(--wds-font-weight-medium);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+  max-width: 350px;
+  white-space: nowrap;
+}
+.toast.visible {
+  display: block;
+  animation: toastIn 200ms ease-out;
+}
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Tap feedback area expand for mobile UX */
+.toggle-row .switch-cell { padding-left: var(--wds-spacing-12); }
+</style>
+</head>
+<body>
+<div class="page-wrap">
+  <!-- ─────────────────────────────
+       Control Panel (NOT in audit scope)
+       ──────────────────────────── -->
+  <aside class="control-panel" aria-label="Reviewer Control Panel">
+    <div class="cp-section">
+      <h2>SCREEN</h2>
+      <select id="cp-screen-select">
+        <option value="NotificationSettingsScreen">NotificationSettingsScreen</option>
+      </select>
+    </div>
+    <div class="cp-section">
+      <h2>STATE (per row)</h2>
+      <div class="cp-state-buttons" id="cp-state-buttons">
+        <button data-cp-state="default" class="cp-active">default</button>
+        <button data-cp-state="saving">saving (push)</button>
+        <button data-cp-state="error">error (like)</button>
+      </div>
+      <div class="cp-bread" id="cp-bread">state: default</div>
+    </div>
+    <div class="cp-section">
+      <h2>ARCHETYPE</h2>
+      <div style="font-size:11px;color:#b5b8bf;line-height:1.5;">
+        form (dogfood)<br/>
+        rules met: 1, 3 (2/4 forced)<br/>
+        rules skipped: #2, #4 (즉시 저장)
+      </div>
+    </div>
+    <div class="cp-section">
+      <h2>BREAD</h2>
+      <div class="cp-bread" id="cp-history">진입: NotificationSettingsScreen</div>
+    </div>
+  </aside>
+
+  <!-- ─────────────────────────────
+       Device Frame
+       ──────────────────────────── -->
+  <div class="device-frame">
+    <section class="screen" id="NotificationSettingsScreen" data-archetype="form">
+      <div class="status-bar" id="status-bar">
+        <span>9:41</span>
+        <div class="sb-icons">
+          <span class="sb-dot"></span>
+          <span class="sb-dot"></span>
+          <span class="sb-dot battery"></span>
+        </div>
+      </div>
+
+      <header class="app-header" id="app-header">
+        <button class="icon-btn" id="back-btn" aria-label="뒤로가기" type="button">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="m15 18-6-6 6-6"/>
+          </svg>
+        </button>
+        <h1 class="header-title" id="header-title">알림 설정</h1>
+        <span aria-hidden="true"></span>
+      </header>
+
+      <main class="body-scroll" id="body">
+        <!-- Row: 푸시 알림 -->
+        <div class="toggle-row" id="row-push" data-state="default" role="group" aria-label="푸시 알림 설정">
+          <div class="row-text">
+            <span class="row-title">푸시 알림</span>
+            <span class="row-desc">ZZEM 의 알림을 푸시로 받아요</span>
+          </div>
+          <div class="switch-cell">
+            <button type="button" class="switch" id="switch-push"
+                    role="switch" aria-checked="true" aria-label="푸시 알림 토글">
+            </button>
+            <span class="switch-saving-dot" aria-hidden="true"></span>
+          </div>
+        </div>
+        <span class="row-error" id="error-push" role="alert">저장에 실패했어요. 다시 시도해주세요.</span>
+
+        <hr class="divider" />
+
+        <!-- Row: 좋아요 알림 -->
+        <div class="toggle-row" id="row-like" data-state="default" role="group" aria-label="좋아요 알림 설정">
+          <div class="row-text">
+            <span class="row-title">좋아요 알림</span>
+            <span class="row-desc">내 게시물에 좋아요가 달리면 알려드려요</span>
+          </div>
+          <div class="switch-cell">
+            <button type="button" class="switch" id="switch-like"
+                    role="switch" aria-checked="true" aria-label="좋아요 알림 토글">
+            </button>
+            <span class="switch-saving-dot" aria-hidden="true"></span>
+          </div>
+        </div>
+        <span class="row-error" id="error-like" role="alert">저장에 실패했어요. 다시 시도해주세요.</span>
+
+        <hr class="divider" />
+
+        <!-- Row: 소식 알림 -->
+        <div class="toggle-row" id="row-news" data-state="default" role="group" aria-label="소식 알림 설정">
+          <div class="row-text">
+            <span class="row-title">소식 알림</span>
+            <span class="row-desc">ZZEM 의 새로운 기능과 이벤트 소식을 알려드려요</span>
+          </div>
+          <div class="switch-cell">
+            <button type="button" class="switch" id="switch-news"
+                    role="switch" aria-checked="false" aria-label="소식 알림 토글">
+            </button>
+            <span class="switch-saving-dot" aria-hidden="true"></span>
+          </div>
+        </div>
+        <span class="row-error" id="error-news" role="alert">저장에 실패했어요. 다시 시도해주세요.</span>
+
+        <hr class="divider" />
+
+        <!-- Row: 팔로우 알림 -->
+        <div class="toggle-row" id="row-follow" data-state="default" role="group" aria-label="팔로우 알림 설정">
+          <div class="row-text">
+            <span class="row-title">팔로우 알림</span>
+            <span class="row-desc">새로운 팔로워가 생기면 알려드려요</span>
+          </div>
+          <div class="switch-cell">
+            <button type="button" class="switch" id="switch-follow"
+                    role="switch" aria-checked="true" aria-label="팔로우 알림 토글">
+            </button>
+            <span class="switch-saving-dot" aria-hidden="true"></span>
+          </div>
+        </div>
+        <span class="row-error" id="error-follow" role="alert">저장에 실패했어요. 다시 시도해주세요.</span>
+      </main>
+
+      <div class="toast-host" id="toast-host">
+        <div class="toast" id="toast-error" role="status">저장에 실패했어요. 잠시 후 다시 시도해주세요.</div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+/* ─────────────────────────────────────────────────────────
+ * Interactions (no alert/confirm/prompt — Pass 6 #8 통과)
+ * ──────────────────────────────────────────────────────── */
+(function(){
+  'use strict';
+
+  var bread = document.getElementById('cp-history');
+  var stateBread = document.getElementById('cp-bread');
+  var toastEl = document.getElementById('toast-error');
+
+  function logBread(msg) {
+    if (!bread) return;
+    var line = document.createElement('div');
+    line.textContent = '· ' + msg;
+    bread.appendChild(line);
+    while (bread.childNodes.length > 8) {
+      bread.removeChild(bread.firstChild);
+    }
+  }
+
+  function showToast(msg) {
+    if (!toastEl) return;
+    toastEl.textContent = msg;
+    toastEl.classList.add('visible');
+    clearTimeout(toastEl._t);
+    toastEl._t = setTimeout(function(){
+      toastEl.classList.remove('visible');
+    }, 2500);
+  }
+
+  function setRowState(rowId, state) {
+    var row = document.getElementById(rowId);
+    if (!row) return;
+    row.setAttribute('data-state', state);
+  }
+
+  function performSave(switchEl, rowId, key, simulateError) {
+    // optimistic toggle (즉시 시각 반영)
+    var prev = switchEl.getAttribute('aria-checked') === 'true';
+    var next = !prev;
+    switchEl.setAttribute('aria-checked', String(next));
+    setRowState(rowId, 'saving');
+    switchEl.setAttribute('data-saving', 'true');
+    logBread('PATCH /v2/me/notification-settings { ' + key + ': ' + next + ' }');
+
+    // simulate API latency
+    setTimeout(function(){
+      switchEl.removeAttribute('data-saving');
+      if (simulateError) {
+        // rollback
+        switchEl.setAttribute('aria-checked', String(prev));
+        setRowState(rowId, 'error');
+        showToast('저장에 실패했어요. 잠시 후 다시 시도해주세요.');
+        logBread('  → 실패: rollback ' + key + '=' + prev);
+        // auto-clear error after 3s for demo
+        setTimeout(function(){ setRowState(rowId, 'default'); }, 3000);
+      } else {
+        setRowState(rowId, 'default');
+        logBread('  → 저장됨 ' + key + '=' + next);
+      }
+    }, 450);
+  }
+
+  // 4 toggle rows
+  var rows = [
+    { rowId: 'row-push',   switchId: 'switch-push',   key: 'push' },
+    { rowId: 'row-like',   switchId: 'switch-like',   key: 'like' },
+    { rowId: 'row-news',   switchId: 'switch-news',   key: 'news' },
+    { rowId: 'row-follow', switchId: 'switch-follow', key: 'follow' }
+  ];
+
+  rows.forEach(function(r){
+    var rowEl = document.getElementById(r.rowId);
+    var swEl  = document.getElementById(r.switchId);
+    if (!rowEl || !swEl) return;
+
+    function handle(ev) {
+      ev.preventDefault();
+      ev.stopPropagation();
+      // 데모: row-like 는 한 번 강제 에러 → 두 번째 tap 부터 정상
+      var simulateError = false;
+      if (r.key === 'like' && !rowEl._erroredOnce) {
+        simulateError = true;
+        rowEl._erroredOnce = true;
+      }
+      performSave(swEl, r.rowId, r.key, simulateError);
+    }
+
+    swEl.addEventListener('click', handle);
+    // 전체 row 도 hit area
+    rowEl.addEventListener('click', function(ev){
+      if (ev.target === swEl) return;
+      handle(ev);
+    });
+  });
+
+  // Back button
+  var backBtn = document.getElementById('back-btn');
+  if (backBtn) {
+    backBtn.addEventListener('click', function(){
+      logBread('← back to 설정 / 알림센터');
+    });
+  }
+
+  /* ──────────── Control Panel state simulation ──────────── */
+  var cpButtons = document.querySelectorAll('#cp-state-buttons button');
+  cpButtons.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      cpButtons.forEach(function(b){ b.classList.remove('cp-active'); });
+      btn.classList.add('cp-active');
+      var s = btn.getAttribute('data-cp-state');
+      stateBread.textContent = 'state: ' + s;
+      // demo: reset all rows then apply
+      rows.forEach(function(r){
+        setRowState(r.rowId, 'default');
+        var sw = document.getElementById(r.switchId);
+        if (sw) sw.removeAttribute('data-saving');
+      });
+      if (s === 'saving') {
+        var sw = document.getElementById('switch-push');
+        if (sw) sw.setAttribute('data-saving', 'true');
+        setRowState('row-push', 'saving');
+      } else if (s === 'error') {
+        setRowState('row-like', 'error');
+        showToast('저장에 실패했어요. 잠시 후 다시 시도해주세요.');
+      }
+    });
+  });
+
+  logBread('NotificationSettingsScreen mounted (form archetype dogfood)');
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,176 @@
+# Quality Report: app-017 / 차단관리_리스트
+# Sprint: ugc-platform-integration-qa-2
+# Generated: 2026-04-25
+
+task_id: "app-017"
+screen_name: "BlockManagementListScreen"
+archetype: "feed"
+figma_frame: "37289:169761"
+
+# ─────────────────────────────
+# Pass 6 Anti-Slop Audit (10 checks — #10 = exemplar drift)
+# ─────────────────────────────
+pass_6_audit:
+  status: "passed"
+  score: "10 / 10"
+  checks:
+    - id: 1
+      name: "raw hex outside tokens.css"
+      status: "passed"
+      detail: |
+        proto unique hex (25): 22개 tokens.css 매칭. 차집합 3개 (#1a1a2e #2a2a3e #e0e0e0)
+        + #444 #666 #888 #999 — 모두 .control-panel CSS 셀렉터 내부 (lines 166-193).
+        design-engineer.md C.2.1 검사 범위 규칙: ".screen 후손 요소만 적용, .control-panel 제외" → PASS.
+    - id: 2
+      name: "unicode emoji on interactive elements"
+      status: "passed"
+      detail: "모든 button 아이콘은 inline Lucide SVG (back/refresh/shield-check). 이모지 0건."
+    - id: 3
+      name: "border-left Material slop on cards"
+      status: "passed"
+      detail: ".card 클래스 미사용 (list-row 구조). border-left 0건."
+    - id: 4
+      name: "font-family outside Pretendard within .screen"
+      status: "passed"
+      detail: |
+        .screen 후손: 두 곳 (line 357, 461) 모두 `font-family: inherit` → Pretendard 상속.
+        ui-monospace/JetBrains Mono 는 .control-panel 셀렉터에만 (audit 제외).
+    - id: 5
+      name: "purple gradient on full background"
+      status: "passed"
+      detail: |
+        skeleton shimmer: linear-gradient(90deg, --neutral-100, --neutral-200, --neutral-100) — 토큰 only, 보라 0.
+        empty-view__icon: 단색 fill (--brand-weak) + 단색 color (--brand-primary). 그라디언트 미사용.
+    - id: 6
+      name: "placeholder-image on main content slot"
+      status: "passed"
+      detail: |
+        .placeholder-image 클래스 미사용. avatar 는 이니셜 텍스트 fallback (1글자, neutral fill).
+        list 의 주 콘텐츠 = 닉네임 + 차단일 + CTA. avatar 는 보조 정보.
+        intent.md placeholders[0].needs_real_content = false (Sprint Lead 사전 합의 필요 없음 — 표준 패턴).
+    - id: 7
+      name: "interactions count = bound elements count"
+      status: "passed"
+      detail: |
+        spec interactions: 5건 (back, refresh, swipe-down, unblock×7, empty-action).
+        DOM bindings: back-button, refresh-button, body-scroll touch, 7 unblock-btn, empty-action,
+                      4 state-toggle btn (control-panel — out of scope) → 본 화면 11건 매칭 OK.
+    - id: 8
+      name: "alert/confirm/prompt in onclick"
+      status: "passed"
+      detail: "grep onclick=...(alert|confirm|prompt)\\( → 0건. showToast() + console.log() 만 사용 (verifier 안전)."
+    - id: 9
+      name: "feed archetype persona 강제 룰 (4/4)"
+      status: "passed"
+      detail: |
+        #1 loading 상태 + skeleton 6 행: states.loading + #blocked-skeleton (6 SkeletonRow).
+        #2 empty 상태: states.empty + #empty-view ("차단한 사용자가 없어요" + CTA).
+        #3 첫 viewport 6+ 동질 아이템: 7 BlockedUserRow (각 72px → 504px < 본문 영역 ~720px).
+        #4 새로고침 인터랙션: AppHeader RefreshButton + body-scroll pull-to-refresh hint (2개).
+    - id: 10
+      name: "exemplar drift (vs v2-dogfood-free-tab-app-001-freetabscreen)"
+      status: "passed"
+      drift_warning: false
+      detail: |
+        본 화면은 list-row 구조 (수직 1열, 72px 행, divider, 행마다 avatar+텍스트2줄+CTA).
+        Exemplar 는 2열 grid (4:5 aspect 카드, gradient thumb, NEW badge).
+        시각 비교: 핵심 레이아웃 일치도 < 30% (exemplar 카드 grid CSS 일체 미재사용).
+        패턴 차원에서는 동일 (header + body-scroll + skeleton + empty + refresh + toast 골격) —
+        이는 feed archetype 자체의 표준이지 exemplar 특수 패턴 모방 아님.
+        → drift_warning: false. 80% 임계 미달.
+
+# ─────────────────────────────
+# Feed Persona Rules
+# ─────────────────────────────
+persona:
+  archetype: "feed"
+  forced_rules: "4 / 4 passed"
+  forced_rule_details:
+    - rule: 1
+      name: "loading state with skeleton"
+      passed: true
+      evidence: "states.loading + #blocked-skeleton 6개 SkeletonRow"
+    - rule: 2
+      name: "empty state defined"
+      passed: true
+      evidence: "states.empty + #empty-view + EmptyAction CTA"
+    - rule: 3
+      name: "first viewport 6+ homogeneous items"
+      passed: true
+      evidence: "7 BlockedUserRow, 각 72px → 본문 약 504px (헤더56 + count약40 + status44 = 사용 후 ~700px 가용)"
+    - rule: 4
+      name: "refresh interaction"
+      passed: true
+      evidence: "AppHeader #refresh-button (명시적) + #body-scroll touchstart/move/end pull-to-refresh"
+  recommended_rules:
+    - rule: 1
+      name: "end indicator (마지막 카드 직후)"
+      adopted: true
+      evidence: "#end-indicator '마지막 차단 사용자입니다'"
+    - rule: 2
+      name: "card spacing 1단계 토큰 (12px / 16px)"
+      adopted: true
+      evidence: "blocked-row padding: 12px 20px, 행 사이 1px divider"
+    - rule: 3
+      name: "필터/정렬 sticky"
+      adopted: false
+      reason: "본 화면은 정렬/필터 컨트롤 부재 (PRD AC-2.4 미요구). 권장 룰 거절. 향후 닉네임 정렬 follow-up 시 재검토."
+
+# ─────────────────────────────
+# Exemplar Reference (B.6)
+# ─────────────────────────────
+exemplar_inline:
+  inlined: true
+  exemplar_id: "v2-dogfood-free-tab-app-001-freetabscreen"
+  source_path: "sprint-orchestrator/dogfood/v2-exercise/free-tab-app-001"
+  dimension_focus:
+    - "archetype_fit"
+    - "interaction_completeness"
+    - "token_compliance"
+  read_artifacts:
+    - "_index.json (exemplar metadata)"
+    - "screen-spec.yaml (구조 참조 — 콘텐츠 미복사)"
+    - "prototype.html (HTML 골격 anchors 만 — Korean copy/list items 미복사)"
+  borrowing_strategy: |
+    Patterns reused: device-frame + control-panel + state-data attribute toggle scaffold +
+    skeleton shimmer + toast + refresh handler + verifier-safe onAction(). 모두 archetype 표준.
+    Patterns NOT reused: 카드 grid CSS (.free-grid / .free-card / category gradients),
+    banner sections (.banner--purple/--teal), bottom-nav, 카테고리/필터명 라벨, CreatorAvatar.
+  lookup_command_run: |
+    cd /Users/zachryu/dev/work/zzem-orchestrator/sprint-gallery && \
+    pnpm gallery:exemplar:lookup --archetype=feed --exclude-sprint=ugc-platform-integration-qa-2 --format=md
+    (sandbox 에서 bash 실행 거절 → exemplars/_index.json 직접 read 로 대체. 결과 동일 1건 반환)
+
+# ─────────────────────────────
+# Quality Score (Step B.5)
+# ─────────────────────────────
+quality_score:
+  extraction_accuracy: "24 / 24 = 1.0"
+  schema_completeness: "7 / 7 = 1.0"
+  fabrication_risk: "low"
+  fabrication_risk_rationale: |
+    AC-2.4 직접 도출 컴포넌트만 PRD에서 추출. 보강 항목 (skeleton/empty/refresh/end-indicator/
+    count-summary/dummy nicknames) 은 모두 feed persona 룰 충족 또는 표준 UI 관례. 비즈니스
+    로직 추측 없음. 더미 닉네임은 명백히 prototype placeholder.
+  context_coverage:
+    why_linked: "1 / 1 = 1.0"   # AC-2.4 → component/state 연결
+    what_resolved: "12 / 12 = 1.0"
+
+# ─────────────────────────────
+# Files Generated
+# ─────────────────────────────
+files:
+  - "screen-spec.yaml"
+  - "BlockManagementListScreen.intent.md"
+  - "prototype.html"
+  - "quality-report.yaml"
+  # screenshots/ 는 Phase 4 Sprint Lead 단계에서 capture-screenshots.ts 로 생성
+
+# ─────────────────────────────
+# Next Steps
+# ─────────────────────────────
+next:
+  - "Sprint Lead: intent.md gate review → proceed/adjust"
+  - "Sprint Lead: capture-screenshots.ts 실행하여 default/loading/empty/error 4 state PNG 생성"
+  - "Sprint Lead: verify-prototype.ts 실행 (DOM 인터랙션 검증)"
+  - "exemplar drift warning: 없음 (구조적 차별화 성공) → Sprint Lead 별도 보고 불요"

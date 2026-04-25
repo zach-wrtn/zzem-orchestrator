@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>app-017 · 차단관리_리스트 (v2 — feed archetype)</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+<style>
+  /* === tokens.css inline (Step A output — sprint-level) === */
+  :root {
+    /* PRIMITIVE - Color Purple (Brand) */
+    --wds-color-purple-50:  #F5F0FF;
+    --wds-color-purple-100: #EBE1FF;
+    --wds-color-purple-400: #A17BFF;
+    --wds-color-purple-500: #8752FA;
+    --wds-color-purple-600: #7040E0;
+    --wds-color-purple-700: #5A30C0;
+
+    /* PRIMITIVE - Neutral */
+    --wds-color-neutral-0:   #FFFFFF;
+    --wds-color-neutral-50:  #F7F8F9;
+    --wds-color-neutral-100: #F0F1F3;
+    --wds-color-neutral-200: #E4E5E9;
+    --wds-color-neutral-300: #D1D3D8;
+    --wds-color-neutral-400: #B5B8BF;
+    --wds-color-neutral-500: #8E9199;
+    --wds-color-neutral-600: #6B6E76;
+    --wds-color-neutral-700: #46474C;
+    --wds-color-neutral-900: #212228;
+    --wds-color-neutral-1000: #000000;
+
+    /* PRIMITIVE - Status */
+    --wds-color-red-100:    #FFE5E3;
+    --wds-color-red-500:    #FF3B30;
+    --wds-color-red-600:    #E0241A;
+    --wds-color-green-500:  #34C759;
+    --wds-color-yellow-500: #FFCC00;
+
+    /* SEMANTIC - Background */
+    --wds-background-normal:    var(--wds-color-neutral-0);
+    --wds-background-elevated:  var(--wds-color-neutral-0);
+    --wds-background-dimmed:    rgba(0, 0, 0, 0.50);
+
+    /* SEMANTIC - Surface */
+    --wds-surface-primary:   var(--wds-color-neutral-0);
+    --wds-surface-secondary: var(--wds-color-neutral-50);
+    --wds-surface-tertiary:  var(--wds-color-neutral-100);
+
+    /* SEMANTIC - Fill */
+    --wds-fill-brand-primary: var(--wds-color-purple-500);
+    --wds-fill-brand-weak:    var(--wds-color-purple-50);
+    --wds-fill-brand-strong:  var(--wds-color-purple-600);
+    --wds-fill-neutral:       var(--wds-color-neutral-100);
+    --wds-fill-status-error:  var(--wds-color-red-500);
+    --wds-fill-status-error-strong: var(--wds-color-red-600);
+    --wds-fill-status-error-weak:   var(--wds-color-red-100);
+
+    /* SEMANTIC - Label */
+    --wds-label-normal:       var(--wds-color-neutral-900);
+    --wds-label-alternative:  var(--wds-color-neutral-600);
+    --wds-label-assistive:    var(--wds-color-neutral-500);
+    --wds-label-disabled:     var(--wds-color-neutral-300);
+    --wds-label-inverse:      var(--wds-color-neutral-0);
+    --wds-label-brand:        var(--wds-color-purple-500);
+    --wds-label-error:        var(--wds-color-red-500);
+
+    /* SEMANTIC - Line */
+    --wds-line-normal:       var(--wds-color-neutral-200);
+    --wds-line-alternative:  var(--wds-color-neutral-100);
+
+    /* SEMANTIC - Status */
+    --wds-status-error: var(--wds-color-red-500);
+
+    /* COMPONENT - Button */
+    --component-button-primary-fill:        var(--wds-fill-brand-primary);
+    --component-button-primary-label:       var(--wds-label-inverse);
+    --component-button-destructive-fill:    var(--wds-fill-status-error);
+    --component-button-destructive-label:   var(--wds-label-inverse);
+    --component-button-secondary-ghost-fill:  transparent;
+    --component-button-secondary-ghost-label: var(--wds-label-alternative);
+    --component-button-radius:              12px;
+
+    /* COMPONENT - Bottom Sheet */
+    --component-bottom-sheet-fill:    var(--wds-background-elevated);
+    --component-bottom-sheet-radius:  20px;
+    --component-bottom-sheet-handle:  var(--wds-color-neutral-300);
+
+    /* COMPONENT - Avatar */
+    --component-avatar-fill: var(--wds-surface-tertiary);
+    --component-avatar-ring: var(--wds-line-normal);
+
+    /* COMPONENT - Info Row Icon */
+    --component-info-icon-fill:  var(--wds-fill-status-error-weak);
+    --component-info-icon-color: var(--wds-fill-status-error);
+
+    /* SPACING */
+    --wds-spacing-0:  0px;
+    --wds-spacing-1:  1px;
+    --wds-spacing-2:  2px;
+    --wds-spacing-4:  4px;
+    --wds-spacing-6:  6px;
+    --wds-spacing-8:  8px;
+    --wds-spacing-10: 10px;
+    --wds-spacing-12: 12px;
+    --wds-spacing-14: 14px;
+    --wds-spacing-16: 16px;
+    --wds-spacing-20: 20px;
+    --wds-spacing-24: 24px;
+    --wds-spacing-28: 28px;
+    --wds-spacing-32: 32px;
+    --wds-spacing-40: 40px;
+    --wds-spacing-48: 48px;
+    --wds-spacing-56: 56px;
+    --wds-spacing-64: 64px;
+    --wds-spacing-80: 80px;
+
+    /* RADIUS */
+    --wds-radius-none: 0px;
+    --wds-radius-xs:   4px;
+    --wds-radius-sm:   8px;
+    --wds-radius-md:   12px;
+    --wds-radius-lg:   16px;
+    --wds-radius-xl:   20px;
+    --wds-radius-2xl:  24px;
+    --wds-radius-full: 9999px;
+
+    /* TYPOGRAPHY */
+    --wds-font-family-primary: 'Pretendard', -apple-system, 'SF Pro Display', sans-serif;
+    --wds-font-weight-regular:  400;
+    --wds-font-weight-medium:   500;
+    --wds-font-weight-semibold: 600;
+    --wds-font-weight-bold:     700;
+    --wds-font-size-2xs: 11px;
+    --wds-font-size-xs:  12px;
+    --wds-font-size-sm:  13px;
+    --wds-font-size-md:  14px;
+    --wds-font-size-lg:  16px;
+    --wds-font-size-xl:  18px;
+    --wds-font-size-2xl: 20px;
+    --wds-font-size-3xl: 24px;
+
+    /* Brand convenience aliases */
+    --color-brand-primary:   var(--wds-color-purple-500);
+    --color-bg-normal:       var(--wds-color-neutral-0);
+    --color-fill-neutral:    var(--wds-color-neutral-100);
+    --color-label-normal:    var(--wds-color-neutral-900);
+    --color-label-assistive: var(--wds-color-neutral-500);
+  }
+
+  /* === Reset === */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--wds-font-family-primary);
+    background: var(--wds-color-neutral-100);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 16px;
+  }
+
+  /* === Control Panel (리뷰어용 — 본 영역은 anti-slop audit 제외) === */
+  .control-panel {
+    width: 390px;
+    background: #1a1a2e;
+    color: #e0e0e0;
+    border-radius: 12px 12px 0 0;
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 13px;
+    font-family: ui-monospace, 'JetBrains Mono', monospace;
+  }
+  .control-panel__row { display: flex; align-items: center; gap: 8px; }
+  .control-panel__label { color: #888; font-size: 11px; min-width: 56px; }
+  .control-panel select {
+    background: #2a2a3e; color: #e0e0e0; border: 1px solid #444;
+    border-radius: 6px; padding: 4px 8px; font-size: 12px; flex: 1;
+  }
+  .control-panel__states { display: flex; gap: 4px; flex-wrap: wrap; flex: 1; }
+  .control-panel__state-btn {
+    background: #2a2a3e; color: #888; border: 1px solid #444;
+    border-radius: 6px; padding: 4px 10px; font-size: 11px; cursor: pointer;
+    transition: all 0.15s; font-family: inherit;
+  }
+  .control-panel__state-btn.active {
+    background: var(--color-brand-primary); color: #fff;
+    border-color: var(--color-brand-primary);
+  }
+  .control-panel__breadcrumb { color: #666; font-size: 11px; font-family: inherit; }
+  .control-panel__hint { color: #999; font-size: 10px; font-style: italic; font-family: inherit; }
+
+  /* === Device Frame === */
+  .device-frame {
+    width: 390px;
+    height: 844px;
+    background: var(--wds-background-normal);
+    overflow: hidden;
+    position: relative;
+    border: 1px solid var(--wds-line-normal);
+    border-radius: 0 0 12px 12px;
+  }
+
+  .screen {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    color: var(--wds-label-normal);
+  }
+
+  /* === Status Bar === */
+  .status-bar {
+    height: 44px;
+    padding: 0 var(--wds-spacing-20);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: var(--wds-font-size-md);
+    font-weight: var(--wds-font-weight-semibold);
+    color: var(--wds-label-normal);
+  }
+  .status-bar__icons { display: inline-flex; gap: var(--wds-spacing-6); align-items: center; }
+
+  /* === App Header === */
+  .app-header {
+    height: 56px;
+    padding: 0 var(--wds-spacing-8) 0 var(--wds-spacing-4);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--wds-line-alternative);
+    background: var(--wds-background-normal);
+  }
+  .app-header__title {
+    flex: 1;
+    text-align: center;
+    font-size: var(--wds-font-size-xl);
+    font-weight: var(--wds-font-weight-semibold);
+    color: var(--wds-label-normal);
+    margin: 0 -44px 0 0;
+  }
+  .header-icon-btn {
+    width: 44px;
+    height: 44px;
+    background: transparent;
+    border: none;
+    color: var(--wds-label-normal);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border-radius: var(--wds-radius-full);
+  }
+  .header-icon-btn:active {
+    background: var(--wds-fill-neutral);
+  }
+  .header-icon-btn--alt {
+    color: var(--wds-label-alternative);
+  }
+
+  /* === Body Scroll === */
+  .body-scroll {
+    flex: 1;
+    overflow-y: auto;
+    position: relative;
+    background: var(--wds-background-normal);
+  }
+  .body-scroll[data-pulling="true"] .pull-to-refresh-hint { transform: translateY(0); opacity: 1; }
+  .pull-to-refresh-hint {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    padding: var(--wds-spacing-8) 0;
+    text-align: center;
+    color: var(--wds-label-assistive);
+    font-size: var(--wds-font-size-xs);
+    transform: translateY(-100%);
+    opacity: 0;
+    transition: transform 0.2s ease-out, opacity 0.2s ease-out;
+  }
+
+  /* === Count Summary === */
+  .count-summary {
+    padding: var(--wds-spacing-16) var(--wds-spacing-20) var(--wds-spacing-8);
+    color: var(--wds-label-alternative);
+    font-size: var(--wds-font-size-sm);
+    font-weight: var(--wds-font-weight-medium);
+  }
+  .count-summary__strong {
+    color: var(--wds-label-normal);
+    font-weight: var(--wds-font-weight-semibold);
+  }
+
+  /* === Blocked List === */
+  .blocked-list {
+    list-style: none;
+    background: var(--wds-background-normal);
+  }
+  .blocked-row {
+    display: flex;
+    align-items: center;
+    gap: var(--wds-spacing-12);
+    padding: var(--wds-spacing-12) var(--wds-spacing-20);
+    min-height: 72px;
+    border-bottom: 1px solid var(--wds-line-alternative);
+  }
+  .blocked-row:last-child {
+    border-bottom: none;
+  }
+  .blocked-row__avatar {
+    flex: 0 0 48px;
+    width: 48px;
+    height: 48px;
+    border-radius: var(--wds-radius-full);
+    background: var(--component-avatar-fill);
+    border: 1px solid var(--component-avatar-ring);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--wds-label-alternative);
+    font-weight: var(--wds-font-weight-semibold);
+    font-size: var(--wds-font-size-lg);
+    overflow: hidden;
+    user-select: none;
+  }
+  .blocked-row__meta {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--wds-spacing-2);
+    min-width: 0;
+  }
+  .blocked-row__nickname {
+    font-size: var(--wds-font-size-lg);
+    font-weight: var(--wds-font-weight-semibold);
+    color: var(--wds-label-normal);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .blocked-row__date {
+    font-size: var(--wds-font-size-xs);
+    color: var(--wds-label-assistive);
+  }
+  .unblock-btn {
+    flex: 0 0 auto;
+    height: 32px;
+    padding: 0 var(--wds-spacing-14);
+    background: var(--wds-fill-neutral);
+    color: var(--wds-label-normal);
+    border: none;
+    border-radius: var(--component-button-radius);
+    font-size: var(--wds-font-size-sm);
+    font-weight: var(--wds-font-weight-medium);
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.12s ease;
+  }
+  .unblock-btn:active {
+    background: var(--wds-color-neutral-200);
+  }
+
+  /* === Skeleton (loading state) — feed 강제 룰 #1 === */
+  .blocked-skeleton {
+    list-style: none;
+    background: var(--wds-background-normal);
+  }
+  .skeleton-row {
+    display: flex;
+    align-items: center;
+    gap: var(--wds-spacing-12);
+    padding: var(--wds-spacing-12) var(--wds-spacing-20);
+    min-height: 72px;
+    border-bottom: 1px solid var(--wds-line-alternative);
+  }
+  .skeleton-row:last-child {
+    border-bottom: none;
+  }
+  .skeleton-block {
+    background: linear-gradient(
+      90deg,
+      var(--wds-color-neutral-100) 0%,
+      var(--wds-color-neutral-200) 50%,
+      var(--wds-color-neutral-100) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite linear;
+    border-radius: var(--wds-radius-sm);
+  }
+  .skeleton-block--avatar {
+    flex: 0 0 48px;
+    width: 48px;
+    height: 48px;
+    border-radius: var(--wds-radius-full);
+  }
+  .skeleton-block--text {
+    flex: 1;
+    height: 14px;
+  }
+  .skeleton-block--cta {
+    flex: 0 0 64px;
+    height: 32px;
+    border-radius: var(--component-button-radius);
+  }
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* === End indicator (feed 권장 룰 #1) === */
+  .end-indicator {
+    padding: var(--wds-spacing-20) 0 var(--wds-spacing-28);
+    text-align: center;
+    color: var(--wds-label-assistive);
+    font-size: var(--wds-font-size-xs);
+  }
+
+  /* === Empty View (feed 강제 룰 #2) === */
+  .empty-view {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--wds-spacing-80) var(--wds-spacing-24);
+    text-align: center;
+    gap: var(--wds-spacing-12);
+  }
+  .empty-view__icon {
+    width: 56px;
+    height: 56px;
+    border-radius: var(--wds-radius-full);
+    background: var(--wds-fill-brand-weak);
+    color: var(--wds-fill-brand-primary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--wds-spacing-4);
+  }
+  .empty-view__title {
+    font-size: var(--wds-font-size-lg);
+    font-weight: var(--wds-font-weight-semibold);
+    color: var(--wds-label-normal);
+  }
+  .empty-view__desc {
+    font-size: var(--wds-font-size-sm);
+    color: var(--wds-label-alternative);
+    line-height: 1.4;
+  }
+  .empty-view__action {
+    margin-top: var(--wds-spacing-16);
+    height: 44px;
+    padding: 0 var(--wds-spacing-20);
+    background: var(--wds-fill-neutral);
+    color: var(--wds-label-normal);
+    border: none;
+    border-radius: var(--component-button-radius);
+    font-size: var(--wds-font-size-md);
+    font-weight: var(--wds-font-weight-medium);
+    font-family: inherit;
+    cursor: pointer;
+  }
+  .empty-view__action:active {
+    background: var(--wds-color-neutral-200);
+  }
+
+  /* === Toast === */
+  .toast {
+    position: absolute;
+    left: 50%;
+    bottom: var(--wds-spacing-32);
+    transform: translateX(-50%) translateY(20px);
+    background: var(--wds-color-neutral-900);
+    color: var(--wds-label-inverse);
+    padding: var(--wds-spacing-10) var(--wds-spacing-16);
+    border-radius: var(--wds-radius-md);
+    font-size: var(--wds-font-size-sm);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    max-width: 320px;
+    text-align: center;
+    z-index: 50;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* === State Visibility (data-state on .device-frame) === */
+  /* default — 7 rows + count + end */
+  .device-frame[data-state="default"] .count-summary { display: block; }
+  .device-frame[data-state="default"] .blocked-list { display: block; }
+  .device-frame[data-state="default"] .blocked-skeleton { display: none; }
+  .device-frame[data-state="default"] .end-indicator { display: block; }
+  .device-frame[data-state="default"] .empty-view { display: none; }
+
+  /* loading — skeleton 6개 */
+  .device-frame[data-state="loading"] .count-summary { display: none; }
+  .device-frame[data-state="loading"] .blocked-list { display: none; }
+  .device-frame[data-state="loading"] .blocked-skeleton { display: block; }
+  .device-frame[data-state="loading"] .end-indicator { display: none; }
+  .device-frame[data-state="loading"] .empty-view { display: none; }
+
+  /* empty — empty view */
+  .device-frame[data-state="empty"] .count-summary { display: none; }
+  .device-frame[data-state="empty"] .blocked-list { display: none; }
+  .device-frame[data-state="empty"] .blocked-skeleton { display: none; }
+  .device-frame[data-state="empty"] .end-indicator { display: none; }
+  .device-frame[data-state="empty"] .empty-view { display: flex; }
+
+  /* error — empty view 재사용 + toast */
+  .device-frame[data-state="error"] .count-summary { display: none; }
+  .device-frame[data-state="error"] .blocked-list { display: none; }
+  .device-frame[data-state="error"] .blocked-skeleton { display: none; }
+  .device-frame[data-state="error"] .end-indicator { display: none; }
+  .device-frame[data-state="error"] .empty-view { display: flex; }
+
+  /* Mobile fullscreen */
+  @media (max-width: 480px) {
+    body { padding: 0; align-items: stretch; min-height: 100dvh; background: var(--wds-background-normal); }
+    .control-panel { display: none; }
+    .device-frame { width: 100dvw; height: 100dvh; border: none; border-radius: 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Control Panel (audit-제외 영역) -->
+<div class="control-panel">
+  <div class="control-panel__row">
+    <span class="control-panel__label">Screen</span>
+    <select id="screen-select" disabled>
+      <option value="block-mgmt-list" selected>BlockManagementListScreen (app-017)</option>
+    </select>
+  </div>
+  <div class="control-panel__row">
+    <span class="control-panel__label">State</span>
+    <div class="control-panel__states" id="state-toggles">
+      <button class="control-panel__state-btn active" data-state="default" data-state-toggle>default</button>
+      <button class="control-panel__state-btn" data-state="loading" data-state-toggle>loading</button>
+      <button class="control-panel__state-btn" data-state="empty" data-state-toggle>empty</button>
+      <button class="control-panel__state-btn" data-state="error" data-state-toggle>error</button>
+    </div>
+  </div>
+  <div class="control-panel__row">
+    <span class="control-panel__breadcrumb" id="breadcrumb">block-mgmt-list · default</span>
+  </div>
+  <div class="control-panel__row">
+    <span class="control-panel__hint">v2 — feed archetype, exemplar inlined (list 구조 차별화)</span>
+  </div>
+</div>
+
+<!-- Device Frame -->
+<div class="device-frame" id="device-frame" data-state="default">
+  <section class="screen" id="block-mgmt-list">
+
+    <div class="status-bar">
+      <span>9:41</span>
+      <span class="status-bar__icons">
+        <svg width="16" height="11" viewBox="0 0 16 11" fill="none" aria-hidden="true"><path d="M1 6.5a6.5 6.5 0 0 1 13 0v3.75a.75.75 0 0 1-.75.75H1.75A.75.75 0 0 1 1 10.25z" fill="currentColor"/></svg>
+        <svg width="16" height="11" viewBox="0 0 16 11" fill="none" aria-hidden="true"><rect x="0.5" y="0.5" width="13" height="9" rx="1.5" stroke="currentColor"/><rect x="14.25" y="3.5" width="1.25" height="3" rx="0.5" fill="currentColor"/><rect x="2" y="2" width="10" height="6" rx="0.5" fill="currentColor"/></svg>
+      </span>
+    </div>
+
+    <header class="app-header">
+      <button class="header-icon-btn" id="back-button" type="button" aria-label="뒤로" onclick="onAction('go-back')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+      </button>
+      <h1 class="app-header__title">차단 관리</h1>
+      <button class="header-icon-btn header-icon-btn--alt" id="refresh-button" type="button" aria-label="차단 목록 새로고침" onclick="triggerRefresh()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/></svg>
+      </button>
+    </header>
+
+    <main class="body-scroll" id="body-scroll">
+
+      <div class="pull-to-refresh-hint" id="ptr-hint">차단 목록을 새로고침하고 있어요…</div>
+
+      <!-- count summary -->
+      <div class="count-summary" id="count-summary">
+        차단된 사용자 <span class="count-summary__strong">7명</span>
+      </div>
+
+      <!-- skeleton (loading state) -->
+      <ul class="blocked-skeleton" id="blocked-skeleton" aria-hidden="true">
+        <li class="skeleton-row">
+          <span class="skeleton-block skeleton-block--avatar"></span>
+          <span class="skeleton-block skeleton-block--text" style="max-width: 160px;"></span>
+          <span class="skeleton-block skeleton-block--cta"></span>
+        </li>
+        <li class="skeleton-row">
+          <span class="skeleton-block skeleton-block--avatar"></span>
+          <span class="skeleton-block skeleton-block--text" style="max-width: 200px;"></span>
+          <span class="skeleton-block skeleton-block--cta"></span>
+        </li>
+        <li class="skeleton-row">
+          <span class="skeleton-block skeleton-block--avatar"></span>
+          <span class="skeleton-block skeleton-block--text" style="max-width: 140px;"></span>
+          <span class="skeleton-block skeleton-block--cta"></span>
+        </li>
+        <li class="skeleton-row">
+          <span class="skeleton-block skeleton-block--avatar"></span>
+          <span class="skeleton-block skeleton-block--text" style="max-width: 180px;"></span>
+          <span class="skeleton-block skeleton-block--cta"></span>
+        </li>
+        <li class="skeleton-row">
+          <span class="skeleton-block skeleton-block--avatar"></span>
+          <span class="skeleton-block skeleton-block--text" style="max-width: 150px;"></span>
+          <span class="skeleton-block skeleton-block--cta"></span>
+        </li>
+        <li class="skeleton-row">
+          <span class="skeleton-block skeleton-block--avatar"></span>
+          <span class="skeleton-block skeleton-block--text" style="max-width: 170px;"></span>
+          <span class="skeleton-block skeleton-block--cta"></span>
+        </li>
+      </ul>
+
+      <!-- blocked users list (default state) -->
+      <ul class="blocked-list" id="blocked-list" role="list" aria-label="차단된 사용자 목록">
+        <li class="blocked-row" role="listitem" aria-label="달리는토끼, 2026.04.20 차단됨">
+          <span class="blocked-row__avatar" aria-hidden="true">달</span>
+          <div class="blocked-row__meta">
+            <span class="blocked-row__nickname">달리는토끼</span>
+            <span class="blocked-row__date">2026.04.20 차단</span>
+          </div>
+          <button class="unblock-btn" type="button" data-user-id="u-001" aria-label="달리는토끼 차단 해제" onclick="onAction('unblock', 'u-001', '달리는토끼')">해제</button>
+        </li>
+        <li class="blocked-row" role="listitem" aria-label="조용한새벽, 2026.04.18 차단됨">
+          <span class="blocked-row__avatar" aria-hidden="true">조</span>
+          <div class="blocked-row__meta">
+            <span class="blocked-row__nickname">조용한새벽</span>
+            <span class="blocked-row__date">2026.04.18 차단</span>
+          </div>
+          <button class="unblock-btn" type="button" data-user-id="u-002" aria-label="조용한새벽 차단 해제" onclick="onAction('unblock', 'u-002', '조용한새벽')">해제</button>
+        </li>
+        <li class="blocked-row" role="listitem" aria-label="햇살가득책방, 2026.04.15 차단됨">
+          <span class="blocked-row__avatar" aria-hidden="true">햇</span>
+          <div class="blocked-row__meta">
+            <span class="blocked-row__nickname">햇살가득책방</span>
+            <span class="blocked-row__date">2026.04.15 차단</span>
+          </div>
+          <button class="unblock-btn" type="button" data-user-id="u-003" aria-label="햇살가득책방 차단 해제" onclick="onAction('unblock', 'u-003', '햇살가득책방')">해제</button>
+        </li>
+        <li class="blocked-row" role="listitem" aria-label="구름위산책, 2026.04.11 차단됨">
+          <span class="blocked-row__avatar" aria-hidden="true">구</span>
+          <div class="blocked-row__meta">
+            <span class="blocked-row__nickname">구름위산책</span>
+            <span class="blocked-row__date">2026.04.11 차단</span>
+          </div>
+          <button class="unblock-btn" type="button" data-user-id="u-004" aria-label="구름위산책 차단 해제" onclick="onAction('unblock', 'u-004', '구름위산책')">해제</button>
+        </li>
+        <li class="blocked-row" role="listitem" aria-label="심야라디오, 2026.04.07 차단됨">
+          <span class="blocked-row__avatar" aria-hidden="true">심</span>
+          <div class="blocked-row__meta">
+            <span class="blocked-row__nickname">심야라디오</span>
+            <span class="blocked-row__date">2026.04.07 차단</span>
+          </div>
+          <button class="unblock-btn" type="button" data-user-id="u-005" aria-label="심야라디오 차단 해제" onclick="onAction('unblock', 'u-005', '심야라디오')">해제</button>
+        </li>
+        <li class="blocked-row" role="listitem" aria-label="민트초코러버, 2026.04.02 차단됨">
+          <span class="blocked-row__avatar" aria-hidden="true">민</span>
+          <div class="blocked-row__meta">
+            <span class="blocked-row__nickname">민트초코러버</span>
+            <span class="blocked-row__date">2026.04.02 차단</span>
+          </div>
+          <button class="unblock-btn" type="button" data-user-id="u-006" aria-label="민트초코러버 차단 해제" onclick="onAction('unblock', 'u-006', '민트초코러버')">해제</button>
+        </li>
+        <li class="blocked-row" role="listitem" aria-label="노을사진가, 2026.03.28 차단됨">
+          <span class="blocked-row__avatar" aria-hidden="true">노</span>
+          <div class="blocked-row__meta">
+            <span class="blocked-row__nickname">노을사진가</span>
+            <span class="blocked-row__date">2026.03.28 차단</span>
+          </div>
+          <button class="unblock-btn" type="button" data-user-id="u-007" aria-label="노을사진가 차단 해제" onclick="onAction('unblock', 'u-007', '노을사진가')">해제</button>
+        </li>
+      </ul>
+
+      <!-- end indicator (feed 권장 룰 #1) -->
+      <div class="end-indicator" id="end-indicator">마지막 차단 사용자입니다</div>
+
+      <!-- empty view (feed 강제 룰 #2) -->
+      <div class="empty-view" id="empty-view" role="region" aria-label="차단된 사용자 없음">
+        <div class="empty-view__icon" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+        </div>
+        <div class="empty-view__title">차단한 사용자가 없어요</div>
+        <div class="empty-view__desc">다른 사용자를 차단하면<br>여기에 표시돼요</div>
+        <button class="empty-view__action" id="empty-action" type="button" aria-label="설정으로 돌아가기" onclick="onAction('go-back')">설정으로 돌아가기</button>
+      </div>
+
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  </section>
+</div>
+
+<script>
+  // === State management ===
+  const frame = document.getElementById('device-frame');
+  const breadcrumb = document.getElementById('breadcrumb');
+  const stateButtons = document.querySelectorAll('.control-panel__state-btn');
+  const toast = document.getElementById('toast');
+
+  function setState(state) {
+    frame.setAttribute('data-state', state);
+    stateButtons.forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.state === state);
+    });
+    breadcrumb.textContent = 'block-mgmt-list · ' + state;
+    if (state === 'error') {
+      showToast('차단 목록을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.');
+    }
+    console.log('[state]', state);
+  }
+
+  stateButtons.forEach(btn => {
+    btn.addEventListener('click', () => setState(btn.dataset.state));
+  });
+
+  // === Refresh (feed archetype 강제 룰 #4) ===
+  function triggerRefresh() {
+    showToast('차단 목록을 새로고침하고 있어요…');
+    setState('loading');
+    setTimeout(() => {
+      setState('default');
+      showToast('차단 목록을 새로고침했어요');
+    }, 1200);
+  }
+
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2200);
+  }
+
+  // === Generic action handler (no alert/confirm/prompt — verifier safe) ===
+  function onAction(name, userId, nickname) {
+    console.log('[action]', name, userId || '', nickname || '');
+    if (name === 'unblock') {
+      // 실제 해제는 app-018 confirm sheet 위임 — 본 화면은 진입점 데모
+      showToast('해제 확인 시트로 이동: ' + (nickname || userId || ''));
+    } else if (name === 'go-back') {
+      showToast('설정으로 돌아가기');
+    }
+  }
+
+  // === Pull-to-refresh hint (visual only — feed archetype 강제 룰 #4 보조) ===
+  const bodyScroll = document.getElementById('body-scroll');
+  let touchStartY = null;
+  bodyScroll.addEventListener('touchstart', (e) => {
+    if (bodyScroll.scrollTop === 0) touchStartY = e.touches[0].clientY;
+  }, { passive: true });
+  bodyScroll.addEventListener('touchmove', (e) => {
+    if (touchStartY !== null) {
+      const dy = e.touches[0].clientY - touchStartY;
+      bodyScroll.dataset.pulling = dy > 40 ? 'true' : 'false';
+    }
+  }, { passive: true });
+  bodyScroll.addEventListener('touchend', () => {
+    if (bodyScroll.dataset.pulling === 'true') {
+      bodyScroll.dataset.pulling = 'false';
+      triggerRefresh();
+    }
+    touchStartY = null;
+  }, { passive: true });
+
+  // === Init ===
+  setState('default');
+</script>
+
+</body>
+</html>

@@ -1,0 +1,467 @@
+# Screen Spec: NotificationCenterScreen (app-020 / 알림센터_기본)
+# Step B output. Generated from context-engine.yaml + task spec + PRD AC-3.1 / AC-3.2 / AC-3.3.
+# Figma frame: 37211:167171
+
+meta:
+  screen_name: "NotificationCenterScreen"
+  screen_archetype: "feed"
+  task_id: "app-020"
+  sprint_id: "ugc-platform-integration-qa-2"
+  app: "ZZEM"
+  platform: "iOS / Android (React Native)"
+  language: "ko"
+  frame: "390x844"
+  theme: "light"
+  figma_frame: "37211:167171"
+  exemplar_refs:
+    - id: "v2-dogfood-free-tab-app-001-freetabscreen"
+      dimension_focus: "feed persona 4/4 + token compliance"
+      structural_divergence: "list (avatar+text rows) vs grid (cards) — exemplar drift 위험 낮음"
+
+# ─────────────────────────────
+# Component Tree
+# ─────────────────────────────
+component_tree: |
+  NotificationCenterScreen [frame: 390x844]
+  ├── StatusBar [system] (div) #status-bar — 9:41 + 시스템 아이콘
+  ├── NotificationHeader [container] (header) #notification-header (sticky-top, 56px)
+  │   ├── BackButton [icon-button] (button) #back-button — chevron-left (24px) → goBack
+  │   ├── HeaderTitle [text] (h1) #header-title — "알림"
+  │   └── SettingsButton [icon-button] (button) #settings-button — settings (24px) → app-022
+  ├── BodyScroll [scroll-container] (main) #body-scroll
+  │   ├── NotificationSkeleton [feedback] (ul) #notification-skeleton — loading state
+  │   │   └── SkeletonRow [skeleton] (li) × 6
+  │   │       ├── SkeletonAvatar [skeleton] (div) — 40px circle
+  │   │       └── SkeletonText [skeleton] (div) — 2 lines
+  │   ├── NotificationList [list] (ul) #notification-list — default state
+  │   │   └── NotificationRow [card] (li) × 8
+  │   │       ├── UnreadDot [badge] (span) — 6px purple dot (unread only)
+  │   │       ├── ActorAvatar [avatar] (div) — 40px circle + initial
+  │   │       ├── TypeIcon [icon] (span) — small lucide icon (heart/user-plus/message-circle/bell)
+  │   │       ├── BodyText [text] (p)
+  │   │       │   ├── ActorName [text] (strong) — semibold
+  │   │       │   └── ActionText [text] (span) — 액션 한국어 라벨
+  │   │       ├── TimeStamp [text] (span) — 상대 시간 ("2분 전", "1시간 전" 등)
+  │   │       └── NotificationThumbnail [image] (div) — 선택적 40x40 (좋아요/댓글)
+  │   ├── EndIndicator [feedback] (div) #end-indicator — "지난 알림을 모두 봤어요"
+  │   └── EmptyView [container] (div) #empty-view — empty state (reference)
+  │       ├── EmptyIcon [illustration] (div) — bell-off lucide
+  │       ├── EmptyTitle [text] (h3) — "받은 알림이 없어요"
+  │       ├── EmptyDesc [text] (p) — "친구를 팔로우하면 새 소식을 알려드려요"
+  │       └── EmptyHint [text] (p) — "(0건 시 별도 화면 app-021 로 분기)"
+
+# ─────────────────────────────
+# Component Details (Enhanced — Component-as-Data)
+# ─────────────────────────────
+components:
+  - name: "NotificationHeader"
+    id: "notification-header"
+    tag: "header"
+    type: "container"
+    position: "sticky-top"
+    size: "full-width x 56px"
+    tokens:
+      fill: "var(--wds-background-normal)"
+      text: "var(--wds-label-normal)"
+      border: "1px solid var(--wds-line-alternative)"
+      spacing: "0 8px 0 4px"
+    behavior:
+      purpose: "화면 식별 + 뒤로가기 + 알림 설정 진입 경로 (AC-3.3 entry)"
+      user_action: "back tap / settings tap"
+      feedback: "navigation"
+    layout: { direction: horizontal, alignment: space-between, sizing: hug }
+    a11y: { role: "banner", label: "알림센터 헤더" }
+
+  - name: "BackButton"
+    id: "back-button"
+    tag: "button"
+    type: "icon-button"
+    size: "44x44"
+    tokens:
+      fill: "transparent"
+      text: "var(--wds-label-normal)"
+      radius: "var(--wds-radius-full)"
+    behavior:
+      purpose: "이전 화면 복귀"
+      user_action: "tap"
+      feedback: "navigation (slide-right)"
+    a11y: { role: "button", label: "뒤로가기" }
+
+  - name: "HeaderTitle"
+    id: "header-title"
+    tag: "h1"
+    type: "text"
+    tokens:
+      text: "var(--wds-label-normal)"
+    a11y: { role: "heading", label: "알림" }
+
+  - name: "SettingsButton"
+    id: "settings-button"
+    tag: "button"
+    type: "icon-button"
+    size: "44x44"
+    tokens:
+      fill: "transparent"
+      text: "var(--wds-label-normal)"
+      radius: "var(--wds-radius-full)"
+    behavior:
+      purpose: "알림 설정 화면(app-022) 진입 — AC-3.3 entry point"
+      user_action: "tap"
+      feedback: "navigation"
+    a11y: { role: "button", label: "알림 설정" }
+
+  - name: "NotificationList"
+    id: "notification-list"
+    tag: "ul"
+    type: "list"
+    size: "full-width"
+    tokens:
+      fill: "transparent"
+    layout: { direction: vertical, alignment: start, sizing: fill }
+    behavior:
+      purpose: "받은 알림 시간순(최신→과거) 표시 (AC-3.1)"
+      user_action: "row tap → deeplink (선택)"
+      feedback: "navigation"
+    states:
+      default: "visible — 8 rows (또는 N from API)"
+      loading: "hidden — NotificationSkeleton 노출"
+      empty: "hidden — EmptyView 노출 (실제 분기는 app-021)"
+    a11y: { role: "list", label: "알림 목록" }
+    constraints:
+      min_height: null
+      truncation: "none"
+
+  - name: "NotificationRow"
+    id: "notification-row-{index}"
+    tag: "li"
+    type: "card"
+    size: "full-width x 72px"
+    tokens:
+      fill_unread: "var(--wds-fill-brand-weak)"   # --purple-50 #F5F0FF
+      fill_read:   "var(--wds-background-normal)" # #FFFFFF
+      text:        "var(--wds-label-normal)"
+      border:      "1px solid var(--wds-line-alternative) (하단만)"
+      spacing:     "12px 16px"
+    behavior:
+      purpose: "단일 알림 표시 — actor + 액션 + 시간 + (선택)썸네일"
+      user_action: "tap (선택적 — deeplink to target post/profile)"
+      feedback: "navigation (선택적)"
+    states:
+      unread: "fill = brand-weak, UnreadDot 노출"
+      read:   "fill = bg-normal, UnreadDot 숨김"
+    a11y: { role: "button", label: "{actorName}님이 {action}했어요. {시간}" }
+    constraints:
+      max_lines: 2
+      truncation: "ellipsis"
+
+  - name: "UnreadDot"
+    id: "unread-dot-{index}"
+    tag: "span"
+    type: "badge"
+    size: "6x6"
+    tokens:
+      fill: "var(--wds-fill-brand-primary)"  # --purple-500 #8752FA
+      radius: "var(--wds-radius-full)"
+    behavior:
+      purpose: "미읽음 즉시 인지 (AC-3.1 핵심)"
+      user_action: "passive (시각 신호)"
+      feedback: "visual"
+    a11y: { role: "status", label: "읽지 않은 알림" }
+
+  - name: "ActorAvatar"
+    id: "actor-avatar-{index}"
+    tag: "div"
+    type: "avatar"
+    size: "40x40"
+    tokens:
+      fill: "var(--wds-fill-brand-weak)"  # 토큰화된 placeholder fill
+      text: "var(--wds-label-brand)"
+      radius: "var(--wds-radius-full)"
+    behavior:
+      purpose: "알림 발생 사용자 시각 식별"
+      feedback: "visual"
+    a11y: { role: "img", label: "{actorName} 프로필" }
+    constraints:
+      min_height: "40px"
+
+  - name: "TypeIcon"
+    id: "type-icon-{index}"
+    tag: "span"
+    type: "icon"
+    size: "16x16"
+    tokens:
+      fill: "var(--wds-label-alternative)"  # 14px subordinate
+    behavior:
+      purpose: "알림 타입 시각 표식 (좋아요/팔로우/댓글/소식)"
+      feedback: "visual"
+    a11y: { role: "img", label: "{타입 라벨}" }
+    note: "lucide inline SVG — heart / user-plus / message-circle / bell"
+
+  - name: "TimeStamp"
+    id: "time-stamp-{index}"
+    tag: "span"
+    type: "text"
+    tokens:
+      text: "var(--wds-label-assistive)"
+    a11y: { role: "text", label: "{상대 시간}" }
+    constraints:
+      max_lines: 1
+
+  - name: "NotificationThumbnail"
+    id: "thumb-{index}"
+    tag: "div"
+    type: "image"
+    size: "40x40"
+    tokens:
+      fill: "linear-gradient(toned, --thumb-purple)"
+      radius: "var(--wds-radius-sm)"
+    behavior:
+      purpose: "좋아요/댓글 대상 게시물 미리보기 (선택적)"
+      feedback: "visual"
+    a11y: { role: "img", label: "관련 게시물 썸네일" }
+    note: "gradient-token — 실 구현 시 POST 썸네일 URL 로 교체. context-engine.assets.feed_thumbnails 참조."
+
+  - name: "NotificationSkeleton"
+    id: "notification-skeleton"
+    tag: "ul"
+    type: "skeleton"
+    size: "full-width"
+    tokens:
+      fill: "var(--wds-color-neutral-100)"
+      radius: "var(--wds-radius-sm)"
+    behavior:
+      purpose: "첫 로드 시 회색 placeholder 6장 (feed archetype 강제 룰 #1)"
+    states:
+      default: "hidden"
+      loading: "visible"
+    a11y: { role: "status", label: "알림 로딩 중" }
+
+  - name: "EndIndicator"
+    id: "end-indicator"
+    tag: "div"
+    type: "text"
+    tokens:
+      text: "var(--wds-label-assistive)"
+      spacing: "16px 0 24px"
+    behavior:
+      purpose: "리스트 끝 표식 (feed archetype 권장 룰 #1)"
+      feedback: "visual"
+    a11y: { role: "status", label: "알림 끝" }
+
+  - name: "EmptyView"
+    id: "empty-view"
+    tag: "div"
+    type: "container"
+    tokens:
+      spacing: "80px 24px"
+    behavior:
+      purpose: "0건 분기 reference — 실제 화면은 app-021 가 담당"
+    states:
+      default: "hidden"
+      empty: "visible"
+    a11y: { role: "region", label: "알림 없음 안내" }
+
+# ─────────────────────────────
+# Layout Spec
+# ─────────────────────────────
+layout_spec:
+  type: "flex-column"
+  viewport: "390x844"
+  regions:
+    - id: "status-bar"
+      height: "fixed(44px)"
+    - id: "notification-header"
+      sticky: "top"
+      height: "fixed(56px)"
+    - id: "body-scroll"
+      scroll: "vertical"
+      flex: 1
+      children:
+        - id: "notification-skeleton"
+          type: "flex-column"
+          gap: "0px"
+          padding: "0"
+        - id: "notification-list"
+          type: "flex-column"
+          gap: "0px"
+          padding: "0"
+        - id: "end-indicator"
+          type: "block"
+          padding: "16px 0 24px"
+          alignment: "center"
+        - id: "empty-view"
+          type: "flex-column"
+          alignment: "center"
+          padding: "80px 24px"
+
+# ─────────────────────────────
+# States
+# ─────────────────────────────
+states:
+  default:
+    description: "알림 8건 (미읽음 3건 상단 + 읽음 5건). 시간순 정렬. (AC-3.1)"
+    active: true
+    visible_components: [notification-list, end-indicator]
+    hidden_components: [notification-skeleton, empty-view]
+
+  loading:
+    description: "첫 진입 — API 응답 대기 (feed archetype 강제 룰 #1, AC-loading)"
+    visible_components: [notification-skeleton]
+    hidden_components: [notification-list, end-indicator, empty-view]
+
+  empty:
+    description: "notifications.length == 0 — 본 prototype reference. 실 분기는 app-021. (AC-3.2)"
+    visible_components: [empty-view]
+    hidden_components: [notification-list, notification-skeleton, end-indicator]
+    labels:
+      title: "받은 알림이 없어요"
+      description: "친구를 팔로우하면 새 소식을 알려드려요"
+      hint: "(0건 시 별도 화면 app-021 로 분기)"
+
+  error:
+    description: "API 실패 — empty-view 와 동일 fallback + 토스트"
+    visible_components: [empty-view]
+    hidden_components: [notification-list, notification-skeleton, end-indicator]
+    labels:
+      message: "알림을 불러오지 못했어요. 잠시 후 다시 시도해 주세요."
+      retry: "다시 시도"
+
+# ─────────────────────────────
+# Interactions
+# ─────────────────────────────
+interactions:
+  - trigger: "tap"
+    target: "#back-button"
+    action: "go-back"
+    destination: null
+    transition: "slide-right"
+
+  - trigger: "tap"
+    target: "#settings-button"
+    action: "navigate"
+    destination: "app-022"
+    transition: "slide-left"
+    note: "AC-3.3 entry — 알림설정 화면 진입"
+
+  - trigger: "tap"
+    target: ".notification-row"
+    action: "toggle-state"
+    state_key: "row-read"
+    note: "row tap → 미읽음→읽음 전환 (deeplink 는 RN 구현 시; prototype 은 read 토글)"
+
+  - trigger: "swipe-down"
+    target: "#body-scroll"
+    action: "toggle-state"
+    state_key: "loading"
+    note: "feed archetype 강제 룰 #4 — pull-to-refresh"
+
+# ─────────────────────────────
+# Visual Rules
+# ─────────────────────────────
+rules:
+  - condition: "notification.read == false"
+    effect: "행 배경 = brand-weak (--purple-50 #F5F0FF), 좌측 6px UnreadDot 노출"
+    example: "AC-3.1 핵심"
+  - condition: "notification.read == true"
+    effect: "행 배경 = bg-normal (#FFFFFF), UnreadDot 숨김"
+    example: "AC-3.1 핵심"
+  - condition: "notification.targetThumbnail != null"
+    effect: "우측 40x40 NotificationThumbnail 노출 (좋아요/댓글)"
+    example: "type=like or type=comment"
+  - condition: "notification.type == 'follow'"
+    effect: "썸네일 영역 생략 — actor + 액션 텍스트만"
+    example: "팔로우 알림"
+  - condition: "notifications.length == 0"
+    effect: "EmptyView 노출 (본 spec) — 실 분기는 app-021"
+    example: "AC-3.2"
+  - condition: "isLoading == true"
+    effect: "NotificationSkeleton 6장, list 숨김 (feed 강제 룰 #1)"
+    example: "AC-loading"
+  - condition: "API 응답 순서 보존 (BR-time-sort)"
+    effect: "List order = 서버 시간 역순 (클라이언트 재정렬 금지)"
+    example: "AC-3.1 시간순 정렬"
+
+# ─────────────────────────────
+# Labels (ko)
+# ─────────────────────────────
+labels:
+  header:
+    title: "알림"
+    back: "뒤로가기"
+    settings: "알림 설정"
+  list:
+    items:
+      - { actor: "minji_studio", action: "님이 회원님의 게시물을 좋아합니다", time: "2분 전", type: "like", read: false, thumb: true }
+      - { actor: "petlab_official", action: "님이 회원님을 팔로우하기 시작했습니다", time: "12분 전", type: "follow", read: false, thumb: false }
+      - { actor: "neon_creator", action: "님이 회원님의 게시물에 댓글을 남겼어요: \"이 필터 진짜 좋네요!\"", time: "38분 전", type: "comment", read: false, thumb: true }
+      - { actor: "ZZEM", action: " 새로운 무료 필터가 도착했어요", time: "1시간 전", type: "news", read: true, thumb: false }
+      - { actor: "smile_baby", action: "님이 회원님의 게시물을 좋아합니다", time: "3시간 전", type: "like", read: true, thumb: true }
+      - { actor: "lumen_lab", action: "님이 회원님을 팔로우하기 시작했습니다", time: "5시간 전", type: "follow", read: true, thumb: false }
+      - { actor: "hopper_pet", action: "님이 회원님의 게시물에 댓글을 남겼어요", time: "8시간 전", type: "comment", read: true, thumb: true }
+      - { actor: "dreamy_b", action: "님이 회원님의 게시물을 좋아합니다", time: "어제", type: "like", read: true, thumb: true }
+  end_indicator: "지난 알림을 모두 봤어요"
+  empty_state:
+    title: "받은 알림이 없어요"
+    description: "친구를 팔로우하면 새 소식을 알려드려요"
+    hint: "(0건 시 별도 화면 app-021 로 분기)"
+  toast:
+    error: "알림을 불러오지 못했어요. 잠시 후 다시 시도해 주세요."
+  a11y:
+    unread_dot: "읽지 않은 알림"
+    refresh: "알림 새로고침"
+    type_like: "좋아요 알림"
+    type_follow: "팔로우 알림"
+    type_comment: "댓글 알림"
+    type_news: "소식 알림"
+
+# ─────────────────────────────
+# Token Map
+# ─────────────────────────────
+tokens:
+  background:           "wds.background.normal → #FFFFFF"
+  background_unread:    "wds.fill.brand-weak → #F5F0FF (purple-50)"
+  text_primary:         "wds.label.normal → #212228"
+  text_secondary:       "wds.label.alternative → #6B6E76"
+  text_assistive:       "wds.label.assistive → #8E9199"
+  text_brand:           "wds.label.brand → #8752FA"
+  divider_weak:         "wds.line.alternative → #F0F1F3"
+  divider_normal:       "wds.line.normal → #E4E5E9"
+  brand:                "wds.fill.brand-primary → #8752FA"
+  unread_dot:           "wds.fill.brand-primary → #8752FA"
+  avatar_fill:          "wds.fill.brand-weak → #F5F0FF"
+  skeleton_fill:        "wds.color.neutral.100 → #F0F1F3"
+  thumbnail_radius:     "wds.radius.sm → 8px"
+  avatar_radius:        "wds.radius.full → 9999px"
+  font_family:          "wds.font.family.primary → Pretendard"
+  font_size_body:       "wds.font.size.md → 14px"
+  font_size_meta:       "wds.font.size.xs → 12px"
+  font_size_title:      "wds.font.size.lg → 16px"
+
+# ─────────────────────────────
+# Quality Score
+# ─────────────────────────────
+quality_score:
+  extraction_accuracy:
+    total_components: 11
+    with_token_map: 11
+    with_html_mapping: 11
+    score: "22 / 22 = 1.0"
+  fabrication_risk:
+    inferred_fields:
+      - "NotificationSkeleton (loading state) — feed archetype 강제 룰 #1 적용 (관례 추가)"
+      - "EndIndicator (지난 알림을 모두 봤어요) — feed 권장 룰 #1 적용"
+      - "Pull-to-refresh interaction — feed archetype 강제 룰 #4 적용"
+      - "8 sample notification entries (actor/action/time) — 시각 검증용 더미. PRD 명시 없음"
+      - "TypeIcon (lucide heart/user-plus/message-circle/bell) — 알림 타입 시각 표식. PRD 직접 명시 없음 — 표준 패턴"
+    risk_level: "low"
+    rationale: |
+      모두 표준 UI 패턴이거나 feed archetype 강제 룰 충족을 위한 관례적 추가.
+      비즈니스 로직 추측은 없음 — 알림 타입 (like/follow/comment/news) 은 PRD AC-3.3
+      ('푸시/좋아요/소식/팔로우' 4 카테고리) 와 1:1 일치.
+  schema_completeness:
+    required_sections: ["meta", "component_tree", "layout_spec", "states", "interactions", "labels", "token_map"]
+    present_sections: ["meta", "component_tree", "components", "layout_spec", "states", "interactions", "rules", "labels", "tokens", "quality_score"]
+    score: "7 / 7 = 1.0"
+  context_coverage:
+    why_linked: "5 / 5 = 1.0"   # AC-3.1 / 3.2 / 3.3-entry / loading / refresh 모두 컴포넌트/상태에 연결
+    what_resolved: "11 / 11 = 1.0"  # 모든 토큰/컴포넌트가 design-tokens (sprint tokens.css) 에서 확인

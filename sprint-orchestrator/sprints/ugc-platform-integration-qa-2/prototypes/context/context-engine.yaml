@@ -1,0 +1,150 @@
+# Context Engine — ugc-platform-integration-qa-2 / app-005
+# Generated: 2026-04-25 (DE Step A output)
+# Schema: v1.0 (template: sprint-orchestrator/templates/context-engine-template.yaml)
+
+meta:
+  sprint_id: "ugc-platform-integration-qa-2"
+  task_id: "app-005"
+  generated_at: "2026-04-25T00:00:00Z"
+  schema_version: "1.0"
+  figma_frame: "37160:80034"
+  figma_file: "7hozJ6Pvs09q98BxvChj08"
+  archetype: "modal"
+  exemplar_refs: []   # no exemplar inlined for app-005 (modal archetype, exemplars are feed-only this sprint)
+
+# ─────────────────────────────
+# Layer 1: WHY (Business Intent)
+# ─────────────────────────────
+why:
+  product_intent: "프로필 사진 영역 tap 시 변경 옵션을 명확히 제공하여 사용자가 사진 변경 진입점을 한 번에 인지하게 한다."
+  target_user: "프로필 편집 중인 ZZEM 사용자 (닉네임/아바타 갱신 의도)"
+  success_metric: "AC-1.3 통과 — 라이브러리 선택 / 삭제 / 취소 모두 1 tap 진입 가능"
+  user_stories:
+    - id: "US-1"
+      as_a: "프로필 사진을 바꾸고 싶은 사용자"
+      i_want: "사진 영역을 tap 하면 옵션 시트가 떠서 어떤 행동이 가능한지 즉시 본다"
+      so_that: "변경 / 삭제 중 무엇을 할지 모호함 없이 결정한다"
+  acceptance_criteria:
+    - id: "AC-1.3"
+      given: "사용자가 프로필편집_메인 화면에 있다"
+      when: "프로필 사진 영역을 tap 한다"
+      then: "바텀시트가 slide-up 으로 진입하며 backdrop dim + '앨범에서 선택' / '기본 이미지로 변경' / '취소' 옵션 3개를 보여준다"
+      ui_impact: "modal archetype: backdrop opacity ≥0.4, drag handle, 옵션 row × 3, divider, 외부 backdrop tap dismiss"
+    - id: "AC-1.3a"
+      given: "바텀시트가 열려있다"
+      when: "'앨범에서 선택' tap"
+      then: "app-009 (앨범 picker) 진입"
+      ui_impact: "옵션 row 1 의 navigate 액션"
+    - id: "AC-1.3b"
+      given: "바텀시트가 열려있다"
+      when: "'기본 이미지로 변경' tap"
+      then: "default avatar 적용 + sheet dismiss + 부모 form '저장' 활성화"
+      ui_impact: "옵션 row 2 의 즉시 적용 + close-overlay"
+    - id: "AC-1.3c"
+      given: "바텀시트가 열려있다"
+      when: "'취소' tap 또는 backdrop tap"
+      then: "sheet dismiss 하고 부모 화면으로 복귀"
+      ui_impact: "modal persona 강제 룰 #2 — 닫기 2-way (cancel + backdrop)"
+
+# ─────────────────────────────
+# Layer 2: WHAT (Design System)
+# ─────────────────────────────
+what:
+  tokens_needed:
+    colors:
+      - "wds-background-dimmed (rgba(0,0,0,0.40))"
+      - "wds-surface-primary"
+      - "wds-label-normal"
+      - "wds-label-alternative"
+      - "wds-label-assistive"
+      - "wds-line-alternative"
+      - "wds-fill-brand-primary"
+      - "pe-sheet-handle"
+      - "pe-destructive-text"
+    typography:
+      - "wds-font-size-lg (16px) — 옵션 row 텍스트"
+      - "wds-font-size-md (14px) — title"
+      - "wds-font-weight-semibold (600) — title + cancel"
+      - "wds-font-weight-medium (500) — option row"
+    spacing:
+      - "wds-spacing-12 (12px)"
+      - "wds-spacing-16 (16px)"
+      - "wds-spacing-20 (20px)"
+      - "wds-spacing-24 (24px)"
+    radius:
+      - "wds-radius-28 (28px) — 바텀시트 상단 모서리"
+      - "wds-radius-md (12px) — 취소 버튼"
+      - "wds-radius-full — 핸들"
+  components_needed:
+    - name: "ParentScaffold"
+      category: "layout"
+    - name: "Backdrop"
+      category: "feedback"
+    - name: "BottomSheet"
+      category: "feedback"
+    - name: "DragHandle"
+      category: "feedback"
+    - name: "SheetTitle"
+      category: "content"
+    - name: "OptionRow"
+      category: "input"
+    - name: "OptionIcon"
+      category: "content"
+    - name: "Divider"
+      category: "layout"
+    - name: "CancelButton"
+      category: "input"
+  patterns_needed:
+    - name: "ActionSheet (iOS-style 3-option picker)"
+      description: "타이틀 + 옵션 N개 (선택형) + 명시적 취소 row. 모바일 표준 — backdrop tap + cancel 모두 dismiss"
+    - name: "Backdrop dim 0.4"
+      description: "modal persona 강제 룰 #1 — 부모 화면 시각 분리"
+
+# ─────────────────────────────
+# Layer 3: HOW (Orchestration)
+# ─────────────────────────────
+how:
+  composition_rules:
+    - rule: "부모 화면 (프로필편집_메인) 은 muted/faded 상태로 backdrop 아래 노출. modal persona 권장 룰 #1 (bottom sheet form) 준수"
+      applies_to: ["프로필편집_사진_바텀시트_선택"]
+    - rule: "Sheet title '프로필 사진' 은 sheet 상단 고정 — modal persona 강제 룰 #4 (사용자 위치 인지)"
+      applies_to: ["프로필편집_사진_바텀시트_선택"]
+    - rule: "옵션 row 3개는 동일 height (52px) + 24x24 leading icon + divider 1px alternative line"
+      applies_to: ["프로필편집_사진_바텀시트_선택"]
+    - rule: "'취소' 는 row 가 아닌 별도 버튼 (전체폭 + radius-md + bg surface-button) — iOS Action Sheet 관례 + modal persona 강제 룰 #3 충족 (primary 0 + secondary 0, cancel 은 별도 dismiss)"
+      applies_to: ["프로필편집_사진_바텀시트_선택"]
+  conditional_rendering:
+    - condition: "state == 'open'"
+      variant_a: "backdrop visible (opacity 0.4) + sheet translateY(0) + 부모 화면 muted"
+      variant_b: "(state == 'dismissing') backdrop fade-out + sheet translateY(100%)"
+  constraints:
+    - "Backdrop opacity 0.4 이상 필수 (modal persona #1)"
+    - "닫기 2-way: 취소 버튼 + backdrop tap (modal persona #2)"
+    - "Primary CTA 0 + secondary 0 — 본 시트는 picker 형 (사용자가 옵션 1을 골라 다음 화면으로 가는 분기점). modal persona #3: '결정 단순화' 충족 — 모든 row 가 동등한 시각 weight"
+    - "Sheet title '프로필 사진' 표기 (modal persona #4)"
+    - "Drag handle (─) 상단 가시 (modal persona 권장 #2)"
+    - "Pretendard 외 font 금지 (Pass 6 #4)"
+    - "raw hex 금지 — tokens.css 정의된 var(--*) 만 사용 (Pass 6 #1)"
+    - "interactive 요소에 unicode emoji 금지 — Lucide-style inline SVG (Pass 6 #2)"
+    - "blocking dialog (alert/confirm/prompt) 금지 (Pass 6 #8)"
+  priority_order:
+    - "BottomSheet (시각 우선 — 사용자 attention 집중)"
+    - "Backdrop dim (부모와의 분리)"
+    - "Cancel 버튼 (escape route 가시성)"
+    - "Parent scaffold (faded 배경)"
+
+# ─────────────────────────────
+# Layer 4: ASSETS
+# ─────────────────────────────
+# app-005 modal — 부모 placeholder + sheet icons 만 필요. 실 이미지 슬롯 0.
+assets:
+  avatars:
+    kind: illustration
+    source: "inline SVG circle placeholder (parent profile area, faded behind backdrop)"
+    count: "1"
+    license: "internal-test"
+    needs_real_content: false   # 부모는 backdrop 아래 muted — 주 콘텐츠가 아님 (Pass 6 #6 면제)
+  icons:
+    kind: illustration
+    source: "Lucide inline SVG (image, image-off, x)"
+    fallback: "text-placeholder"

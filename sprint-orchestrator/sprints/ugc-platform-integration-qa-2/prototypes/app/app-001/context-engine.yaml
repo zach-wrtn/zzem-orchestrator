@@ -1,0 +1,229 @@
+# Context Engine — ugc-platform-integration-qa-2 / app-001
+# Step A output of Design Engineer protocol v2.
+# Source PRD: docs/prds/ugc-platform-integration-qa-2.md (Group 001)
+# Source task: sprint-orchestrator/sprints/ugc-platform-integration-qa-2/tasks/app/app-001.md
+# Figma frame: 7hozJ6Pvs09q98BxvChj08 / 37160:79939 (프로필편집_메인)
+
+meta:
+  sprint_id: "ugc-platform-integration-qa-2"
+  task_id: "app-001"
+  generated_at: "2026-04-25T16:00:00Z"
+  schema_version: "1.0"
+  figma_file: "7hozJ6Pvs09q98BxvChj08"
+  figma_node: "37160:79939"
+  archetype: "form"
+
+# ─────────────────────────────
+# Layer 1: WHY (Business Intent)
+# ─────────────────────────────
+why:
+  product_intent: |
+    유저가 본인의 프로필 닉네임과 사진을 한 화면에서 편집할 수 있도록 한다.
+    MY 프로필 → "프로필 편집" 진입 → 닉네임 + 사진 두 편집 슬롯을
+    동시 노출하여 변경분 발생 시에만 저장 활성. 변경 미저장 보호 (back confirm)는
+    같은 그룹의 modal (app-003 / app-007) 에서 처리.
+  target_user: "ZZEM 일반 유저 (본인 프로필 보유)"
+  success_metric: "프로필 편집 진입 → 변경(닉네임 or 사진) → 저장 완료율 (Group 001 funnel)"
+  user_stories:
+    - id: "US-1"
+      as_a: "ZZEM 유저"
+      i_want: "닉네임과 프로필 사진을 한 화면에서 편집"
+      so_that: "정체성 표현을 빠르게 갱신"
+    - id: "US-2"
+      as_a: "ZZEM 유저"
+      i_want: "변경 사항이 없을 때 실수로 저장 누르지 않게 비활성화 됨"
+      so_that: "의미 없는 서버 호출 방지 + 명확한 상태 인지"
+  acceptance_criteria:
+    - id: "AC-1.1.a"
+      given: "유저가 MY 프로필에서 '프로필 편집' 탭"
+      when: "프로필편집_메인 진입"
+      then: "현재 프로필 사진 + 닉네임 prefill 상태로 렌더"
+      ui_impact: "ProfileImg 영역 = 현재 avatar; NicknameInput value = 현재 닉네임"
+    - id: "AC-1.1.b"
+      given: "프로필편집_메인 진입 상태"
+      when: "사진 영역 tap"
+      then: "이미지 소스 바텀시트 (app-005) 오픈"
+      ui_impact: "PhotoTrigger tap → open-overlay → app-005"
+    - id: "AC-1.1.c"
+      given: "프로필편집_메인 진입 상태"
+      when: "닉네임 인풋 focus"
+      then: "키보드 활성 (app-004) + 글자 카운터 표시"
+      ui_impact: "NicknameInput focus → app-004; CharCounter visible"
+    - id: "AC-1.1.d"
+      given: "변경 없음 상태 (init)"
+      when: "유저 화면 진입"
+      then: "우측 '저장' 버튼 비활성"
+      ui_impact: "SaveButton state=disabled (bg #F1F1F1, label #8A8A8A)"
+    - id: "AC-1.1.e"
+      given: "닉네임 또는 사진 변경 발생"
+      when: "유저 변경 입력"
+      then: "'저장' 버튼 활성"
+      ui_impact: "SaveButton state=enabled (bg #262626, label #FFFFFF) — 분기는 app-002 / app-006"
+    - id: "AC-1.1.f"
+      given: "변경분이 있는 상태"
+      when: "좌측 back tap"
+      then: "나가기 confirm modal (app-003 / app-007) 오픈"
+      ui_impact: "BackButton tap (with dirty) → open-overlay → confirm modal"
+
+# ─────────────────────────────
+# Layer 2: WHAT (Design System)
+# ─────────────────────────────
+what:
+  tokens_needed:
+    colors:
+      - "wds.color.neutral.0"     # bg #FFFFFF
+      - "wds.color.neutral.100"   # divider #F0F1F3 / save disabled
+      - "wds.color.neutral.500"   # placeholder text #8E9199
+      - "wds.color.neutral-900"   # label primary #212228
+      - "pe.input.fill"           # #F7F7F7 input bg
+      - "pe.input.border"         # #F1F1F1 input border
+      - "pe.save.disabled"        # #F1F1F1
+      - "pe.save.disabled-label"  # #8A8A8A
+      - "pe.save.active"          # #262626
+      - "pe.save.active-label"    # #FFFFFF
+      - "pe.camera.badge.fill"    # #E2E2E2
+      - "pe.camera.badge.border"  # #FFFFFF
+      - "pe.text-primary"         # #262626 헤더 타이틀
+      - "pe.text-tertiary"        # #8A8A8A char counter
+      - "pe.avatar.empty.bg"      # #F5F3FF
+    typography:
+      - "wds.font.size.xs"        # 12px char counter
+      - "wds.font.size.md"        # 14px input label
+      - "wds.font.size.lg"        # 16px input value, save button
+      - "wds.font.size.xl"        # 18px header title
+      - "wds.font.weight.medium"  # 500 input label
+      - "wds.font.weight.semibold"# 600 header title, save
+    spacing:
+      - "wds.spacing.4"   # 4px tit padding-x
+      - "wds.spacing.8"   # 8px char counter gap
+      - "wds.spacing.12"  # 12px input padding-y
+      - "wds.spacing.16"  # 16px page padding
+      - "wds.spacing.20"  # 20px tit→input vertical gap
+    radius:
+      - "wds.radius.lg"   # 16px input + save button
+      - "wds.radius.full" # 9999 avatar + camera badge
+
+  components_needed:
+    - name: "StatusBar"
+      category: "navigation"
+    - name: "HeaderBar"
+      category: "navigation"
+      pattern_ref: "docs/designs/patterns/profile-edit.mdx"
+      note: "← back + 중앙 '프로필 편집' SemiBold 18px"
+    - name: "ProfileImg"
+      category: "input"
+      pattern_ref: "docs/designs/patterns/profile-edit.mdx"
+      note: "100px avatar + 우하단 24px 카메라 배지 (tap → app-005)"
+    - name: "NicknameLabel"
+      category: "content"
+      note: "'닉네임' Pretendard Medium 14px"
+    - name: "NicknameInput"
+      category: "input"
+      pattern_ref: "docs/designs/patterns/profile-edit.mdx"
+      note: "filled rounded box (h-44, radius-16, bg #F7F7F7)"
+    - name: "CharCounter"
+      category: "content"
+      note: "'n/20' caption — focus 시 또는 항상 노출 (디자인 추론 — risk: low)"
+    - name: "SaveButton"
+      category: "control"
+      pattern_ref: "docs/designs/components/button.mdx"
+      note: "h-56 sticky bottom; disabled (init) → enabled (변경 시)"
+
+  patterns_needed:
+    - name: "form: 1 primary action sticky bottom"
+      description: "form persona 강제 룰 #4 — 저장 버튼 1개만 화면 하단 고정"
+    - name: "input filled rounded box"
+      description: "닉네임 인풋 #F7F7F7 fill + 1px #F1F1F1 border + radius-16"
+    - name: "circular avatar with corner badge"
+      description: "100px circle + 24px 카메라 배지 (border 4px white)"
+    - name: "char counter inline below input"
+      description: "20자 제한, focus 시 'n/20' 우측 노출"
+    - name: "disabled-by-default save button"
+      description: "form persona 강제 룰 #2 — 변경 발생 전까지 비활성"
+
+# ─────────────────────────────
+# Layer 3: HOW (Orchestration)
+# ─────────────────────────────
+how:
+  composition_rules:
+    - rule: "StatusBar(58px) → HeaderBar(48px) → Profile(124px) → Input(72px) → spacer → SaveButton(sticky bottom 100px)"
+      applies_to: ["프로필편집_메인"]
+    - rule: "ProfileImg 가운데 정렬 (frame 좌표 x=121.5, w=100 in 375 frame)"
+      applies_to: ["프로필편집_메인"]
+    - rule: "Input 좌우 padding 16px, 'tit' (label) padding-left 4px (Figma 좌표)"
+      applies_to: ["프로필편집_메인"]
+    - rule: "SaveButton 상단 padding 12px, 좌우 16px, 하단 32px (Figma 좌표 y=712~812)"
+      applies_to: ["프로필편집_메인"]
+    - rule: "어떤 인터랙티브 요소도 alert/confirm/prompt 사용 금지 (verifier 호환 + Pass 6 #8)"
+      applies_to: ["프로필편집_메인"]
+  conditional_rendering:
+    - condition: "isDirty == false (init)"
+      variant_a: "SaveButton state=disabled (bg #F1F1F1, label #8A8A8A)"
+      variant_b: null
+    - condition: "isDirty == true (닉네임 or 사진 변경)"
+      variant_a: "SaveButton state=enabled (bg #262626, label #FFFFFF)"
+      variant_b: null
+    - condition: "NicknameInput focus"
+      variant_a: "CharCounter visible '0/20' (또는 현재 길이)"
+      variant_b: "CharCounter hidden"
+    - condition: "닉네임 length > 20"
+      variant_a: "ErrorText 인라인 표시 (input 직하) + SaveButton disabled 유지 (form persona 룰 #1)"
+      variant_b: null
+    - condition: "BackButton tap with isDirty=true"
+      variant_a: "open-overlay → confirm modal (app-003 / app-007)"
+      variant_b: "navigate-back (직접 이전 화면)"
+  constraints:
+    - "form persona 강제 룰 #1: 모든 input 에 inline validation 정의 (error.nickname state)"
+    - "form persona 강제 룰 #2: SaveButton disabled / enabled 상태 둘 다 정의됨"
+    - "form persona 강제 룰 #3: error message 는 input 직하 inline (alert 박스 금지)"
+    - "form persona 강제 룰 #4: primary action 1개만 (저장)"
+    - "Lucide-style inline SVG 만 사용 (이모지 인터랙티브 금지 — Pass 6 #2)"
+    - "Tokens-only color — 모든 hex 는 tokens.css 등재 (Pass 6 #1)"
+    - "Pretendard 외 font-family 금지 (Pass 6 #4)"
+    - "브랜드 보라 그라디언트 배경 금지 (Pass 6 #5) — 이 화면은 보라 미사용"
+    - "Avatar 영역 placeholder-image 허용 (assets.avatars.needs_real_content: false — 진입 init)"
+  priority_order:
+    - "1. SaveButton 상태 (저장 가능 여부 즉시 인지)"
+    - "2. NicknameInput (가장 빈도 높은 변경 슬롯)"
+    - "3. ProfileImg (탭 → 시트 분기 트리거)"
+    - "4. HeaderBar back (변경 미저장 보호 진입)"
+    - "5. CharCounter (입력 진행 인지)"
+
+# ─────────────────────────────
+# Layer 4: ASSETS (v1)
+# ─────────────────────────────
+# 본 화면은 profile edit init 진입 화면 — avatar 슬롯은 사용자 업로드 컨텐츠.
+# Sprint Lead 확인 (PRD §Asset Layer 카메라 그룹) — 카메라 그룹은
+# "avatar = 사용자 업로드 (placeholder 허용 — 실 데이터 미존재)" 명시 승인.
+assets:
+  avatars:
+    kind: real-image
+    source: "user-uploaded (runtime); init = 시스템 기본 아바타"
+    count: 1
+    license: "user-provided"
+    needs_real_content: false   # PRD §Asset Layer 명시 승인 — placeholder 허용
+    note: |
+      Pass 6 #6 면제 — 본 화면은 프로필 편집 init 상태. 실 업로드 사진은
+      runtime 에서 주입. prototype 에서는 100px circle + 가운데 user 아이콘
+      (lucide) + 우하단 카메라 배지로 표현. PRD §v2 dogfood scope 의
+      'avatar = 사용자 업로드 (placeholder 허용)' 정책에 부합.
+  feed_thumbnails:
+    kind: real-image
+    source: null
+    needs_real_content: false
+    note: "이 화면에서 feed_thumbnail 슬롯 없음"
+  meme_images:
+    kind: real-image
+    source: null
+    needs_real_content: false
+    note: "이 화면에서 meme image 슬롯 없음"
+  icons:
+    kind: illustration
+    source: "lucide inline SVG (chevron-left, camera, user)"
+    fallback: "text-placeholder"
+    needs_real_content: false
+  hero_banners:
+    kind: real-image
+    source: null
+    needs_real_content: false
+    note: "이 화면에서 hero banner 슬롯 없음"

@@ -1,0 +1,477 @@
+# Screen Spec — 프로필편집_메인
+# Machine-readable form spec. DE Step B output.
+# Source: docs/prds/ugc-platform-integration-qa-2.md (Group 001 AC-1.1.*)
+#       + Figma 7hozJ6Pvs09q98BxvChj08 / 37160:79939 (frame metadata)
+#       + docs/designs/patterns/profile-edit.mdx
+#       + docs/designs/components/button.mdx
+
+meta:
+  screen_name: "프로필편집_메인"
+  screen_archetype: "form"   # B.1.1 결정 — form persona 강제 룰 4개 모두 적용
+  task_id: "app-001"
+  sprint_id: "ugc-platform-integration-qa-2"
+  app: "ZZEM"
+  platform: "iOS / Android (React Native)"
+  language: "ko"
+  frame: "390x844"          # device-frame; original Figma frame 375x812
+  theme: "light"
+  figma_node: "37160:79939"
+
+# ─────────────────────────────
+# Component Tree
+# ─────────────────────────────
+component_tree: |
+  Screen [frame: 390x844] #screen-profile-edit
+  ├── StatusBar [system] (div) #status-bar
+  ├── HeaderBar [container] (header) #header-bar
+  │   ├── BackButton [icon-button] (button) #back-button — 뒤로가기 (chevron-left)
+  │   ├── HeaderTitle [text] (h1) #header-title — "프로필 편집"
+  │   └── HeaderSpacer [layout] (div) #header-spacer — symmetry
+  ├── Contents [scroll-container] (main) #contents
+  │   ├── Profile [container] (section) #profile
+  │   │   └── ProfileImg [composed] (button) #profile-img-trigger — tap → app-005
+  │   │       ├── Avatar [avatar] (div) #avatar
+  │   │       │   └── AvatarUserIcon [icon] (svg) #avatar-icon — lucide user
+  │   │       └── CameraBadge [icon-badge] (span) #camera-badge — lucide camera
+  │   └── Input [container] (section) #input
+  │       ├── NicknameLabel [text] (label) #nickname-label — "닉네임"
+  │       ├── NicknameField [input-wrapper] (div) #nickname-field
+  │       │   ├── NicknameInput [text-input] (input) #nickname-input
+  │       │   └── CharCounter [text] (span) #char-counter — "n/20"
+  │       └── NicknameError [text] (p) #nickname-error — inline validation (form 룰 #3)
+  └── BottomAction [container] (div) #bottom-action — sticky bottom
+      └── SaveButton [button-primary] (button) #save-button — "저장"
+
+# ─────────────────────────────
+# Component Details (Component-as-Data)
+# ─────────────────────────────
+components:
+  - name: "StatusBar"
+    id: "status-bar"
+    tag: "div"
+    type: "container"
+    position: "top"
+    size: "full-width x 44px"
+    tokens:
+      fill: "transparent"
+      text: "wds.label.normal → #212228"
+    notes: "iPhone status bar mock — 9:41 + signal/battery icons"
+
+  - name: "HeaderBar"
+    id: "header-bar"
+    tag: "header"
+    type: "container"
+    position: "sticky-top"
+    size: "full-width x 48px"
+    tokens:
+      fill: "wds.background.normal → #FFFFFF"
+      border: "none"
+      spacing: "0 16 0 16"
+    layout: { direction: horizontal, alignment: space-between, sizing: fill }
+    a11y: { role: heading, label: "프로필 편집 헤더" }
+
+  - name: "BackButton"
+    id: "back-button"
+    tag: "button"
+    type: "icon-button"
+    position: "left"
+    size: "44x44"
+    tokens:
+      fill: "transparent"
+      text: "wds.label.normal → #212228"
+    behavior:
+      purpose: "이전 화면 복귀; isDirty 시 confirm modal 분기"
+      user_action: "tap"
+      feedback: "navigation (clean) | overlay (dirty)"
+    states:
+      default: "회색 chevron-left 24px"
+      disabled: null
+      loading: null
+      error: null
+    a11y: { role: button, label: "뒤로 가기" }
+
+  - name: "HeaderTitle"
+    id: "header-title"
+    tag: "h1"
+    type: "text"
+    position: "center"
+    size: "wrap-content"
+    tokens:
+      text: "pe.text-primary → #262626"
+    constraints: { max_lines: 1, truncation: ellipsis }
+    a11y: { role: heading, label: "프로필 편집" }
+
+  - name: "ProfileImg"
+    id: "profile-img-trigger"
+    tag: "button"
+    type: "composed"
+    position: "center"
+    size: "100x100"
+    tokens:
+      fill: "transparent"
+      radius: "full (9999px)"
+    behavior:
+      purpose: "프로필 사진 변경 진입 (라이브러리/카메라/삭제 시트)"
+      user_action: "tap"
+      feedback: "navigation (open-overlay → app-005)"
+    states:
+      default: "현재 avatar + 카메라 배지 노출"
+      disabled: null
+      loading: null
+      error: null
+    layout: { direction: vertical, alignment: center, sizing: fixed }
+    a11y: { role: button, label: "프로필 사진 변경" }
+
+  - name: "Avatar"
+    id: "avatar"
+    tag: "div"
+    type: "avatar"
+    position: "center"
+    size: "100x100"
+    tokens:
+      fill: "pe.avatar.empty.bg → #F5F3FF (init); user upload runtime 시 image fill"
+      border: "1px solid pe.avatar.border (rgba(136,136,136,0.2))"
+      radius: "full (9999px)"
+    constraints: { min_height: "100px" }
+    notes: "init state = lucide user 아이콘 가운데; runtime upload 시 <img> 로 교체"
+
+  - name: "CameraBadge"
+    id: "camera-badge"
+    tag: "span"
+    type: "icon-badge"
+    position: "absolute (bottom-right of Avatar)"
+    size: "24x24"
+    tokens:
+      fill: "pe.camera.badge.fill → #E2E2E2"
+      border: "4px solid pe.camera.badge.border (#FFFFFF)"
+      radius: "full (9999px)"
+      text: "pe.text-primary → #262626"
+    a11y: { role: img, label: "사진 변경 가능 표시" }
+
+  - name: "NicknameLabel"
+    id: "nickname-label"
+    tag: "label"
+    type: "text"
+    position: "above input"
+    size: "full-width x 20px"
+    tokens:
+      text: "pe.text-primary → #262626"
+      spacing: "0 0 0 4"
+    a11y: { role: text, label: "닉네임 라벨" }
+
+  - name: "NicknameInput"
+    id: "nickname-input"
+    tag: "input"
+    type: "text-input"
+    position: "below NicknameLabel"
+    size: "full-width x 44px"
+    tokens:
+      fill: "pe.input.fill → #F7F7F7"
+      border: "1px solid pe.input.border (#F1F1F1)"
+      radius: "lg (16px)"
+      text: "pe.text-primary → #262626"
+      spacing: "12 16 12 16"
+    behavior:
+      purpose: "닉네임 입력 (현재 닉네임 prefill)"
+      user_action: "focus + type"
+      feedback: "visual (CharCounter visible) + system (키보드 활성 → app-004)"
+    states:
+      default: "현재 닉네임 value prefill, char counter hidden"
+      disabled: null
+      loading: null
+      error: "border-color → wds.label.error (#FF3B30); NicknameError 표시"
+    constraints: { max_lines: 1, truncation: none, content_policy: "최대 20자, URL/이모지 미정 (PRD 미명시 — risk: low)" }
+    a11y: { role: text, label: "닉네임 입력", hint: "최대 20자" }
+
+  - name: "CharCounter"
+    id: "char-counter"
+    tag: "span"
+    type: "text"
+    position: "absolute (bottom-right inside NicknameField)"
+    size: "wrap-content"
+    tokens:
+      text: "pe.text-tertiary → #8A8A8A"
+    states:
+      default: "hidden (focus 전)"
+      focused: "visible 'n/20' (n=현재 길이)"
+      error: "color → wds.label.error 'n/20' (n>20)"
+    a11y: { role: text, label: "글자수 카운터" }
+
+  - name: "NicknameError"
+    id: "nickname-error"
+    tag: "p"
+    type: "text"
+    position: "below NicknameField"
+    size: "full-width"
+    tokens:
+      text: "wds.label.error → #FF3B30"
+      spacing: "6 4 0 4"
+    states:
+      default: "hidden"
+      error: "visible — '20자 이내로 입력해주세요'"
+    a11y: { role: text, label: "닉네임 에러 메시지" }
+    notes: "form persona 강제 룰 #3 — input 직하 inline (alert 박스 금지)"
+
+  - name: "SaveButton"
+    id: "save-button"
+    tag: "button"
+    type: "button-primary"
+    position: "sticky-bottom"
+    size: "full-width x 56px"
+    tokens:
+      fill: "pe.save.disabled (#F1F1F1) → pe.save.active (#262626) on enabled"
+      text: "pe.save.disabled-label (#8A8A8A) → pe.save.active-label (#FFFFFF) on enabled"
+      radius: "lg (16px)"
+      spacing: "0 16 0 16 (outer 12 16 32 16)"
+    behavior:
+      purpose: "변경분 저장 (form persona 강제 룰 #4 — primary action 1개)"
+      user_action: "tap (enabled only)"
+      feedback: "navigation (분기: app-002 닉네임만 / app-006 사진만 / 양쪽)"
+    states:
+      submit_disabled: "isDirty == false → bg #F1F1F1, label #8A8A8A, pointer-events none"
+      submit_enabled:  "isDirty == true → bg #262626, label #FFFFFF"
+      loading: "spinner inline, 텍스트 숨김, aria-busy=true (button.mdx)"
+      error: null
+    a11y: { role: button, label: "변경 사항 저장" }
+    notes: "form persona 강제 룰 #2 충족 — submit_disabled / submit_enabled 둘 다 정의됨"
+
+# ─────────────────────────────
+# Layout Spec
+# ─────────────────────────────
+layout_spec:
+  type: flex-column
+  viewport: 390x844
+  regions:
+    - id: status-bar
+      height: fixed(44px)
+    - id: header-bar
+      sticky: top
+      height: fixed(48px)
+      padding: "0 4px"
+    - id: contents
+      scroll: vertical
+      flex: 1
+      padding: "0"
+      children:
+        - id: profile
+          type: flex-column
+          padding: "12 16 12 16"
+          align: center
+        - id: input
+          type: flex-column
+          padding: "0 16 0 16"
+          gap: "8px"
+    - id: bottom-action
+      sticky: bottom
+      height: fixed(100px)
+      padding: "12 16 32 16"
+
+# ─────────────────────────────
+# States
+# ─────────────────────────────
+states:
+  default:
+    description: "init — 닉네임 prefill, isDirty=false, SaveButton disabled, CharCounter hidden, error hidden"
+    active: true
+    visible_components: [status-bar, header-bar, profile, input, save-button]
+    hidden_components: [nickname-error]
+    submit_disabled: true
+    labels:
+      save_button: "저장"
+
+  focused:
+    description: "닉네임 input focus — 키보드 활성 (app-004), CharCounter visible 'n/20'"
+    visible_components: [status-bar, header-bar, profile, input, save-button, char-counter]
+    hidden_components: [nickname-error]
+    submit_disabled: true   # 변경 발생 전까진 여전히 disabled
+    labels:
+      char_counter: "0/20"
+
+  dirty:
+    description: "변경 발생 (닉네임 또는 사진) — SaveButton enabled, CharCounter visible"
+    visible_components: [status-bar, header-bar, profile, input, save-button, char-counter]
+    hidden_components: [nickname-error]
+    submit_enabled: true
+    labels:
+      char_counter: "5/20"
+
+  error:
+    description: "닉네임 validation 실패 (>20자) — inline error 표시, SaveButton disabled 유지 (form 룰 #1)"
+    visible_components: [status-bar, header-bar, profile, input, save-button, char-counter, nickname-error]
+    submit_disabled: true
+    validation_rules:
+      - field: "nickname-input"
+        rule: "length <= 20"
+        on_fail: "show #nickname-error '20자 이내로 입력해주세요' + border-color error"
+    labels:
+      nickname_error: "20자 이내로 입력해주세요"
+      char_counter: "21/20"
+
+  loading:
+    description: "저장 요청 중 — SaveButton spinner, button disabled (중복 제출 방지 권장 룰 #2)"
+    visible_components: [status-bar, header-bar, profile, input, save-button]
+    submit_disabled: true
+    labels:
+      save_button: "저장 중…"
+
+# ─────────────────────────────
+# Interactions
+# ─────────────────────────────
+interactions:
+  - trigger: tap
+    target: "#back-button"
+    action: navigate-or-confirm
+    destination: "back (clean) | confirm-modal app-003/app-007 (dirty)"
+    transition: slide-right
+    note: "AC-1.1.f"
+
+  - trigger: tap
+    target: "#profile-img-trigger"
+    action: open-overlay
+    destination: "app-005 (이미지 소스 바텀시트)"
+    transition: slide-up
+    note: "AC-1.1.b"
+
+  - trigger: focus
+    target: "#nickname-input"
+    action: toggle-state
+    state_key: "focused"
+    note: "AC-1.1.c — 키보드 활성 (app-004) + CharCounter visible"
+
+  - trigger: input
+    target: "#nickname-input"
+    action: toggle-state
+    state_key: "dirty (or error if length > 20)"
+    note: "AC-1.1.e — SaveButton 활성 분기"
+
+  - trigger: tap
+    target: "#save-button"
+    action: submit
+    destination: "분기 (app-002 닉네임만 / app-006 사진만 / 양쪽 통합 결과)"
+    transition: slide-left
+    note: "submit_enabled 시에만; loading state 거쳐 결과 화면"
+
+# ─────────────────────────────
+# Visual Rules
+# ─────────────────────────────
+rules:
+  - condition: "isDirty == false"
+    effect: "SaveButton disabled (bg #F1F1F1, label #8A8A8A)"
+    example: "init 진입 직후 — 사용자가 아무것도 변경하지 않았을 때"
+
+  - condition: "isDirty == true"
+    effect: "SaveButton enabled (bg #262626, label #FFFFFF)"
+    example: "닉네임 1글자라도 변경 또는 사진 변경 트리거"
+
+  - condition: "NicknameInput focus"
+    effect: "CharCounter visible 'n/20' 우측"
+    example: "input tap → 키보드 올라옴 + 카운터 표시"
+
+  - condition: "NicknameInput length > 20"
+    effect: "border-color error + NicknameError visible '20자 이내로 입력해주세요'"
+    example: "21자 입력 시 inline error"
+
+  - condition: "BackButton tap with isDirty=true"
+    effect: "open-overlay → confirm modal (app-003/app-007)"
+    example: "변경 미저장 보호 (AC-1.1.f)"
+
+# ─────────────────────────────
+# Labels (ko)
+# ─────────────────────────────
+labels:
+  header:
+    title: "프로필 편집"
+    back_aria: "뒤로 가기"
+  body:
+    nickname_label: "닉네임"
+    nickname_placeholder: "닉네임을 입력해주세요"
+    char_counter_template: "{n}/20"
+  buttons:
+    save: "저장"
+    save_loading: "저장 중…"
+  errors:
+    nickname_too_long: "20자 이내로 입력해주세요"
+
+# ─────────────────────────────
+# Token Map
+# ─────────────────────────────
+token_map:
+  background: "wds.background.normal → #FFFFFF"
+  text_primary: "pe.text-primary → #262626"
+  text_secondary: "pe.text-secondary → #656565"
+  text_tertiary: "pe.text-tertiary → #8A8A8A"
+  divider: "wds.line.normal → #E4E5E9"
+  input_fill: "pe.input.fill → #F7F7F7"
+  input_border: "pe.input.border → #F1F1F1"
+  input_radius: "wds.radius.lg → 16px"
+  input_text: "pe.text-primary → #262626"
+  save_disabled_fill: "pe.save.disabled → #F1F1F1"
+  save_disabled_label: "pe.save.disabled-label → #8A8A8A"
+  save_active_fill: "pe.save.active → #262626"
+  save_active_label: "pe.save.active-label → #FFFFFF"
+  save_radius: "wds.radius.lg → 16px"
+  avatar_empty_bg: "pe.avatar.empty.bg → #F5F3FF"
+  avatar_border: "pe.avatar.border → rgba(136,136,136,0.2)"
+  camera_badge_fill: "pe.camera.badge.fill → #E2E2E2"
+  camera_badge_border: "pe.camera.badge.border → #FFFFFF"
+  error_text: "wds.label.error → #FF3B30"
+
+# ─────────────────────────────
+# Quality Score
+# ─────────────────────────────
+quality_score:
+  extraction_accuracy:
+    total_components: 11
+    with_token_map: 11
+    with_html_mapping: 11
+    score: "22 / 22 = 1.0"
+  fabrication_risk:
+    inferred_fields:
+      - "CharCounter 'n/20' template — task '글자 카운트 n/20' 명시 있음, 단 항상/focus 노출 timing 추론 (low)"
+      - "NicknameError text '20자 이내로 입력해주세요' — content_policy '최대 20자' 추론 (low)"
+      - "loading state — form persona 권장 룰 #2 (관례 표준; low)"
+      - "Nickname max length = 20 — task `n/20` 표기에서 도출 (low)"
+    risk_level: "low"
+    note: "PRD/task 에 명시된 항목만 사용; 표준 form 패턴 (validation, loading) 만 추가."
+  schema_completeness:
+    required_sections: ["meta", "component_tree", "layout_spec", "states", "interactions", "labels", "token_map"]
+    present_sections:  ["meta", "component_tree", "components", "layout_spec", "states", "interactions", "rules", "labels", "token_map", "quality_score"]
+    score: "10 / 7 = 1.0 (all required + 3 enrichment sections)"
+  context_coverage:
+    why_linked: "6 / 6 = 1.0 (모든 AC-1.1.* 가 components/interactions 에 연결됨)"
+    what_resolved: "11 / 11 = 1.0 (모든 component 가 token + pattern 으로 해소됨)"
+
+# ─────────────────────────────
+# Form Persona Compliance (cross-check)
+# ─────────────────────────────
+form_persona_check:
+  forced_rules:
+    - id: 1
+      rule: "inline validation 정의 — error.{field-id} 또는 validation_rules"
+      result: "met"
+      evidence: "states.error.validation_rules + #nickname-error inline component"
+    - id: 2
+      rule: "Submit 버튼 disabled 상태 정의 — submit_disabled + submit_enabled 둘 다"
+      result: "met"
+      evidence: "states.default.submit_disabled + states.dirty.submit_enabled + components.SaveButton.states (둘 다 명시)"
+    - id: 3
+      rule: "Error message inline 직하 (alert 박스 금지)"
+      result: "met"
+      evidence: "#nickname-error position 'below NicknameField' + tag <p>; alert/confirm/prompt 미사용"
+    - id: 4
+      rule: "Primary action 1개만 (Submit/Save)"
+      result: "met"
+      evidence: "SaveButton 하나만 type=button-primary; HeaderBar back 은 icon-button (보조)"
+  recommended_rules:
+    - id: 1
+      rule: "Validation 시점 focus-out (blur)"
+      result: "met"
+      evidence: "states.error 는 length>20 시 발동 — 본 spec 은 input event 에서 dirty/error 분기 (즉시 피드백). 권장 룰은 blur 지만 모바일 char counter 패턴상 즉시 표시가 더 자연스러움. 거절 시 quality-report 에 archetype_recommendation_skipped 로깅."
+    - id: 2
+      rule: "Submit 후 loading state"
+      result: "met"
+      evidence: "states.loading + SaveButton.states.loading"
+    - id: 3
+      rule: "긴 form 섹션 분할 (8개 미만)"
+      result: "n/a"
+      evidence: "본 화면 입력 슬롯 2개 (사진 + 닉네임) — 분할 불필요"

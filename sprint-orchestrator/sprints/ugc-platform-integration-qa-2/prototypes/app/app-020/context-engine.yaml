@@ -1,0 +1,233 @@
+# Context Engine — ugc-platform-integration-qa-2 / app-020 (알림센터_기본)
+# Step A output of Design Engineer protocol v2.
+# Source PRD: docs/prds/ugc-platform-integration-qa-2.md (Group 003 AC-3.1, AC-3.2, AC-3.3)
+# Source task: sprint-orchestrator/sprints/ugc-platform-integration-qa-2/tasks/app/app-020.md
+# Figma frame: 37211:167171
+
+meta:
+  sprint_id: "ugc-platform-integration-qa-2"
+  task_id: "app-020"
+  generated_at: "2026-04-25T00:00:00Z"
+  schema_version: "1.0"
+  exercise: "v2-pipeline-dogfood"
+  exemplar_refs:
+    - id: "v2-dogfood-free-tab-app-001-freetabscreen"
+      dimension_focus: "archetype_fit (feed persona 4/4) + token_compliance (no raw hex) + interaction_completeness (skeleton/empty/refresh)"
+      structural_divergence: |
+        본 화면은 알림 리스트 (수직 행, avatar+text)
+        exemplar 는 free-tab 2-col 그리드 카드 — 시각 구조 자연스럽게 상이.
+        list-vs-grid 차별로 exemplar drift warning 위험 낮음.
+
+# ─────────────────────────────
+# Layer 1: WHY (Business Intent)
+# ─────────────────────────────
+why:
+  product_intent: |
+    사용자가 받은 좋아요/팔로우/댓글/소식 알림을 한 화면에서
+    시간순으로 빠르게 훑어보고 미읽음 여부를 즉시 인지하게 한다.
+    홈/MY 의 알림 아이콘 → 진입 후 1 step 내에 핵심 정보 파악.
+  target_user: "ZZEM 소셜 사용자 (좋아요/팔로우/댓글 수신자)"
+  success_metric: "알림센터 진입 후 row tap → deeplink 진입률 (AC-3.1 funnel)"
+  user_stories:
+    - id: "US-3.1"
+      as_a: "ZZEM 사용자"
+      i_want: "내가 받은 좋아요/팔로우/댓글 알림을 시간순으로 한눈에 보고 싶다"
+      so_that: "최근 활동을 빠르게 파악하고 반응할 수 있다"
+    - id: "US-3.2"
+      as_a: "알림 수신 사용자"
+      i_want: "아직 읽지 않은 알림을 시각적으로 구분하고 싶다"
+      so_that: "새로운 알림을 놓치지 않고 우선 확인"
+  acceptance_criteria:
+    - id: "AC-3.1"
+      given: "알림이 1건 이상 존재"
+      when: "사용자가 알림센터 진입"
+      then: "미읽음 강조 + 시간 역순 정렬된 알림 리스트 표시"
+      ui_impact: "NotificationList: 6+ rows, unread dot/bg, 최신 먼저 정렬"
+    - id: "AC-3.2"
+      given: "알림 0건"
+      when: "사용자가 알림센터 진입"
+      then: "empty_state 화면 (app-021) 으로 분기"
+      ui_impact: "EmptyView 노출, NotificationList 숨김 (별도 task app-021 에서 상세)"
+    - id: "AC-3.3-entry"
+      given: "알림센터에서 우측 상단 설정 아이콘 tap"
+      when: "사용자가 설정 아이콘 누름"
+      then: "알림 설정 화면 (app-022) 진입"
+      ui_impact: "Header SettingsButton → navigate(app-022)"
+    - id: "AC-loading"
+      given: "API 응답 대기 중 (첫 로드)"
+      when: "알림센터 진입"
+      then: "Skeleton placeholder 6장 노출"
+      ui_impact: "NotificationSkeleton 6 rows visible — feed archetype 강제 룰 #1"
+    - id: "AC-refresh"
+      given: "알림 리스트 표시 중"
+      when: "사용자가 pull-to-refresh"
+      then: "Skeleton 재노출 → 최신 데이터 갱신"
+      ui_impact: "swipe-down on body → toggle loading state — feed archetype 강제 룰 #4"
+
+# ─────────────────────────────
+# Layer 2: WHAT (Design System)
+# ─────────────────────────────
+what:
+  tokens_needed:
+    colors:
+      - "wds.color.purple.500"     # 브랜드 보라 #8752FA — unread dot, brand label
+      - "wds.color.purple.50"      # #F5F0FF — unread bg tint
+      - "wds.color.neutral.0"      # bg #FFFFFF
+      - "wds.color.neutral.50"     # surface secondary #F7F8F9 — read row hover
+      - "wds.color.neutral.100"    # divider weak / skeleton fill #F0F1F3
+      - "wds.color.neutral.200"    # divider normal #E4E5E9
+      - "wds.color.neutral.300"    # disabled #D1D3D8
+      - "wds.color.neutral.500"    # label assistive #8E9199 — 시간 텍스트
+      - "wds.color.neutral.600"    # label alt #6B6E76 — 보조 텍스트
+      - "wds.color.neutral.900"    # label normal #212228 — 본문
+      - "wds.color.red.500"        # status error #FF3B30 — (미사용 예상)
+    typography:
+      - "wds.font.size.xs"         # 12px — 시간 stamp
+      - "wds.font.size.sm"         # 13px — 보조 라벨
+      - "wds.font.size.md"         # 14px — 알림 본문 (메인)
+      - "wds.font.size.lg"         # 16px — 헤더 타이틀
+      - "wds.font.weight.regular"  # 400 — 본문
+      - "wds.font.weight.semibold" # 600 — 헤더 타이틀, actor name
+      - "wds.font.weight.bold"     # 700 — (미사용 예상)
+    spacing:
+      - "wds.spacing.4"   # 4px
+      - "wds.spacing.8"   # 8px
+      - "wds.spacing.12"  # 12px — row 내부 gap
+      - "wds.spacing.16"  # 16px — 행 padding
+      - "wds.spacing.20"  # 20px
+      - "wds.spacing.24"  # 24px
+    radius:
+      - "wds.radius.full" # 9999 — avatar
+      - "wds.radius.sm"   # 8px — thumbnail (게시물 미리보기)
+      - "wds.radius.xs"   # 4px — unread dot
+
+  components_needed:
+    - name: "NotificationHeader"
+      category: "navigation"
+      pattern_ref: "docs/designs/patterns/screen-header.mdx (back + title + action)"
+    - name: "NotificationList"
+      category: "layout"
+      pattern_ref: "feed archetype — 컴팩트 리스트 (64-72px 행)"
+    - name: "NotificationRow"
+      category: "content"
+      pattern_ref: "docs/designs/components/list-row.mdx (avatar + text + meta)"
+    - name: "UnreadDot"
+      category: "feedback"
+      note: "좌측 6px purple dot — 미읽음 표식"
+    - name: "ActorAvatar"
+      category: "content"
+      pattern_ref: "docs/designs/components/avatar.mdx (40px circle)"
+    - name: "NotificationSkeleton"
+      category: "feedback"
+      note: "feed archetype 강제 룰 #1 — loading state placeholder 6장"
+    - name: "NotificationThumbnail"
+      category: "content"
+      note: "선택적 — 좋아요/댓글 알림에서 대상 게시물 썸네일 (40x40)"
+    - name: "EmptyHint"
+      category: "feedback"
+      note: "본 화면 0건 분기는 app-021 가 담당 — 본 spec 에서는 reference state 만 노출"
+
+  patterns_needed:
+    - name: "Compact list with avatar + 2-line text + meta"
+      description: "feed archetype Good Pattern '컴팩트 리스트' — 좌측 40-44px 아바타, 우측 본문 2줄 (actor + action) + 시간 stamp"
+    - name: "Unread visual differentiation"
+      description: "미읽음: 좌측 6px brand-purple dot + 행 배경 미세 tint (--wds-fill-brand-weak). 읽음: dot 없음, 흰 배경"
+    - name: "Time-grouped list (today / 어제 / 지난 7일)"
+      description: "선택적 — 시간 그룹 헤더 (sticky 아님). 본 prototype 은 'today' 기본 가정"
+    - name: "Pull-to-refresh hint"
+      description: "body-scroll 영역 swipe-down → loading state 재진입 (feed 강제 룰 #4)"
+    - name: "Skeleton list placeholder"
+      description: "행과 동일 높이 (72px) 회색 placeholder 6장 (feed 강제 룰 #1)"
+
+# ─────────────────────────────
+# Layer 3: HOW (Orchestration)
+# ─────────────────────────────
+how:
+  composition_rules:
+    - rule: "Header (sticky-top, 56px) → ListContainer (scroll, flex:1) — BottomNav 없음 (full-screen modal 식 진입)"
+      applies_to: ["NotificationCenterScreen"]
+    - rule: "NotificationRow 좌측 영역 = unread-dot(6) + avatar(40); 우측 영역 = text(2 lines) + time + (optional) thumbnail(40)"
+      applies_to: ["NotificationRow"]
+    - rule: "행 높이 72px 고정 (avatar 40 + padding 16*2). 첫 viewport (390x844 - 44 status - 56 header = 744) 에 10개 노출 가능"
+      applies_to: ["NotificationList"]
+    - rule: "최소 6개 행 첫 viewport 노출 (feed archetype 강제 룰 #3) — 본 layout 은 10 노출로 충족 with 여유"
+      applies_to: ["NotificationList"]
+    - rule: "미읽음 행: 배경 = --wds-fill-brand-weak (--purple-50 #F5F0FF), 좌측 dot. 읽음 행: 배경 = --wds-background-normal (#FFFFFF)"
+      applies_to: ["NotificationRow"]
+    - rule: "시간순 정렬 = 최신(상단) → 과거(하단). 클라이언트 재정렬 금지 (서버 응답 순서 보존)"
+      applies_to: ["NotificationList"]
+  conditional_rendering:
+    - condition: "isLoading == true (첫 로드)"
+      variant_a: "NotificationSkeleton 6장 노출, NotificationList 숨김"
+      variant_b: null
+    - condition: "notifications.length == 0"
+      variant_a: "본 prototype reference state 'empty' — 실제 분기는 app-021 별 화면"
+      variant_b: null
+    - condition: "notification.read == false"
+      variant_a: "UnreadDot 노출 + 행 배경 brand-weak tint"
+      variant_b: "UnreadDot 숨김 + 흰 배경"
+    - condition: "notification.targetThumbnail != null"
+      variant_a: "우측 40x40 NotificationThumbnail 노출 (좋아요/댓글)"
+      variant_b: "썸네일 영역 생략 (팔로우)"
+  constraints:
+    - "어떤 인터랙티브 요소도 alert/confirm/prompt 사용 금지 (verifier 호환 — Pass 6 #8)"
+    - "모든 아이콘 lucide-style inline SVG (back, settings, bell, heart, user-plus, message-circle)"
+    - "tokens.css 에 정의된 색만 사용 — raw hex 금지 (Pass 6 #1)"
+    - "font-family 는 Pretendard 만 (.screen 내부) — JetBrains Mono / 기타 금지 (Pass 6 #4)"
+    - "행은 카드(border-left 슬롭) 아닌 list-row 패턴 — Pass 6 #3 회피"
+  priority_order:
+    - "1. NotificationRow (핵심 콘텐츠 — actor + 액션 + 시간)"
+    - "2. UnreadDot (즉시 인지 — AC-3.1 핵심)"
+    - "3. NotificationHeader (back + title + 설정 진입)"
+    - "4. NotificationSkeleton (loading 시각 일관성)"
+    - "5. ListContainer scroll (수직 스크롤)"
+
+# ─────────────────────────────
+# Layer 4: ASSETS (v1)
+# ─────────────────────────────
+assets:
+  avatars:
+    kind: gradient-token
+    source: |
+      ActorAvatar 40px circle — 아바타 placeholder 는 단일 색 fill (--wds-color-purple-100 등)
+      + 사용자 이니셜 1글자 (대문자) 중앙 정렬.
+      사유: 실 사용자 아바타 데이터 없음 + dogfood prototype 단계 — Sprint Lead 별도 승인 시 실제 이미지 교체.
+    count: 10
+    license: "internal-test"
+    needs_real_content: false
+    note: |
+      avatar 가 주 콘텐츠 카드의 hero 가 아니므로 (40px subordinate), gradient-token kind 로 처리.
+      Pass 6 #6 면제. 실제 RN 구현 시 avatar URL 받아 <Image> 로 교체.
+  feed_thumbnails:
+    kind: gradient-token
+    source: |
+      NotificationThumbnail (선택적, 40x40) — 좋아요/댓글 알림의 대상 게시물 미리보기.
+      카테고리별 그라디언트 토큰 (--thumb-purple, --thumb-neutral) — 토큰화된 색만 사용.
+    count: 6
+    license: "internal-test"
+    needs_real_content: false
+    note: |
+      썸네일도 행 내 부수 위치 (40x40, 우측 하단) — gradient-token 으로 의도.
+      실 구현 시 POST 썸네일 URL 로 교체.
+  meme_images:
+    kind: gradient-token
+    source: null
+    needs_real_content: false
+    note: "본 화면에서 meme image 슬롯 없음"
+  icons:
+    kind: illustration
+    source: |
+      lucide inline SVG:
+      - chevron-left (back, 24px)
+      - settings (header right, 24px)
+      - heart (좋아요 알림 타입 표식, 16px)
+      - user-plus (팔로우 알림 타입 표식, 16px)
+      - message-circle (댓글 알림 타입 표식, 16px)
+      - bell (소식 알림 타입 표식, 16px)
+    fallback: "기호 placeholder 허용 (Pass 6 #2: ←, ⋮ 등 — 단 lucide SVG 우선)"
+    needs_real_content: false
+  hero_banners:
+    kind: gradient-token
+    source: null
+    needs_real_content: false
+    note: "본 화면에서 hero banner 슬롯 없음 (헤더만 존재)"

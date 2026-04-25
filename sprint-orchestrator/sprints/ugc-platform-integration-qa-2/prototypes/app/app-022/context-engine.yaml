@@ -1,0 +1,202 @@
+# Context Engine — ugc-platform-integration-qa-2 / app-022 (NotificationSettingsScreen)
+# Step A output of Design Engineer protocol v2.
+# Source PRD: docs/prds/ugc-platform-integration-qa-2.md (Group 003 AC-3.3 / AC-3.4)
+# Source task: sprint-orchestrator/sprints/ugc-platform-integration-qa-2/tasks/app/app-022.md
+# Figma frame: 37289:169429 (file 7hozJ6Pvs09q98BxvChj08) — `알림설정_토글` canonical
+
+meta:
+  sprint_id: "ugc-platform-integration-qa-2"
+  task_id: "app-022"
+  generated_at: "2026-04-25T00:00:00Z"
+  schema_version: "1.1"
+  archetype_dogfood: true   # form persona 강제 룰 #2 vs 즉시 저장 충돌 케이스
+
+# ─────────────────────────────
+# Layer 1: WHY (Business Intent)
+# ─────────────────────────────
+why:
+  product_intent: |
+    사용자가 ZZEM 알림 카테고리(푸시 / 좋아요 / 소식 / 팔로우)별 수신 여부를
+    개별 토글로 즉시 제어할 수 있게 한다. 별도 저장 단계 없이 토글 자체가
+    저장 트리거가 되어 인지 부담을 최소화한다.
+  target_user: "ZZEM 알림을 받아본 모든 사용자(과수신/저수신 양극단 모두)"
+  success_metric: "알림 설정 화면 진입 후 푸시 alarm opt-out 비율 변화 (PRD § Group 003)"
+  user_stories:
+    - id: "US-3.3"
+      as_a: "알림이 너무 많거나 적다고 느끼는 사용자"
+      i_want: "카테고리별로 알림을 끄거나 켜고 싶다"
+      so_that: "내가 원하는 알림만 수신할 수 있다"
+    - id: "US-3.4"
+      as_a: "알림 설정을 자주 조정하는 사용자"
+      i_want: "토글 한 번에 즉시 저장되길 원한다"
+      so_that: "추가 액션(저장 버튼) 없이 빠르게 끝낸다"
+  acceptance_criteria:
+    - id: "AC-3.3"
+      given: "사용자가 알림 설정 진입"
+      when: "화면 렌더"
+      then: "4 카테고리(푸시/좋아요/소식/팔로우) 개별 토글 row 표시"
+      ui_impact: "ToggleRow × 4 표시 (title + description + Switch)"
+    - id: "AC-3.4"
+      given: "사용자가 토글 tap"
+      when: "Switch state 변경"
+      then: "즉시 PATCH /v2/me/notification-settings 호출 + 시각 즉시 반영(optimistic)"
+      ui_impact: |
+        Switch UI optimistic toggle (즉시 ON↔OFF), saving 인디케이터(짧은 ms 단위 spinner)
+        은 silent 저장 패턴 적용 — 별도 저장 버튼/Submit primary CTA 부재.
+        실패 시 toggle rollback + inline 에러 toast.
+        ⚠ form persona 강제 룰 #2 (Submit disabled until valid) 와 직접 충돌 →
+        archetype_recommendation_skipped 처리. 본 화면은 toggle = save trigger.
+
+# ─────────────────────────────
+# Layer 2: WHAT (Design System)
+# ─────────────────────────────
+what:
+  tokens_needed:
+    colors:
+      - "wds.color.purple.500"     # switch on fill (브랜드)
+      - "wds.color.neutral.0"      # bg / switch knob
+      - "wds.color.neutral.50"     # surface secondary (section bg)
+      - "wds.color.neutral.100"    # divider weak / switch off track
+      - "wds.color.neutral.200"    # divider normal
+      - "wds.color.neutral.300"    # switch off track stronger fallback
+      - "wds.color.neutral.500"    # label assistive (description)
+      - "wds.color.neutral.600"    # label alternative
+      - "wds.color.neutral.900"    # label normal (title)
+      - "wds.color.red.500"        # error rollback toast
+    typography:
+      - "wds.font.size.md"   # 14px - description
+      - "wds.font.size.lg"   # 16px - row title
+      - "wds.font.size.xl"   # 18px - header title
+      - "wds.font.weight.regular"
+      - "wds.font.weight.medium"
+      - "wds.font.weight.semibold"
+    spacing:
+      - "wds.spacing.4"   # 4px - title↔description gap
+      - "wds.spacing.8"   # 8px
+      - "wds.spacing.12"  # 12px
+      - "wds.spacing.16"  # 16px - row vertical padding
+      - "wds.spacing.20"  # 20px - row horizontal padding
+      - "wds.spacing.24"  # 24px
+    radius:
+      - "wds.radius.full" # switch track, knob
+
+  components_needed:
+    - name: "AppHeaderBack"
+      category: "navigation"
+      pattern_ref: "back chevron + center title (settings detail)"
+    - name: "ToggleRow"
+      category: "input"
+      note: "title + description + Switch — settings list 표준"
+    - name: "Switch"
+      category: "input"
+      note: "iOS-style track/knob, 즉시 저장 패턴 (form 강제 룰 #2 부재)"
+    - name: "SectionDivider"
+      category: "layout"
+    - name: "SaveErrorToast"
+      category: "feedback"
+      note: "form persona 강제 룰 #3 충족: 토글 저장 실패 시 inline-near-row 에러"
+
+  patterns_needed:
+    - name: "Settings list with toggles"
+      description: "라벨 + 설명 + Switch 의 row 반복. 즉시 저장 (별 submit 없음)."
+    - name: "Optimistic UI with rollback"
+      description: "tap → 즉시 UI 반영 → 실패 시 rollback + toast"
+
+# ─────────────────────────────
+# Layer 3: HOW (Orchestration)
+# ─────────────────────────────
+how:
+  composition_rules:
+    - rule: "AppHeaderBack(고정 56px) → 4 ToggleRow (각 ~72px) (수직, gap 0, divider 1px)"
+      applies_to: ["NotificationSettingsScreen"]
+    - rule: "각 ToggleRow 내부: 좌측 텍스트(title 위 / desc 아래 — 2-line) + 우측 Switch (52x32)"
+      applies_to: ["ToggleRow"]
+    - rule: "토글 즉시 저장 — Switch tap 직후 saving 상태 (optimistic)→ success silent / error rollback+toast"
+      applies_to: ["ToggleRow"]
+    - rule: "별도 'Save / 저장' primary CTA 부재 (PRD AC-3.4) — form 강제 룰 #2/#4 충돌"
+      applies_to: ["NotificationSettingsScreen"]
+  conditional_rendering:
+    - condition: "row.savingState == idle"
+      variant_a: "Switch 평상시 (knob 좌/우 위치)"
+      variant_b: null
+    - condition: "row.savingState == saving"
+      variant_a: "Switch knob 옆 8px spinner — silent indicator"
+      variant_b: null
+    - condition: "row.savingState == error"
+      variant_a: "Switch rollback (이전 값) + row 직하 inline 에러 메시지 ('저장 실패. 다시 시도해주세요.')"
+      variant_b: null
+  constraints:
+    - "어떤 인터랙티브 요소도 alert/confirm/prompt 사용 금지 (Pass 6 #8)"
+    - "Switch icon 은 네이티브가 아니므로 div 기반 + CSS transition 으로 구현 (Lucide SVG 의 의미상 'check' 아이콘 옵션도 가능하나 표준 toggle UI 채택)"
+    - "기본 디자인 텍스트는 Pretendard, 사이즈는 wds 토큰만 사용"
+    - "control-panel 은 device frame 외부 — Pass 6 검사 제외 영역"
+  priority_order:
+    - "1. ToggleRow × 4 (핵심 인터랙션)"
+    - "2. AppHeaderBack (이전 화면 복귀)"
+    - "3. SaveErrorToast (실패 피드백)"
+
+# ─────────────────────────────
+# Layer 4: ASSETS (v1)
+# ─────────────────────────────
+assets:
+  avatars:
+    kind: gradient-token
+    source: null
+    needs_real_content: false
+    note: "이 화면에 avatar 슬롯 없음"
+  feed_thumbnails:
+    kind: gradient-token
+    source: null
+    needs_real_content: false
+    note: "이 화면에 thumbnail 슬롯 없음"
+  meme_images:
+    kind: gradient-token
+    source: null
+    needs_real_content: false
+    note: "이 화면에 meme image 슬롯 없음"
+  icons:
+    kind: illustration
+    source: "lucide-style inline SVG (chevron-left for back). Switch 자체는 div 기반 — SVG 아님"
+    fallback: "text-placeholder ('←')"
+    needs_real_content: false
+  hero_banners:
+    kind: gradient-token
+    source: null
+    needs_real_content: false
+
+# ─────────────────────────────
+# Archetype Persona Conflict Note (form #2)
+# ─────────────────────────────
+archetype_conflict:
+  archetype: "form"
+  conflicting_rules:
+    - id: 2
+      rule: "Submit 버튼 disabled until valid"
+      conflict_with: "PRD AC-3.4 — '토글 변경 즉시 저장 (별도 저장 버튼 없음)'"
+      decision: "archetype_recommendation_skipped (option a)"
+      rationale: |
+        본 화면은 즉시 저장(optimistic save) 패턴이며 명시적 Submit 버튼이 부재한다.
+        form persona 강제 룰 #2 가 가정하는 'submit 시점에 누적 검증' 모델과 정면 충돌.
+        - PRD AC-3.4 가 'submit 버튼 부재' 를 명시 → 사용자 의도 우선
+        - settings list with toggles 는 industry standard 즉시 저장 패턴
+        Sprint Lead 후속: form persona md 강제 룰 #2 를
+        '1 primary action OR 즉시 저장 패턴 명시' 로 약화 검토 필요.
+    - id: 4
+      rule: "Primary action 1개만 (Submit / Save 등)"
+      conflict_with: "primary action 자체가 부재"
+      decision: "archetype_recommendation_skipped (option a)"
+      rationale: |
+        Primary CTA 가 부재한 형태이므로 룰 #4 가 가정하는 '1개' 도 만족 불가.
+        Switch 는 input 이지 CTA 가 아님. Sprint Lead 후속: 강제 룰 #4 도
+        'primary action 0~1개 (즉시 저장 패턴 시 0)' 로 약화 검토.
+  satisfied_rules:
+    - id: 1
+      rule: "Inline validation 정의됨"
+      satisfied_by: |
+        토글은 binary boolean — 사용자 입력 단계의 'invalid' 상태 자체가 부재.
+        대신 '저장 결과의 inline 에러' 로 의미 확장: states.error 에 정의 + 룰 #3 충족.
+    - id: 3
+      rule: "Error message 가 해당 입력 직하 (alert 박스 금지)"
+      satisfied_by: |
+        실패 시 row 직하 inline 영역(.row-error)에 에러 메시지 노출 +
+        SaveErrorToast 는 보조 (모바일 UX 권장 — 사용자 시선 row 부근)

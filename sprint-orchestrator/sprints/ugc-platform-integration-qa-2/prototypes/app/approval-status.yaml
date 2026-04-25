@@ -1,0 +1,24 @@
+# Approval Status — ugc-platform-integration-qa-2 / app prototypes
+
+tasks:
+  app-020:
+    NotificationCenterScreen:
+      status: pending
+      spec: "app-020/screen-spec.yaml"
+      intent: "app-020/NotificationCenterScreen.intent.md"
+      prototype: "app-020/prototype.html#NotificationCenterScreen"
+      screenshot: "app-020/screenshots/NotificationCenterScreen-default.png"
+      states_captured: [default, loading, empty, error]
+      archetype: feed
+      figma_frame: "37211:167171"
+      quality_score: "1.0 / 1.0"
+      fabrication_risk: low
+      anti_slop_audit: passed
+      anti_slop_score: "10/10"
+      archetype_persona_score: "4/4"
+      exemplar_drift_warning: false
+      exemplar_inlined: "v2-dogfood-free-tab-app-001-freetabscreen"
+      reviewed_at: null
+      notes: |
+        First exemplar 인라인 라이브 운영. list-vs-grid 자연 차별로 drift 없음.
+        Empty state 본 화면 reference — 0건 실 분기는 app-021 별 화면 (예정).

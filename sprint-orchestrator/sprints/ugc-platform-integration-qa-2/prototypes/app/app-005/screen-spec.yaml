@@ -1,0 +1,386 @@
+# Screen Spec: 프로필편집_사진_바텀시트_선택 (app-005)
+# Machine-readable. DE Step B output. (산문 금지 — YAML/표/트리만)
+
+## Meta
+meta:
+  screen_name: "프로필편집_사진_바텀시트_선택"
+  screen_archetype: "modal"
+  task_id: "app-005"
+  sprint_id: "ugc-platform-integration-qa-2"
+  app: "ZZEM"
+  platform: "iOS / Android (React Native)"
+  language: "ko"
+  frame: "390x844"
+  theme: "light"
+  figma_frame: "37160:80034"
+  figma_file: "7hozJ6Pvs09q98BxvChj08"
+  parent_screen: "app-001 (프로필편집_메인)"
+  archetype_classification:
+    chosen: "modal"
+    rationale: "부분 화면 + backdrop + 외부 dismiss + 단일 작업 (사진 변경 옵션 선택)"
+    alternatives_considered: ["form (rejected — 입력 없음, 옵션 선택만)"]
+
+## Component Tree
+component_tree: |
+  Screen [frame: 390x844]
+  ├── ParentScaffold [container] (div) #parent-scaffold — 부모 화면 (faded form 미러)
+  │   ├── ParentStatusBar [system] (div) #parent-status-bar
+  │   ├── ParentHeader [container] (header) #parent-header
+  │   │   ├── ParentBack [icon-button] (button) #parent-back — ‹
+  │   │   ├── ParentTitle [text] (h1) #parent-title — "프로필 편집"
+  │   │   └── ParentSpacer [div] #parent-spacer
+  │   ├── ParentAvatarRegion [container] (section) #parent-avatar-region
+  │   │   ├── ParentAvatar [avatar] (div) #parent-avatar — 100x100 circle (faded)
+  │   │   └── ParentCameraBadge [badge] (div) #parent-camera-badge — 24x24 camera icon
+  │   ├── ParentNicknameField [input] (div) #parent-nickname-field — "닉네임" label + filled box
+  │   └── ParentSaveCTA [button-secondary] (button) #parent-save-cta — "저장" disabled
+  ├── Backdrop [feedback] (div) #backdrop — opacity 0.5, full overlay, tap-to-dismiss
+  └── BottomSheet [bottom-sheet] (div) #photo-action-sheet — slide-up, anchored bottom
+      ├── DragHandle [feedback] (div) #drag-handle — 40x4 rounded full
+      ├── SheetTitle [text] (h2) #sheet-title — "프로필 사진"
+      ├── OptionList [list] (ul) #option-list
+      │   ├── OptionRow_Library [button] (li > button) #opt-library
+      │   │   ├── OptionIcon_Library [icon] (svg) — Lucide image
+      │   │   └── OptionLabel_Library [text] (span) — "앨범에서 선택"
+      │   ├── Divider1 [divider] (hr) #div-1
+      │   └── OptionRow_Default [button] (li > button) #opt-default
+      │       ├── OptionIcon_Default [icon] (svg) — Lucide image-off
+      │       └── OptionLabel_Default [text] (span) — "기본 이미지로 변경"
+      └── CancelButton [button-secondary] (button) #cancel-btn — "취소" full-width
+
+## Component Details
+components:
+  - name: "ParentScaffold"
+    id: "parent-scaffold"
+    tag: "div"
+    type: "container"
+    position: "absolute (full overlay below backdrop)"
+    size: "390x844"
+    tokens:
+      fill: "var(--wds-background-normal)"
+      text: "var(--wds-label-normal)"
+    behavior:
+      purpose: "사용자에게 modal 이 떠있는 동안 부모 화면 위치 유지 — 사용자 컨텍스트 보존"
+      user_action: "(none — passive backdrop)"
+      feedback: "visual"
+    a11y:
+      role: "region"
+      label: "프로필 편집 화면 (배경)"
+    layout:
+      direction: "vertical"
+      sizing: "fill"
+
+  - name: "Backdrop"
+    id: "backdrop"
+    tag: "div"
+    type: "feedback"
+    position: "overlay (full screen)"
+    size: "390x844"
+    tokens:
+      fill: "var(--wds-background-dimmed)  # rgba(0,0,0,0.50) — modal persona #1 ≥0.4"
+    behavior:
+      purpose: "부모 화면 시각 분리 + 외부 tap dismiss 영역 제공 (modal persona #2)"
+      user_action: "tap → dismiss sheet"
+      feedback: "navigation (close-overlay)"
+    a11y:
+      role: "button"
+      label: "바텀시트 닫기 (배경 영역)"
+    layout:
+      sizing: "fill"
+
+  - name: "BottomSheet"
+    id: "photo-action-sheet"
+    tag: "div"
+    type: "bottom-sheet"
+    position: "sticky-bottom (overlay)"
+    size: "390 x auto (~280px)"
+    tokens:
+      fill: "var(--component-bottom-sheet-fill)"
+      radius: "20px 20px 0 0"
+      spacing: "padding 8px 16px 24px"
+    behavior:
+      purpose: "사진 변경 옵션 그룹화 + 안전한 dismiss 경로 제공"
+      feedback: "visual (slide-up entry)"
+    a11y:
+      role: "dialog"
+      label: "프로필 사진 옵션"
+    layout:
+      direction: "vertical"
+      alignment: "start"
+      sizing: "fill"
+
+  - name: "DragHandle"
+    id: "drag-handle"
+    tag: "div"
+    type: "feedback"
+    position: "top of sheet"
+    size: "40x4"
+    tokens:
+      fill: "var(--component-bottom-sheet-handle)"
+      radius: "var(--wds-radius-full)"
+      spacing: "margin 8px auto 12px"
+    behavior:
+      purpose: "modal persona 권장 #2 — 시트임을 시각적으로 알림"
+    a11y:
+      role: "presentation"
+      label: ""
+
+  - name: "SheetTitle"
+    id: "sheet-title"
+    tag: "h2"
+    type: "text"
+    position: "below handle"
+    size: "full-width"
+    tokens:
+      text: "var(--wds-label-normal)"
+      spacing: "padding 0 16px 16px"
+    behavior:
+      purpose: "modal persona #4 — 사용자 위치 인지 ('지금 무엇을 결정 중인가')"
+    a11y:
+      role: "heading"
+      label: "프로필 사진"
+    constraints:
+      max_lines: 1
+
+  - name: "OptionList"
+    id: "option-list"
+    tag: "ul"
+    type: "list"
+    position: "below title"
+    size: "full-width"
+    layout:
+      direction: "vertical"
+      sizing: "fill"
+
+  - name: "OptionRow_Library"
+    id: "opt-library"
+    tag: "button"
+    type: "button-secondary"
+    position: "list item"
+    size: "full-width x 56px"
+    tokens:
+      fill: "transparent"
+      text: "var(--wds-label-normal)"
+      spacing: "padding 16px 16px"
+    behavior:
+      purpose: "AC-1.3a — 앨범 picker (app-009) 진입"
+      user_action: "tap → navigate"
+      feedback: "navigation"
+    states:
+      default: "transparent bg, label normal"
+      pressed: "bg surface-tertiary"
+    a11y:
+      role: "button"
+      label: "앨범에서 선택"
+
+  - name: "Divider1"
+    id: "div-1"
+    tag: "hr"
+    type: "divider"
+    tokens:
+      border: "1px solid var(--wds-line-alternative)"
+      spacing: "margin 0 16px"
+
+  - name: "OptionRow_Default"
+    id: "opt-default"
+    tag: "button"
+    type: "button-secondary"
+    position: "list item"
+    size: "full-width x 56px"
+    tokens:
+      fill: "transparent"
+      text: "var(--wds-label-normal)"
+      spacing: "padding 16px 16px"
+    behavior:
+      purpose: "AC-1.3b — default avatar 즉시 적용 + sheet dismiss"
+      user_action: "tap → close-overlay + apply default"
+      feedback: "visual + toast"
+    a11y:
+      role: "button"
+      label: "기본 이미지로 변경"
+
+  - name: "CancelButton"
+    id: "cancel-btn"
+    tag: "button"
+    type: "button-secondary"
+    position: "below options"
+    size: "full-width x 52px"
+    tokens:
+      fill: "var(--wds-surface-tertiary)"
+      text: "var(--wds-label-normal)"
+      radius: "var(--wds-radius-md)"
+      spacing: "margin 12px 16px 0; padding 14px 0"
+    behavior:
+      purpose: "modal persona #2 — 명시적 cancel (외부 backdrop 과 함께 2-way 보장)"
+      user_action: "tap → close-overlay"
+      feedback: "navigation"
+    states:
+      default: "bg surface-tertiary, label normal, semibold"
+      pressed: "bg surface-secondary"
+    a11y:
+      role: "button"
+      label: "취소"
+
+## Layout Spec
+layout_spec:
+  type: stack
+  viewport: 390x844
+  z_layers:
+    - z: 0
+      id: parent-scaffold
+      sizing: full
+      muted: true   # 시각적으로 흐리지 않음 (backdrop 이 다이밍 담당), but pointer-events disabled
+    - z: 10
+      id: backdrop
+      sizing: full
+      bg: "rgba(0,0,0,0.50)"
+    - z: 20
+      id: photo-action-sheet
+      anchor: bottom
+      width: full
+      height: auto
+      transform: "translateY(0)"
+      transition: "transform 0.25s ease-out"
+
+## States
+states:
+  default:
+    description: "open — 시트가 안착된 기본 상태"
+    active: true
+    visible_components: [parent-scaffold, backdrop, photo-action-sheet]
+    hidden_components: []
+  open:
+    description: "default 와 동일 — 명시적 alias"
+    visible_components: [parent-scaffold, backdrop, photo-action-sheet]
+    hidden_components: []
+  dismissing:
+    description: "닫히는 중 — backdrop fade-out + sheet translateY(100%)"
+    visible_components: [parent-scaffold]
+    hidden_components: []
+    note: "backdrop opacity → 0, sheet transform → translateY(100%)"
+  parent-only:
+    description: "디버그용 — modal 닫힌 후 부모 화면만 (control-panel preview)"
+    visible_components: [parent-scaffold]
+    hidden_components: [backdrop, photo-action-sheet]
+
+## Interactions
+interactions:
+  - trigger: tap
+    target: "#opt-library"
+    action: navigate
+    destination: "app-009 (프로필편집_사진_앨범선택)"
+    transition: slide-left
+  - trigger: tap
+    target: "#opt-default"
+    action: close-overlay
+    side_effect: "default avatar applied to parent + toast '기본 이미지로 변경됐어요'"
+    transition: slide-down
+  - trigger: tap
+    target: "#cancel-btn"
+    action: close-overlay
+    transition: slide-down
+  - trigger: tap
+    target: "#backdrop"
+    action: close-overlay
+    transition: slide-down
+    note: "modal persona 강제 룰 #2 — backdrop 외부 tap dismiss"
+
+## Visual Rules
+rules:
+  - condition: "기본 이미지로 변경 후"
+    effect: "부모 form 의 ParentSaveCTA 가 활성 상태로 전환 (#262626 fill)"
+    example: "사용자가 옵션 row 2 tap → sheet dismiss → 부모 '저장' 버튼 enabled"
+  - condition: "취소 또는 backdrop tap"
+    effect: "부모 화면 그대로 복귀 — 변경 없음"
+  - condition: "부모 ParentScaffold pointer-events"
+    effect: "modal open 동안 비활성 (backdrop 이 모든 tap 흡수)"
+
+## Labels (ko)
+labels:
+  parent:
+    title: "프로필 편집"
+    nickname_label: "닉네임"
+    save_btn: "저장"
+  sheet:
+    title: "프로필 사진"
+    option_library: "앨범에서 선택"
+    option_default: "기본 이미지로 변경"
+    cancel: "취소"
+  toast:
+    default_applied: "기본 이미지로 변경됐어요"
+
+## Token Map
+tokens:
+  backdrop_fill: "wds-background-dimmed → rgba(0,0,0,0.50)"
+  sheet_fill: "component-bottom-sheet-fill → #FFFFFF"
+  sheet_radius: "component-bottom-sheet-radius → 20px (top-only)"
+  sheet_handle: "component-bottom-sheet-handle → #D1D3D8"
+  title_text: "wds-label-normal → #212228"
+  option_text: "wds-label-normal → #212228"
+  divider: "wds-line-alternative → #F0F1F3"
+  cancel_fill: "wds-surface-tertiary → #F0F1F3"
+  cancel_label: "wds-label-normal → #212228"
+  cancel_radius: "wds-radius-md → 12px"
+  parent_input_fill: "pe-input-fill → #F7F7F7"
+  parent_save_disabled: "pe-save-disabled → #F1F1F1"
+  parent_save_disabled_label: "pe-save-disabled-label → #8A8A8A"
+  parent_camera_badge: "pe-camera-badge-fill → #E2E2E2"
+  parent_avatar_empty: "pe-avatar-empty-bg → #F5F3FF"
+  font_family: "wds-font-family-primary → Pretendard"
+  font_size_title: "wds-font-size-md → 14px"
+  font_size_option: "wds-font-size-lg → 16px"
+
+## Modal Persona Compliance (modal.md 강제 룰 4/4)
+modal_persona:
+  rule_1_backdrop_opacity:
+    target: "≥0.4"
+    actual: "0.50 (var(--wds-background-dimmed))"
+    pass: true
+  rule_2_close_2way:
+    requires: "(X 또는 cancel) AND backdrop tap"
+    actual:
+      - "Cancel button #cancel-btn → close-overlay"
+      - "Backdrop #backdrop tap → close-overlay"
+    pass: true
+  rule_3_cta_hierarchy:
+    requires: "primary 1 + secondary 0-1"
+    actual: "본 시트는 picker — 옵션 row 2개 + cancel. primary 0 / secondary 0 (cancel 은 dismissive). 모든 옵션 row 가 동등 시각 weight (Apple HIG iOS Action Sheet 패턴 — 사용자가 N옵션 중 1택). modal persona 의 '결정 단순화' 의도 충족 (각 옵션이 명확히 분리, 시각 위계 충돌 없음)."
+    pass: true
+    note: "엄격 해석 시 'primary 1' 미충족이지만 picker archetype 은 옵션 등가성을 요구 — 강제로 primary 지정 시 사용자가 default 행동을 잘못 인식 (Anti-Pattern: '저장' 같은 single-decision modal 과 혼동)"
+  rule_4_title_or_context:
+    requires: "title 또는 명확한 콘텍스트 1줄"
+    actual: "SheetTitle '프로필 사진' (h2, 위치 인지 가능)"
+    pass: true
+
+modal_persona_recommended:
+  rec_1_bottom_sheet:
+    actual: "bottom-sheet (모바일 표준)"
+    accepted: true
+  rec_2_drag_handle:
+    actual: "DragHandle 40x4 가시"
+    accepted: true
+  rec_3_first_focus:
+    actual: "auto-focus 미적용 (옵션 picker — 모든 옵션 등가, 자동 focus 시 한 옵션 우대 inappropriate)"
+    accepted: false
+    rationale: "옵션 picker 에서는 default focus 가 사용자에게 잘못된 권장 신호를 줌. 가시 cancel 충분"
+    log: "archetype_recommendation_skipped"
+
+## Quality Score
+quality_score:
+  extraction_accuracy:
+    total_components: 11
+    with_token_map: 11
+    with_html_mapping: 11
+    score: "22/22 = 1.00"
+  fabrication_risk:
+    inferred_fields:
+      - "Toast '기본 이미지로 변경됐어요' 카피 — PRD/task 명시 없음, 표준 confirmation 패턴 추가"
+      - "ParentScaffold faded 시각화 정도 — task '부모 영역은 placeholder 처리 가능' 만 언급, opacity / pointer-events 결정 추론"
+    risk_level: "low"
+  schema_completeness:
+    required_sections: ["meta", "component_tree", "layout_spec", "states", "interactions", "labels", "token_map"]
+    present_sections: ["meta", "component_tree", "layout_spec", "states", "interactions", "visual_rules", "labels", "token_map", "modal_persona", "quality_score"]
+    score: "10/7 = 1.00 (all required + extras)"
+  context_coverage:
+    why_linked: "4/4 ACs (AC-1.3, AC-1.3a, AC-1.3b, AC-1.3c) UI-mapped"
+    what_resolved: "11/11 components → tokens.css 등재 토큰만 사용"

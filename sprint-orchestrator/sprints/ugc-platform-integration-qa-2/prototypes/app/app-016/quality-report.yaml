@@ -1,0 +1,166 @@
+# Quality Report — app-016 / OtherProfileScreen-Unblocked
+# Sprint: ugc-platform-integration-qa-2
+# Generated: 2026-04-25 (DE Phase 3 v2 pipeline)
+
+task_id: app-016
+screen: OtherProfileScreen-Unblocked
+archetype: detail
+figma_frame: "37211:162146"
+
+# ─────────────────────────────
+# Pass 6 Anti-Slop Audit (10 checks — .screen 후손만 평가, .control-panel 제외)
+# ─────────────────────────────
+anti_slop_audit:
+  status: passed
+  score: "9/9 (#10 N/A — exemplar 미인라인)"
+  checks:
+    - id: 1
+      name: "hex-not-in-tokens"
+      result: pass
+      detail: |
+        prototype.html 의 모든 hex 값은 (a) sprint tokens.css 에 등재 또는
+        (b) prototype 내 :root 의 sprint-aliases (--thumb-*, --card-*) 로 선언됨.
+        gradient-token kind (feed_thumbnails) 의 색상은 context-engine assets 에 출처 기록.
+        control-panel-only (#1a1a2e, #2a2a3e, #e0e0e0, #E7E8EB, #888, #444, #bbb, #999) 는 audit 제외 영역.
+    - id: 2
+      name: "emoji-on-interactive"
+      result: pass
+      detail: "모든 button/tab/nav 는 lucide inline SVG 사용. body 텍스트 내 emoji 없음."
+    - id: 3
+      name: "border-left card slop"
+      result: pass
+      detail: "border-left: Npx solid var(--*) 패턴 0건"
+    - id: 4
+      name: "font-family non-Pretendard inside .screen"
+      result: pass
+      detail: |
+        .screen 후손 font-family 는 'inherit' (기본 Pretendard) 만 사용.
+        ui-monospace 사용은 control-panel 영역 한정 (audit 제외).
+    - id: 5
+      name: "brand purple gradient on background"
+      result: pass
+      detail: "linear-gradient(... #8752FA ...) 사용 0건. 보라는 단색 brand-primary 만 사용 (button-primary fill)."
+    - id: 6
+      name: "placeholder-image on main content"
+      result: pass
+      detail: |
+        meme-card 내 .placeholder-image × 6 — context-engine assets.feed_thumbnails.kind=gradient-token,
+        needs_real_content=false (ugc-platform-002 app-006 패턴 답습). 면제 룰 적용.
+    - id: 7
+      name: "interaction binding parity"
+      result: pass
+      detail: |
+        Spec interactions 8개 (back, more, follow toggle, message, tab×n, card×n, nav×n, toast auto).
+        DOM 8 addEventListener 그룹 + setTimeout(toast). 정합성 OK.
+    - id: 8
+      name: "alert/confirm/prompt"
+      result: pass
+      detail: "alert(), confirm(), prompt() 사용 0건. 모든 피드백은 toast + console.log."
+    - id: 9
+      name: "archetype persona enforced"
+      result: pass
+      score: "4/4"
+      detail: "detail persona 4 강제 룰 모두 통과 (아래 archetype_persona 참조)"
+    - id: 10
+      name: "exemplar drift"
+      result: skipped
+      detail: "detail archetype — 이 스프린트에서 exemplar 인라인 없음 (feed 만 해당)"
+
+# ─────────────────────────────
+# Archetype Persona — detail (강제 룰 4개)
+# ─────────────────────────────
+archetype_persona:
+  archetype: detail
+  status: passed
+  score: "4/4"
+  rules:
+    - id: 1
+      name: "Hero 영역 320px+"
+      result: pass
+      evidence: |
+        .profile-hero { min-height: 320px; padding: 24px 20px 16px; gap: 16px; }
+        avatar(100) + nickname(~24) + bio(~20) + count-row(~48) + cta-row(40) + paddings ≥ 320px.
+    - id: 2
+      name: "Back 1-way 보장"
+      result: pass
+      evidence: "#btn-back (좌상단 ←) 만 노출. swipe-down/close 미 추가 — Back 단일 경로."
+    - id: 3
+      name: "핵심 metadata 4 이내"
+      result: pass
+      evidence: "count-row 3 tiles (팔로워 1.2만 / 팔로잉 248 / 게시물 86) — 4 이내."
+    - id: 4
+      name: "Primary CTA 1 + secondary 0-2"
+      result: pass
+      evidence: |
+        primary: .btn-primary#btn-follow × 1 (팔로우 — brand fill)
+        secondary: .btn-secondary#btn-message × 1 (메시지 — neutral fill)
+        icon-only ghost: #btn-more × 1 (header 우상단)
+        합계 primary 1 + secondary 2 (경계 충족).
+  recommendations:
+    - id: rec-1
+      name: "Sticky bottom CTA"
+      taken: false
+      reason: "프로필 hero 가 즉시 가시 + 콘텐츠 그리드 진입 후 follow 액션 빈도 낮음. dual-btn-row 가 hero 직하 고정 노출되어 권장 룰 충족 효과 유사."
+      logged_as: "archetype_recommendation_skipped"
+    - id: rec-2
+      name: "관련 항목/추천 섹션"
+      taken: false
+      reason: "차단 해제 직후 컨텍스트 — 추천 섹션은 PRD scope 외. dead-end 위험은 BottomNav (홈/검색/MY) 로 완화."
+      logged_as: "archetype_recommendation_skipped"
+    - id: rec-3
+      name: "Hero 이미지 16:9 또는 1:1"
+      taken: not-applicable
+      reason: "프로필 hero 는 banner 이미지 없이 avatar + 텍스트 중심 — 비율 룰 N/A."
+
+# ─────────────────────────────
+# Quality Score (Spec self-review B.5)
+# ─────────────────────────────
+quality_score:
+  extraction_accuracy: "26 / 26 = 1.0"
+  schema_completeness: "7 / 7 = 1.0"
+  fabrication_risk: low
+  fabrication_risk_inferred:
+    - "Bio 한 줄 콘텐츠 (Hero ≥320px 충족용 표준 detail hero 패턴)"
+    - "Count tile mock 값 (1.2만 / 248 / 86)"
+    - "팔로우 button 시각 toggle 동작 (PRD 미명시, 표준 패턴)"
+    - "Bottom nav active=search (진입 경로 가정)"
+  context_coverage:
+    why_linked: "2 / 2 = 1.0 (AC-2.3, AC-2.5)"
+    what_resolved: "13 / 13 = 1.0"
+
+# ─────────────────────────────
+# Asset Layer (context-engine.yaml § assets)
+# ─────────────────────────────
+assets:
+  avatars:
+    kind: gradient-token
+    needs_real_content: false
+    note: "타유저 avatar — initial 'M' fallback (Sprint Lead 명시 fallback OK)"
+  feed_thumbnails:
+    kind: gradient-token
+    needs_real_content: false
+    note: "6 cells 카테고리 그라디언트, sprint-aliases 등재 — Pass 6 #1·#6 모두 통과"
+  icons:
+    kind: illustration
+    needs_real_content: false
+    note: "lucide inline SVG (ArrowLeft, MoreVertical, Grid, Lock, Heart, Home, Search, User, Check)"
+
+# ─────────────────────────────
+# Files
+# ─────────────────────────────
+files:
+  context_engine: "context-engine.yaml"
+  spec: "OtherProfileScreen-Unblocked.spec.md"
+  intent: "OtherProfileScreen-Unblocked.intent.md"
+  prototype_alpha: "prototype-alpha.html"
+  prototype: "prototype.html"
+  quality_report: "quality-report.yaml"
+
+# ─────────────────────────────
+# Approval (pending Sprint Lead)
+# ─────────────────────────────
+approval:
+  status: pending
+  reviewer: null
+  reviewed_at: null
+  notes: ""

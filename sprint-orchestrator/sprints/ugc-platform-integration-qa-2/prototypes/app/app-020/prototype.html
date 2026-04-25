@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>app-020 알림센터_기본 Prototype</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+  <style>
+    /* ============================================================
+     * Design Tokens — inlined from
+     * sprint-orchestrator/sprints/ugc-platform-integration-qa-2/prototypes/context/tokens.css
+     * ============================================================ */
+    :root {
+      /* === PRIMITIVE - Color Purple (Brand) === */
+      --wds-color-purple-50:  #F5F0FF;
+      --wds-color-purple-100: #EBE1FF;
+      --wds-color-purple-400: #A17BFF;
+      --wds-color-purple-500: #8752FA;
+      --wds-color-purple-600: #7040E0;
+      --wds-color-purple-700: #5A30C0;
+
+      /* === PRIMITIVE - Color Neutral === */
+      --wds-color-neutral-0:   #FFFFFF;
+      --wds-color-neutral-50:  #F7F8F9;
+      --wds-color-neutral-100: #F0F1F3;
+      --wds-color-neutral-200: #E4E5E9;
+      --wds-color-neutral-300: #D1D3D8;
+      --wds-color-neutral-400: #B5B8BF;
+      --wds-color-neutral-500: #8E9199;
+      --wds-color-neutral-600: #6B6E76;
+      --wds-color-neutral-700: #46474C;
+      --wds-color-neutral-900: #212228;
+      --wds-color-neutral-1000: #000000;
+
+      /* === PRIMITIVE - Status === */
+      --wds-color-red-100:    #FFE5E3;
+      --wds-color-red-500:    #FF3B30;
+      --wds-color-red-600:    #E0241A;
+      --wds-color-green-500:  #34C759;
+      --wds-color-yellow-500: #FFCC00;
+
+      /* === SEMANTIC - Background === */
+      --wds-background-normal:    var(--wds-color-neutral-0);
+      --wds-background-elevated:  var(--wds-color-neutral-0);
+      --wds-background-dimmed:    rgba(0, 0, 0, 0.50);
+
+      /* === SEMANTIC - Surface === */
+      --wds-surface-primary:   var(--wds-color-neutral-0);
+      --wds-surface-secondary: var(--wds-color-neutral-50);
+      --wds-surface-tertiary:  var(--wds-color-neutral-100);
+
+      /* === SEMANTIC - Fill === */
+      --wds-fill-brand-primary: var(--wds-color-purple-500);
+      --wds-fill-brand-weak:    var(--wds-color-purple-50);
+      --wds-fill-brand-strong:  var(--wds-color-purple-600);
+      --wds-fill-neutral:       var(--wds-color-neutral-100);
+      --wds-fill-status-error:  var(--wds-color-red-500);
+      --wds-fill-status-error-strong: var(--wds-color-red-600);
+      --wds-fill-status-error-weak:   var(--wds-color-red-100);
+
+      /* === SEMANTIC - Label === */
+      --wds-label-normal:       var(--wds-color-neutral-900);
+      --wds-label-alternative:  var(--wds-color-neutral-600);
+      --wds-label-assistive:    var(--wds-color-neutral-500);
+      --wds-label-disabled:     var(--wds-color-neutral-300);
+      --wds-label-inverse:      var(--wds-color-neutral-0);
+      --wds-label-brand:        var(--wds-color-purple-500);
+      --wds-label-error:        var(--wds-color-red-500);
+
+      /* === SEMANTIC - Line === */
+      --wds-line-normal:       var(--wds-color-neutral-200);
+      --wds-line-alternative:  var(--wds-color-neutral-100);
+
+      /* === SEMANTIC - Status === */
+      --wds-status-error: var(--wds-color-red-500);
+
+      /* === COMPONENT - Avatar === */
+      --component-avatar-fill: var(--wds-surface-tertiary);
+      --component-avatar-ring: var(--wds-line-normal);
+
+      /* === SPACING (4px grid) === */
+      --wds-spacing-0:  0px;
+      --wds-spacing-1:  1px;
+      --wds-spacing-2:  2px;
+      --wds-spacing-4:  4px;
+      --wds-spacing-6:  6px;
+      --wds-spacing-8:  8px;
+      --wds-spacing-10: 10px;
+      --wds-spacing-12: 12px;
+      --wds-spacing-14: 14px;
+      --wds-spacing-16: 16px;
+      --wds-spacing-20: 20px;
+      --wds-spacing-24: 24px;
+      --wds-spacing-28: 28px;
+      --wds-spacing-32: 32px;
+      --wds-spacing-40: 40px;
+      --wds-spacing-48: 48px;
+      --wds-spacing-56: 56px;
+      --wds-spacing-64: 64px;
+      --wds-spacing-80: 80px;
+
+      /* === RADIUS === */
+      --wds-radius-none: 0px;
+      --wds-radius-xs:   4px;
+      --wds-radius-sm:   8px;
+      --wds-radius-md:   12px;
+      --wds-radius-lg:   16px;
+      --wds-radius-xl:   20px;
+      --wds-radius-2xl:  24px;
+      --wds-radius-full: 9999px;
+
+      /* === TYPOGRAPHY === */
+      --wds-font-family-primary: 'Pretendard', -apple-system, 'SF Pro Display', sans-serif;
+      --wds-font-weight-regular:  400;
+      --wds-font-weight-medium:   500;
+      --wds-font-weight-semibold: 600;
+      --wds-font-weight-bold:     700;
+      --wds-font-size-2xs: 11px;
+      --wds-font-size-xs:  12px;
+      --wds-font-size-sm:  13px;
+      --wds-font-size-md:  14px;
+      --wds-font-size-lg:  16px;
+      --wds-font-size-xl:  18px;
+      --wds-font-size-2xl: 20px;
+      --wds-font-size-3xl: 24px;
+
+      /* === Brand convenience aliases === */
+      --color-brand-primary:   var(--wds-color-purple-500);
+      --color-bg-normal:       var(--wds-color-neutral-0);
+      --color-fill-neutral:    var(--wds-color-neutral-100);
+      --color-label-normal:    var(--wds-color-neutral-900);
+      --color-label-assistive: var(--wds-color-neutral-500);
+
+      /* === Sprint-level aliases (app-020 알림센터) === */
+      --thumb-purple-start: var(--wds-color-purple-100);
+      --thumb-purple-end:   var(--wds-color-purple-400);
+      --thumb-neutral-start: var(--wds-color-neutral-100);
+      --thumb-neutral-end:   var(--wds-color-neutral-300);
+    }
+
+    /* === Reset === */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--wds-font-family-primary);
+      background: #f0f0f0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 16px;
+    }
+
+    /* === Control Panel (리뷰어용, device frame 외부 — Pass 6 검사 제외) === */
+    .control-panel {
+      width: 390px;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      border-radius: 12px 12px 0 0;
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 13px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+    .control-panel__row { display: flex; align-items: center; gap: 8px; }
+    .control-panel__label { color: #888; font-size: 11px; min-width: 48px; }
+    .control-panel select {
+      background: #2a2a3e; color: #e0e0e0; border: 1px solid #444;
+      border-radius: 6px; padding: 4px 8px; font-size: 12px; flex: 1;
+    }
+    .control-panel__states { display: flex; gap: 4px; flex-wrap: wrap; }
+    .control-panel__state-btn {
+      background: #2a2a3e; color: #888; border: 1px solid #444;
+      border-radius: 6px; padding: 4px 10px; font-size: 11px; cursor: pointer;
+      transition: all 0.15s;
+    }
+    .control-panel__state-btn.active {
+      background: var(--color-brand-primary);
+      color: #fff;
+      border-color: var(--color-brand-primary);
+    }
+    .control-panel__breadcrumb { color: #666; font-size: 11px; font-family: ui-monospace, monospace; }
+
+    /* === Device Frame === */
+    .device-frame {
+      width: 390px;
+      height: 844px;
+      background: var(--wds-background-normal);
+      overflow: hidden;
+      position: relative;
+      border: 1px solid #ddd;
+      border-radius: 0 0 12px 12px;
+    }
+
+    /* === Screen === */
+    .screen {
+      display: none;
+      flex-direction: column;
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+    .screen.active { display: flex; }
+
+    /* === Transitions === */
+    @keyframes slideLeftIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+    @keyframes slideRightIn { from { transform: translateX(-100%); } to { transform: translateX(0); } }
+    @keyframes slideUpIn { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .transition-slide-left { animation: slideLeftIn 0.3s ease-out; }
+    .transition-slide-right { animation: slideRightIn 0.3s ease-out; }
+    .transition-slide-up { animation: slideUpIn 0.3s ease-out; }
+    .transition-fade { animation: fadeIn 0.2s ease-out; }
+
+    /* === State Visibility === */
+    [data-state] { display: none; }
+    [data-state].state-active { display: flex; }
+
+    /* === Toast === */
+    .toast {
+      position: absolute;
+      left: 50%;
+      bottom: 32px;
+      transform: translateX(-50%);
+      background: var(--wds-color-neutral-900);
+      color: var(--wds-label-inverse);
+      padding: 12px 20px;
+      border-radius: var(--wds-radius-md);
+      font-size: var(--wds-font-size-sm);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease-out;
+      z-index: 200;
+      max-width: 320px;
+      text-align: center;
+    }
+    .toast.show { opacity: 1; }
+
+    /* ============================================================
+     * Per-screen styles — NotificationCenterScreen (app-020)
+     * ============================================================ */
+
+    /* StatusBar (system mock) */
+    .status-bar {
+      flex: 0 0 auto;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 var(--wds-spacing-20);
+      font-size: var(--wds-font-size-sm);
+      color: var(--wds-label-normal);
+      font-weight: var(--wds-font-weight-semibold);
+    }
+    .status-bar__icons {
+      display: flex;
+      gap: var(--wds-spacing-4);
+      align-items: center;
+      color: var(--wds-label-normal);
+    }
+
+    /* Header */
+    .notification-header {
+      flex: 0 0 auto;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 var(--wds-spacing-8) 0 var(--wds-spacing-4);
+      border-bottom: 1px solid var(--wds-line-alternative);
+      background: var(--wds-background-normal);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .header-icon-btn {
+      width: 44px;
+      height: 44px;
+      border: none;
+      background: transparent;
+      border-radius: var(--wds-radius-full);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--wds-label-normal);
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+    .header-icon-btn:active { background: var(--wds-surface-secondary); }
+    .header-title {
+      font-size: var(--wds-font-size-lg);
+      font-weight: var(--wds-font-weight-semibold);
+      color: var(--wds-label-normal);
+      letter-spacing: -0.2px;
+    }
+
+    /* Body scroll */
+    .body-scroll {
+      flex: 1 1 auto;
+      overflow-y: auto;
+      overflow-x: hidden;
+      background: var(--wds-background-normal);
+      position: relative;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-y: contain;
+    }
+
+    /* Pull-to-refresh indicator */
+    .pull-indicator {
+      position: absolute;
+      top: 8px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-32px);
+      width: 32px;
+      height: 32px;
+      border-radius: var(--wds-radius-full);
+      background: var(--wds-background-normal);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--wds-label-brand);
+      opacity: 0;
+      transition: opacity 0.18s ease, transform 0.18s ease;
+      z-index: 5;
+    }
+    .pull-indicator.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(8px);
+    }
+    .pull-indicator svg { animation: spin 0.9s linear infinite; }
+    @keyframes spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
+
+    /* Notification list (default state) */
+    .notification-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .notification-row {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--wds-spacing-12);
+      padding: var(--wds-spacing-12) var(--wds-spacing-16);
+      min-height: 72px;
+      border-bottom: 1px solid var(--wds-line-alternative);
+      background: var(--wds-background-normal);
+      cursor: pointer;
+      position: relative;
+      transition: background 0.15s ease;
+    }
+    .notification-row:active { background: var(--wds-surface-secondary); }
+    .notification-row.unread {
+      background: var(--wds-fill-brand-weak);
+    }
+    .notification-row.unread:active {
+      background: var(--wds-color-purple-100);
+    }
+
+    /* Unread dot */
+    .unread-dot {
+      position: absolute;
+      left: var(--wds-spacing-6);
+      top: 50%;
+      width: 6px;
+      height: 6px;
+      border-radius: var(--wds-radius-full);
+      background: var(--wds-fill-brand-primary);
+      transform: translateY(-50%);
+    }
+    .notification-row.read .unread-dot { display: none; }
+
+    /* Avatar */
+    .actor-avatar {
+      flex: 0 0 auto;
+      width: 40px;
+      height: 40px;
+      border-radius: var(--wds-radius-full);
+      background: var(--wds-fill-brand-weak);
+      color: var(--wds-label-brand);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--wds-font-size-md);
+      font-weight: var(--wds-font-weight-semibold);
+      position: relative;
+      overflow: hidden;
+    }
+    .actor-avatar.brand-strong {
+      background: var(--wds-color-purple-500);
+      color: var(--wds-label-inverse);
+    }
+    .actor-avatar.neutral {
+      background: var(--wds-color-neutral-100);
+      color: var(--wds-label-alternative);
+    }
+    .actor-avatar.brand-mid {
+      background: var(--wds-color-purple-100);
+      color: var(--wds-color-purple-700);
+    }
+
+    /* Type icon overlay (small badge bottom-right of avatar) */
+    .type-icon-badge {
+      position: absolute;
+      right: -2px;
+      bottom: -2px;
+      width: 18px;
+      height: 18px;
+      border-radius: var(--wds-radius-full);
+      background: var(--wds-background-normal);
+      border: 1.5px solid var(--wds-background-normal);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--wds-label-brand);
+    }
+    .type-icon-badge.like   { color: var(--wds-fill-status-error); }
+    .type-icon-badge.follow { color: var(--wds-color-purple-500); }
+    .type-icon-badge.comment{ color: var(--wds-color-purple-600); }
+    .type-icon-badge.news   { color: var(--wds-label-alternative); }
+    .avatar-wrap {
+      position: relative;
+      flex: 0 0 auto;
+      width: 40px;
+      height: 40px;
+    }
+
+    /* Body text column */
+    .row-body {
+      flex: 1 1 auto;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: var(--wds-spacing-4);
+    }
+    .row-text {
+      font-size: var(--wds-font-size-md);
+      line-height: 1.4;
+      color: var(--wds-label-normal);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      word-break: keep-all;
+    }
+    .row-text strong {
+      font-weight: var(--wds-font-weight-semibold);
+      color: var(--wds-label-normal);
+    }
+    .row-text .row-comment-quote {
+      color: var(--wds-label-alternative);
+    }
+    .row-meta {
+      font-size: var(--wds-font-size-xs);
+      color: var(--wds-label-assistive);
+      letter-spacing: -0.1px;
+    }
+
+    /* Right thumbnail (optional) */
+    .notification-thumbnail {
+      flex: 0 0 auto;
+      width: 40px;
+      height: 40px;
+      border-radius: var(--wds-radius-sm);
+      background: linear-gradient(135deg, var(--thumb-purple-start) 0%, var(--thumb-purple-end) 100%);
+      align-self: center;
+    }
+    .notification-thumbnail.neutral {
+      background: linear-gradient(135deg, var(--thumb-neutral-start) 0%, var(--thumb-neutral-end) 100%);
+    }
+
+    /* End indicator */
+    .end-indicator {
+      padding: var(--wds-spacing-20) var(--wds-spacing-16) var(--wds-spacing-32);
+      text-align: center;
+      font-size: var(--wds-font-size-xs);
+      color: var(--wds-label-assistive);
+    }
+
+    /* Skeleton list */
+    .notification-skeleton {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    .skeleton-row {
+      display: flex;
+      align-items: center;
+      gap: var(--wds-spacing-12);
+      padding: var(--wds-spacing-12) var(--wds-spacing-16);
+      min-height: 72px;
+      border-bottom: 1px solid var(--wds-line-alternative);
+    }
+    .skeleton-shape {
+      background: linear-gradient(90deg,
+        var(--wds-color-neutral-100) 25%,
+        var(--wds-color-neutral-50) 50%,
+        var(--wds-color-neutral-100) 75%);
+      background-size: 200% 100%;
+      animation: skeleton-shimmer 1.5s infinite;
+    }
+    .skeleton-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--wds-radius-full);
+      flex: 0 0 auto;
+    }
+    .skeleton-lines {
+      flex: 1 1 auto;
+      display: flex;
+      flex-direction: column;
+      gap: var(--wds-spacing-8);
+    }
+    .skeleton-line-1 { width: 80%; height: 12px; border-radius: var(--wds-radius-xs); }
+    .skeleton-line-2 { width: 50%; height: 10px; border-radius: var(--wds-radius-xs); }
+    .skeleton-thumb {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--wds-radius-sm);
+      flex: 0 0 auto;
+    }
+    @keyframes skeleton-shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* Empty view (reference state — 실 분기는 app-021) */
+    .empty-view {
+      flex: 1 1 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: var(--wds-spacing-80) var(--wds-spacing-24);
+      text-align: center;
+      gap: var(--wds-spacing-12);
+    }
+    .empty-icon-wrap {
+      width: 64px;
+      height: 64px;
+      border-radius: var(--wds-radius-full);
+      background: var(--wds-fill-brand-weak);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--wds-label-brand);
+      margin-bottom: var(--wds-spacing-8);
+    }
+    .empty-title {
+      font-size: var(--wds-font-size-lg);
+      font-weight: var(--wds-font-weight-semibold);
+      color: var(--wds-label-normal);
+    }
+    .empty-desc {
+      font-size: var(--wds-font-size-sm);
+      color: var(--wds-label-alternative);
+      line-height: 1.5;
+    }
+    .empty-hint {
+      margin-top: var(--wds-spacing-12);
+      font-size: var(--wds-font-size-xs);
+      color: var(--wds-label-assistive);
+      font-style: italic;
+    }
+
+    /* Mobile fullscreen: reviewer panel out of the way, device-frame fills viewport */
+    @media (max-width: 480px) {
+      body { padding: 0; align-items: stretch; min-height: 100dvh; }
+      .control-panel { display: none; }
+      .device-frame {
+        width: 100dvw;
+        height: 100dvh;
+        border: none;
+        border-radius: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============================================================
+       Control Panel (Pass 6 검사 제외 영역)
+       ============================================================ -->
+  <div class="control-panel">
+    <div class="control-panel__row">
+      <span class="control-panel__label">Screen</span>
+      <select id="screen-select" onchange="navigateBySelect(this.value)">
+        <option value="NotificationCenterScreen">NotificationCenterScreen</option>
+      </select>
+    </div>
+    <div class="control-panel__row">
+      <span class="control-panel__label">State</span>
+      <div class="control-panel__states" id="state-toggles">
+        <button class="control-panel__state-btn active" data-state="default" onclick="toggleState('default')">default</button>
+        <button class="control-panel__state-btn" data-state="loading" onclick="toggleState('loading')">loading</button>
+        <button class="control-panel__state-btn" data-state="empty" onclick="toggleState('empty')">empty</button>
+        <button class="control-panel__state-btn" data-state="error" onclick="toggleState('error')">error</button>
+      </div>
+    </div>
+    <div class="control-panel__row">
+      <span class="control-panel__label">Action</span>
+      <button class="control-panel__state-btn" onclick="simulateRefresh()">refresh</button>
+      <button class="control-panel__state-btn" onclick="markAllRead()">mark all read</button>
+    </div>
+    <div class="control-panel__row">
+      <span class="control-panel__breadcrumb" id="breadcrumb">NotificationCenterScreen</span>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       Device Frame
+       ============================================================ -->
+  <div class="device-frame" id="device-frame">
+
+    <section class="screen active" id="NotificationCenterScreen">
+
+      <!-- StatusBar -->
+      <div class="status-bar" id="status-bar">
+        <span>9:41</span>
+        <div class="status-bar__icons" aria-hidden="true">
+          <!-- signal -->
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h.01"/><path d="M7 20v-4"/><path d="M12 20v-8"/><path d="M17 20V8"/><path d="M22 4v16"/></svg>
+          <!-- wifi -->
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+          <!-- battery -->
+          <svg width="22" height="14" viewBox="0 0 26 14" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="20" height="12" rx="3"/><line x1="23" y1="5" x2="23" y2="9" stroke-width="2.5" stroke-linecap="round"/><rect x="3" y="3" width="14" height="8" rx="1.5" fill="currentColor"/></svg>
+        </div>
+      </div>
+
+      <!-- Header -->
+      <header class="notification-header" id="notification-header">
+        <button class="header-icon-btn" id="back-button" aria-label="뒤로가기" onclick="goBack()">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+        <h1 class="header-title" id="header-title">알림</h1>
+        <button class="header-icon-btn" id="settings-button" aria-label="알림 설정" onclick="navigateSettings()">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </button>
+      </header>
+
+      <!-- Body -->
+      <main class="body-scroll" id="body-scroll">
+
+        <!-- Pull-to-refresh indicator -->
+        <div class="pull-indicator" id="pull-indicator" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.22-8.56"/><polyline points="21 4 21 12 13 12"/></svg>
+        </div>
+
+        <!-- DEFAULT STATE: Notification list -->
+        <ul class="notification-list" id="notification-list" data-state="default">
+
+          <!-- Row 1: like (unread, with thumb) -->
+          <li class="notification-row unread" data-row-index="0" data-type="like" onclick="toggleRowRead(this)">
+            <span class="unread-dot" aria-label="읽지 않은 알림"></span>
+            <div class="avatar-wrap">
+              <div class="actor-avatar brand-mid" aria-label="minji_studio 프로필">M</div>
+              <span class="type-icon-badge like" aria-label="좋아요 알림">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+              </span>
+            </div>
+            <div class="row-body">
+              <p class="row-text"><strong>minji_studio</strong>님이 회원님의 게시물을 좋아합니다</p>
+              <span class="row-meta">2분 전</span>
+            </div>
+            <div class="notification-thumbnail" aria-label="관련 게시물 썸네일"></div>
+          </li>
+
+          <!-- Row 2: follow (unread, no thumb) -->
+          <li class="notification-row unread" data-row-index="1" data-type="follow" onclick="toggleRowRead(this)">
+            <span class="unread-dot" aria-label="읽지 않은 알림"></span>
+            <div class="avatar-wrap">
+              <div class="actor-avatar brand-strong" aria-label="petlab_official 프로필">P</div>
+              <span class="type-icon-badge follow" aria-label="팔로우 알림">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+              </span>
+            </div>
+            <div class="row-body">
+              <p class="row-text"><strong>petlab_official</strong>님이 회원님을 팔로우하기 시작했습니다</p>
+              <span class="row-meta">12분 전</span>
+            </div>
+          </li>
+
+          <!-- Row 3: comment (unread, with thumb) -->
+          <li class="notification-row unread" data-row-index="2" data-type="comment" onclick="toggleRowRead(this)">
+            <span class="unread-dot" aria-label="읽지 않은 알림"></span>
+            <div class="avatar-wrap">
+              <div class="actor-avatar brand-mid" aria-label="neon_creator 프로필">N</div>
+              <span class="type-icon-badge comment" aria-label="댓글 알림">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              </span>
+            </div>
+            <div class="row-body">
+              <p class="row-text"><strong>neon_creator</strong>님이 댓글을 남겼어요: <span class="row-comment-quote">"이 필터 진짜 좋네요!"</span></p>
+              <span class="row-meta">38분 전</span>
+            </div>
+            <div class="notification-thumbnail" aria-label="관련 게시물 썸네일"></div>
+          </li>
+
+          <!-- Row 4: news (read, no thumb) -->
+          <li class="notification-row read" data-row-index="3" data-type="news" onclick="toggleRowRead(this)">
+            <span class="unread-dot" aria-label="읽지 않은 알림"></span>
+            <div class="avatar-wrap">
+              <div class="actor-avatar neutral" aria-label="ZZEM 공식 알림">Z</div>
+              <span class="type-icon-badge news" aria-label="소식 알림">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+              </span>
+            </div>
+            <div class="row-body">
+              <p class="row-text"><strong>ZZEM</strong> 새로운 무료 필터가 도착했어요</p>
+              <span class="row-meta">1시간 전</span>
+            </div>
+          </li>
+
+          <!-- Row 5: like (read, with thumb) -->
+          <li class="notification-row read" data-row-index="4" data-type="like" onclick="toggleRowRead(this)">
+            <span class="unread-dot" aria-label="읽지 않은 알림"></span>
+            <div class="avatar-wrap">
+              <div class="actor-avatar brand-mid" aria-label="smile_baby 프로필">S</div>
+              <span class="type-icon-badge like" aria-label="좋아요 알림">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+              </span>
+            </div>
+            <div class="row-body">
+              <p class="row-text"><strong>smile_baby</strong>님이 회원님의 게시물을 좋아합니다</p>
+              <span class="row-meta">3시간 전</span>
+            </div>
+            <div class="notification-thumbnail neutral" aria-label="관련 게시물 썸네일"></div>
+          </li>
+
+          <!-- Row 6: follow (read, no thumb) -->
+          <li class="notification-row read" data-row-index="5" data-type="follow" onclick="toggleRowRead(this)">
+            <span class="unread-dot" aria-label="읽지 않은 알림"></span>
+            <div class="avatar-wrap">
+              <div class="actor-avatar brand-strong" aria-label="lumen_lab 프로필">L</div>
+              <span class="type-icon-badge follow" aria-label="팔로우 알림">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+              </span>
+            </div>
+            <div class="row-body">
+              <p class="row-text"><strong>lumen_lab</strong>님이 회원님을 팔로우하기 시작했습니다</p>
+              <span class="row-meta">5시간 전</span>
+            </div>
+          </li>
+
+          <!-- Row 7: comment (read, with thumb) -->
+          <li class="notification-row read" data-row-index="6" data-type="comment" onclick="toggleRowRead(this)">
+            <span class="unread-dot" aria-label="읽지 않은 알림"></span>
+            <div class="avatar-wrap">
+              <div class="actor-avatar brand-mid" aria-label="hopper_pet 프로필">H</div>
+              <span class="type-icon-badge comment" aria-label="댓글 알림">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              </span>
+            </div>
+            <div class="row-body">
+              <p class="row-text"><strong>hopper_pet</strong>님이 회원님의 게시물에 댓글을 남겼어요</p>
+              <span class="row-meta">8시간 전</span>
+            </div>
+            <div class="notification-thumbnail" aria-label="관련 게시물 썸네일"></div>
+          </li>
+
+          <!-- Row 8: like (read, with thumb) -->
+          <li class="notification-row read" data-row-index="7" data-type="like" onclick="toggleRowRead(this)">
+            <span class="unread-dot" aria-label="읽지 않은 알림"></span>
+            <div class="avatar-wrap">
+              <div class="actor-avatar brand-mid" aria-label="dreamy_b 프로필">D</div>
+              <span class="type-icon-badge like" aria-label="좋아요 알림">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+              </span>
+            </div>
+            <div class="row-body">
+              <p class="row-text"><strong>dreamy_b</strong>님이 회원님의 게시물을 좋아합니다</p>
+              <span class="row-meta">어제</span>
+            </div>
+            <div class="notification-thumbnail neutral" aria-label="관련 게시물 썸네일"></div>
+          </li>
+        </ul>
+
+        <!-- End indicator -->
+        <div class="end-indicator" id="end-indicator" data-state="default">지난 알림을 모두 봤어요</div>
+
+        <!-- LOADING STATE: Skeleton -->
+        <ul class="notification-skeleton" id="notification-skeleton" data-state="loading">
+          <li class="skeleton-row">
+            <div class="skeleton-shape skeleton-avatar"></div>
+            <div class="skeleton-lines">
+              <div class="skeleton-shape skeleton-line-1"></div>
+              <div class="skeleton-shape skeleton-line-2"></div>
+            </div>
+            <div class="skeleton-shape skeleton-thumb"></div>
+          </li>
+          <li class="skeleton-row">
+            <div class="skeleton-shape skeleton-avatar"></div>
+            <div class="skeleton-lines">
+              <div class="skeleton-shape skeleton-line-1" style="width:65%"></div>
+              <div class="skeleton-shape skeleton-line-2"></div>
+            </div>
+          </li>
+          <li class="skeleton-row">
+            <div class="skeleton-shape skeleton-avatar"></div>
+            <div class="skeleton-lines">
+              <div class="skeleton-shape skeleton-line-1" style="width:75%"></div>
+              <div class="skeleton-shape skeleton-line-2"></div>
+            </div>
+            <div class="skeleton-shape skeleton-thumb"></div>
+          </li>
+          <li class="skeleton-row">
+            <div class="skeleton-shape skeleton-avatar"></div>
+            <div class="skeleton-lines">
+              <div class="skeleton-shape skeleton-line-1" style="width:60%"></div>
+              <div class="skeleton-shape skeleton-line-2" style="width:35%"></div>
+            </div>
+          </li>
+          <li class="skeleton-row">
+            <div class="skeleton-shape skeleton-avatar"></div>
+            <div class="skeleton-lines">
+              <div class="skeleton-shape skeleton-line-1" style="width:78%"></div>
+              <div class="skeleton-shape skeleton-line-2"></div>
+            </div>
+            <div class="skeleton-shape skeleton-thumb"></div>
+          </li>
+          <li class="skeleton-row">
+            <div class="skeleton-shape skeleton-avatar"></div>
+            <div class="skeleton-lines">
+              <div class="skeleton-shape skeleton-line-1" style="width:70%"></div>
+              <div class="skeleton-shape skeleton-line-2" style="width:45%"></div>
+            </div>
+          </li>
+        </ul>
+
+        <!-- EMPTY STATE: Reference (실 분기는 app-021) -->
+        <div class="empty-view" id="empty-view" data-state="empty">
+          <div class="empty-icon-wrap">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+              <path d="M18.63 13A17.89 17.89 0 0 1 18 8"/>
+              <path d="M6.26 6.26A5.86 5.86 0 0 0 6 8c0 7-3 9-3 9h14"/>
+              <path d="M18 8a6 6 0 0 0-9.33-5"/>
+              <line x1="1" y1="1" x2="23" y2="23"/>
+            </svg>
+          </div>
+          <h3 class="empty-title">받은 알림이 없어요</h3>
+          <p class="empty-desc">친구를 팔로우하면 새 소식을 알려드려요</p>
+          <p class="empty-hint">(0건 시 별도 화면 app-021 로 분기)</p>
+        </div>
+
+        <!-- ERROR STATE -->
+        <div class="empty-view" id="error-view" data-state="error">
+          <div class="empty-icon-wrap" style="background: var(--wds-fill-status-error-weak); color: var(--wds-label-error);">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+          </div>
+          <h3 class="empty-title">알림을 불러오지 못했어요</h3>
+          <p class="empty-desc">잠시 후 다시 시도해 주세요</p>
+        </div>
+
+      </main>
+
+      <!-- Toast -->
+      <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    </section>
+
+  </div>
+
+  <script>
+    // === State ===
+    let currentScreen = null;
+    let currentState = 'default';
+    const navHistory = [];
+
+    // === Navigation ===
+    function navigate(screenId, transition = 'slide-left') {
+      const target = document.getElementById(screenId);
+      if (!target || (currentScreen && currentScreen.id === screenId)) return;
+      if (currentScreen) {
+        navHistory.push(currentScreen.id);
+        currentScreen.classList.remove('active');
+        currentScreen.className = currentScreen.className.replace(/transition-\S+/g, '');
+      }
+      target.classList.add('active');
+      if (transition !== 'none') {
+        target.classList.add('transition-' + transition);
+        target.addEventListener('animationend', function handler() {
+          target.classList.remove('transition-' + transition);
+          target.removeEventListener('animationend', handler);
+        });
+      }
+      currentScreen = target;
+      currentState = 'default';
+      applyState(screenId, 'default');
+      updateControlPanel();
+    }
+
+    function navigateSettings() {
+      // app-022 destination — separate task. Show toast as visual feedback (no alert/confirm/prompt per Pass 6 #8).
+      console.log('[navigate] → app-022 (알림설정)');
+      showToast('알림 설정 화면(app-022) 진입 — 별 task 에서 구현');
+    }
+
+    function goBack() {
+      if (navHistory.length === 0) {
+        console.log('[goBack] no previous screen — entry point');
+        showToast('이전 화면으로 돌아갑니다');
+        return;
+      }
+      const prevId = navHistory.pop();
+      const target = document.getElementById(prevId);
+      if (!target) return;
+      if (currentScreen) currentScreen.classList.remove('active');
+      target.classList.add('active', 'transition-slide-right');
+      target.addEventListener('animationend', function handler() {
+        target.classList.remove('transition-slide-right');
+        target.removeEventListener('animationend', handler);
+      });
+      currentScreen = target;
+      currentState = 'default';
+      applyState(prevId, 'default');
+      updateControlPanel();
+    }
+
+    function navigateBySelect(screenId) { navigate(screenId, 'fade'); }
+
+    // === State Toggle ===
+    function applyState(screenId, stateName) {
+      const screen = document.getElementById(screenId);
+      if (!screen) return;
+      screen.querySelectorAll('[data-state]').forEach(el => {
+        el.classList.toggle('state-active', el.dataset.state === stateName);
+      });
+      currentState = stateName;
+      updateStateButtons();
+    }
+
+    function toggleState(stateName) {
+      if (!currentScreen) return;
+      applyState(currentScreen.id, stateName);
+    }
+
+    // === Row read toggle (deeplink stand-in) ===
+    function toggleRowRead(row) {
+      if (!row) return;
+      const wasUnread = row.classList.contains('unread');
+      if (wasUnread) {
+        row.classList.remove('unread');
+        row.classList.add('read');
+        showToast('알림을 확인했어요');
+      } else {
+        row.classList.remove('read');
+        row.classList.add('unread');
+      }
+      console.log('[notification] row', row.dataset.rowIndex, 'type=' + row.dataset.type, '→', wasUnread ? 'read' : 'unread');
+    }
+
+    function markAllRead() {
+      const rows = document.querySelectorAll('.notification-row.unread');
+      rows.forEach(r => { r.classList.remove('unread'); r.classList.add('read'); });
+      showToast(`알림 ${rows.length}건을 모두 읽음 처리했어요`);
+    }
+
+    // === Pull-to-refresh (visual demo) ===
+    let touchStartY = 0;
+    let pullDistance = 0;
+    let isPulling = false;
+
+    function setupPullToRefresh() {
+      const scroller = document.getElementById('body-scroll');
+      if (!scroller) return;
+      scroller.addEventListener('touchstart', (e) => {
+        if (scroller.scrollTop === 0) {
+          touchStartY = e.touches[0].clientY;
+          isPulling = true;
+        }
+      }, { passive: true });
+      scroller.addEventListener('touchmove', (e) => {
+        if (!isPulling) return;
+        pullDistance = e.touches[0].clientY - touchStartY;
+        if (pullDistance > 60) {
+          document.getElementById('pull-indicator').classList.add('show');
+        }
+      }, { passive: true });
+      scroller.addEventListener('touchend', () => {
+        if (isPulling && pullDistance > 60) {
+          simulateRefresh();
+        }
+        document.getElementById('pull-indicator').classList.remove('show');
+        isPulling = false;
+        pullDistance = 0;
+      }, { passive: true });
+    }
+
+    function simulateRefresh() {
+      const indicator = document.getElementById('pull-indicator');
+      indicator.classList.add('show');
+      console.log('[refresh] 알림 새로고침 시작');
+      // Show loading state briefly
+      applyState('NotificationCenterScreen', 'loading');
+      setTimeout(() => {
+        applyState('NotificationCenterScreen', 'default');
+        indicator.classList.remove('show');
+        showToast('알림을 새로고침했어요');
+      }, 1100);
+    }
+
+    // === Toast ===
+    let toastTimer = null;
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      if (!t) return;
+      t.textContent = msg;
+      t.classList.add('show');
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.remove('show'), 1800);
+    }
+
+    // === Control Panel ===
+    function updateControlPanel() {
+      if (!currentScreen) return;
+      const select = document.getElementById('screen-select');
+      if (select) select.value = currentScreen.id;
+      const breadcrumb = document.getElementById('breadcrumb');
+      if (breadcrumb) {
+        const path = [...navHistory, currentScreen.id].join(' → ');
+        breadcrumb.textContent = path;
+      }
+      updateStateButtons();
+    }
+
+    function updateStateButtons() {
+      document.querySelectorAll('.control-panel__state-btn[data-state]').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.state === currentState);
+      });
+    }
+
+    // === Init ===
+    document.addEventListener('DOMContentLoaded', () => {
+      const firstScreen = document.querySelector('.screen');
+      if (firstScreen) {
+        firstScreen.classList.add('active');
+        currentScreen = firstScreen;
+        applyState(firstScreen.id, 'default');
+        updateControlPanel();
+      }
+      setupPullToRefresh();
+    });
+  </script>
+
+</body>
+</html>

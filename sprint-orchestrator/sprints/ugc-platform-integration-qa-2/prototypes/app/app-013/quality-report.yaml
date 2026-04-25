@@ -1,0 +1,181 @@
+# Quality Report — app-013 BlockConfirmSheet
+# Pass 6 anti-slop audit + modal archetype persona
+# Generated: 2026-04-25
+
+sprint_id: "ugc-platform-integration-qa-2"
+task_id: "app-013"
+screen: "BlockConfirmSheet"
+archetype: "modal"
+figma_frame: "37211:162198"
+
+# ─────────────────────────────
+# Pass 6 Anti-Slop Audit (10 checks)
+# ─────────────────────────────
+pass_6_anti_slop:
+  status: "passed"
+  checks:
+    - id: 1
+      name: "hex-not-in-tokens (.screen 후손)"
+      status: "pass"
+      detail: |
+        prototype.html 의 hex 25개 추출. tokens.css 에 미정의된 4개 (#1a1a2e, #2a2a3e,
+        #e0e0e0, #f0f0f0) 는 모두 .control-panel 또는 body/device-frame border 등
+        .screen 외부 영역. 검사 범위 (.screen 후손) 내 모든 hex 는 토큰 정의됨.
+        외부 미정의 hex: #888 #bbb #666 #999 #444 #fff #ddd 도 모두 .control-panel 내부.
+    - id: 2
+      name: "emoji on interactive elements"
+      status: "pass"
+      detail: |
+        모든 button (close, cancel, block, parent-back, parent-more, parent-cta) 은
+        lucide inline SVG 또는 한국어 텍스트만 사용. 안내 row 의 ban / eye-off /
+        bell-off 도 lucide SVG. 이모지 0건.
+    - id: 3
+      name: "card border-left slop"
+      status: "pass"
+      detail: "border-left 사용 없음. info-rows 는 surface fill + radius 로 강조."
+    - id: 4
+      name: "font-family Pretendard 외 (.screen 후손)"
+      status: "pass"
+      detail: |
+        font-family 선언 9건 — 'Pretendard' (var --wds-font-family-primary),
+        ui-monospace (.control-panel 만), inherit (.screen 내 button). .screen 후손에
+        Pretendard 외 명시 0건.
+    - id: 5
+      name: "브랜드 보라 그라디언트 전면 사용"
+      status: "pass"
+      detail: |
+        보라색 gradient 사용 0건. parent-cta 만 단색 brand fill (--wds-fill-brand-primary).
+        modal 자체는 destructive 빨강 + 중성 surface 조합.
+    - id: 6
+      name: "placeholder-image 주 콘텐츠 점유"
+      status: "pass"
+      detail: |
+        ProfileImage 100x100 — context-engine.yaml assets.avatars.kind: gradient-token
+        선언 (needs_real_content: false). 단색 fill + 닉네임 initial 'Z' 로 표시.
+        Pass 6 #6 면제 (의도된 fallback).
+    - id: 7
+      name: "DOM 이벤트 바인딩 ↔ Spec interactions 정합"
+      status: "pass"
+      detail: |
+        Spec interactions: 5개 (backdrop tap, close-btn tap, cancel-btn tap,
+        block-btn tap, api-success navigate).
+        prototype.html bindings: backdrop click + close-btn click + cancel-btn click +
+        block-btn click + ESC keydown + state buttons (control-panel) + screen click stop.
+        Spec 의 5개 user-facing interaction 모두 바인딩됨. api-success 는 setTimeout
+        으로 시뮬레이션. ESC 는 강제 룰 #2 (close 2-way) 의 보조 channel — 추가 1건.
+    - id: 8
+      name: "alert/confirm/prompt 사용"
+      status: "pass"
+      detail: "grep 결과 0건. 모든 피드백은 toast + setState 로 구현."
+    - id: 9
+      name: "modal archetype persona 강제 룰 4/4"
+      status: "pass"
+      detail: "modal_persona 섹션 참조 — 4/4 모두 통과."
+    - id: 10
+      name: "exemplar drift"
+      status: "n/a"
+      detail: "modal archetype 은 exemplar 인라인 대상 아님 (feed 만 — PRD §v2 메커니즘)."
+
+# ─────────────────────────────
+# Modal Archetype Persona (강제 룰 4/4)
+# ─────────────────────────────
+modal_persona:
+  status: "passed"
+  rules:
+    - id: 1
+      name: "Backdrop opacity ≥ 0.4"
+      status: "pass"
+      detail: |
+        --wds-background-dimmed: rgba(0, 0, 0, 0.50). 0.50 ≥ 0.4. 시각상 부모 화면
+        (parent-surface) 명확히 dim 처리 + 시트 콘텐츠 가독성 확보.
+    - id: 2
+      name: "닫기 2-way 보장 (X + 외부 backdrop tap)"
+      status: "pass"
+      detail: |
+        Close trigger 3개:
+        (a) #close-btn (X 버튼) — 우상단 absolute, lucide x SVG
+        (a) #cancel-btn (취소 버튼) — secondary ghost
+        (b) #backdrop tap — 외부 영역 click 핸들러
+        + bonus: ESC keydown
+        screen-spec.yaml interactions 에 close-overlay 트리거 4개 (backdrop, close-btn,
+        cancel-btn, esc) 명시. 강제 룰 #2 충족 (2개 이상).
+    - id: 3
+      name: "Primary CTA 1개 + secondary 0-1개"
+      status: "pass"
+      detail: |
+        Primary: #block-btn '차단하기' (destructive 빨강 #FF3B30) — 1개
+        Secondary: #cancel-btn '취소' (ghost outline) — 1개
+        총 1+1 정확히 충족. 결정 단순화.
+    - id: 4
+      name: "Title / 명확한 콘텍스트"
+      status: "pass"
+      detail: |
+        sheet-title h1: "ZZEM유저123님을 차단하시겠어요?" — 닉네임 + 액션 명시.
+        modal 만 떠있을 때도 사용자가 '누구를 / 무엇을' 즉시 인지 가능.
+        + ProfileImage 100x100 으로 시각 식별 보강.
+
+  recommended_rules:
+    - id: 1
+      name: "Bottom sheet 형태 (모바일 표준)"
+      status: "applied"
+      detail: "화면 하단 anchor + slide-up transition (transform 0.28s cubic-bezier)."
+    - id: 2
+      name: "Drag handle 가시"
+      status: "applied"
+      detail: "36x4 pill, neutral-300 색, 시트 상단 center."
+    - id: 3
+      name: "첫 input/option 자동 focus"
+      status: "skipped"
+      reason: |
+        confirm modal 에는 input 필드가 없음 (CTA 만). destructive primary 를
+        autofocus 하면 사용자가 ENTER 로 의도치 않게 차단 실행할 위험 — 권장 룰
+        거절. archetype_recommendation_skipped 로 로깅.
+
+# ─────────────────────────────
+# Quality Score (from spec)
+# ─────────────────────────────
+quality_score:
+  extraction_accuracy: "1.0 (22/22)"
+  schema_completeness: "1.0+ (9/7 — required + visual_rules + quality_score)"
+  fabrication_risk: "low"
+  context_coverage:
+    why_linked: "4/4 AC 모두 ui_impact 매핑됨"
+    what_resolved: "11/11 컴포넌트 토큰 매핑 완료"
+
+# ─────────────────────────────
+# Inferred Fields (intent.md 게이트 후 확정 필요)
+# ─────────────────────────────
+inferred_fields:
+  - field: "info_rows[1] (row 2 — 양방향 차단 카피)"
+    detail: "PRD 미명시. Figma 37211:162198 텍스트 노드 대조 검증 필요."
+  - field: "info_rows[*].desc (보조 1줄)"
+    detail: "PRD 는 'icon + text' 만 명시. 가독성을 위해 desc 1줄 추가 — Figma 대조 필요."
+  - field: "Title 카피 ('차단할까요?' vs '차단하시겠어요?')"
+    detail: "task description '차단하시겠어요?' vs PRD 본문 '차단할까요?' — task description 채택."
+
+# ─────────────────────────────
+# Logging
+# ─────────────────────────────
+activity_log:
+  - phase: "started"
+    message: "app-013 modal v2 prototype 태스크 수령"
+  - phase: "context_engine"
+    message: "WHY 4 ACs / WHAT 11 components / HOW 6 rules / Assets 4 slots 조립"
+  - phase: "tokens_generated"
+    message: "tokens.css 생성 (modal 전용 component 토큰 11개 신규: button-destructive, button-secondary-ghost, bottom-sheet, info-icon)"
+  - phase: "spec_complete"
+    message: "BlockConfirmSheet.spec.md 작성 — accuracy 1.0, fabrication low"
+  - phase: "preview_generated"
+    message: "BlockConfirmSheet.intent.md 생성 (fabrication low 트리거), gate_questions 4개"
+  - phase: "html_alpha"
+    message: "prototype-alpha 생략 — single-screen modal, structure + content 단일 Write 로 통합"
+  - phase: "html_final"
+    message: "prototype.html 생성 (open / loading / dismissed 3 states)"
+  - phase: "anti_slop_audit"
+    message: "Pass 6 anti-slop audit 9/9 (10번 exemplar n/a) 통과"
+  - phase: "archetype_persona_passed"
+    message: "modal persona 강제 룰 4/4 통과"
+  - phase: "archetype_recommendation_skipped"
+    message: "modal 권장 룰 #3 (첫 input autofocus) 거절: destructive primary autofocus 위험"
+  - phase: "completed"
+    message: "Pass 6 9/9 + persona 4/4 + fabrication low + intent.md gate 대기"

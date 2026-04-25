@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>app-021 · 알림센터 노데이터 (empty_state)</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+<style>
+  /* === tokens.css inline (sprint-level: ugc-platform-integration-qa-2) === */
+  :root {
+    --wds-color-purple-50:  #F5F0FF;
+    --wds-color-purple-100: #EBE1FF;
+    --wds-color-purple-400: #A17BFF;
+    --wds-color-purple-500: #8752FA;
+    --wds-color-purple-600: #7040E0;
+    --wds-color-purple-700: #5A30C0;
+
+    --wds-color-neutral-0:    #FFFFFF;
+    --wds-color-neutral-50:   #F7F8F9;
+    --wds-color-neutral-100:  #F0F1F3;
+    --wds-color-neutral-200:  #E4E5E9;
+    --wds-color-neutral-300:  #D1D3D8;
+    --wds-color-neutral-400:  #B5B8BF;
+    --wds-color-neutral-500:  #8E9199;
+    --wds-color-neutral-600:  #6B6E76;
+    --wds-color-neutral-700:  #46474C;
+    --wds-color-neutral-900:  #212228;
+    --wds-color-neutral-1000: #000000;
+
+    --wds-color-red-100:    #FFE5E3;
+    --wds-color-red-500:    #FF3B30;
+    --wds-color-red-600:    #E0241A;
+    --wds-color-green-500:  #34C759;
+    --wds-color-yellow-500: #FFCC00;
+
+    --wds-background-normal:    var(--wds-color-neutral-0);
+    --wds-background-elevated:  var(--wds-color-neutral-0);
+    --wds-background-dimmed:    rgba(0, 0, 0, 0.50);
+
+    --wds-surface-primary:   var(--wds-color-neutral-0);
+    --wds-surface-secondary: var(--wds-color-neutral-50);
+    --wds-surface-tertiary:  var(--wds-color-neutral-100);
+
+    --wds-fill-brand-primary: var(--wds-color-purple-500);
+    --wds-fill-brand-weak:    var(--wds-color-purple-50);
+    --wds-fill-brand-strong:  var(--wds-color-purple-600);
+    --wds-fill-neutral:       var(--wds-color-neutral-100);
+
+    --wds-label-normal:       var(--wds-color-neutral-900);
+    --wds-label-alternative:  var(--wds-color-neutral-600);
+    --wds-label-assistive:    var(--wds-color-neutral-500);
+    --wds-label-disabled:     var(--wds-color-neutral-300);
+    --wds-label-inverse:      var(--wds-color-neutral-0);
+    --wds-label-brand:        var(--wds-color-purple-500);
+
+    --wds-line-normal:       var(--wds-color-neutral-200);
+    --wds-line-alternative:  var(--wds-color-neutral-100);
+
+    --wds-status-error:    var(--wds-color-red-500);
+
+    --component-button-primary-fill:        var(--wds-fill-brand-primary);
+    --component-button-primary-label:       var(--wds-label-inverse);
+    --component-button-radius:              16px;
+
+    --component-notice-fill:    var(--wds-surface-secondary);
+    --component-notice-label:   var(--wds-label-normal);
+    --component-notice-icon:    var(--wds-label-alternative);
+    --component-notice-action:  var(--wds-label-brand);
+    --component-notice-radius:  12px;
+
+    --component-empty-icon-fill:    var(--wds-fill-brand-weak);
+    --component-empty-icon-color:   var(--wds-fill-brand-primary);
+    --component-empty-icon-size:    96px;
+
+    --wds-spacing-1:  1px;
+    --wds-spacing-2:  2px;
+    --wds-spacing-4:  4px;
+    --wds-spacing-6:  6px;
+    --wds-spacing-8:  8px;
+    --wds-spacing-10: 10px;
+    --wds-spacing-12: 12px;
+    --wds-spacing-14: 14px;
+    --wds-spacing-16: 16px;
+    --wds-spacing-20: 20px;
+    --wds-spacing-24: 24px;
+    --wds-spacing-32: 32px;
+    --wds-spacing-40: 40px;
+    --wds-spacing-48: 48px;
+    --wds-spacing-56: 56px;
+    --wds-spacing-64: 64px;
+    --wds-spacing-80: 80px;
+
+    --wds-radius-xs:   4px;
+    --wds-radius-sm:   8px;
+    --wds-radius-md:   12px;
+    --wds-radius-lg:   16px;
+    --wds-radius-xl:   20px;
+    --wds-radius-full: 9999px;
+
+    --wds-font-family-primary: 'Pretendard', -apple-system, 'SF Pro Display', sans-serif;
+    --wds-font-weight-regular:  400;
+    --wds-font-weight-medium:   500;
+    --wds-font-weight-semibold: 600;
+    --wds-font-weight-bold:     700;
+    --wds-font-size-2xs: 11px;
+    --wds-font-size-xs:  12px;
+    --wds-font-size-sm:  13px;
+    --wds-font-size-md:  14px;
+    --wds-font-size-lg:  16px;
+    --wds-font-size-xl:  18px;
+    --wds-font-size-2xl: 20px;
+    --wds-font-size-3xl: 24px;
+
+    --color-brand-primary:   var(--wds-color-purple-500);
+    --color-bg-normal:       var(--wds-color-neutral-0);
+    --color-fill-neutral:    var(--wds-color-neutral-100);
+    --color-label-normal:    var(--wds-color-neutral-900);
+    --color-label-assistive: var(--wds-color-neutral-500);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--wds-font-family-primary);
+    background: #f0f0f0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 16px;
+    color: var(--wds-label-normal);
+  }
+
+  /* === Control Panel (외부 — Pass 6 audit 제외 영역) === */
+  .control-panel {
+    width: 390px;
+    background: #1a1a2e;
+    color: #e0e0e0;
+    border-radius: 12px 12px 0 0;
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 13px;
+    font-family: ui-monospace, monospace;
+  }
+  .control-panel__row { display: flex; align-items: center; gap: 8px; }
+  .control-panel__label { color: #888; font-size: 11px; min-width: 56px; }
+  .control-panel select {
+    background: #2a2a3e; color: #e0e0e0; border: 1px solid #444;
+    border-radius: 6px; padding: 4px 8px; font-size: 12px; flex: 1;
+    font-family: ui-monospace, monospace;
+  }
+  .control-panel__states { display: flex; gap: 4px; flex-wrap: wrap; flex: 1; }
+  .control-panel__state-btn {
+    background: #2a2a3e; color: #bbb; border: 1px solid #444;
+    border-radius: 6px; padding: 4px 10px; font-size: 11px; cursor: pointer;
+    transition: all 0.15s;
+    font-family: ui-monospace, monospace;
+  }
+  .control-panel__state-btn.active {
+    background: var(--color-brand-primary); color: #fff; border-color: var(--color-brand-primary);
+  }
+  .control-panel__breadcrumb { color: #666; font-size: 11px; font-family: ui-monospace, monospace; }
+  .control-panel__hint { color: #999; font-size: 10px; font-style: italic; }
+
+  /* === Device Frame === */
+  .device-frame {
+    width: 390px;
+    height: 844px;
+    background: var(--wds-background-normal);
+    overflow: hidden;
+    position: relative;
+    border: 1px solid #ddd;
+    border-radius: 0 0 12px 12px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .screen { display: flex; flex-direction: column; height: 100%; }
+
+  /* === Status Bar === */
+  .status-bar {
+    height: 44px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 24px;
+    font-size: var(--wds-font-size-md);
+    font-weight: var(--wds-font-weight-semibold);
+    flex-shrink: 0;
+    color: var(--wds-label-normal);
+  }
+  .status-bar__icons { display: flex; gap: 6px; align-items: center; }
+  .status-bar__icons svg { display: block; }
+
+  /* === Header (back + title + 설정) === */
+  .header {
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 var(--wds-spacing-12);
+    flex-shrink: 0;
+    background: var(--wds-background-normal);
+  }
+  .header__back {
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--wds-label-normal);
+    border-radius: var(--wds-radius-sm);
+    font-family: inherit;
+  }
+  .header__title {
+    font-size: var(--wds-font-size-lg);
+    font-weight: var(--wds-font-weight-bold);
+    color: var(--wds-label-normal);
+    flex: 1;
+    text-align: center;
+    pointer-events: none;
+    margin: 0;
+  }
+  .header__action {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--wds-label-normal);
+    font-size: var(--wds-font-size-md);
+    font-weight: var(--wds-font-weight-medium);
+    padding: 4px 8px;
+    min-width: 44px;
+    text-align: right;
+    font-family: inherit;
+  }
+
+  /* === Body === */
+  .body-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding-bottom: 64px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* === NotificationsOffNotice (Figma 인라인 alert) === */
+  .notice-off {
+    margin: var(--wds-spacing-16) var(--wds-spacing-16) 0;
+    padding: var(--wds-spacing-14) var(--wds-spacing-16);
+    background: var(--component-notice-fill);
+    border-radius: var(--component-notice-radius);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--wds-spacing-12);
+    flex-shrink: 0;
+  }
+  .notice-off__left {
+    display: flex;
+    align-items: center;
+    gap: var(--wds-spacing-8);
+    min-width: 0;
+  }
+  .notice-off__icon {
+    width: 20px;
+    height: 20px;
+    color: var(--component-notice-icon);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .notice-off__label {
+    font-size: var(--wds-font-size-sm);
+    font-weight: var(--wds-font-weight-medium);
+    color: var(--component-notice-label);
+    line-height: 1.4;
+  }
+  .notice-off__action {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--component-notice-action);
+    font-size: var(--wds-font-size-sm);
+    font-weight: var(--wds-font-weight-semibold);
+    padding: 6px 4px;
+    flex-shrink: 0;
+    font-family: inherit;
+  }
+  .notice-off__action:active { opacity: 0.65; }
+
+  /* === Empty State View === */
+  .empty-state {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--wds-spacing-32) var(--wds-spacing-24) var(--wds-spacing-48);
+    text-align: center;
+    gap: var(--wds-spacing-16);
+  }
+  .empty-state__anchor {
+    width: var(--component-empty-icon-size);
+    height: var(--component-empty-icon-size);
+    border-radius: var(--wds-radius-full);
+    background: var(--component-empty-icon-fill);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--component-empty-icon-color);
+    margin-bottom: var(--wds-spacing-8);
+  }
+  .empty-state__anchor svg { display: block; }
+  .empty-state__headline {
+    font-size: var(--wds-font-size-lg);
+    font-weight: var(--wds-font-weight-bold);
+    color: var(--wds-label-normal);
+    line-height: 1.4;
+    margin: 0;
+  }
+  .empty-state__body {
+    font-size: var(--wds-font-size-md);
+    font-weight: var(--wds-font-weight-regular);
+    color: var(--wds-label-alternative);
+    line-height: 1.55;
+    max-width: 280px;
+    margin: 0;
+  }
+  .empty-state__cta {
+    margin-top: var(--wds-spacing-12);
+    background: var(--component-button-primary-fill);
+    color: var(--component-button-primary-label);
+    border: none;
+    border-radius: var(--component-button-radius);
+    padding: 12px 28px;
+    font-size: var(--wds-font-size-md);
+    font-weight: var(--wds-font-weight-semibold);
+    cursor: pointer;
+    font-family: inherit;
+    min-width: 160px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--wds-spacing-6);
+  }
+  .empty-state__cta:active { background: var(--wds-fill-brand-strong); }
+
+  /* === Loading skeleton === */
+  .skeleton-wrap {
+    display: none;
+    flex: 1;
+    flex-direction: column;
+    gap: var(--wds-spacing-16);
+    padding: var(--wds-spacing-16);
+  }
+  .skeleton-row {
+    height: 48px;
+    background: linear-gradient(90deg,
+      var(--wds-color-neutral-100) 25%,
+      var(--wds-color-neutral-200) 50%,
+      var(--wds-color-neutral-100) 75%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.5s infinite;
+    border-radius: var(--wds-radius-md);
+  }
+  @keyframes skeleton-shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* === Error View === */
+  .error-view {
+    display: none;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--wds-spacing-32);
+    gap: var(--wds-spacing-12);
+    color: var(--wds-label-alternative);
+    text-align: center;
+  }
+  .error-view__msg {
+    font-size: var(--wds-font-size-md);
+    font-weight: var(--wds-font-weight-medium);
+  }
+  .error-view__retry {
+    background: var(--wds-surface-tertiary);
+    color: var(--wds-label-normal);
+    border: none;
+    border-radius: var(--wds-radius-md);
+    padding: 8px 16px;
+    font-size: var(--wds-font-size-sm);
+    font-weight: var(--wds-font-weight-semibold);
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  /* === Bottom Nav === */
+  .bottom-nav {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 64px;
+    border-top: 0.5px solid var(--wds-line-alternative);
+    background: var(--wds-background-normal);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding-bottom: var(--wds-spacing-8);
+  }
+  .bottom-nav__item {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--wds-label-assistive);
+    padding: var(--wds-spacing-8) var(--wds-spacing-12);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: inherit;
+  }
+  .bottom-nav__item.active { color: var(--wds-label-normal); }
+
+  /* === STATE OVERRIDES === */
+  .device-frame[data-state="default"] .notice-off { display: flex; }
+  .device-frame[data-state="default"] .empty-state { display: flex; }
+  .device-frame[data-state="default"] .skeleton-wrap { display: none; }
+  .device-frame[data-state="default"] .error-view { display: none; }
+
+  .device-frame[data-state="permission-granted"] .notice-off { display: none; }
+  .device-frame[data-state="permission-granted"] .empty-state { display: flex; }
+  .device-frame[data-state="permission-granted"] .skeleton-wrap { display: none; }
+  .device-frame[data-state="permission-granted"] .error-view { display: none; }
+
+  .device-frame[data-state="loading"] .notice-off { display: none; }
+  .device-frame[data-state="loading"] .empty-state { display: none; }
+  .device-frame[data-state="loading"] .skeleton-wrap { display: flex; }
+  .device-frame[data-state="loading"] .error-view { display: none; }
+
+  .device-frame[data-state="error"] .notice-off { display: none; }
+  .device-frame[data-state="error"] .empty-state { display: none; }
+  .device-frame[data-state="error"] .skeleton-wrap { display: none; }
+  .device-frame[data-state="error"] .error-view { display: flex; }
+
+  /* === Toast === */
+  .toast {
+    display: none;
+    position: absolute;
+    bottom: 80px;
+    left: 16px;
+    right: 16px;
+    background: var(--wds-color-neutral-900);
+    color: var(--wds-label-inverse);
+    padding: var(--wds-spacing-12) var(--wds-spacing-16);
+    border-radius: var(--wds-radius-md);
+    font-size: var(--wds-font-size-sm);
+    z-index: 50;
+    text-align: center;
+    line-height: 1.4;
+  }
+  .toast.show { display: block; }
+
+  @media (max-width: 480px) {
+    body { padding: 0; align-items: stretch; min-height: 100dvh; }
+    .control-panel { display: none; }
+    .device-frame {
+      width: 100dvw;
+      height: 100dvh;
+      border: none;
+      border-radius: 0;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- Control Panel (verifier-friendly, Pass 6 audit 제외) -->
+<div class="control-panel">
+  <div class="control-panel__row">
+    <span class="control-panel__label">Screen</span>
+    <select id="screen-select">
+      <option value="notifications-empty">NotificationsEmptyScreen</option>
+    </select>
+  </div>
+  <div class="control-panel__row">
+    <span class="control-panel__label">State</span>
+    <div class="control-panel__states" id="state-toggles">
+      <button class="control-panel__state-btn active" data-state="default" data-state-toggle>default</button>
+      <button class="control-panel__state-btn" data-state="permission-granted" data-state-toggle>permission-granted</button>
+      <button class="control-panel__state-btn" data-state="loading" data-state-toggle>loading</button>
+      <button class="control-panel__state-btn" data-state="error" data-state-toggle>error</button>
+    </div>
+  </div>
+  <div class="control-panel__row">
+    <span class="control-panel__breadcrumb" id="breadcrumb">notifications-empty · default</span>
+  </div>
+  <div class="control-panel__row">
+    <span class="control-panel__hint">v2 dogfood — empty_state archetype persona enforced (1st validation)</span>
+  </div>
+</div>
+
+<!-- Device Frame -->
+<div class="device-frame" id="device-frame" data-state="default">
+  <section class="screen" id="notifications-empty">
+
+    <!-- Status Bar -->
+    <div class="status-bar">
+      <span>9:41</span>
+      <span class="status-bar__icons">
+        <svg width="16" height="11" viewBox="0 0 16 11" fill="none" aria-hidden="true"><path d="M1 6.5a6.5 6.5 0 0 1 13 0v3.75a.75.75 0 0 1-.75.75H1.75A.75.75 0 0 1 1 10.25z" fill="currentColor"/></svg>
+        <svg width="16" height="11" viewBox="0 0 16 11" fill="none" aria-hidden="true"><rect x="0.5" y="0.5" width="13" height="9" rx="1.5" stroke="currentColor"/><rect x="14.25" y="3.5" width="1.25" height="3" rx="0.5" fill="currentColor"/><rect x="2" y="2" width="10" height="6" rx="0.5" fill="currentColor"/></svg>
+      </span>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+      <button class="header__back" type="button" id="header-back" aria-label="뒤로 가기" onclick="onAction('go-back')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+      </button>
+      <h1 class="header__title" id="header-title">알림</h1>
+      <button class="header__action" type="button" id="header-settings" aria-label="알림 설정" onclick="onAction('open-notification-settings')">설정</button>
+    </header>
+
+    <!-- Body -->
+    <main class="body-scroll" id="body">
+
+      <!-- NotificationsOffNotice (조건부 — OS 권한 denied 시) -->
+      <section class="notice-off" id="notice-off" aria-label="휴대폰 알림 비활성화 안내">
+        <div class="notice-off__left">
+          <span class="notice-off__icon" id="notice-off-icon" aria-hidden="true">
+            <!-- Lucide bell-off (notifications_off) -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M10.268 21a2 2 0 0 0 3.464 0"/>
+              <path d="M17 17H4a1 1 0 0 1-.74-1.673C4.59 13.956 6 12.499 6 8a6 6 0 0 1 .258-1.742"/>
+              <path d="m2 2 20 20"/>
+              <path d="M8.668 3.01A6 6 0 0 1 18 8c0 2.687.77 4.653 1.707 6.05"/>
+            </svg>
+          </span>
+          <span class="notice-off__label" id="notice-off-label">휴대폰의 앱 알림이 꺼져있어요</span>
+        </div>
+        <button class="notice-off__action" type="button" id="notice-off-action" aria-label="휴대폰 알림 켜기" onclick="onAction('open-system-notification-settings')">알림 켜기</button>
+      </section>
+
+      <!-- Empty State View (시각 중앙) -->
+      <section class="empty-state" id="empty-state" aria-label="알림 없음 안내">
+        <div class="empty-state__anchor" id="empty-anchor" aria-hidden="true">
+          <!-- Lucide bell-off 48px brand stroke -->
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M10.268 21a2 2 0 0 0 3.464 0"/>
+            <path d="M17 17H4a1 1 0 0 1-.74-1.673C4.59 13.956 6 12.499 6 8a6 6 0 0 1 .258-1.742"/>
+            <path d="m2 2 20 20"/>
+            <path d="M8.668 3.01A6 6 0 0 1 18 8c0 2.687.77 4.653 1.707 6.05"/>
+          </svg>
+        </div>
+        <h2 class="empty-state__headline" id="empty-headline">조용한 하루네요</h2>
+        <p class="empty-state__body" id="empty-body">친구를 팔로우하면 좋아요·소식·새 팔로워 알림을 받아볼 수 있어요.</p>
+        <button class="empty-state__cta" type="button" id="empty-cta" aria-label="친구 찾기" onclick="onAction('navigate-search')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          친구 찾기
+        </button>
+      </section>
+
+      <!-- Loading skeleton -->
+      <div class="skeleton-wrap" id="skeleton-wrap" aria-hidden="true">
+        <div class="skeleton-row"></div>
+        <div class="skeleton-row" style="height: 220px; border-radius: 16px;"></div>
+      </div>
+
+      <!-- Error view -->
+      <div class="error-view" id="error-view" role="alert">
+        <span class="error-view__msg">알림을 불러오지 못했어요</span>
+        <button class="error-view__retry" type="button" id="error-retry" onclick="onAction('retry-fetch')">다시 시도</button>
+      </div>
+
+    </main>
+
+    <!-- Toast (visual feedback for nav actions — no alert/confirm/prompt) -->
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <!-- Bottom Nav -->
+    <nav class="bottom-nav" aria-label="주 탐색">
+      <button class="bottom-nav__item" type="button" id="nav-home" aria-label="홈" onclick="onAction('switch-tab-home')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9.5 12 3l9 6.5V20a2 2 0 0 1-2 2h-4v-7H9v7H5a2 2 0 0 1-2-2z"/></svg>
+      </button>
+      <button class="bottom-nav__item" type="button" id="nav-search" aria-label="검색" onclick="onAction('switch-tab-search')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      </button>
+      <button class="bottom-nav__item" type="button" id="nav-create" aria-label="만들기" onclick="onAction('switch-tab-create')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+      </button>
+      <button class="bottom-nav__item active" type="button" id="nav-bell" aria-label="알림 (현재 화면)" aria-current="page" onclick="onAction('switch-tab-bell')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/></svg>
+      </button>
+      <button class="bottom-nav__item" type="button" id="nav-my" aria-label="MY" onclick="onAction('switch-tab-my')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+      </button>
+    </nav>
+
+  </section>
+</div>
+
+<script>
+  // === Control panel: state toggle ===
+  const deviceFrame = document.getElementById('device-frame');
+  const stateBtns = document.querySelectorAll('[data-state-toggle]');
+  const breadcrumb = document.getElementById('breadcrumb');
+
+  stateBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const state = btn.getAttribute('data-state');
+      deviceFrame.setAttribute('data-state', state);
+      stateBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      breadcrumb.textContent = `notifications-empty · ${state}`;
+    });
+  });
+
+  // === Toast helper (no alert/confirm/prompt — verifier-friendly) ===
+  const toast = document.getElementById('toast');
+  let toastTimer = null;
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 1800);
+  }
+
+  // === Action router (visual feedback only — no real navigation) ===
+  function onAction(action) {
+    console.log('[action]', action);
+    switch (action) {
+      case 'go-back':
+        showToast('이전 화면으로 돌아갑니다');
+        break;
+      case 'open-notification-settings':
+        showToast('알림 설정으로 이동합니다 (app-022)');
+        break;
+      case 'open-system-notification-settings':
+        showToast('휴대폰 설정 → 알림에서 ZZEM 을 켜주세요');
+        break;
+      case 'navigate-search':
+        showToast('친구 찾기로 이동합니다 (검색 탭)');
+        break;
+      case 'retry-fetch':
+        deviceFrame.setAttribute('data-state', 'loading');
+        stateBtns.forEach(b => b.classList.toggle('active', b.getAttribute('data-state') === 'loading'));
+        breadcrumb.textContent = 'notifications-empty · loading';
+        showToast('다시 시도 중…');
+        setTimeout(() => {
+          deviceFrame.setAttribute('data-state', 'default');
+          stateBtns.forEach(b => b.classList.toggle('active', b.getAttribute('data-state') === 'default'));
+          breadcrumb.textContent = 'notifications-empty · default';
+        }, 900);
+        break;
+      case 'switch-tab-home':   showToast('홈 탭으로 이동'); break;
+      case 'switch-tab-search': showToast('검색 탭으로 이동'); break;
+      case 'switch-tab-create': showToast('만들기 탭으로 이동'); break;
+      case 'switch-tab-bell':   showToast('이미 알림 탭입니다'); break;
+      case 'switch-tab-my':     showToast('MY 탭으로 이동'); break;
+      default:
+        showToast(`action: ${action}`);
+    }
+  }
+</script>
+
+</body>
+</html>
