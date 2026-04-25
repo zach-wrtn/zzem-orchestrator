@@ -1,0 +1,476 @@
+# =====================================================================
+# Corrected from Mock — verified against production BE 2026-04-25 via
+# be-vs-spec-diff.md investigation.
+#
+# SSOT: apps/meme-api/src/controller/** (production)
+# Origin Mock: sprint-orchestrator/sprints/ugc-platform-integration-qa-2/
+#              contracts/api-contract.yaml
+# Diff report: sprint-orchestrator/sprints/ugc-platform-be-reconciliation/
+#              contracts/be-vs-spec-diff.md
+#
+# Coverage: 9 endpoints (7 corrected from Mock + 2 newly added).
+# App data layer audit confirmed it already aligns with production BE —
+# no app changes required for Group 002.
+#
+# Note: BE `ApiVersion(path)` prepends `v{version}/` only — actual
+# production paths are `/v2/...` or `/v1/...`. The app's
+# `ApiInstance.Wrtn` adds a `/meme` gateway prefix (so app-side URLs
+# become `/meme/v2/...`). For SSOT clarity this contract documents the
+# raw BE path (without the gateway prefix).
+# =====================================================================
+
+openapi: 3.0.3
+info:
+  title: UGC Platform — Production-aligned API Contract (BE Reconciliation)
+  version: 0.1.0-corrected
+  description: |
+    Corrected contract for the qa-2 sprint surface, aligned with the
+    production meme-api BE (verified 2026-04-25).
+
+    Changes vs. original Mock spec (qa-2):
+      - 4 path corrections: `/block` → `/blocks` (x2),
+        `/blocked-users` → `/blocks`,
+        `/v2/me/avatar/presigned-url` → `/v1/utils/put-presigned-url`.
+      - 6 schema corrections: `items` → `list`, `id` → `notificationId`,
+        `read` → `unread`, `actorNickname`/`actorAvatarUrl` →
+        `actorUserId`, notification `type` enum
+        `[push,like,news,follow]` → `[LIKE,FOLLOW,PAYBACK]`,
+        notification-settings `push` → `pushAll`.
+      - 2 newly added endpoints: `GET /v2/me/notifications/unread-count`,
+        `POST /v2/me/notifications/read-all`.
+      - 1 BE gap documented separately: dedicated avatar presigned-url
+        endpoint missing (see avatar-presigned-url-gap.md).
+  x-status: be-aligned
+  x-sprint: ugc-platform-be-reconciliation
+  x-source-of-truth: apps/meme-api/src/controller/**
+  x-verified-on: 2026-04-25
+
+servers:
+  - url: https://api.zzem.io
+    description: Production BE (paths shown without `/meme` gateway prefix)
+
+tags:
+  - name: profile
+    description: 프로필 편집 (avatar 업로드 — generic util) — Group 001
+  - name: block
+    description: 차단 / 차단 관리 — Group 002
+  - name: notification
+    description: 알림 센터 + 알림 설정 — Group 003
+
+paths:
+  # -----------------------------------------------------------------
+  # 1. POST /v1/utils/put-presigned-url   (was /v2/me/avatar/presigned-url)
+  # -----------------------------------------------------------------
+  /v1/utils/put-presigned-url:
+    post:
+      tags: [profile]
+      summary: 일반 파일 업로드용 presigned URL 발급 (avatar 포함 — generic util)
+      description: |
+        BE has no dedicated `/v2/me/avatar/presigned-url`. The app reuses
+        this generic util endpoint with `feature: PERSONA_PROFILE` for
+        avatar uploads today. See avatar-presigned-url-gap.md for the
+        semantic-mismatch follow-up.
+      x-related-tasks: [app-005, app-006, app-008, app-009]
+      x-corrected-from: POST /v2/me/avatar/presigned-url
+      security:
+        - LibUserAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutPresignedUrlRequest'
+      responses:
+        '200':
+          description: presigned URL 발급
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PutPresignedUrlResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  # -----------------------------------------------------------------
+  # 2. POST /v2/users/{userId}/blocks     (was /v2/users/{userId}/block)
+  # 3. DELETE /v2/users/{userId}/blocks   (was /v2/users/{userId}/block)
+  # -----------------------------------------------------------------
+  /v2/users/{userId}/blocks:
+    post:
+      tags: [block]
+      summary: 사용자 차단 (idempotent)
+      description: |
+        Self-block returns 400. Unblocks both directions of UserFollow as
+        a side-effect.
+      x-related-tasks: [app-012, app-013, app-014]
+      x-corrected-from: POST /v2/users/{userId}/block
+      security:
+        - LibUserAuth: []
+      parameters:
+        - $ref: '#/components/parameters/UserIdPath'
+      responses:
+        '200':
+          description: 차단 적용 (idempotent)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlockStateResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [block]
+      summary: 사용자 차단 해제 (idempotent — no follow restoration)
+      x-related-tasks: [app-015, app-016, app-018, app-019]
+      x-corrected-from: DELETE /v2/users/{userId}/block
+      security:
+        - LibUserAuth: []
+      parameters:
+        - $ref: '#/components/parameters/UserIdPath'
+      responses:
+        '200':
+          description: 차단 해제 (isBlocked=false, blockedAt=null)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlockStateResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # -----------------------------------------------------------------
+  # 4. GET /v2/me/blocks   (was /v2/me/blocked-users)
+  # -----------------------------------------------------------------
+  /v2/me/blocks:
+    get:
+      tags: [block]
+      summary: 차단 관리 리스트 (cursor pagination)
+      description: |
+        Cursor is base64-encoded JSON `{ createdAt, id }` (opaque to client).
+      x-related-tasks: [app-017, app-018]
+      x-corrected-from: GET /v2/me/blocked-users
+      security:
+        - LibUserAuth: []
+      parameters:
+        - in: query
+          name: cursor
+          schema: { type: string, nullable: true }
+          description: Opaque base64-encoded cursor
+        - in: query
+          name: limit
+          schema: { type: integer, default: 20, maximum: 100 }
+      responses:
+        '200':
+          description: 차단된 사용자 페이지
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlockUserListResponse'
+
+  # -----------------------------------------------------------------
+  # 5. GET /v2/me/notifications   (path matches; schema corrected)
+  # -----------------------------------------------------------------
+  /v2/me/notifications:
+    get:
+      tags: [notification]
+      summary: 알림 센터 (시간 역순, cursor pagination)
+      x-related-tasks: [app-020, app-021]
+      x-corrected-from: 'schema only — items→list, id→notificationId, read→unread, actor fields, type enum'
+      security:
+        - LibUserAuth: []
+      parameters:
+        - in: query
+          name: cursor
+          schema: { type: string, nullable: true }
+        - in: query
+          name: limit
+          schema: { type: integer, default: 20, maximum: 100 }
+      responses:
+        '200':
+          description: 알림 페이지 (top-level unreadCount 제거 — 별도 엔드포인트)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationListResponse'
+
+  # -----------------------------------------------------------------
+  # 6. GET /v2/me/notifications/unread-count   (NEWLY ADDED)
+  # -----------------------------------------------------------------
+  /v2/me/notifications/unread-count:
+    get:
+      tags: [notification]
+      summary: 읽지 않은 알림 개수 (red-dot)
+      x-related-tasks: [app-020]
+      x-newly-added: true
+      security:
+        - LibUserAuth: []
+      responses:
+        '200':
+          description: unread count
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnreadCountResponse'
+
+  # -----------------------------------------------------------------
+  # 7. POST /v2/me/notifications/read-all   (NEWLY ADDED)
+  # -----------------------------------------------------------------
+  /v2/me/notifications/read-all:
+    post:
+      tags: [notification]
+      summary: 모든 알림 읽음 처리 (idempotent)
+      x-related-tasks: [app-021]
+      x-newly-added: true
+      security:
+        - LibUserAuth: []
+      responses:
+        '200':
+          description: mark-all-read 결과
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MarkAllReadResponse'
+
+  # -----------------------------------------------------------------
+  # 8. GET /v2/me/notification-settings   (added — was implied only)
+  # 9. PATCH /v2/me/notification-settings (push → pushAll)
+  # -----------------------------------------------------------------
+  /v2/me/notification-settings:
+    get:
+      tags: [notification]
+      summary: 알림 설정 조회
+      description: |
+        Note: when `pushAll` is `false`, BE forces `like/news/follow` to
+        `false` in the response (storage retained — clients should not
+        derive UI state from these when `pushAll` is off).
+      x-related-tasks: [app-022]
+      x-newly-added: true
+      security:
+        - LibUserAuth: []
+      responses:
+        '200':
+          description: 현재 설정
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationSettingsResponse'
+
+    patch:
+      tags: [notification]
+      summary: 알림 설정 토글 (4 카테고리, partial update)
+      description: |
+        All four fields are optional, but at least one must be provided
+        (`minProperties: 1`). 페르소나 계정의 경우 `403 PERSONA_NOTIFICATION_LOCKED`.
+      x-related-tasks: [app-022]
+      x-corrected-from: 'request/response schema — push → pushAll, partial OK'
+      security:
+        - LibUserAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationSettingsUpdateRequest'
+      responses:
+        '200':
+          description: 토글 즉시 저장 결과
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationSettingsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          description: 페르소나 계정에서 알림 설정 변경 차단
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    LibUserAuth:
+      type: http
+      scheme: bearer
+      description: LibUserGuard (`ApiLibUserAuth`)
+
+  parameters:
+    UserIdPath:
+      name: userId
+      in: path
+      required: true
+      schema: { type: string }
+
+  responses:
+    BadRequest:
+      description: 잘못된 요청
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+    NotFound:
+      description: 리소스 없음
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  schemas:
+    # ---------- profile / utils ----------
+    PutPresignedUrlRequest:
+      type: object
+      required: [feature, fileExtension, contentLength]
+      properties:
+        feature:
+          type: string
+          description: |
+            FILE_FEATURE enum. Avatar uploads currently reuse
+            `PERSONA_PROFILE` (semantic mismatch — see
+            avatar-presigned-url-gap.md).
+          enum:
+            - GEN_MEME_SOURCE
+            - GEN_MEME_THUMBNAIL
+            - ZZEM_PRESET
+            - EXAMPLE_VIDEO_SOURCE
+            - FILTER_THUMBNAIL
+            - PERSONA_PROFILE
+        fileExtension:
+          type: string
+          description: FILE_EXTENSION enum
+          enum: [jpg, jpeg, png, webp, gif, mp4, mov]
+        contentLength:
+          type: integer
+          minimum: 1
+          example: 524288
+        metadata:
+          type: object
+          additionalProperties: { type: string }
+          nullable: true
+
+    PutPresignedUrlResponse:
+      type: object
+      required: [putPresignedUrl, getPresignedUrl, fileUuid, signedHeaders]
+      properties:
+        putPresignedUrl: { type: string, format: uri }
+        getPresignedUrl: { type: string, format: uri }
+        fileUuid: { type: string, format: uuid }
+        signedHeaders:
+          type: array
+          description: BE returns array of `{name, value}`, NOT a Record map.
+          items:
+            $ref: '#/components/schemas/SignedHeader'
+
+    SignedHeader:
+      type: object
+      required: [name, value]
+      properties:
+        name: { type: string }
+        value: { type: string }
+
+    # ---------- block ----------
+    BlockStateResponse:
+      type: object
+      required: [userId, isBlocked]
+      properties:
+        userId: { type: string }
+        isBlocked: { type: boolean }
+        blockedAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    BlockUserListResponse:
+      type: object
+      required: [list]
+      properties:
+        list:
+          type: array
+          items: { $ref: '#/components/schemas/BlockUserItem' }
+        nextCursor: { type: string, nullable: true }
+
+    BlockUserItem:
+      type: object
+      required: [userId, nickname, blockedAt]
+      properties:
+        userId: { type: string }
+        nickname: { type: string }
+        profileImageUrl: { type: string, format: uri, nullable: true }
+        blockedAt: { type: string, format: date-time }
+
+    # ---------- notification ----------
+    NotificationListResponse:
+      type: object
+      required: [list]
+      properties:
+        list:
+          type: array
+          items: { $ref: '#/components/schemas/NotificationItem' }
+        nextCursor: { type: string, nullable: true }
+
+    NotificationItem:
+      type: object
+      required: [notificationId, type, title, unread, createdAt]
+      properties:
+        notificationId: { type: string }
+        type:
+          type: string
+          description: |
+            Domain-typed (uppercase). `PAYBACK` replaces qa-2 spec's
+            `news`/`push`. Spec lowercase enum was wrong.
+          enum: [LIKE, FOLLOW, PAYBACK]
+        title: { type: string }
+        body: { type: string, nullable: true }
+        actorUserId:
+          type: string
+          nullable: true
+          description: |
+            BE returns only the actor user id; client must resolve
+            nickname/avatar via UserProfile (n+1 implication —
+            see follow-ups in be-vs-spec-diff.md).
+        thumbnailUrl: { type: string, format: uri, nullable: true }
+        deeplink: { type: string, nullable: true }
+        unread:
+          type: boolean
+          description: BE uses `unread` (inverted from qa-2 spec's `read`).
+        createdAt: { type: string, format: date-time }
+
+    UnreadCountResponse:
+      type: object
+      required: [unreadCount]
+      properties:
+        unreadCount: { type: integer, minimum: 0 }
+
+    MarkAllReadResponse:
+      type: object
+      required: [markedCount]
+      properties:
+        markedCount: { type: integer, minimum: 0 }
+
+    # ---------- notification settings ----------
+    NotificationSettingsResponse:
+      type: object
+      description: |
+        4 카테고리. `pushAll=false` 일 때 BE 가 `like/news/follow` 응답을
+        강제 `false` 로 override (storage 는 유지).
+      required: [pushAll, like, news, follow]
+      properties:
+        pushAll: { type: boolean }
+        like: { type: boolean }
+        news: { type: boolean }
+        follow: { type: boolean }
+
+    NotificationSettingsUpdateRequest:
+      type: object
+      description: |
+        Partial update — all fields optional, **minProperties: 1**.
+      minProperties: 1
+      properties:
+        pushAll: { type: boolean }
+        like: { type: boolean }
+        news: { type: boolean }
+        follow: { type: boolean }
+
+    # ---------- shared ----------
+    ErrorResponse:
+      type: object
+      required: [code, message]
+      properties:
+        code: { type: string }
+        message: { type: string }
