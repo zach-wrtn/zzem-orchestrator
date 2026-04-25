@@ -258,6 +258,58 @@ HTML 프로토타입이 이 파일을 inline으로 포함한다.
 
 **Zero-Contamination**: 토큰 값은 `design-tokens/` JSON에서 직접 변환한다. 값을 추측하거나 보완하지 않는다.
 
+**Tokens.css 부재 시 fallback** (구버전 스프린트 호환): 일부 스프린트 (예: free-tab-diversification) 는 sprint-level `tokens.css` 가 생성되지 않은 상태로 남아있다. 이 경우 Pass 6 #1 (hex-not-in-tokens) 평가가 불가능해진다. 다음 fallback 사용:
+
+1. 우선: 스프린트의 prototype.html 자체에 inline 정의된 `:root { --... }` 변수 → 거기서 `#[0-9A-Fa-f]{6}` 추출하여 가상 tokens.css 로 사용
+2. 차선: `wds-tokens` 외부 리포의 `semantic/*.json` + `component/*.json` 의 `$value` 필드에서 hex 추출. 이 sprint 는 외부 토큰만 신뢰
+3. 둘 다 없으면 Pass 6 #1 을 `skipped` 로 기록하고 Sprint Lead 에 보고. 자동 PASS 처리 금지 (잠재적 slop 유입 경로)
+
+### A.5 Asset Layer 조립 (v1 추가)
+
+시각적 품질을 좌우하는 **이미지 슬롯**(피드 썸네일·아바타·밈 이미지·hero banner)을 placeholder로 때우면 Figma 수준 품질에서 멀어진다. Step A 산출물인 `context-engine.yaml`에 `assets:` 레이어를 조립한다.
+
+**5개 슬롯 카테고리 + fallback 순서**:
+
+| 카테고리 | fallback 우선순위 | placeholder 허용 여부 |
+|---------|------------------|-------------------|
+| `avatars` | user-provided → KB sample → `app-core-packages/ds/avatars/` → Sprint Lead 질의 | ✗ 주 콘텐츠 위치면 금지 |
+| `feed_thumbnails` | user-provided → Figma node screenshot → Sprint Lead 질의 | ✗ |
+| `meme_images` | user-provided → KB `sample_image` 패턴 → Sprint Lead 질의 | ✗ |
+| `icons` | `@wrtn/icons` inline SVG → 기호 placeholder(`←`, `⋮`, `♡`, `+`) | ✓ 기호 placeholder는 허용 |
+| `hero_banners` | user-provided → Sprint Lead 질의 | ✗ |
+
+**`kind` 필드** (각 슬롯에 필수, v1.1 추가):
+
+| `kind` | 의미 | needs_real_content 기본 |
+|--------|------|------------------------|
+| `real-image` | 사진/렌더된 비트맵. `<img src>` 필수 | true (placeholder 금지) |
+| `gradient-token` | 토큰화된 그라디언트 (예: `--banner-purple`). 색상이 `design-tokens/` 에 정의된 경우 | false (의도된 디자인 — 면제) |
+| `illustration` | 카테고리별 SVG/추상 일러스트 | false (디자인 시스템 등재 시) |
+
+**예시 — free-tab FreeRosterCard 식 디자인**: `feed_thumbnails.kind: gradient-token` 으로 선언하면 Pass 6 #6 (placeholder-image) 면제 + Pass 6 #1 의 hex 검사는 그라디언트의 색이 `design-tokens/` 에 등재된 hex 인 경우에만 PASS. 즉 `kind: gradient-token` 은 "그라디언트 의도이지만 토큰 외부 색을 발명할 권리가 아니다."
+
+**조립 규칙 (stop-and-ask 원칙)**:
+- 슬롯에 실제 src 경로가 확정된 경우에만 `assets:` 에 기록. 추측 경로 금지
+- 확정되지 않은 슬롯은 키를 **생략**하고 Sprint Lead에 보고:
+  ```
+  ⚠ Asset missing: {slot_category} for task {task-id}.
+  Fallback chain exhausted. 다음 중 하나 필요:
+    - 실제 이미지 파일 경로
+    - Figma node URL
+    - "placeholder 허용" 명시 승인
+  ```
+- Sprint Lead의 명시적 "placeholder 허용" 승인이 있을 때만 Pass 6 audit #6을 `needs_real_content: false`로 기록하여 통과
+
+**Pass 6 Anti-Slop Audit 체크 6과의 연결**:
+- `prototype.html`에서 `<div class="placeholder-image">`가 화면의 주 콘텐츠 슬롯에 존재 + `context-engine.yaml assets.{slot}.needs_real_content: true` → **Pass 6 실패** → HTML 저장 금지
+- `needs_real_content: false` (명시 승인) → 통과
+
+**저장 경로**: `sprints/{sprint-id}/prototypes/context/context-engine.yaml` 의 `assets:` 블록.
+
+**템플릿 참조**: `sprint-orchestrator/templates/context-engine-template.yaml` § `assets`.
+
+**Zero-Contamination**: asset 경로는 파일시스템에서 존재 확인된 것만. 가상 경로/미래 경로/"나중에 채워질" 경로를 `source:` 에 쓰지 않는다.
+
 ---
 
 ## Step B: UX Decomposition (PRD → Screen Spec)
@@ -408,6 +460,36 @@ quality_score:
 - `medium`: PRD에 명시되지 않은 UI 요소를 추론하여 추가
 - `high`: 비즈니스 로직이나 데이터 구조를 추측 — **허용하지 않음, 반드시 Sprint Lead에 질의**
 
+### B.6 Assumption Preview 산출 (조건부)
+
+Step C 진입 전 Sprint Lead가 early-review 할 수 있도록 `intent.md` 를 산출한다. **아래 트리거 조건 중 하나라도 해당하면 필수, 그렇지 않으면 스킵 가능**:
+
+- `quality_score.fabrication_risk` in `[low, medium]`
+- `quality_score.context_coverage.why_linked < 1.0` (UI에 영향을 주는 AC 중 연결되지 않은 것이 있음)
+- 태스크 Description에 `preview_required: true` 명시
+- 새 컴포넌트(`(new)` 표시)가 2개 이상 등장
+
+**템플릿**: `sprint-orchestrator/templates/assumption-preview-template.md`
+
+**저장 경로**:
+`sprints/{sprint-id}/prototypes/app/{task-id}/{ScreenName}.intent.md`
+
+**작성 원칙**:
+- Screen Spec 각 섹션을 다시 나열하지 않는다 — Spec에 **없던** 결정만 기록
+- 트리거가 하나도 해당하지 않고 + `inferred_layout` 항목이 0개 + `placeholders.needs_real_content: true`가 0개일 때만 preview 생성을 **스킵**하고 로그만 남김 (`phase: preview_skipped`). 트리거가 하나라도 해당하면 반드시 intent.md를 산출한다 (본문이 짧아도 무방).
+- 한 태스크가 여러 Screen을 포함하면 화면별로 파일 분리
+
+**Gate 동작**:
+- Step C는 Sprint Lead로부터 `proceed` 수신 시에만 진행
+- `adjust` 수신 시 지정된 항목만 Screen Spec에 반영 후 preview 재생성 (최대 2회까지 루프; 초과 시 Sprint Lead에 escalation — 옵션은 `.claude/skills/sprint/phase-prototype.md` §3.2.5 Adjust 루프 상한 참조)
+- `stop` 수신 시 `TaskUpdate: blocked` + Sprint Lead에게 PRD 갭 보고
+
+**로깅 포인트** (Activity Logging 표에 다음 행 추가):
+
+| B.6 Preview 생성 | `preview_generated` | "{ScreenName}.intent.md 생성, gate_questions {N}개" |
+| B.6 Preview 스킵 | `preview_skipped` | "fabrication_risk none + 전부 PRD 기반 — preview 불필요" |
+| B.6 Adjust 수신 | `preview_adjusting` | "Sprint Lead adjust 피드백 {N}건 반영 중" |
+
 ---
 
 ## Step C: Prototype Generation (Screen Spec → HTML)
@@ -477,6 +559,41 @@ Phase β (단일 Write — 기계적 변환):
   Pass 6: Polish     — 통합 검증 + 미세 조정
   → prototype.html 저장 (prototype-alpha.html 기반 최종본)
 ```
+
+### C.2.1 Pass 6 Anti-Slop Self-Audit (필수)
+
+Pass 6 "Polish" 완료 조건. 아래 8개 체크 중 하나라도 실패하면 prototype.html을 저장하지 않고 원인을 수정한 뒤 재실행한다.
+
+**검사 범위**: 모든 체크는 `.screen` 후손 요소(실제 화면)에만 적용. `.control-panel` (리뷰어용 device frame 외부 컨트롤)은 모든 체크에서 제외 — 이 영역은 monospace font, 테스트용 버튼 등 디자인 시스템과 무관한 요소를 의도적으로 포함한다.
+
+| # | 체크 | 실패 시 조치 |
+|---|------|------------|
+| 1 | `#[0-9A-Fa-f]{6}` hex 색상이 tokens.css에 정의되지 않은 값으로 HTML에 등장하는가 (`.screen` 후손에 한함) | 해당 hex → `var(--color-*)` 로 교체. 매핑이 없으면 DE가 임의 생성 금지 → Sprint Lead에 토큰 누락 보고 |
+| 2 | Unicode emoji가 인터랙티브 요소(button, tab, nav)의 아이콘으로 사용되었는가 (`<button>🔔</button>` 등) | 기호 placeholder(`←`, `⋮`, `♡`, `+`) 또는 inline SVG로 교체. body 텍스트 내 이모지는 허용 |
+| 3 | `.card` 계열 요소에 `border-left: Npx solid var(--*)` 스타일이 있는가 (Material/Tailwind slop) | 제거. 강조가 필요하면 `box-shadow` 또는 배경 fill 사용 |
+| 4 | `.screen` 후손에 `font-family`를 `Pretendard` 외로 명시한 CSS 규칙이 있는가 (인라인 스타일 포함, `.control-panel` 제외) | `--font-family-default` 로 통일. `JetBrains Mono`는 라틴 전용 mono 블록에 한해 허용 |
+| 5 | `linear-gradient(... #8752FA ...)` 등 브랜드 보라색을 그라디언트로 배경 전면에 사용했는가 | 단색 fill 또는 토큰화된 표면으로 교체. 그라디언트는 DESIGN.md §4에 명시된 경우에만 |
+| 6 | `<img src>` 없이 `<div class="placeholder-image">`가 화면의 **주 콘텐츠** 위치(피드 카드 썸네일, 프로필 아바타, 밈 이미지)를 차지하고 있는가 | Phase 4의 Asset Layer(`context-engine.yaml` `assets:`)가 있으면 실제 파일 경로로 교체; 없으면 Sprint Lead에 stop-and-ask |
+| 7 | Pass 1~5에서 생성된 DOM 중 `[onclick]` 또는 `addEventListener`로 바인딩된 요소 수가 Screen Spec `interactions` 엔트리 수와 불일치하는가 | 누락된 이벤트 바인딩을 추가하거나, 스펙의 interaction을 삭제하여 정합성 맞춤 |
+| 8 | `onclick` 핸들러에 `alert()` / `confirm()` / `prompt()` 가 사용되었는가 | 인터랙티브 데모로 표현 (`toggleState`, console.log + visual feedback 등). 이 패턴은 puppeteer click 프로토콜을 블로킹하여 verifier hang 의 직접 원인 (free-tab/app-002 18분 hang 사례) |
+
+**자동화 힌트**: 체크 1·2·4·8은 `grep -E`로 기계 검출 가능 (아래 shell 블록 참조). 체크 3·5·6은 DE가 수동 검토. 체크 7은 DOM 파싱 필요 — Phase 3의 `verify-prototype.ts`가 커버 (verifier는 alert를 자동 dismiss + 클릭당 2초 timeout 적용하므로 #8의 hang은 verifier 단계에서도 차단됨).
+
+```bash
+# Pass 6 시작 직전 DE가 실행할 수 있는 자가 검사 커맨드(제안):
+# (체크 #1) hex 토큰 위반 검출
+grep -oE '#[0-9A-Fa-f]{6}' prototype.html | sort -u > /tmp/proto-hex.txt
+grep -oE '#[0-9A-Fa-f]{6}' ../../prototypes/context/tokens.css | sort -u > /tmp/tokens-hex.txt
+comm -23 /tmp/proto-hex.txt /tmp/tokens-hex.txt   # 차집합이 비어있어야 통과
+# 참고: 스프린트 단위 tokens.css 가 아직 없는 (구버전) 스프린트면
+# wds-tokens 외부 repo 의 semantic/component layer JSON 의 hex 들을
+# fallback 으로 비교한다. §A.4 참조.
+
+# (체크 #8) onclick 안의 blocking dialog 검출
+grep -nE 'onclick=[^>]*\b(alert|confirm|prompt)\(' prototype.html  # 결과 0줄이어야 통과
+```
+
+**결과 기록**: audit 완료 시 `approval-status.yaml` 의 해당 스크린 엔트리에 `anti_slop_audit: passed` 필드 추가. 실패 수정 이력이 있으면 `anti_slop_fixes: ["item-N: 설명", ...]`에 누적.
 
 **Phase α 입력/출력**:
 | 입력 | 출력 |
@@ -573,11 +690,12 @@ HTML 생성이 실패하면:
 ```
 sprint-orchestrator/sprints/{sprint-id}/prototypes/
 ├── context/
-│   ├── context-engine.yaml              # Step A 산출물 (Context Engine)
+│   ├── context-engine.yaml              # Step A 산출물 (WHY/WHAT/HOW + assets 4-layer)
 │   └── tokens.css                       # Step A 산출물 (디자인 토큰 CSS)
 ├── app/
 │   ├── {task-id}/
 │   │   ├── {ScreenName}.spec.md         # Step B 산출물 (machine-readable + quality_score)
+│   │   ├── {ScreenName}.intent.md       # Step B.6 산출물 (조건부 — Assumption Preview)
 │   │   ├── prototype.html               # Step C 산출물 (self-contained HTML)
 │   │   ├── prototype.png                # 대표 스크린샷 (첫 스크린 default)
 │   │   └── screenshots/
@@ -676,11 +794,17 @@ echo '{"ts":"<현재시각 ISO8601>","task":"<태스크 subject>","phase":"<phas
 | 2. 컨텍스트 수집 | `context_loaded` | "화면 3개 식별: ProfileScreen, EditScreen, SettingsScreen" |
 | 2. Snapshot 활용 | `snapshot_used` | "Frozen Snapshot 활용: DESIGN.md + patterns 3개 + KB 2개" |
 | A. Context Engine 조립 | `context_engine` | "WHY 3 stories / WHAT 12 tokens / HOW 4 rules 조립 완료" |
+| A.5 Asset 조립 | `assets_resolved` | "assets: avatars({N}) feed_thumbs({M}) icons({K}) — {P}건 Sprint Lead 질의 대기" |
+| A.5 Asset 미해결 | `assets_pending` | "⚠ {slot_category} src 미확정 — fallback 체인 소진" |
 | B. Spec 작성 시작 | `spec_writing` | "ProfileScreen spec 작성 중" |
 | B. Spec 작성 완료 | `spec_complete` | "3개 화면 spec 완료, avg accuracy 0.92, fabrication none" |
+| B.6 Preview 생성 | `preview_generated` | "{ScreenName}.intent.md 생성, gate_questions {N}개" |
+| B.6 Preview 스킵 | `preview_skipped` | "fabrication_risk none — preview 불필요" |
+| B.6 Adjust 수신 | `preview_adjusting` | "Sprint Lead adjust 피드백 {N}건 반영 중" |
 | A. tokens.css 생성 | `tokens_generated` | "tokens.css 생성 완료 (42 variables)" |
 | C. Phase α 완료 | `html_alpha` | "prototype-alpha.html 생성 (Structure + Components)" |
 | C. Phase β 완료 | `html_final` | "prototype.html 생성 (Content + States + Interactions + Polish)" |
+| C. Pass 6 audit 통과 | `anti_slop_audit` | "Anti-slop audit passed (7/7)" 또는 "Anti-slop audit: {N}건 수정 후 통과" |
 | 완료 보고 | `completed` | "프로토타입 완료, 품질 accuracy 0.95 / completeness 1.0" |
 | 품질 이상 | `nudge` | "⚠ fabrication_risk medium on FollowerList" |
 | 오류 | `error` | 오류 설명 (detail에 상세) |
