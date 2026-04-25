@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-25T10:18:49.726Z",
+  "generated_at": "2026-04-25T15:43:15.539Z",
   "exemplars": [
     {
       "id": "v2-dogfood-free-tab-app-001-freetabscreen",
@@ -121,6 +121,26 @@
       "last_validated_at": "2026-04-25T10:18:49.726Z",
       "validation_status": "valid",
       "notes": "Reclassified post-#41 (archetype enum 6→7). Was form misfit during dogfood; nav_list persona 4/4 confirmed."
+    },
+    {
+      "id": "v2-dogfood-onboarding-onboarding-walkthrough-onboardingwalkthrough",
+      "sprint_id": "v2-dogfood-onboarding",
+      "task_id": "onboarding-walkthrough",
+      "screen_name": "OnboardingWalkthrough",
+      "archetype": "onboarding",
+      "why_curated": "v2 dogfood — first onboarding exemplar (7/7 archetype 커버 완성). 3-step ZZEM walkthrough + step indicator + 56px+ primary + skip + success state. Reference for first-use / signup / tutorial flows.",
+      "prototype_path": "sprint-orchestrator/dogfood/v2-exercise/onboarding-walkthrough/prototype.html",
+      "screenshot_path": "sprint-orchestrator/dogfood/v2-exercise/onboarding-walkthrough/screenshots/default.png",
+      "design_dimensions": [
+        "archetype_fit",
+        "token_compliance",
+        "interaction_completeness"
+      ],
+      "added_by": "zach@wrtn.io",
+      "added_at": "2026-04-25T15:43:15.539Z",
+      "last_validated_at": "2026-04-25T15:43:15.539Z",
+      "validation_status": "valid",
+      "notes": "Bootstrap completes 7/7 archetype coverage. v2 dogfood pattern — synthetic ZZEM walkthrough."
     }
   ]
 }

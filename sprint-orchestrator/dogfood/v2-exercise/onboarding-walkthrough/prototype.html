@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>onboarding-walkthrough · ZZEM 3-step Walkthrough (v2 dogfood)</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+<style>
+  /* === tokens.css inline (Step A output) === */
+  :root {
+    --wds-color-purple-50:  #F5F0FF;
+    --wds-color-purple-100: #EBE1FF;
+    --wds-color-purple-400: #A17BFF;
+    --wds-color-purple-500: #8752FA;
+    --wds-color-purple-600: #7040E0;
+    --wds-color-purple-700: #5A30C0;
+
+    --wds-color-neutral-0:    #FFFFFF;
+    --wds-color-neutral-50:   #F7F8F9;
+    --wds-color-neutral-100:  #F0F1F3;
+    --wds-color-neutral-200:  #E4E5E9;
+    --wds-color-neutral-300:  #D1D3D8;
+    --wds-color-neutral-400:  #B5B8BF;
+    --wds-color-neutral-500:  #8E9199;
+    --wds-color-neutral-600:  #6B6E76;
+    --wds-color-neutral-700:  #46474C;
+    --wds-color-neutral-900:  #212228;
+
+    --wds-color-red-500:    #FF3B30;
+    --wds-color-green-500:  #34C759;
+
+    --wds-background-normal:    var(--wds-color-neutral-0);
+    --wds-background-elevated:  var(--wds-color-neutral-0);
+
+    --wds-surface-primary:   var(--wds-color-neutral-0);
+    --wds-surface-secondary: var(--wds-color-neutral-50);
+    --wds-surface-tertiary:  var(--wds-color-neutral-100);
+
+    --wds-fill-brand-primary: var(--wds-color-purple-500);
+    --wds-fill-brand-weak:    var(--wds-color-purple-50);
+    --wds-fill-brand-strong:  var(--wds-color-purple-600);
+
+    --wds-label-normal:       var(--wds-color-neutral-900);
+    --wds-label-alternative:  var(--wds-color-neutral-600);
+    --wds-label-assistive:    var(--wds-color-neutral-500);
+    --wds-label-disabled:     var(--wds-color-neutral-300);
+    --wds-label-inverse:      var(--wds-color-neutral-0);
+    --wds-label-brand:        var(--wds-color-purple-500);
+
+    --wds-line-normal:       var(--wds-color-neutral-200);
+    --wds-line-alternative:  var(--wds-color-neutral-100);
+
+    --wds-status-error:    var(--wds-color-red-500);
+
+    /* Component tokens (onboarding) */
+    --component-button-primary-fill:  var(--wds-fill-brand-primary);
+    --component-button-primary-label: var(--wds-label-inverse);
+    --component-button-primary-radius: var(--wds-radius-lg);
+    --component-button-primary-height: 56px; /* onboarding 강제 룰 #2 */
+
+    --component-hero-fill: radial-gradient(circle at 50% 45%,
+      var(--wds-color-purple-100) 0%,
+      var(--wds-color-purple-50)  60%,
+      var(--wds-color-purple-50) 100%);
+    --component-hero-icon: var(--wds-fill-brand-primary);
+    --component-hero-size: 200px; /* onboarding 권장 룰 #1: 160-240 범위 */
+
+    --component-dot-active:   var(--wds-fill-brand-primary);
+    --component-dot-inactive: var(--wds-color-neutral-200);
+
+    --component-success-bg:   rgba(255, 255, 255, 0.96);
+    --component-success-icon: var(--wds-fill-brand-primary);
+
+    --wds-spacing-1:  1px;
+    --wds-spacing-2:  2px;
+    --wds-spacing-4:  4px;
+    --wds-spacing-6:  6px;
+    --wds-spacing-8:  8px;
+    --wds-spacing-10: 10px;
+    --wds-spacing-12: 12px;
+    --wds-spacing-14: 14px;
+    --wds-spacing-16: 16px;
+    --wds-spacing-20: 20px;
+    --wds-spacing-24: 24px;
+    --wds-spacing-32: 32px;
+    --wds-spacing-40: 40px;
+    --wds-spacing-48: 48px;
+    --wds-spacing-56: 56px;
+    --wds-spacing-64: 64px;
+    --wds-spacing-80: 80px;
+
+    --wds-radius-xs:   4px;
+    --wds-radius-sm:   8px;
+    --wds-radius-md:   12px;
+    --wds-radius-lg:   16px;
+    --wds-radius-xl:   20px;
+    --wds-radius-full: 9999px;
+
+    --wds-font-family-primary: 'Pretendard', -apple-system, 'SF Pro Display', sans-serif;
+    --wds-font-weight-regular:  400;
+    --wds-font-weight-medium:   500;
+    --wds-font-weight-semibold: 600;
+    --wds-font-weight-bold:     700;
+    --wds-font-size-2xs: 11px;
+    --wds-font-size-xs:  12px;
+    --wds-font-size-sm:  13px;
+    --wds-font-size-md:  14px;
+    --wds-font-size-lg:  16px;
+    --wds-font-size-xl:  18px;
+    --wds-font-size-2xl: 20px;
+    --wds-font-size-3xl: 24px;
+
+    --color-brand-primary:   var(--wds-color-purple-500);
+    --color-bg-normal:       var(--wds-color-neutral-0);
+    --color-fill-neutral:    var(--wds-color-neutral-100);
+    --color-label-normal:    var(--wds-color-neutral-900);
+    --color-label-assistive: var(--wds-color-neutral-500);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--wds-font-family-primary);
+    background: #f0f0f0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 16px;
+    color: var(--wds-label-normal);
+  }
+
+  /* === Control Panel (외부 — Pass 6 audit 제외 영역) === */
+  .control-panel {
+    width: 390px;
+    background: #1a1a2e;
+    color: #e0e0e0;
+    border-radius: 12px 12px 0 0;
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 13px;
+    font-family: ui-monospace, monospace;
+  }
+  .control-panel__row { display: flex; align-items: center; gap: 8px; }
+  .control-panel__label { color: #888; font-size: 11px; min-width: 56px; }
+  .control-panel select {
+    background: #2a2a3e; color: #e0e0e0; border: 1px solid #444;
+    border-radius: 6px; padding: 4px 8px; font-size: 12px; flex: 1;
+    font-family: ui-monospace, monospace;
+  }
+  .control-panel__states { display: flex; gap: 4px; flex-wrap: wrap; flex: 1; }
+  .control-panel__state-btn {
+    background: #2a2a3e; color: #bbb; border: 1px solid #444;
+    border-radius: 6px; padding: 4px 10px; font-size: 11px; cursor: pointer;
+    transition: all 0.15s;
+    font-family: ui-monospace, monospace;
+  }
+  .control-panel__state-btn.active {
+    background: var(--color-brand-primary); color: #fff; border-color: var(--color-brand-primary);
+  }
+  .control-panel__breadcrumb { color: #666; font-size: 11px; font-family: ui-monospace, monospace; }
+  .control-panel__hint { color: #999; font-size: 10px; font-style: italic; }
+
+  /* === Device Frame === */
+  .device-frame {
+    width: 390px;
+    height: 844px;
+    background: var(--wds-background-normal);
+    overflow: hidden;
+    position: relative;
+    border: 1px solid #ddd;
+    border-radius: 0 0 12px 12px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .screen { display: flex; flex-direction: column; height: 100%; position: relative; }
+
+  /* === Status Bar === */
+  .status-bar {
+    height: 44px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 24px;
+    font-size: var(--wds-font-size-md);
+    font-weight: var(--wds-font-weight-semibold);
+    flex-shrink: 0;
+    color: var(--wds-label-normal);
+  }
+  .status-bar__icons { display: flex; gap: 6px; align-items: center; }
+  .status-bar__icons svg { display: block; }
+
+  /* === Onboarding Header (back + skip) === */
+  .onb-header {
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 var(--wds-spacing-12);
+    flex-shrink: 0;
+    background: var(--wds-background-normal);
+  }
+  .onb-header__back {
+    width: 44px;
+    height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--wds-label-normal);
+    border-radius: var(--wds-radius-sm);
+    font-family: inherit;
+    transition: opacity 0.15s;
+  }
+  .onb-header__back:active { opacity: 0.6; }
+  .onb-header__back-spacer {
+    width: 44px;
+    height: 44px;
+    display: inline-block;
+  }
+  .onb-header__skip {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--wds-label-alternative);
+    font-size: var(--wds-font-size-sm);
+    font-weight: var(--wds-font-weight-semibold);
+    padding: 12px 12px;
+    min-height: 44px;
+    font-family: inherit;
+    transition: color 0.15s;
+  }
+  .onb-header__skip:active { color: var(--wds-label-normal); }
+
+  /* === Step Indicator (3 dots) — onboarding 강제 룰 #1 === */
+  .step-indicator {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--wds-spacing-8);
+    padding: var(--wds-spacing-8) 0 var(--wds-spacing-16);
+    flex-shrink: 0;
+  }
+  .step-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: var(--wds-radius-full);
+    background: var(--component-dot-inactive);
+    transition: width 0.25s, background 0.25s;
+  }
+  .step-dot.active {
+    width: 24px;
+    background: var(--component-dot-active);
+  }
+
+  /* === Body Content === */
+  .onb-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--wds-spacing-24);
+    text-align: center;
+  }
+
+  .hero-illust {
+    width: var(--component-hero-size);
+    height: var(--component-hero-size);
+    border-radius: var(--wds-radius-md);
+    background: var(--component-hero-fill);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--wds-spacing-32);
+    flex-shrink: 0;
+  }
+  .hero-illust__icon {
+    color: var(--component-hero-icon);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .onb-headline {
+    font-size: var(--wds-font-size-3xl);
+    font-weight: var(--wds-font-weight-bold);
+    color: var(--wds-label-normal);
+    line-height: 1.35;
+    margin: 0 0 var(--wds-spacing-12);
+    letter-spacing: -0.4px;
+    max-width: 320px;
+  }
+  .onb-body-copy {
+    font-size: var(--wds-font-size-md);
+    font-weight: var(--wds-font-weight-regular);
+    color: var(--wds-label-alternative);
+    line-height: 1.55;
+    margin: 0;
+    max-width: 320px;
+  }
+
+  /* === Primary CTA — onboarding 강제 룰 #2 (56px+) === */
+  .onb-cta {
+    margin: var(--wds-spacing-24) var(--wds-spacing-24) var(--wds-spacing-32);
+    height: var(--component-button-primary-height);
+    border-radius: var(--component-button-primary-radius);
+    background: var(--component-button-primary-fill);
+    color: var(--component-button-primary-label);
+    font-size: var(--wds-font-size-lg);
+    font-weight: var(--wds-font-weight-semibold);
+    border: none;
+    cursor: pointer;
+    flex-shrink: 0;
+    font-family: inherit;
+    transition: background 0.15s, transform 0.05s;
+  }
+  .onb-cta:active {
+    background: var(--wds-fill-brand-strong);
+    transform: scale(0.99);
+  }
+
+  /* === Success Overlay — onboarding 강제 룰 #4 === */
+  .success-overlay {
+    position: absolute;
+    inset: 0;
+    background: var(--component-success-bg);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 30;
+    opacity: 0;
+    transition: opacity 0.3s;
+    padding: var(--wds-spacing-24);
+    text-align: center;
+  }
+  .success-overlay.show {
+    display: flex;
+    opacity: 1;
+  }
+  .success-overlay__icon {
+    width: 96px;
+    height: 96px;
+    border-radius: var(--wds-radius-full);
+    background: var(--wds-fill-brand-weak);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--component-success-icon);
+    margin-bottom: var(--wds-spacing-24);
+  }
+  .success-overlay__title {
+    font-size: var(--wds-font-size-3xl);
+    font-weight: var(--wds-font-weight-bold);
+    color: var(--wds-label-normal);
+    margin: 0 0 var(--wds-spacing-8);
+    letter-spacing: -0.4px;
+  }
+  .success-overlay__hint {
+    font-size: var(--wds-font-size-md);
+    font-weight: var(--wds-font-weight-regular);
+    color: var(--wds-label-alternative);
+    margin: 0;
+  }
+
+  /* === Toast === */
+  .toast {
+    display: none;
+    position: absolute;
+    bottom: 110px;
+    left: 24px;
+    right: 24px;
+    background: var(--wds-color-neutral-900);
+    color: var(--wds-label-inverse);
+    padding: var(--wds-spacing-12) var(--wds-spacing-16);
+    border-radius: var(--wds-radius-md);
+    font-size: var(--wds-font-size-sm);
+    font-weight: var(--wds-font-weight-medium);
+    z-index: 40;
+    text-align: center;
+  }
+  .toast.show { display: block; }
+
+  /* === STATE OVERRIDES === */
+  /* step-1: back hidden, dot[0] active, illust=sparkles, CTA=다음 */
+  .device-frame[data-state="step-1"] .onb-header__back { display: none; }
+  .device-frame[data-state="step-1"] .onb-header__back-spacer { display: inline-block; }
+  .device-frame[data-state="step-1"] .step-dot[data-step="0"] { background: var(--component-dot-active); width: 24px; }
+  .device-frame[data-state="step-1"] .step-dot[data-step="1"],
+  .device-frame[data-state="step-1"] .step-dot[data-step="2"] {
+    background: var(--component-dot-inactive); width: 6px;
+  }
+  .device-frame[data-state="step-1"] .hero-icon-1 { display: inline-flex; }
+  .device-frame[data-state="step-1"] .hero-icon-2,
+  .device-frame[data-state="step-1"] .hero-icon-3 { display: none; }
+
+  /* step-2 */
+  .device-frame[data-state="step-2"] .onb-header__back { display: inline-flex; }
+  .device-frame[data-state="step-2"] .onb-header__back-spacer { display: none; }
+  .device-frame[data-state="step-2"] .step-dot[data-step="1"] { background: var(--component-dot-active); width: 24px; }
+  .device-frame[data-state="step-2"] .step-dot[data-step="0"],
+  .device-frame[data-state="step-2"] .step-dot[data-step="2"] {
+    background: var(--component-dot-inactive); width: 6px;
+  }
+  .device-frame[data-state="step-2"] .hero-icon-2 { display: inline-flex; }
+  .device-frame[data-state="step-2"] .hero-icon-1,
+  .device-frame[data-state="step-2"] .hero-icon-3 { display: none; }
+
+  /* step-3 */
+  .device-frame[data-state="step-3"] .onb-header__back { display: inline-flex; }
+  .device-frame[data-state="step-3"] .onb-header__back-spacer { display: none; }
+  .device-frame[data-state="step-3"] .step-dot[data-step="2"] { background: var(--component-dot-active); width: 24px; }
+  .device-frame[data-state="step-3"] .step-dot[data-step="0"],
+  .device-frame[data-state="step-3"] .step-dot[data-step="1"] {
+    background: var(--component-dot-inactive); width: 6px;
+  }
+  .device-frame[data-state="step-3"] .hero-icon-3 { display: inline-flex; }
+  .device-frame[data-state="step-3"] .hero-icon-1,
+  .device-frame[data-state="step-3"] .hero-icon-2 { display: none; }
+
+  /* success: hide everything except overlay */
+  .device-frame[data-state="success"] .onb-header,
+  .device-frame[data-state="success"] .step-indicator,
+  .device-frame[data-state="success"] .onb-body,
+  .device-frame[data-state="success"] .onb-cta { visibility: hidden; }
+  .device-frame[data-state="success"] .success-overlay { display: flex; opacity: 1; }
+
+  @media (max-width: 480px) {
+    body { padding: 0; align-items: stretch; min-height: 100dvh; }
+    .control-panel { display: none; }
+    .device-frame {
+      width: 100dvw;
+      height: 100dvh;
+      border: none;
+      border-radius: 0;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- Control Panel (verifier-friendly) -->
+<div class="control-panel">
+  <div class="control-panel__row">
+    <span class="control-panel__label">Screen</span>
+    <select id="screen-select">
+      <option value="onboarding">OnboardingWalkthrough</option>
+    </select>
+  </div>
+  <div class="control-panel__row">
+    <span class="control-panel__label">State</span>
+    <div class="control-panel__states" id="state-toggles">
+      <button class="control-panel__state-btn active" data-state="step-1" data-state-toggle>step-1</button>
+      <button class="control-panel__state-btn" data-state="step-2" data-state-toggle>step-2</button>
+      <button class="control-panel__state-btn" data-state="step-3" data-state-toggle>step-3</button>
+      <button class="control-panel__state-btn" data-state="success" data-state-toggle>success</button>
+    </div>
+  </div>
+  <div class="control-panel__row">
+    <span class="control-panel__breadcrumb" id="breadcrumb">onboarding · step-1</span>
+  </div>
+  <div class="control-panel__row">
+    <span class="control-panel__hint">v2 dogfood — onboarding archetype persona enforced (4/4)</span>
+  </div>
+</div>
+
+<!-- Device Frame -->
+<div class="device-frame" id="device-frame" data-state="step-1">
+  <section class="screen" id="onboarding">
+
+    <div class="status-bar">
+      <span>9:41</span>
+      <span class="status-bar__icons">
+        <svg width="16" height="11" viewBox="0 0 16 11" fill="none" aria-hidden="true"><path d="M1 6.5a6.5 6.5 0 0 1 13 0v3.75a.75.75 0 0 1-.75.75H1.75A.75.75 0 0 1 1 10.25z" fill="currentColor"/></svg>
+        <svg width="16" height="11" viewBox="0 0 16 11" fill="none" aria-hidden="true"><rect x="0.5" y="0.5" width="13" height="9" rx="1.5" stroke="currentColor"/><rect x="14.25" y="3.5" width="1.25" height="3" rx="0.5" fill="currentColor"/><rect x="2" y="2" width="10" height="6" rx="0.5" fill="currentColor"/></svg>
+      </span>
+    </div>
+
+    <header class="onb-header" role="banner" aria-label="온보딩 헤더">
+      <button class="onb-header__back" id="back-btn" type="button" data-action="back" aria-label="이전 단계로 돌아가기" onclick="onBack()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+      </button>
+      <span class="onb-header__back-spacer" aria-hidden="true"></span>
+      <button class="onb-header__skip" id="skip-btn" type="button" data-action="skip" aria-label="온보딩 건너뛰기" onclick="onSkip()">건너뛰기</button>
+    </header>
+
+    <div class="step-indicator" id="step-indicator" role="progressbar" aria-label="온보딩 진행 단계" aria-valuemin="1" aria-valuemax="3" aria-valuenow="1">
+      <span class="step-dot active" data-step="0" aria-hidden="true"></span>
+      <span class="step-dot" data-step="1" aria-hidden="true"></span>
+      <span class="step-dot" data-step="2" aria-hidden="true"></span>
+    </div>
+
+    <main class="onb-body" id="onb-body">
+      <div class="hero-illust" id="hero-illust" role="img" aria-label="단계별 일러스트레이션">
+        <span class="hero-illust__icon hero-icon-1" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg>
+        </span>
+        <span class="hero-illust__icon hero-icon-2" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 5h6"/><path d="M19 2v6"/><path d="M21 11.5V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7.5"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/><circle cx="9" cy="9" r="2"/></svg>
+        </span>
+        <span class="hero-illust__icon hero-icon-3" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 17a1 1 0 0 1-.707-.293l-4.578-4.578a3 3 0 0 1 4.243-4.243L11 9.172"/><path d="M14 6a3 3 0 0 1 4.243 0l3.5 3.5"/><path d="M14.293 9.293 19.5 4.086a3 3 0 0 1 4.243 4.243L18.535 13.5"/><path d="m13 13 4 4"/><path d="m7 14-1.293 1.293a1 1 0 0 0 0 1.414L8.586 19.6a2 2 0 0 0 2.828 0L13 18"/></svg>
+        </span>
+      </div>
+
+      <h1 class="onb-headline" id="onb-headline">ZZEM 에 오신 것을 환영해요</h1>
+      <p class="onb-body-copy" id="onb-body-copy">오늘부터 짧고 강한 밈 한 장으로 표현해 보세요.</p>
+    </main>
+
+    <button class="onb-cta" id="primary-cta" type="button" data-action="next" aria-label="다음 단계 또는 시작" onclick="onNext()">다음</button>
+
+    <div class="success-overlay" id="success-overlay" role="status" aria-live="polite" aria-label="온보딩 완료">
+      <div class="success-overlay__icon" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.801 10A10 10 0 1 1 17 3.335"/><path d="m9 11 3 3L22 4"/></svg>
+      </div>
+      <h2 class="success-overlay__title">준비됐어요!</h2>
+      <p class="success-overlay__hint">잠시 후 홈으로 이동해요</p>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  </section>
+</div>
+
+<script>
+  // === Step content ===
+  const STEPS = {
+    'step-1': {
+      headline: 'ZZEM 에 오신 것을 환영해요',
+      body: '오늘부터 짧고 강한 밈 한 장으로 표현해 보세요.',
+      cta: '다음',
+      indicator: 1,
+    },
+    'step-2': {
+      headline: '사진 한 장으로 밈을 만들어요',
+      body: '카메라 한 번이면 ZZEM 의 필터로 바로 완성돼요.',
+      cta: '다음',
+      indicator: 2,
+    },
+    'step-3': {
+      headline: '친구를 팔로우하고 좋아요를 받아요',
+      body: '마음에 드는 크리에이터를 팔로우하고 매일 새로운 밈을 받아보세요.',
+      cta: '시작하기',
+      indicator: 3,
+    },
+    'success': {
+      headline: 'ZZEM 에 오신 것을 환영해요',
+      body: '오늘부터 짧고 강한 밈 한 장으로 표현해 보세요.',
+      cta: '다음',
+      indicator: 3,
+    },
+  };
+
+  const STEP_ORDER = ['step-1', 'step-2', 'step-3'];
+
+  // === DOM refs ===
+  const frame = document.getElementById('device-frame');
+  const breadcrumb = document.getElementById('breadcrumb');
+  const stateButtons = document.querySelectorAll('.control-panel__state-btn');
+  const headlineEl = document.getElementById('onb-headline');
+  const bodyEl = document.getElementById('onb-body-copy');
+  const ctaEl = document.getElementById('primary-cta');
+  const indicatorEl = document.getElementById('step-indicator');
+  const toast = document.getElementById('toast');
+  let successResetTimer = null;
+
+  function setState(state) {
+    if (!STEPS[state]) return;
+    frame.setAttribute('data-state', state);
+    stateButtons.forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.state === state);
+    });
+    breadcrumb.textContent = 'onboarding · ' + state;
+
+    const cfg = STEPS[state];
+    headlineEl.textContent = cfg.headline;
+    bodyEl.textContent = cfg.body;
+    ctaEl.textContent = cfg.cta;
+    indicatorEl.setAttribute('aria-valuenow', String(cfg.indicator));
+
+    // success state: auto-reset to step-1 after 1.6s for demo cycle
+    if (successResetTimer) {
+      clearTimeout(successResetTimer);
+      successResetTimer = null;
+    }
+    if (state === 'success') {
+      successResetTimer = setTimeout(() => {
+        setState('step-1');
+        showToast('데모: 다시 step-1 로 돌아왔어요');
+      }, 1600);
+    }
+
+    console.log('[state]', state);
+  }
+
+  stateButtons.forEach(btn => {
+    btn.addEventListener('click', () => setState(btn.dataset.state));
+  });
+
+  // === Interactions ===
+  function onNext() {
+    const current = frame.getAttribute('data-state');
+    const idx = STEP_ORDER.indexOf(current);
+    if (idx === -1) return; // success state — no-op
+    if (idx < STEP_ORDER.length - 1) {
+      setState(STEP_ORDER[idx + 1]);
+    } else {
+      // last step → success
+      setState('success');
+    }
+  }
+
+  function onBack() {
+    const current = frame.getAttribute('data-state');
+    const idx = STEP_ORDER.indexOf(current);
+    if (idx <= 0) return; // step-1 or success — no-op
+    setState(STEP_ORDER[idx - 1]);
+  }
+
+  function onSkip() {
+    showToast('튜토리얼을 건너뛰었어요');
+    setState('success');
+  }
+
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 1800);
+  }
+
+  // === Init ===
+  setState('step-1');
+</script>
+
+</body>
+</html>
