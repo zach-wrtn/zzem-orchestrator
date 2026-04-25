@@ -132,6 +132,29 @@ Design Engineer가 HTML 프로토타입을 생성 후 `TaskUpdate: completed`.
 
 Step C 진입 전에 DE가 산출한 `{ScreenName}.intent.md`를 사용자에게 제시하여 가정을 조기 검증한다. 조건 및 템플릿은 `.claude/teammates/design-engineer.md` §B.6 참조.
 
+**룰 충돌 감지 시 (PRD vs Persona 등)**:
+
+DE 가 quality-report 에 `rule_conflict` 또는 `prd_copy_conflict` 블록을 기록한 화면은 본 gate 통과 전에 Sprint Lead 가 사용자에게 다음 표준 질문 발사:
+
+```
+[{ScreenName}] 룰 충돌 발견:
+- 상위 룰: {rule_a} ({source_a, 예: PRD ### NEVER DO})
+- 하위 룰: {rule_b} ({source_b, 예: empty_state persona #4})
+- DE 현재 적용: {current — 보통 상위 룰}
+- DE 제안 변경: "{원문}" → "{제안 카피}" (적용 안 함)
+
+선택:
+A. 현재 유지 (상위 룰 우선) — 변경 없음
+B. DE 제안 채택 (상위 룰 한정 면제) — quality-report 에 면제 사유 기록
+C. mix — 사용자가 직접 카피 작성
+
+선택 (A/B/C)?
+```
+
+사용자 선택을 quality-report 의 `prd_copy_conflict.resolution` (또는 `rule_conflict.resolution`) 에 기록 + 다음 동일 패턴 (검색 0건, 친구 0명 등) 발생 시 동일 결정 자동 적용 검토 (`prd_copy_conflict.precedent: applied_from_{ScreenName}`).
+
+**Precedent 누적**: 동일 sprint 내 동일 룰 충돌 패턴이 2회 이상 발생 시 Sprint Lead 가 첫 결정을 sprint-config.yaml 에 `rule_conflict_precedents` 로 기록 → 이후 동일 패턴 자동 적용 + 사용자 알림. 다른 sprint 로 이전은 retrospective 결정 (수동 carry-over).
+
 **Variants 모드 상호 배타**: 본 태스크가 §3.2 Step 2에서 variants 모드로 분기되었다면 **이 gate를 스킵**한다 (이유: 3개 variant가 곧 비교됨 — 사전 가정 검증보다 사후 비교가 더 강력). 로그에 `phase: preview_skipped, reason: variants_mode` 기록.
 
 **실행 흐름**:
