@@ -258,6 +258,12 @@ HTML 프로토타입이 이 파일을 inline으로 포함한다.
 
 **Zero-Contamination**: 토큰 값은 `design-tokens/` JSON에서 직접 변환한다. 값을 추측하거나 보완하지 않는다.
 
+**Tokens.css 부재 시 fallback** (구버전 스프린트 호환): 일부 스프린트 (예: free-tab-diversification) 는 sprint-level `tokens.css` 가 생성되지 않은 상태로 남아있다. 이 경우 Pass 6 #1 (hex-not-in-tokens) 평가가 불가능해진다. 다음 fallback 사용:
+
+1. 우선: 스프린트의 prototype.html 자체에 inline 정의된 `:root { --... }` 변수 → 거기서 `#[0-9A-Fa-f]{6}` 추출하여 가상 tokens.css 로 사용
+2. 차선: `wds-tokens` 외부 리포의 `semantic/*.json` + `component/*.json` 의 `$value` 필드에서 hex 추출. 이 sprint 는 외부 토큰만 신뢰
+3. 둘 다 없으면 Pass 6 #1 을 `skipped` 로 기록하고 Sprint Lead 에 보고. 자동 PASS 처리 금지 (잠재적 slop 유입 경로)
+
 ### A.5 Asset Layer 조립 (v1 추가)
 
 시각적 품질을 좌우하는 **이미지 슬롯**(피드 썸네일·아바타·밈 이미지·hero banner)을 placeholder로 때우면 Figma 수준 품질에서 멀어진다. Step A 산출물인 `context-engine.yaml`에 `assets:` 레이어를 조립한다.
@@ -271,6 +277,16 @@ HTML 프로토타입이 이 파일을 inline으로 포함한다.
 | `meme_images` | user-provided → KB `sample_image` 패턴 → Sprint Lead 질의 | ✗ |
 | `icons` | `@wrtn/icons` inline SVG → 기호 placeholder(`←`, `⋮`, `♡`, `+`) | ✓ 기호 placeholder는 허용 |
 | `hero_banners` | user-provided → Sprint Lead 질의 | ✗ |
+
+**`kind` 필드** (각 슬롯에 필수, v1.1 추가):
+
+| `kind` | 의미 | needs_real_content 기본 |
+|--------|------|------------------------|
+| `real-image` | 사진/렌더된 비트맵. `<img src>` 필수 | true (placeholder 금지) |
+| `gradient-token` | 토큰화된 그라디언트 (예: `--banner-purple`). 색상이 `design-tokens/` 에 정의된 경우 | false (의도된 디자인 — 면제) |
+| `illustration` | 카테고리별 SVG/추상 일러스트 | false (디자인 시스템 등재 시) |
+
+**예시 — free-tab FreeRosterCard 식 디자인**: `feed_thumbnails.kind: gradient-token` 으로 선언하면 Pass 6 #6 (placeholder-image) 면제 + Pass 6 #1 의 hex 검사는 그라디언트의 색이 `design-tokens/` 에 등재된 hex 인 경우에만 PASS. 즉 `kind: gradient-token` 은 "그라디언트 의도이지만 토큰 외부 색을 발명할 권리가 아니다."
 
 **조립 규칙 (stop-and-ask 원칙)**:
 - 슬롯에 실제 src 경로가 확정된 경우에만 `assets:` 에 기록. 추측 경로 금지
@@ -546,25 +562,35 @@ Phase β (단일 Write — 기계적 변환):
 
 ### C.2.1 Pass 6 Anti-Slop Self-Audit (필수)
 
-Pass 6 "Polish" 완료 조건. 아래 7개 체크 중 하나라도 실패하면 prototype.html을 저장하지 않고 원인을 수정한 뒤 재실행한다.
+Pass 6 "Polish" 완료 조건. 아래 8개 체크 중 하나라도 실패하면 prototype.html을 저장하지 않고 원인을 수정한 뒤 재실행한다.
+
+**검사 범위**: 모든 체크는 `.screen` 후손 요소(실제 화면)에만 적용. `.control-panel` (리뷰어용 device frame 외부 컨트롤)은 모든 체크에서 제외 — 이 영역은 monospace font, 테스트용 버튼 등 디자인 시스템과 무관한 요소를 의도적으로 포함한다.
 
 | # | 체크 | 실패 시 조치 |
 |---|------|------------|
-| 1 | `#[0-9A-Fa-f]{6}` hex 색상이 tokens.css에 정의되지 않은 값으로 HTML에 등장하는가 | 해당 hex → `var(--color-*)` 로 교체. 매핑이 없으면 DE가 임의 생성 금지 → Sprint Lead에 토큰 누락 보고 |
+| 1 | `#[0-9A-Fa-f]{6}` hex 색상이 tokens.css에 정의되지 않은 값으로 HTML에 등장하는가 (`.screen` 후손에 한함) | 해당 hex → `var(--color-*)` 로 교체. 매핑이 없으면 DE가 임의 생성 금지 → Sprint Lead에 토큰 누락 보고 |
 | 2 | Unicode emoji가 인터랙티브 요소(button, tab, nav)의 아이콘으로 사용되었는가 (`<button>🔔</button>` 등) | 기호 placeholder(`←`, `⋮`, `♡`, `+`) 또는 inline SVG로 교체. body 텍스트 내 이모지는 허용 |
 | 3 | `.card` 계열 요소에 `border-left: Npx solid var(--*)` 스타일이 있는가 (Material/Tailwind slop) | 제거. 강조가 필요하면 `box-shadow` 또는 배경 fill 사용 |
-| 4 | `font-family`를 `Pretendard` 외로 명시한 CSS 규칙이 있는가 (인라인 스타일 포함) | `--font-family-default` 로 통일. `JetBrains Mono`는 라틴 전용 mono 블록에 한해 허용 |
+| 4 | `.screen` 후손에 `font-family`를 `Pretendard` 외로 명시한 CSS 규칙이 있는가 (인라인 스타일 포함, `.control-panel` 제외) | `--font-family-default` 로 통일. `JetBrains Mono`는 라틴 전용 mono 블록에 한해 허용 |
 | 5 | `linear-gradient(... #8752FA ...)` 등 브랜드 보라색을 그라디언트로 배경 전면에 사용했는가 | 단색 fill 또는 토큰화된 표면으로 교체. 그라디언트는 DESIGN.md §4에 명시된 경우에만 |
 | 6 | `<img src>` 없이 `<div class="placeholder-image">`가 화면의 **주 콘텐츠** 위치(피드 카드 썸네일, 프로필 아바타, 밈 이미지)를 차지하고 있는가 | Phase 4의 Asset Layer(`context-engine.yaml` `assets:`)가 있으면 실제 파일 경로로 교체; 없으면 Sprint Lead에 stop-and-ask |
 | 7 | Pass 1~5에서 생성된 DOM 중 `[onclick]` 또는 `addEventListener`로 바인딩된 요소 수가 Screen Spec `interactions` 엔트리 수와 불일치하는가 | 누락된 이벤트 바인딩을 추가하거나, 스펙의 interaction을 삭제하여 정합성 맞춤 |
+| 8 | `onclick` 핸들러에 `alert()` / `confirm()` / `prompt()` 가 사용되었는가 | 인터랙티브 데모로 표현 (`toggleState`, console.log + visual feedback 등). 이 패턴은 puppeteer click 프로토콜을 블로킹하여 verifier hang 의 직접 원인 (free-tab/app-002 18분 hang 사례) |
 
-**자동화 힌트**: 체크 1·2·4는 `grep -E`로 기계 검출 가능 (아래 shell 블록 참조). 체크 3·5·6은 DE가 수동 검토. 체크 7은 DOM 파싱 필요 — Phase 3의 `verify-prototype.ts`가 커버.
+**자동화 힌트**: 체크 1·2·4·8은 `grep -E`로 기계 검출 가능 (아래 shell 블록 참조). 체크 3·5·6은 DE가 수동 검토. 체크 7은 DOM 파싱 필요 — Phase 3의 `verify-prototype.ts`가 커버 (verifier는 alert를 자동 dismiss + 클릭당 2초 timeout 적용하므로 #8의 hang은 verifier 단계에서도 차단됨).
 
 ```bash
 # Pass 6 시작 직전 DE가 실행할 수 있는 자가 검사 커맨드(제안):
+# (체크 #1) hex 토큰 위반 검출
 grep -oE '#[0-9A-Fa-f]{6}' prototype.html | sort -u > /tmp/proto-hex.txt
 grep -oE '#[0-9A-Fa-f]{6}' ../../prototypes/context/tokens.css | sort -u > /tmp/tokens-hex.txt
 comm -23 /tmp/proto-hex.txt /tmp/tokens-hex.txt   # 차집합이 비어있어야 통과
+# 참고: 스프린트 단위 tokens.css 가 아직 없는 (구버전) 스프린트면
+# wds-tokens 외부 repo 의 semantic/component layer JSON 의 hex 들을
+# fallback 으로 비교한다. §A.4 참조.
+
+# (체크 #8) onclick 안의 blocking dialog 검출
+grep -nE 'onclick=[^>]*\b(alert|confirm|prompt)\(' prototype.html  # 결과 0줄이어야 통과
 ```
 
 **결과 기록**: audit 완료 시 `approval-status.yaml` 의 해당 스크린 엔트리에 `anti_slop_audit: passed` 필드 추가. 실패 수정 이력이 있으면 `anti_slop_fixes: ["item-N: 설명", ...]`에 누적.

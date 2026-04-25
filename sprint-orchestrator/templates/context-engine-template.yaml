@@ -78,23 +78,34 @@ how:
 #   meme_image     : user-provided > KB sample_image > ask
 #   icon           : @wrtn/icons inline SVG > text placeholder (←, ⋮, ♡)
 #   hero_banner    : user-provided > ask (placeholder 금지)
+#
+# kind 분류 (각 슬롯에 필수):
+#   real-image       : 사진/렌더된 비트맵. <img src> 필수. needs_real_content 고려 대상
+#   gradient-token   : 토큰화된 그라디언트 (예: --banner-purple). 색상이 design-tokens 에
+#                      정의되어 있으면 needs_real_content: false 허용 (의도적 디자인)
+#   illustration     : 카테고리별 SVG/추상 일러스트. 디자인 시스템에 등재되면 OK
 assets:
   avatars:
+    kind: real-image
     source: "{path glob or asset pack reference}"
     count: "{N}"
     license: "{internal-test | public-domain | user-provided}"
     needs_real_content: false   # true 일 때 Pass 6 #6 fails with placeholder-image
   feed_thumbnails:
+    kind: real-image            # 또는 gradient-token (free-tab FreeRosterCard 식)
     source: "{path glob}"
     license: "{internal-test | ...}"
     needs_real_content: true
   meme_images:
+    kind: real-image
     source: "{path or null}"
     license: "{...}"
     needs_real_content: true
   icons:
+    kind: illustration
     source: "{@wrtn/icons or inline SVG file}"
     fallback: "text-placeholder"
   hero_banners:
+    kind: real-image            # 또는 gradient-token (브랜드 캠페인 배너 식)
     source: "{path or null}"
     needs_real_content: true
