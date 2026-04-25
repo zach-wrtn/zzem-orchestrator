@@ -586,6 +586,18 @@ Step C 진입 전 Sprint Lead가 early-review 할 수 있도록 `intent.md` 를 
 
 **Persona 룰 적용**: B.1.1 에서 결정된 `screen_archetype` 의 persona 파일 (`.claude/teammates/design-engineer-archetypes/{archetype}.md`) 에 정의된 강제 룰을 본 Step C 의 모든 Pass (1~6) 에 추가 제약으로 적용한다. Persona 강제 룰은 Pass 6 Anti-Slop Audit 와 동급의 STOP 조건 — 미충족 시 prototype.html 저장 금지. 권장 룰 거절 시 quality-report 에 `archetype_recommendation_skipped` 로깅.
 
+**룰 우선순위 (충돌 시)**:
+
+| 순위 | 룰 종류 | 사례 |
+|------|--------|------|
+| 1 | PRD `### NEVER DO` | "UI copy 변경 금지" 명시 시 DE 카피 변경 금지 |
+| 2 | Pass 6 Anti-Slop Audit | 보라 그라디언트 금지 등 |
+| 3 | DESIGN.md / tokens.css | 토큰 외 raw hex 금지 |
+| 4 | Persona 강제 룰 | empty_state #4 부정 어조 금지 등 |
+| 5 | Persona 권장 룰 | 트레이드오프 — 거절 시 quality-report 로그 |
+
+충돌 시 상위 룰이 이김. 단, **상위 룰 위반 가능성을 발견한 DE 는 자동으로 Sprint Lead 결정 trigger** (quality-report 에 `rule_conflict` 블록 기록 + activity log).
+
 ### Script-First Generation Protocol
 
 > Ref: Hermes Agent PTC — 중간 tool call 결과가 컨텍스트를 먹지 않도록 스크립트로 일괄 처리.
@@ -901,6 +913,7 @@ echo '{"ts":"<현재시각 ISO8601>","task":"<태스크 subject>","phase":"<phas
 | C. Pass 6 audit 통과 | `anti_slop_audit` | "Anti-slop audit passed (10/10)" 또는 "Anti-slop audit: {N}건 수정 후 통과" |
 | C.2.1 archetype persona 통과 | `archetype_persona_passed` | "{archetype} persona 강제 룰 {N}/{N} 통과" |
 | C.2.1 archetype persona 거절 권장 | `archetype_recommendation_skipped` | "{archetype} 권장 #{N} 거절: {사유}" |
+| C.2.1 룰 충돌 발견 | `rule_conflict_detected` | "{rule_a} ({source}) vs {rule_b} ({source}) — Sprint Lead 결정 대기" |
 | C. Variant 완료 | `variant_complete` | "Variant {A|B|C} ({directive}) 완료 — comparison gate 대기" |
 | C. Exemplar drift 감지 | `exemplar_drift_warning` | "Exemplar {id} 와 80%+ 일치 — 차별화 검토 필요" |
 | 완료 보고 | `completed` | "프로토타입 완료, 품질 accuracy 0.95 / completeness 1.0" |
