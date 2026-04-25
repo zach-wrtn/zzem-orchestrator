@@ -1,0 +1,59 @@
+# Design Engineer Eval Suite v1
+schema_version: "1.0"
+
+# 가중 평균 통과 기준
+threshold:
+  regression_score: 0.85
+  per_metric_floor: 0.70   # 단일 metric 이라도 이 값 미만이면 FAIL
+
+# 측정 metric (각각 0.0-1.0)
+metrics:
+  token_compliance:
+    weight: 0.25
+    description: "CSS rule 중 var(--*) 사용 비율 (raw hex 페널티)"
+    extractor: "grep + ratio"
+  anti_slop_pass_rate:
+    weight: 0.20
+    description: "Pass 6 audit 통과한 체크 / 전체 체크"
+    extractor: "quality-report.yaml.anti_slop_audit"
+  spec_completeness:
+    weight: 0.15
+    description: "screen-spec.yaml 필수 섹션 채움 비율"
+    extractor: "yaml section presence"
+  verify_prototype_pass:
+    weight: 0.20
+    description: "verify-prototype clickErrors 0 + status pass"
+    extractor: "verify-prototype.ts result"
+  archetype_persona_compliance:
+    weight: 0.10
+    description: "archetype persona 강제 룰 통과 (해당 시)"
+    extractor: "quality-report.yaml.archetype_persona_passed"
+  file_size_drift:
+    weight: 0.10
+    description: "HTML 바이트 크기 / baseline 비율 (1.0 이상이면 페널티)"
+    extractor: "fs.stat byte ratio"
+
+# Frozen inputs
+inputs:
+  - id: "ugc-001-home"
+    description: "UGC platform Home feed (정적 archetype: feed)"
+    expected_archetype: feed
+  - id: "ugc-001-detail"
+    description: "UGC platform 게시물 상세 (archetype: detail)"
+    expected_archetype: detail
+  - id: "free-tab-app-001-home"
+    description: "Free tab 홈 (archetype: feed, fabrication_risk: medium)"
+    expected_archetype: feed
+  - id: "ai-webtoon-onboarding"
+    description: "AI webtoon onboarding 첫 step (archetype: onboarding)"
+    expected_archetype: onboarding
+
+# CI 동작
+ci:
+  trigger_paths:
+    - ".claude/teammates/design-engineer.md"
+    - ".claude/teammates/design-engineer-archetypes/**"
+    - ".claude/skills/sprint/phase-prototype.md"
+    - "sprint-orchestrator/templates/**"
+  cooldown_per_day: 3
+  fail_blocks_merge: true
