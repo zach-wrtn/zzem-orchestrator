@@ -2,11 +2,18 @@
 
 DE / sprint pipeline 변경 회귀 테스트 하니스.
 
-## 비용 경고
+## 🚫 CI 자동 trigger 비활성화 (Anthropic API opt-out)
+
+본 repo 의 `ANTHROPIC_API_KEY` 정책: **사용 안 함**. 따라서 `.github/workflows/de-eval.yml` 의 자동 trigger 는 비활성화 (`workflow_dispatch` manual 만). 회귀 가드 필요 시:
+
+- (a) **로컬 실행** — `pnpm de-eval` 로컬에서 (사용자 본인 API key 사용)
+- (b) **Scoring-only 모드** — DE 산출물이 이미 commit 됐다면 score.ts 만 실행 (API 불필요. 향후 `--score-only` flag 추가 검토)
+- (c) **재활성화** — `de-eval.yml` 의 trigger 를 `pull_request:` 로 복원 + `ANTHROPIC_API_KEY` secret 등록
+
+## 비용 경고 (실행 시 적용)
 
 - 1회 eval = N개 frozen input × 1 DE 풀 실행 (Pass 1-6 + Asset + Preview)
 - 토큰 소비 ≈ 30k-80k per input (Opus). 4개 input = 120k-320k tokens
-- CI 자동 실행은 변경 감지 시 1일 최대 3회로 제한 (de-eval.yml 의 cooldown)
 - 로컬 실행은 `pnpm de-eval --inputs=<id>` 로 단일 input 만 (개발 중 빠른 피드백)
 
 ## 실행

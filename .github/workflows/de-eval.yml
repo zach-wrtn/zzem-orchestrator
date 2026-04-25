@@ -1,13 +1,16 @@
-name: DE Eval
+name: DE Eval (manual only — ANTHROPIC_API_KEY policy)
+
+# Auto-trigger DISABLED per repo policy: Anthropic API usage opt-out.
+# Workflow preserved as reference + manual trigger via workflow_dispatch.
+# To re-enable auto-trigger: revert this commit + register ANTHROPIC_API_KEY secret.
 
 on:
-  pull_request:
-    paths:
-      - '.claude/teammates/design-engineer.md'
-      - '.claude/teammates/design-engineer-archetypes/**'
-      - '.claude/skills/sprint/phase-prototype.md'
-      - 'sprint-orchestrator/templates/**'
-      - 'sprint-orchestrator/evals/scripts/**'
+  workflow_dispatch:
+    inputs:
+      inputs:
+        description: 'Specific frozen inputs to run (comma-separated). Empty = all.'
+        required: false
+        default: ''
 
 jobs:
   de-eval:
