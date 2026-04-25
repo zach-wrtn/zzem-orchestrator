@@ -23,3 +23,6 @@ firebase-debug.log
 
 # node_modules (any subpackage)
 node_modules/
+
+# Runtime sprint event logs (per-sprint events.jsonl is harness scratch — role logs like be-engineer.jsonl ARE tracked)
+sprint-orchestrator/sprints/*/logs/events.jsonl
