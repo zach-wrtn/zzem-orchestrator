@@ -371,11 +371,43 @@ HTML 프로토타입이 이 파일을 inline으로 포함한다.
 2. 가장 우세한 패턴 1개 선택 (복합 화면이면 시각 면적 큰 영역 기준)
 3. 모호 시 Sprint Lead 에 질의 — default 분류 금지
 4. 결정된 archetype 의 persona 파일을 본 task working memory 에 인라인 (Step C 시작 전까지 유지). phase-prototype.md §3.2 Step 1 이 미리 인라인 했으면 재 read 불필요.
+5. **재분류 룰** (task spec hint vs DE 분석 차이):
+
+   task description 또는 spec 에 `archetype_hint: {x}` 가 있고 DE 분석 결과 다른 archetype 이 더 적합하다고 판단되면 **DE 가 자가 재분류 가능**. 단:
+
+   - 재분류 사유를 `quality-report.yaml > archetype_reclassified` 블록에 기록 (아래 스키마)
+   - Activity Logging 에 `archetype_reclassified` 발사 (Sprint Lead 가 자동 인지)
+   - 재분류 결과가 **두 단계 이상 차이** (예: feed → modal) 또는 **PRD 범위 의심** 시 재분류 적용 전 Sprint Lead 질의 필수 (default 자가 재분류 금지)
+
+   **`archetype_reclassified` 스키마**:
+
+   ```yaml
+   archetype_reclassified:
+     screen: "{ScreenName}"
+     hint: "{원래 hint, 예: detail}"
+     applied: "{재분류 결과, 예: feed}"
+     reason: "{1-2 문장 — Frozen Snapshot 의 어떤 신호가 재분류 근거인지}"
+     evidence:
+       - "{spec yaml 또는 Figma 의 구체 항목 인용 1}"
+       - "{인용 2}"
+     escalated: false  # 두 단계 이상 차이 또는 PRD 범위 의심 시 true (Sprint Lead 결정 대기)
+   ```
+
+   **자가 재분류 허용 매트릭스**:
+
+   | hint → applied | 자가 재분류 | 사유 |
+   |---------------|------------|------|
+   | feed ↔ nav_list | OK | 동질 list 모양에서 의도 (소비 vs 이동) 만 다름 |
+   | detail ↔ feed | OK | 단일 vs 다수 객체 — Snapshot 보면 명확 |
+   | form ↔ nav_list | OK | instant_save 토글 vs navigation row 혼동 흔함 |
+   | modal subtype 변경 (dialog↔picker↔action_sheet) | OK | Meta.modal_subtype 만 변경 |
+   | 그 외 두 단계 이상 (예: feed → modal, detail → onboarding) | **escalated: true** — Sprint Lead 질의 필수 |
 
 **Activity Logging**:
 
 | B.1.1 archetype 분류 | `archetype_classified` | "{ScreenName}: {archetype} (대안 검토: {alt or none})" |
 | B.1.1 archetype 모호 | `archetype_ambiguous` | "{ScreenName}: {a vs b} — Sprint Lead 질의 대기" |
+| B.1.1 archetype 재분류 | `archetype_reclassified` | "{ScreenName}: hint={x} → applied={y} (사유: {1줄}, escalated: {bool})" |
 
 ### B.2 Screen Spec 작성
 
