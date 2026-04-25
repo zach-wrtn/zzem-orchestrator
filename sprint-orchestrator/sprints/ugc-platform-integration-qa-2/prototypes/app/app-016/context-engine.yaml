@@ -34,7 +34,7 @@ why:
     - id: "AC-2.5"
       given: "해제가 성공적으로 적용되었다"
       when: "프로필 복원 직후"
-      then: "'{nickname}님 차단을 해제했어요' Toast 가 표시되고 3s 내 auto-dismiss"
+      then: "'{nickname}님 차단 해제했어요' Toast 가 표시되고 3s 내 auto-dismiss"
       ui_impact: "Toast component (sticky bottom-area, single line, role=status) — 3s timer"
 
 # ─────────────────────────────

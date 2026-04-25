@@ -52,7 +52,7 @@ component_tree: |
   │   ├── NavSearch [icon-button] (button) — active (came from search/feed)
   │   └── NavMy [icon-button] (button)
   └── Toast [feedback] (div) #toast (overlay, bottom 80px)
-      └── ToastText — "memer_kim님 차단을 해제했어요"
+      └── ToastText — "memer_kim님 차단 해제했어요"
 
 # ─────────────────────────────
 # Component Details (Component-as-Data)
@@ -410,7 +410,7 @@ labels:
     - { id: "private", label: "비공개" }
     - { id: "liked", label: "좋아요" }
   toast:
-    unblock: "memer_kim님 차단을 해제했어요"
+    unblock: "memer_kim님 차단 해제했어요"
   bottom_nav:
     - { id: "home", label: "홈" }
     - { id: "search", label: "검색" }

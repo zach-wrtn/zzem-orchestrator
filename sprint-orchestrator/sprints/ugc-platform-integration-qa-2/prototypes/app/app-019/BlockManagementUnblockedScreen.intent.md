@@ -86,7 +86,7 @@ placeholders:
 
   - component_id: "#toast"
     kind: "feedback-text"
-    current: "달리는토끼님 차단을 해제했어요"
+    current: "달리는토끼님 차단 해제했어요"
     source: "AC-2.5 명시 + unblocked_user.nickname (app-017 첫 행 = 가장 최근 차단)"
     needs_real_content: false
 ```
