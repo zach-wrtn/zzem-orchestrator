@@ -158,7 +158,41 @@ Step C 진입 전에 DE가 산출한 `{ScreenName}.intent.md`를 사용자에게
 **로깅**: Sprint Lead는 다음을 `logs/events.jsonl`에 append:
 - `{"phase":"preview_gate","screen":"{ScreenName}","action":"proceed|adjust|stop","iteration":{N}}`
 
+### 3.2.6 Variant Comparison Gate (variants 모드 전용)
+
+§3.2 Step 2 에서 variants 모드로 분기된 태스크는 3개 variant 완료 후 본 gate를 거친다.
+
+**입력**: `sprints/{sprint-id}/prototypes/app/{task-id}/variants/{A,B,C}/prototype.html` + 각 variant 의 spec/quality-report
+
+**Sprint Lead 동작**:
+
+1. capture-screenshots 가 자동 생성한 `variants/_comparison.png` (3컷 가로) 를 사용자에게 제시
+2. `sprint-orchestrator/templates/variant-comparison-template.md` 채워서 `variants/comparison.md` 로 저장
+3. 다음 형식으로 사용자에게 요약 (3-5문장):
+   ```
+   [{ScreenName}] 3개 variant 비교
+   - A (Conservative): {diff_highlights[0]}
+   - B (Expressive): {diff_highlights[0]}
+   - C (Minimal): {diff_highlights[0]}
+   _comparison.png 참조. A / B / C / mix / stop?
+   ```
+4. 사용자 응답 처리:
+
+| 선택 | 동작 |
+|------|------|
+| **A/B/C** | 선택된 variant를 `prototype.html` (variants 부모 디렉토리)로 promote (file move). 미선택 2개는 `variants/_archive/` 로 이동. approval-status.yaml 에 `chosen_variant: {id}` 기록. §3.3 일반 리뷰로 진행. |
+| **mix** | 사용자 지시 ("A의 X + B의 Y") 를 새 단일 모드 TaskCreate Description 에 명시 → 1개 DE 인스턴스 스폰. 기존 3개는 모두 `_archive/` 로. mix 결과는 단일 모드 흐름 (preview gate 활성화 가능). |
+| **stop** | 3개 모두 `_archive/` 로 이동. `prd-gaps.md` 에 갭 항목 append (사용자 사유 인용). `TaskUpdate: blocked`. |
+
+**Adjust loop 상한**: variants → mix 1회 → 그 결과 unsatisfactory 시 stop. mix 후 또 mix 금지 — 무한 루프 방지.
+
+**Logging**:
+- `{"phase":"variant_comparison","screen":"{ScreenName}","action":"chose_A|chose_B|chose_C|mix|stop"}`
+- mix 선택 시: `{"phase":"variant_mix_spawned","screen":"{ScreenName}","mix_spec":"..."}`
+
 ### 3.3 리뷰 (Sprint Lead ↔ 사용자)
+
+> Variants 모드 태스크는 §3.2.6 Comparison Gate 통과(promote 완료) 후 본 §3.3 진입.
 
 각 프로토타입을 사용자에게 순차 리뷰:
 
