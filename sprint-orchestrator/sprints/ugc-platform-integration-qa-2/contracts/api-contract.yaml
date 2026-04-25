@@ -1,0 +1,279 @@
+# =====================================================================
+# Mock — BE OUT OF SCOPE per PRD; FE will hit mock or local stub
+# during Phase 3 dogfood.
+# Canonical PRD: docs/prds/ugc-platform-integration-qa-2.md
+# All endpoints flagged `x-mock: true` and resolved against an
+# in-app mock layer (e.g. MSW / static fixtures). Real BE impl is
+# tracked in a separate backend sprint.
+# =====================================================================
+
+openapi: 3.0.3
+info:
+  title: UGC Platform Integration QA 2 — Mock API
+  version: 0.0.1-mock
+  description: |
+    Skeleton contract for FE prototype dogfood. Endpoints are placeholders;
+    response shapes are illustrative and subject to BE-side authoring.
+  x-status: mock
+  x-sprint: ugc-platform-integration-qa-2
+
+servers:
+  - url: https://api.zzem.local/mock
+    description: Local mock server (FE-resolved)
+
+tags:
+  - name: profile
+    description: 프로필 편집 (avatar + nickname) — Group 001
+  - name: block
+    description: 차단 / 차단 관리 — Group 002
+  - name: notification
+    description: 알림 센터 + 알림 설정 — Group 003
+
+paths:
+  /v2/me/profile:
+    patch:
+      tags: [profile]
+      summary: 닉네임 / 아바타 URL 업데이트 (Mock)
+      x-mock: true
+      x-related-tasks: [app-001, app-002, app-006, app-010, app-011]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfileRequest'
+      responses:
+        '200':
+          description: 업데이트 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: 닉네임 중복
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /v2/me/avatar/presigned-url:
+    post:
+      tags: [profile]
+      summary: 아바타 업로드용 presigned URL 발급 (Mock)
+      x-mock: true
+      x-related-tasks: [app-005, app-006, app-008, app-009]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [contentType]
+              properties:
+                contentType:
+                  type: string
+                  example: image/jpeg
+                fileSizeBytes:
+                  type: integer
+                  example: 524288
+      responses:
+        '200':
+          description: presigned URL 발급
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  putPresignedUrl: { type: string, format: uri }
+                  getPresignedUrl: { type: string, format: uri }
+                  fileUuid: { type: string, format: uuid }
+                  signedHeaders:
+                    type: object
+                    additionalProperties: { type: string }
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /v2/users/{userId}/block:
+    post:
+      tags: [block]
+      summary: 사용자 차단 (Mock)
+      x-mock: true
+      x-related-tasks: [app-012, app-013, app-014]
+      parameters:
+        - $ref: '#/components/parameters/UserIdPath'
+      responses:
+        '204':
+          description: 차단 적용
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [block]
+      summary: 사용자 차단 해제 (Mock)
+      x-mock: true
+      x-related-tasks: [app-015, app-016, app-018, app-019]
+      parameters:
+        - $ref: '#/components/parameters/UserIdPath'
+      responses:
+        '204':
+          description: 차단 해제
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /v2/me/blocked-users:
+    get:
+      tags: [block]
+      summary: 차단 관리 리스트 (Mock)
+      x-mock: true
+      x-related-tasks: [app-017, app-018]
+      parameters:
+        - in: query
+          name: cursor
+          schema: { type: string }
+        - in: query
+          name: limit
+          schema: { type: integer, default: 20, maximum: 50 }
+      responses:
+        '200':
+          description: 차단된 사용자 페이지
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/BlockedUser' }
+                  nextCursor: { type: string, nullable: true }
+
+  /v2/me/notifications:
+    get:
+      tags: [notification]
+      summary: 알림 센터 (Mock)
+      x-mock: true
+      x-related-tasks: [app-020, app-021]
+      parameters:
+        - in: query
+          name: cursor
+          schema: { type: string }
+        - in: query
+          name: limit
+          schema: { type: integer, default: 30, maximum: 50 }
+      responses:
+        '200':
+          description: 알림 페이지 (시간 역순)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/Notification' }
+                  nextCursor: { type: string, nullable: true }
+                  unreadCount: { type: integer }
+
+  /v2/me/notification-settings:
+    patch:
+      tags: [notification]
+      summary: 알림 설정 토글 (4 카테고리, Mock)
+      x-mock: true
+      x-related-tasks: [app-022]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationSettings'
+      responses:
+        '200':
+          description: 토글 즉시 저장 결과
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationSettings'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+components:
+  parameters:
+    UserIdPath:
+      name: userId
+      in: path
+      required: true
+      schema: { type: string }
+
+  responses:
+    BadRequest:
+      description: 잘못된 요청
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+    NotFound:
+      description: 리소스 없음
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  schemas:
+    UpdateProfileRequest:
+      type: object
+      properties:
+        nickname:
+          type: string
+          minLength: 2
+          maxLength: 20
+          example: 새닉네임
+        profileImageFileUuid:
+          type: string
+          format: uuid
+          nullable: true
+          description: null 이면 기본 아바타로 초기화
+
+    ProfileResponse:
+      type: object
+      properties:
+        userId: { type: string }
+        nickname: { type: string }
+        profileImageUrl: { type: string, format: uri, nullable: true }
+        updatedAt: { type: string, format: date-time }
+
+    BlockedUser:
+      type: object
+      properties:
+        userId: { type: string }
+        nickname: { type: string }
+        profileImageUrl: { type: string, format: uri, nullable: true }
+        blockedAt: { type: string, format: date-time }
+
+    Notification:
+      type: object
+      properties:
+        id: { type: string }
+        type:
+          type: string
+          enum: [push, like, news, follow]
+        title: { type: string }
+        body: { type: string }
+        actorNickname: { type: string, nullable: true }
+        actorAvatarUrl: { type: string, format: uri, nullable: true }
+        thumbnailUrl: { type: string, format: uri, nullable: true }
+        deeplink: { type: string, nullable: true }
+        read: { type: boolean }
+        createdAt: { type: string, format: date-time }
+
+    NotificationSettings:
+      type: object
+      description: 4 카테고리 토글 (즉시 저장 패턴)
+      properties:
+        push: { type: boolean }
+        like: { type: boolean }
+        news: { type: boolean }
+        follow: { type: boolean }
+
+    ErrorResponse:
+      type: object
+      properties:
+        code: { type: string }
+        message: { type: string }
