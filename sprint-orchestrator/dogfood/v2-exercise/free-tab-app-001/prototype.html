@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>app-001 · Free Tab Grid Prototype (v2 dogfood)</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+<style>
+  /* === tokens.css inline (Step A output) === */
+  :root {
+    --wds-color-purple-50:  #F5F0FF;
+    --wds-color-purple-100: #EBE1FF;
+    --wds-color-purple-400: #A17BFF;
+    --wds-color-purple-500: #8752FA;
+    --wds-color-purple-600: #7040E0;
+    --wds-color-purple-700: #5A30C0;
+    --wds-color-neutral-0:   #FFFFFF;
+    --wds-color-neutral-50:  #F7F8F9;
+    --wds-color-neutral-100: #F0F1F3;
+    --wds-color-neutral-200: #E4E5E9;
+    --wds-color-neutral-300: #D1D3D8;
+    --wds-color-neutral-400: #B5B8BF;
+    --wds-color-neutral-500: #8E9199;
+    --wds-color-neutral-600: #6B6E76;
+    --wds-color-neutral-900: #212228;
+    --wds-color-neutral-1000: #000000;
+    --wds-color-red-500:    #FF3B30;
+    --wds-color-green-500:  #34C759;
+
+    /* sprint aliases */
+    --ft-teal-300:        #2DD4BF;
+    --ft-teal-700:        #0D9488;
+    --ft-baby-light:      #FFD6E0;
+    --ft-baby-dark:       #FF8FB1;
+    --ft-baby-text:       #7A2040;
+    --ft-pet-light:       #C3E8FF;
+    --ft-pet-dark:        #5AAEF0;
+    --ft-pet-text:        #0B3D66;
+    --ft-studio-dark:     #2A2A3E;
+
+    --wds-background-normal:    var(--wds-color-neutral-0);
+    --wds-surface-primary:      var(--wds-color-neutral-0);
+    --wds-surface-secondary:    var(--wds-color-neutral-50);
+    --wds-surface-tertiary:     var(--wds-color-neutral-100);
+    --wds-fill-brand-primary:   var(--wds-color-purple-500);
+    --wds-fill-brand-weak:      var(--wds-color-purple-50);
+    --wds-fill-brand-strong:    var(--wds-color-purple-600);
+    --wds-label-normal:         var(--wds-color-neutral-900);
+    --wds-label-alternative:    var(--wds-color-neutral-600);
+    --wds-label-assistive:      var(--wds-color-neutral-500);
+    --wds-label-disabled:       var(--wds-color-neutral-300);
+    --wds-label-inverse:        var(--wds-color-neutral-0);
+    --wds-label-brand:          var(--wds-color-purple-500);
+    --wds-line-normal:          var(--wds-color-neutral-200);
+    --wds-line-alternative:     var(--wds-color-neutral-100);
+    --wds-status-error:         var(--wds-color-red-500);
+
+    --banner-purple: linear-gradient(135deg, var(--wds-color-purple-500) 0%, var(--wds-color-purple-600) 100%);
+    --banner-teal:   linear-gradient(135deg, var(--ft-teal-300) 0%, var(--ft-teal-700) 100%);
+    --card-baby:     linear-gradient(135deg, var(--ft-baby-light) 0%, var(--ft-baby-dark) 100%);
+    --card-pet:      linear-gradient(135deg, var(--ft-pet-light) 0%, var(--ft-pet-dark) 100%);
+    --card-studio:   linear-gradient(135deg, var(--ft-studio-dark) 0%, var(--wds-color-purple-500) 100%);
+
+    --wds-spacing-1:  1px;
+    --wds-spacing-2:  2px;
+    --wds-spacing-4:  4px;
+    --wds-spacing-6:  6px;
+    --wds-spacing-8:  8px;
+    --wds-spacing-10: 10px;
+    --wds-spacing-12: 12px;
+    --wds-spacing-16: 16px;
+    --wds-spacing-20: 20px;
+    --wds-spacing-24: 24px;
+    --wds-spacing-32: 32px;
+    --wds-spacing-48: 48px;
+    --wds-spacing-64: 64px;
+    --wds-spacing-80: 80px;
+
+    --wds-radius-xs:   4px;
+    --wds-radius-sm:   8px;
+    --wds-radius-md:   12px;
+    --wds-radius-lg:   16px;
+    --wds-radius-xl:   20px;
+    --wds-radius-full: 9999px;
+
+    --wds-font-family-primary: 'Pretendard', -apple-system, 'SF Pro Display', sans-serif;
+    --wds-font-weight-regular:  400;
+    --wds-font-weight-medium:   500;
+    --wds-font-weight-semibold: 600;
+    --wds-font-weight-bold:     700;
+    --wds-font-size-2xs: 11px;
+    --wds-font-size-xs:  12px;
+    --wds-font-size-sm:  13px;
+    --wds-font-size-md:  14px;
+    --wds-font-size-lg:  16px;
+    --wds-font-size-xl:  18px;
+    --wds-font-size-2xl: 20px;
+
+    --color-brand-primary:   var(--wds-color-purple-500);
+    --color-bg-normal:       var(--wds-color-neutral-0);
+    --color-fill-neutral:    var(--wds-color-neutral-100);
+    --color-label-normal:    var(--wds-color-neutral-900);
+    --color-label-assistive: var(--wds-color-neutral-500);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--wds-font-family-primary);
+    background: #f0f0f0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 16px;
+    color: var(--wds-label-normal);
+  }
+
+  /* === Control Panel (외부 — Pass 6 audit 제외 영역) === */
+  .control-panel {
+    width: 390px;
+    background: #1a1a2e;
+    color: #e0e0e0;
+    border-radius: 12px 12px 0 0;
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 13px;
+    font-family: ui-monospace, monospace;
+  }
+  .control-panel__row { display: flex; align-items: center; gap: 8px; }
+  .control-panel__label { color: #888; font-size: 11px; min-width: 56px; }
+  .control-panel select {
+    background: #2a2a3e; color: #e0e0e0; border: 1px solid #444;
+    border-radius: 6px; padding: 4px 8px; font-size: 12px; flex: 1;
+    font-family: ui-monospace, monospace;
+  }
+  .control-panel__states { display: flex; gap: 4px; flex-wrap: wrap; flex: 1; }
+  .control-panel__state-btn {
+    background: #2a2a3e; color: #bbb; border: 1px solid #444;
+    border-radius: 6px; padding: 4px 10px; font-size: 11px; cursor: pointer;
+    transition: all 0.15s;
+    font-family: ui-monospace, monospace;
+  }
+  .control-panel__state-btn.active {
+    background: var(--color-brand-primary); color: #fff; border-color: var(--color-brand-primary);
+  }
+  .control-panel__breadcrumb { color: #666; font-size: 11px; font-family: ui-monospace, monospace; }
+  .control-panel__hint { color: #999; font-size: 10px; font-style: italic; }
+
+  /* === Device Frame === */
+  .device-frame {
+    width: 390px;
+    height: 844px;
+    background: var(--wds-background-normal);
+    overflow: hidden;
+    position: relative;
+    border: 1px solid #ddd;
+    border-radius: 0 0 12px 12px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .screen { display: flex; flex-direction: column; height: 100%; }
+
+  .status-bar {
+    height: 44px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 24px;
+    font-size: var(--wds-font-size-md);
+    font-weight: var(--wds-font-weight-semibold);
+    flex-shrink: 0;
+    color: var(--wds-label-normal);
+  }
+  .status-bar__icons { display: flex; gap: 6px; align-items: center; }
+  .status-bar__icons svg { display: block; }
+
+  .app-header {
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 var(--wds-spacing-16);
+    flex-shrink: 0;
+  }
+  .app-header__logo {
+    font-size: var(--wds-font-size-xl);
+    font-weight: var(--wds-font-weight-bold);
+    letter-spacing: -0.5px;
+    color: var(--wds-fill-brand-primary);
+  }
+  .app-header__actions { display: flex; gap: var(--wds-spacing-12); align-items: center; }
+  .app-header__credit {
+    background: var(--wds-surface-secondary);
+    border-radius: var(--wds-radius-full);
+    padding: 5px 10px;
+    font-size: var(--wds-font-size-xs);
+    font-weight: var(--wds-font-weight-semibold);
+    display: flex;
+    gap: var(--wds-spacing-4);
+    align-items: center;
+    color: var(--wds-label-normal);
+  }
+  .app-header__credit-icon { color: var(--wds-fill-brand-primary); display: inline-flex; }
+  .app-header__bell {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--wds-label-normal);
+    padding: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .home-tabs {
+    display: flex;
+    padding: 0 var(--wds-spacing-16);
+    border-bottom: 1px solid var(--wds-line-alternative);
+    height: 44px;
+    gap: var(--wds-spacing-24);
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    background: var(--wds-background-normal);
+    z-index: 10;
+  }
+  .home-tab {
+    position: relative;
+    display: flex;
+    align-items: center;
+    font-size: var(--wds-font-size-lg);
+    font-weight: var(--wds-font-weight-semibold);
+    color: var(--wds-label-assistive);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0 2px;
+    font-family: inherit;
+  }
+  .home-tab.active { color: var(--wds-label-normal); }
+  .home-tab.active::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--wds-label-normal);
+  }
+  .home-tab__reddot {
+    position: absolute;
+    top: 12px;
+    right: -8px;
+    width: 6px;
+    height: 6px;
+    border-radius: var(--wds-radius-full);
+    background: var(--wds-status-error);
+  }
+
+  .body-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding-bottom: 64px;
+    position: relative;
+  }
+
+  /* === Banner === */
+  .banner {
+    margin: var(--wds-spacing-12) var(--wds-spacing-16) var(--wds-spacing-8);
+    border-radius: var(--wds-radius-lg);
+    padding: var(--wds-spacing-16) 18px;
+    color: var(--wds-label-inverse);
+    position: relative;
+    overflow: hidden;
+  }
+  .banner--purple { background: var(--banner-purple); }
+  .banner--teal { background: var(--banner-teal); }
+  .banner::after {
+    content: "";
+    position: absolute;
+    right: -20px;
+    top: -20px;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.1);
+  }
+  .banner__title {
+    font-size: var(--wds-font-size-lg);
+    font-weight: var(--wds-font-weight-bold);
+    margin-bottom: var(--wds-spacing-4);
+    position: relative;
+    z-index: 1;
+  }
+  .banner__desc {
+    font-size: var(--wds-font-size-sm);
+    opacity: 0.92;
+    font-weight: var(--wds-font-weight-medium);
+    position: relative;
+    z-index: 1;
+  }
+  .banner__caption {
+    display: none;
+    margin-top: var(--wds-spacing-6);
+    font-size: var(--wds-font-size-2xs);
+    opacity: 0.85;
+    font-weight: var(--wds-font-weight-medium);
+    position: relative;
+    z-index: 1;
+  }
+  .banner.show-caption .banner__caption { display: block; }
+
+  /* === Pull-to-refresh hint (top of body) === */
+  .pull-to-refresh-hint {
+    height: 0;
+    overflow: hidden;
+    transition: height 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--wds-label-assistive);
+    font-size: var(--wds-font-size-xs);
+    background: var(--wds-surface-secondary);
+  }
+  .body-scroll[data-pulling="true"] .pull-to-refresh-hint { height: 36px; }
+
+  /* === Free Grid === */
+  .free-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    padding: var(--wds-spacing-8) 0 0;
+    list-style: none;
+    background: transparent;
+  }
+  .free-card {
+    position: relative;
+    aspect-ratio: 4/5;
+    border-radius: var(--wds-radius-xs);
+    overflow: hidden;
+    cursor: pointer;
+    background: var(--wds-surface-tertiary);
+  }
+  .free-card__thumb {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--wds-font-size-sm);
+    font-weight: var(--wds-font-weight-semibold);
+    color: rgba(255,255,255,0.95);
+    text-align: center;
+    padding: var(--wds-spacing-8);
+    line-height: 1.4;
+  }
+  .free-card__thumb.baby   { background: var(--card-baby);   color: var(--ft-baby-text); }
+  .free-card__thumb.pet    { background: var(--card-pet);    color: var(--ft-pet-text); }
+  .free-card__thumb.studio { background: var(--card-studio); color: var(--wds-label-inverse); }
+  .free-card__overlay {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    padding: 18px var(--wds-spacing-10) var(--wds-spacing-8);
+    background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.65) 100%);
+    color: var(--wds-label-inverse);
+    font-size: var(--wds-font-size-xs);
+    font-weight: var(--wds-font-weight-semibold);
+  }
+  .free-card__creator {
+    display: flex;
+    align-items: center;
+    gap: var(--wds-spacing-6);
+    font-size: var(--wds-font-size-2xs);
+    opacity: 0.9;
+    margin-top: 2px;
+  }
+  .free-card__avatar {
+    width: 16px;
+    height: 16px;
+    border-radius: var(--wds-radius-full);
+    background: var(--wds-fill-brand-primary);
+    flex-shrink: 0;
+  }
+  .free-badge {
+    position: absolute;
+    top: var(--wds-spacing-8);
+    left: var(--wds-spacing-8);
+    background: rgba(255,255,255,0.92);
+    color: var(--wds-fill-brand-primary);
+    font-size: var(--wds-font-size-2xs);
+    font-weight: var(--wds-font-weight-bold);
+    padding: 3px var(--wds-spacing-6);
+    border-radius: var(--wds-radius-sm);
+    z-index: 2;
+  }
+
+  /* === Skeleton (feed archetype 강제 룰 #1) === */
+  .grid-skeleton {
+    display: none;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    padding: var(--wds-spacing-8) 0 0;
+    list-style: none;
+  }
+  .skeleton-card {
+    aspect-ratio: 4/5;
+    background: linear-gradient(90deg,
+      var(--wds-color-neutral-100) 25%,
+      var(--wds-color-neutral-200) 50%,
+      var(--wds-color-neutral-100) 75%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.5s infinite;
+    border-radius: var(--wds-radius-xs);
+  }
+  @keyframes skeleton-shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* === End indicator (feed archetype 권장 룰 #1) === */
+  .end-indicator {
+    text-align: center;
+    padding: var(--wds-spacing-16) 0 var(--wds-spacing-24);
+    color: var(--wds-label-assistive);
+    font-size: var(--wds-font-size-xs);
+  }
+
+  /* === Empty View === */
+  .empty-view {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--wds-spacing-80) var(--wds-spacing-24);
+    text-align: center;
+  }
+  .empty-view__icon {
+    width: 72px;
+    height: 72px;
+    border-radius: var(--wds-radius-full);
+    background: var(--wds-surface-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--wds-label-assistive);
+    margin-bottom: var(--wds-spacing-16);
+  }
+  .empty-view__title {
+    font-size: var(--wds-font-size-lg);
+    font-weight: var(--wds-font-weight-semibold);
+    color: var(--wds-label-normal);
+    margin-bottom: var(--wds-spacing-6);
+  }
+  .empty-view__desc {
+    font-size: var(--wds-font-size-sm);
+    color: var(--wds-label-assistive);
+    margin-bottom: var(--wds-spacing-20);
+  }
+  .empty-view__refresh {
+    background: var(--wds-surface-tertiary);
+    color: var(--wds-label-normal);
+    border: none;
+    border-radius: var(--wds-radius-md);
+    padding: var(--wds-spacing-10) var(--wds-spacing-20);
+    font-size: var(--wds-font-size-md);
+    font-weight: var(--wds-font-weight-semibold);
+    cursor: pointer;
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--wds-spacing-6);
+  }
+
+  /* === Bottom Nav === */
+  .bottom-nav {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 64px;
+    border-top: 0.5px solid var(--wds-line-alternative);
+    background: var(--wds-background-normal);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding-bottom: var(--wds-spacing-8);
+  }
+  .bottom-nav__item {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--wds-label-assistive);
+    padding: var(--wds-spacing-8) var(--wds-spacing-12);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: inherit;
+  }
+  .bottom-nav__item.active { color: var(--wds-label-normal); }
+
+  /* === STATE OVERRIDES === */
+  .device-frame[data-state="default"] .banner--teal { display: none; }
+  .device-frame[data-state="default"] .banner--purple { display: block; }
+  .device-frame[data-state="default"] .home-tab__reddot { display: block; }
+  .device-frame[data-state="default"] .empty-view { display: none; }
+  .device-frame[data-state="default"] .free-grid { display: grid; }
+  .device-frame[data-state="default"] .grid-skeleton { display: none; }
+  .device-frame[data-state="default"] .end-indicator { display: block; }
+
+  .device-frame[data-state="used-today"] .banner--purple { display: none; }
+  .device-frame[data-state="used-today"] .banner--teal { display: block; }
+  .device-frame[data-state="used-today"] .home-tab__reddot { display: none; }
+  .device-frame[data-state="used-today"] .empty-view { display: none; }
+  .device-frame[data-state="used-today"] .free-grid { display: grid; }
+  .device-frame[data-state="used-today"] .grid-skeleton { display: none; }
+  .device-frame[data-state="used-today"] .end-indicator { display: block; }
+
+  .device-frame[data-state="fallback"] .banner--teal { display: none; }
+  .device-frame[data-state="fallback"] .banner--purple { display: block; }
+  .device-frame[data-state="fallback"] .home-tab__reddot { display: block; }
+  .device-frame[data-state="fallback"] .empty-view { display: none; }
+  .device-frame[data-state="fallback"] .free-grid { display: grid; }
+  .device-frame[data-state="fallback"] .grid-skeleton { display: none; }
+  .device-frame[data-state="fallback"] .end-indicator { display: block; }
+
+  .device-frame[data-state="loading"] .banner--purple { display: block; }
+  .device-frame[data-state="loading"] .banner--teal { display: none; }
+  .device-frame[data-state="loading"] .home-tab__reddot { display: block; }
+  .device-frame[data-state="loading"] .free-grid { display: none; }
+  .device-frame[data-state="loading"] .grid-skeleton { display: grid; }
+  .device-frame[data-state="loading"] .empty-view { display: none; }
+  .device-frame[data-state="loading"] .end-indicator { display: none; }
+
+  .device-frame[data-state="empty"] .banner--purple { display: block; }
+  .device-frame[data-state="empty"] .banner--teal { display: none; }
+  .device-frame[data-state="empty"] .home-tab__reddot { display: none; }
+  .device-frame[data-state="empty"] .free-grid { display: none; }
+  .device-frame[data-state="empty"] .grid-skeleton { display: none; }
+  .device-frame[data-state="empty"] .empty-view { display: flex; }
+  .device-frame[data-state="empty"] .end-indicator { display: none; }
+
+  .device-frame[data-state="fallback"] .banner__caption { display: block; }
+
+  .banner--teal { display: none; }
+
+  /* === Toast (error state) === */
+  .toast {
+    display: none;
+    position: absolute;
+    bottom: 80px;
+    left: 16px;
+    right: 16px;
+    background: var(--wds-color-neutral-900);
+    color: var(--wds-label-inverse);
+    padding: var(--wds-spacing-12) var(--wds-spacing-16);
+    border-radius: var(--wds-radius-md);
+    font-size: var(--wds-font-size-sm);
+    z-index: 50;
+  }
+  .toast.show { display: block; }
+
+  @media (max-width: 480px) {
+    body { padding: 0; align-items: stretch; min-height: 100dvh; }
+    .control-panel { display: none; }
+    .device-frame {
+      width: 100dvw;
+      height: 100dvh;
+      border: none;
+      border-radius: 0;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- Control Panel (verifier-friendly) -->
+<div class="control-panel">
+  <div class="control-panel__row">
+    <span class="control-panel__label">Screen</span>
+    <select id="screen-select">
+      <option value="free-tab">FreeTabScreen</option>
+    </select>
+  </div>
+  <div class="control-panel__row">
+    <span class="control-panel__label">State</span>
+    <div class="control-panel__states" id="state-toggles">
+      <button class="control-panel__state-btn active" data-state="default" data-state-toggle>default</button>
+      <button class="control-panel__state-btn" data-state="used-today" data-state-toggle>used-today</button>
+      <button class="control-panel__state-btn" data-state="fallback" data-state-toggle>fallback</button>
+      <button class="control-panel__state-btn" data-state="loading" data-state-toggle>loading</button>
+      <button class="control-panel__state-btn" data-state="empty" data-state-toggle>empty</button>
+    </div>
+  </div>
+  <div class="control-panel__row">
+    <span class="control-panel__breadcrumb" id="breadcrumb">free-tab · default</span>
+  </div>
+  <div class="control-panel__row">
+    <span class="control-panel__hint">v2 dogfood — feed archetype persona enforced</span>
+  </div>
+</div>
+
+<!-- Device Frame -->
+<div class="device-frame" id="device-frame" data-state="default">
+  <section class="screen" id="free-tab">
+
+    <div class="status-bar">
+      <span>9:41</span>
+      <span class="status-bar__icons">
+        <svg width="16" height="11" viewBox="0 0 16 11" fill="none" aria-hidden="true"><path d="M1 6.5a6.5 6.5 0 0 1 13 0v3.75a.75.75 0 0 1-.75.75H1.75A.75.75 0 0 1 1 10.25z" fill="currentColor"/></svg>
+        <svg width="16" height="11" viewBox="0 0 16 11" fill="none" aria-hidden="true"><rect x="0.5" y="0.5" width="13" height="9" rx="1.5" stroke="currentColor"/><rect x="14.25" y="3.5" width="1.25" height="3" rx="0.5" fill="currentColor"/><rect x="2" y="2" width="10" height="6" rx="0.5" fill="currentColor"/></svg>
+      </span>
+    </div>
+
+    <header class="app-header">
+      <span class="app-header__logo">ZZEM</span>
+      <div class="app-header__actions">
+        <span class="app-header__credit">
+          <span class="app-header__credit-icon" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2 4 7v10l8 5 8-5V7z" opacity=".25"/><path d="m12 2 8 5-8 5-8-5z"/></svg>
+          </span>
+          120
+        </span>
+        <button class="app-header__bell" type="button" data-action="open-notifications" aria-label="알림" onclick="onAction('open-notifications')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <nav class="home-tabs" id="home-tabs" role="tablist" aria-label="홈 콘텐츠 탭">
+      <button class="home-tab" id="tab-recommended" role="tab" data-tab="recommended" onclick="setActiveTab('recommended')">추천</button>
+      <button class="home-tab active" id="tab-free" role="tab" aria-selected="true" data-tab="free" onclick="setActiveTab('free')">
+        무료
+        <span class="home-tab__reddot" id="red-dot" role="status" aria-label="새 무료 콘텐츠 알림"></span>
+      </button>
+    </nav>
+
+    <main class="body-scroll" id="body-scroll">
+
+      <div class="pull-to-refresh-hint" id="ptr-hint">필터 새로고침 중…</div>
+
+      <section class="banner banner--purple" id="banner-purple" role="region" aria-label="오늘 무료 필터 안내">
+        <div class="banner__title">오늘만 10개 무료에요</div>
+        <div class="banner__desc">오늘 밤이 지나면 무료 필터가 초기화돼요</div>
+        <div class="banner__caption" id="banner-caption">어제 선정된 무료 필터예요 · 곧 갱신돼요</div>
+      </section>
+
+      <section class="banner banner--teal" id="banner-teal" role="region" aria-label="오늘 무료 사용 완료 안내">
+        <div class="banner__title">내일 또 만나요</div>
+        <div class="banner__desc">내일 새로운 필터로 찾아올게요</div>
+      </section>
+
+      <!-- Skeleton (loading state) — feed archetype 강제 룰 #1 -->
+      <ul class="grid-skeleton" id="grid-skeleton" aria-hidden="true">
+        <li class="skeleton-card"></li>
+        <li class="skeleton-card"></li>
+        <li class="skeleton-card"></li>
+        <li class="skeleton-card"></li>
+        <li class="skeleton-card"></li>
+        <li class="skeleton-card"></li>
+      </ul>
+
+      <ul class="free-grid" id="free-grid">
+        <li class="free-card" role="button" tabindex="0" data-action="navigate-swipefeed" data-filter-id="f-001" onclick="onAction('navigate-swipefeed', 'f-001')" aria-label="아기 첫 걸음 — 탭하여 미리보기">
+          <span class="free-badge">NEW</span>
+          <div class="free-card__thumb baby">아기<br>첫 걸음</div>
+          <div class="free-card__overlay">아기 · 첫 걸음
+            <div class="free-card__creator"><span class="free-card__avatar"></span>studio_a</div>
+          </div>
+        </li>
+        <li class="free-card" role="button" tabindex="0" data-action="navigate-swipefeed" data-filter-id="f-002" onclick="onAction('navigate-swipefeed', 'f-002')" aria-label="반려동물 산책 — 탭하여 미리보기">
+          <div class="free-card__thumb pet">반려동물<br>산책</div>
+          <div class="free-card__overlay">반려동물 · 산책
+            <div class="free-card__creator"><span class="free-card__avatar"></span>petlab</div>
+          </div>
+        </li>
+        <li class="free-card" role="button" tabindex="0" data-action="navigate-swipefeed" data-filter-id="f-003" onclick="onAction('navigate-swipefeed', 'f-003')" aria-label="스튜디오 라이트 — 탭하여 미리보기">
+          <div class="free-card__thumb studio">스튜디오<br>라이트</div>
+          <div class="free-card__overlay">스튜디오 · 라이트
+            <div class="free-card__creator"><span class="free-card__avatar"></span>lumen</div>
+          </div>
+        </li>
+        <li class="free-card" role="button" tabindex="0" data-action="navigate-swipefeed" data-filter-id="f-004" onclick="onAction('navigate-swipefeed', 'f-004')" aria-label="아기 낮잠 — 탭하여 미리보기">
+          <div class="free-card__thumb baby">아기<br>낮잠</div>
+          <div class="free-card__overlay">아기 · 낮잠
+            <div class="free-card__creator"><span class="free-card__avatar"></span>dreamy</div>
+          </div>
+        </li>
+        <li class="free-card" role="button" tabindex="0" data-action="navigate-swipefeed" data-filter-id="f-005" onclick="onAction('navigate-swipefeed', 'f-005')" aria-label="반려동물 간식 — 탭하여 미리보기">
+          <span class="free-badge">NEW</span>
+          <div class="free-card__thumb pet">반려동물<br>간식</div>
+          <div class="free-card__overlay">반려동물 · 간식
+            <div class="free-card__creator"><span class="free-card__avatar"></span>snacky</div>
+          </div>
+        </li>
+        <li class="free-card" role="button" tabindex="0" data-action="navigate-swipefeed" data-filter-id="f-006" onclick="onAction('navigate-swipefeed', 'f-006')" aria-label="스튜디오 그라데이션 — 탭하여 미리보기">
+          <div class="free-card__thumb studio">스튜디오<br>그라데이션</div>
+          <div class="free-card__overlay">스튜디오 · 그라데이션
+            <div class="free-card__creator"><span class="free-card__avatar"></span>grad</div>
+          </div>
+        </li>
+        <li class="free-card" role="button" tabindex="0" data-action="navigate-swipefeed" data-filter-id="f-007" onclick="onAction('navigate-swipefeed', 'f-007')" aria-label="아기 웃음 — 탭하여 미리보기">
+          <div class="free-card__thumb baby">아기<br>웃음</div>
+          <div class="free-card__overlay">아기 · 웃음
+            <div class="free-card__creator"><span class="free-card__avatar"></span>smile</div>
+          </div>
+        </li>
+        <li class="free-card" role="button" tabindex="0" data-action="navigate-swipefeed" data-filter-id="f-008" onclick="onAction('navigate-swipefeed', 'f-008')" aria-label="반려동물 점프 — 탭하여 미리보기">
+          <div class="free-card__thumb pet">반려동물<br>점프</div>
+          <div class="free-card__overlay">반려동물 · 점프
+            <div class="free-card__creator"><span class="free-card__avatar"></span>hopper</div>
+          </div>
+        </li>
+        <li class="free-card" role="button" tabindex="0" data-action="navigate-swipefeed" data-filter-id="f-009" onclick="onAction('navigate-swipefeed', 'f-009')" aria-label="스튜디오 네온 — 탭하여 미리보기">
+          <div class="free-card__thumb studio">스튜디오<br>네온</div>
+          <div class="free-card__overlay">스튜디오 · 네온
+            <div class="free-card__creator"><span class="free-card__avatar"></span>neon</div>
+          </div>
+        </li>
+        <li class="free-card" role="button" tabindex="0" data-action="navigate-swipefeed" data-filter-id="f-010" onclick="onAction('navigate-swipefeed', 'f-010')" aria-label="아기 목욕 — 탭하여 미리보기">
+          <div class="free-card__thumb baby">아기<br>목욕</div>
+          <div class="free-card__overlay">아기 · 목욕
+            <div class="free-card__creator"><span class="free-card__avatar"></span>bubbles</div>
+          </div>
+        </li>
+      </ul>
+
+      <!-- End indicator (feed archetype 권장 룰 #1) -->
+      <div class="end-indicator" id="end-indicator">오늘의 무료 필터를 모두 봤어요</div>
+
+      <div class="empty-view" id="empty-view" role="region" aria-label="무료 필터 없음">
+        <div class="empty-view__icon" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.34-4.34"/></svg>
+        </div>
+        <div class="empty-view__title">지금은 무료 필터가 없어요</div>
+        <div class="empty-view__desc">곧 새로운 무료 필터로 찾아올게요</div>
+        <button class="empty-view__refresh" type="button" id="empty-refresh" data-action="refresh" onclick="triggerRefresh()" aria-label="필터 새로고침">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/></svg>
+          새로고침
+        </button>
+      </div>
+
+    </main>
+
+    <nav class="bottom-nav" aria-label="주 내비게이션">
+      <button class="bottom-nav__item active" type="button" data-nav="home" onclick="onAction('nav-home')" aria-label="홈">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+      </button>
+      <button class="bottom-nav__item" type="button" data-nav="search" onclick="onAction('nav-search')" aria-label="검색">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg>
+      </button>
+      <button class="bottom-nav__item" type="button" data-nav="profile" onclick="onAction('nav-profile')" aria-label="프로필">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </button>
+    </nav>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  </section>
+</div>
+
+<script>
+  // === State management ===
+  const frame = document.getElementById('device-frame');
+  const breadcrumb = document.getElementById('breadcrumb');
+  const stateButtons = document.querySelectorAll('.control-panel__state-btn');
+  const toast = document.getElementById('toast');
+
+  function setState(state) {
+    frame.setAttribute('data-state', state);
+    stateButtons.forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.state === state);
+    });
+    breadcrumb.textContent = 'free-tab · ' + state;
+    console.log('[state]', state);
+  }
+
+  stateButtons.forEach(btn => {
+    btn.addEventListener('click', () => setState(btn.dataset.state));
+  });
+
+  // === Tab toggle (visual only) ===
+  function setActiveTab(tabId) {
+    document.querySelectorAll('.home-tab').forEach(t => {
+      const isActive = t.dataset.tab === tabId;
+      t.classList.toggle('active', isActive);
+      if (isActive) {
+        t.setAttribute('aria-selected', 'true');
+      } else {
+        t.removeAttribute('aria-selected');
+      }
+    });
+    console.log('[tab]', tabId);
+  }
+
+  // === Refresh (feed archetype 강제 룰 #4) ===
+  function triggerRefresh() {
+    showToast('필터를 새로고침하고 있어요…');
+    setState('loading');
+    setTimeout(() => {
+      setState('default');
+      showToast('새로운 무료 필터를 불러왔어요');
+    }, 1200);
+  }
+
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2200);
+  }
+
+  // === Generic action handler (no alert/confirm/prompt — verifier safe) ===
+  function onAction(name, payload) {
+    console.log('[action]', name, payload || '');
+    if (name === 'navigate-swipefeed') {
+      showToast('SwipeFeed 진입: ' + (payload || ''));
+    }
+  }
+
+  // === Pull-to-refresh hint (visual only — feed archetype 강제 룰 #4) ===
+  const bodyScroll = document.getElementById('body-scroll');
+  let touchStartY = null;
+  bodyScroll.addEventListener('touchstart', (e) => {
+    if (bodyScroll.scrollTop === 0) touchStartY = e.touches[0].clientY;
+  }, { passive: true });
+  bodyScroll.addEventListener('touchmove', (e) => {
+    if (touchStartY !== null) {
+      const dy = e.touches[0].clientY - touchStartY;
+      bodyScroll.dataset.pulling = dy > 40 ? 'true' : 'false';
+    }
+  }, { passive: true });
+  bodyScroll.addEventListener('touchend', () => {
+    if (bodyScroll.dataset.pulling === 'true') {
+      bodyScroll.dataset.pulling = 'false';
+      triggerRefresh();
+    }
+    touchStartY = null;
+  }, { passive: true });
+
+  // === Init ===
+  setState('default');
+</script>
+
+</body>
+</html>

@@ -1,0 +1,241 @@
+# Context Engine — free-tab-diversification / app-001 (v2 dogfood)
+# Step A output of Design Engineer protocol v2.
+# Source PRD: docs/prds/PRD-free-tab-filter-diversification.md
+# Source task: sprint-orchestrator/sprints/free-tab-diversification/tasks/app/001-free-tab-grid.md
+
+meta:
+  sprint_id: "free-tab-diversification"
+  task_id: "app-001"
+  generated_at: "2026-04-25T00:00:00Z"
+  schema_version: "1.0"
+  exercise: "v2-dogfood"
+
+# ─────────────────────────────
+# Layer 1: WHY (Business Intent)
+# ─────────────────────────────
+why:
+  product_intent: |
+    하루 1개에 묶여 있던 무료 필터 경험을 N개(기본 10)로 확장하여
+    다양한 무료 콘텐츠로 사용자가 매일 새로운 시도를 할 수 있게 한다.
+    무료 사용 가능 여부를 그리드 진입 시점에 시각적으로 알려준다.
+  target_user: "ZZEM 무료 필터 활용 유저 (미결제 + 결제 사용자 공통)"
+  success_metric: "무료탭 진입 후 SwipeFeed 진입률 (US-1 + US-2 funnel)"
+  user_stories:
+    - id: "US-1"
+      as_a: "무료 필터 사용자"
+      i_want: "오늘의 무료 필터 N개를 그리드로 한눈에 보고 싶다"
+      so_that: "원하는 콘텐츠를 빠르게 발견·선택"
+    - id: "US-4"
+      as_a: "탭 전환 사용자"
+      i_want: "무료탭 스크롤 위치가 다른 탭 다녀와도 유지되길 원한다"
+      so_that: "맥락을 잃지 않음"
+    - id: "US-5"
+      as_a: "무료 사용자"
+      i_want: "오늘 무료 사용 여부를 진입 즉시 알고 싶다"
+      so_that: "행동 가능 여부를 빠르게 판단"
+  acceptance_criteria:
+    - id: "AC-2.1.1"
+      given: "오늘 활성 10필터 상태"
+      when: "무료탭 진입"
+      then: "2열 그리드로 10개 카드 표시"
+      ui_impact: "FreeRosterGrid: 10 cards, 2 cols"
+    - id: "AC-2.1.2"
+      given: "rosterDate==어제 폴백"
+      when: "무료탭 진입"
+      then: "그리드 정상 표시 + 폴백 캡션"
+      ui_impact: "FreeRosterBanner caption '어제 선정된 무료 필터예요' 노출"
+    - id: "AC-2.1.3"
+      given: "filters.length == 0"
+      when: "무료탭 진입"
+      then: "FreeEmptyView 표시"
+      ui_impact: "Grid 숨김, EmptyView 표시"
+    - id: "AC-2.1.4"
+      given: "freeUsedToday == false"
+      when: "무료탭 진입"
+      then: "보라 배너 + 무료 탭 레드닷"
+      ui_impact: "Banner --purple, RedDot visible"
+    - id: "AC-2.5.1"
+      given: "freeUsedToday == true"
+      when: "무료탭 진입"
+      then: "틸 배너 + 레드닷 미표시"
+      ui_impact: "Banner --teal, RedDot hidden"
+    - id: "AC-2.5.3"
+      given: "무료 생성 성공"
+      when: "홈 복귀"
+      then: "레드닷 즉시 소멸"
+      ui_impact: "RedDot hidden — state transition (consumed)"
+    - id: "AC-2.5.4"
+      given: "자정 경과 + AppState active"
+      when: "포그라운드 복귀"
+      then: "보라 배너 + 레드닷 복구"
+      ui_impact: "Banner --purple, RedDot visible (refresh)"
+    - id: "AC-2.4.1"
+      given: "무료탭 스크롤 후 다른 탭 이동"
+      when: "다시 무료탭 복귀"
+      then: "이전 offset 복원"
+      ui_impact: "scroll restore (인터랙션 — 시각 변화 없음, hidden state)"
+
+# ─────────────────────────────
+# Layer 2: WHAT (Design System)
+# ─────────────────────────────
+what:
+  tokens_needed:
+    colors:
+      - "wds.color.purple.500"   # 브랜드 보라 #8752FA
+      - "wds.color.purple.600"   # 그라디언트 종료 #7040E0
+      - "wds.color.neutral.0"    # bg #FFFFFF
+      - "wds.color.neutral.50"   # surface secondary #F7F8F9
+      - "wds.color.neutral.100"  # divider weak #F0F1F3
+      - "wds.color.neutral.200"  # divider normal #E4E5E9
+      - "wds.color.neutral.500"  # label assistive #8E9199
+      - "wds.color.neutral.600"  # label alt #6B6E76
+      - "wds.color.neutral.900"  # label normal #212228
+      - "wds.color.red.500"      # red dot #FF3B30
+      - "wds.color.green.500"    # 배너 틸 폴백 — 실제 디자인은 teal(#2DD4BF) 사용; tokens 내 가장 근접 토큰 매핑 후 alias 추가
+    typography:
+      - "wds.font.size.xs"       # 12px - 카드 라벨, caption
+      - "wds.font.size.sm"       # 13px - 배너 desc
+      - "wds.font.size.md"       # 14px - 본문
+      - "wds.font.size.lg"       # 16px - 배너 title, empty title
+      - "wds.font.size.xl"       # 18px - 헤더 로고
+      - "wds.font.weight.semibold"  # 600
+      - "wds.font.weight.bold"      # 700
+    spacing:
+      - "wds.spacing.4"   # 4px
+      - "wds.spacing.8"   # 8px
+      - "wds.spacing.12"  # 12px
+      - "wds.spacing.16"  # 16px
+      - "wds.spacing.24"  # 24px
+    radius:
+      - "wds.radius.xs"   # 4px - feed card (per docs/designs/patterns/feed-grid.mdx)
+      - "wds.radius.lg"   # 16px - banner
+      - "wds.radius.full" # 9999 - red dot, avatar
+
+  components_needed:
+    - name: "AppHeader"
+      category: "navigation"
+      pattern_ref: "docs/designs/patterns/home-screen.mdx"
+    - name: "HomeTabsHeader"
+      category: "navigation"
+      pattern_ref: "docs/designs/components/chip.mdx"
+    - name: "RedDot"
+      category: "feedback"
+    - name: "FreeRosterBanner"
+      category: "feedback"
+    - name: "FreeRosterGrid"
+      category: "layout"
+      pattern_ref: "docs/designs/patterns/feed-grid.mdx"
+    - name: "FreeRosterCard"
+      category: "content"
+      pattern_ref: "docs/designs/components/card.mdx#feed"
+    - name: "FreeEmptyView"
+      category: "feedback"
+      pattern_ref: "empty_state archetype"
+    - name: "BottomNav"
+      category: "navigation"
+      pattern_ref: "docs/designs/components/bottom-nav.mdx"
+    - name: "GridSkeleton"
+      category: "feedback"
+      note: "feed archetype 강제 룰 #1 — loading state"
+
+  patterns_needed:
+    - name: "2-col grid feed"
+      description: "Pinterest/Magazine style 2-col, 1px gutter, aspect 4:5 (per feed-grid.mdx)"
+    - name: "Conditional banner swap"
+      description: "freeUsedToday 분기로 보라/틸 배너 토글"
+    - name: "Tab-level red dot"
+      description: "탭 라벨 우상단 6px 레드닷, 사용 시 즉시 소멸"
+    - name: "Skeleton grid loading"
+      description: "그리드와 동일 레이아웃의 회색 placeholder 6+개 (feed archetype)"
+    - name: "Empty state with retry hint"
+      description: "결과 0건 시 일러스트 + 카피 + 보조 액션"
+
+# ─────────────────────────────
+# Layer 3: HOW (Orchestration)
+# ─────────────────────────────
+how:
+  composition_rules:
+    - rule: "AppHeader → HomeTabsHeader → Banner → Grid (수직)"
+      applies_to: ["FreeTabScreen"]
+    - rule: "Banner sticky 아님 — 스크롤과 함께 이동"
+      applies_to: ["FreeTabScreen"]
+    - rule: "HomeTabsHeader 는 sticky-top (스크롤 중에도 고정)"
+      applies_to: ["FreeTabScreen"]
+    - rule: "Grid 카드 비율 4:5, gap 1px (모자이크), border-radius 4px (per feed-grid.mdx)"
+      applies_to: ["FreeRosterGrid"]
+    - rule: "최소 6개 카드 첫 viewport 노출 (feed archetype 강제 룰 #3)"
+      applies_to: ["FreeRosterGrid"]
+  conditional_rendering:
+    - condition: "freeUsedToday == false"
+      variant_a: "Banner --purple + RedDot visible"
+      variant_b: null
+    - condition: "freeUsedToday == true"
+      variant_a: "Banner --teal + RedDot hidden"
+      variant_b: null
+    - condition: "rosterDate != today (fallback)"
+      variant_a: "Banner --purple + 캡션 '어제 선정된 무료 필터예요 · 곧 갱신돼요'"
+      variant_b: null
+    - condition: "filters.length == 0"
+      variant_a: "FreeEmptyView 노출, Grid 숨김"
+      variant_b: null
+    - condition: "isLoading == true (첫 로드)"
+      variant_a: "GridSkeleton 6+개 노출, Banner 정적 노출"
+      variant_b: null
+  constraints:
+    - "Bottom Nav 는 항상 sticky-bottom"
+    - "GridSkeleton 카드는 실제 카드와 동일한 4:5 비율 + 4px radius (시각적 동일성)"
+    - "RedDot 위치: '무료' 라벨 우상단 absolute, 6x6, 색 #FF3B30"
+    - "배너 height fixed 88-96px (콘텐츠에 따라 자동), 카드 그리드 가독성 확보"
+    - "어떤 인터랙티브 요소도 alert/confirm/prompt 사용 금지 (verifier 호환)"
+  priority_order:
+    - "1. Banner (사용 가능 여부 즉시 인지)"
+    - "2. Grid (선택지 제시)"
+    - "3. Tab + RedDot (탭 전환 가능)"
+    - "4. AppHeader (브랜드/크레딧)"
+    - "5. BottomNav (전역 이동)"
+
+# ─────────────────────────────
+# Layer 4: ASSETS (v1)
+# ─────────────────────────────
+# free-tab FreeRosterCard 식 — 각 카드는 카테고리별 그라디언트 토큰 (real image 아님)
+# 이 디자인 결정은 PRD 가 카드 썸네일을 명시 정의하지 않았고, 기존 prototype 이
+# 그라디언트 톤을 사용한 점을 추적. v2 에서도 동일 결정 — "gradient-token" 으로 선언.
+assets:
+  avatars:
+    kind: gradient-token
+    source: "inline solid color (16px circle, --color-brand-primary)"
+    count: 10
+    license: "internal-test"
+    needs_real_content: false
+    note: "크리에이터 아바타는 16px 작은 단일 색 원 — 카드 콘텐츠 위계상 부수적, gradient-token 으로 의도"
+  feed_thumbnails:
+    kind: gradient-token
+    source: |
+      카테고리별 토큰화된 그라디언트:
+      - baby:   linear-gradient(135deg, #FFD6E0 0%, #FF8FB1 100%)
+      - pet:    linear-gradient(135deg, #C3E8FF 0%, #5AAEF0 100%)
+      - studio: linear-gradient(135deg, #2A2A3E 0%, #8752FA 100%)
+    count: 10
+    license: "internal-test"
+    needs_real_content: false
+    note: "Pass 6 #6 면제 (gradient-token kind). #1 hex 검사는 카테고리 토큰으로 등재됨."
+  meme_images:
+    kind: gradient-token
+    source: null
+    needs_real_content: false
+    note: "이 화면에서 meme image 슬롯 없음"
+  icons:
+    kind: illustration
+    source: "lucide inline SVG (home/search/profile in bottom-nav, bell in header)"
+    fallback: "text-placeholder"
+    needs_real_content: false
+  hero_banners:
+    kind: gradient-token
+    source: |
+      - banner-purple: linear-gradient(135deg, #8752FA 0%, #7040E0 100%)  # tokens-aligned
+      - banner-teal:   linear-gradient(135deg, #2DD4BF 0%, #0D9488 100%)  # NEW token alias 필요
+    needs_real_content: false
+    note: |
+      DESIGN.md §4 가이드: 그라디언트는 명시된 경우에만 — 본 케이스는
+      PRD "보라/틸 배너 전환" (US-5) 에 명시되어 정당. teal hex 는 tokens.css 에
+      --banner-teal-start/end alias 로 정의 (Pass 6 #1 통과).

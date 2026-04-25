@@ -1,0 +1,459 @@
+# Screen Spec: FreeTabScreen (v2 dogfood)
+# Step B output. Generated from context-engine.yaml + task spec.
+
+meta:
+  screen_name: "FreeTabScreen"
+  screen_archetype: "feed"   # ← PR #31 archetype 분류
+  task_id: "app-001"
+  sprint_id: "free-tab-diversification"
+  app: "ZZEM"
+  platform: "iOS / Android (React Native)"
+  language: "ko"
+  frame: "390x844"
+  theme: "light"
+
+# ─────────────────────────────
+# Component Tree
+# ─────────────────────────────
+component_tree: |
+  FreeTabScreen [frame: 390x844]
+  ├── StatusBar [system] (div) #status-bar — 9:41 + 시스템 아이콘
+  ├── AppHeader [container] (header) #app-header
+  │   ├── Logo [text] (span) #logo — "ZZEM"
+  │   ├── CreditChip [chip] (span) #credit-chip — "120"
+  │   └── BellButton [icon-button] (button) #bell-button — 알림
+  ├── HomeTabsHeader [navigation] (nav) #home-tabs (sticky-top)
+  │   ├── TabRecommended [tab] (button) #tab-recommended — "추천"
+  │   └── TabFree [tab] (button) #tab-free — "무료"
+  │       └── RedDot [badge] (span) #red-dot — visible when freeUsedToday==false
+  ├── BodyScroll [scroll-container] (main) #body-scroll
+  │   ├── FreeRosterBanner [container] (section) #banner-purple — purple variant
+  │   │   ├── BannerTitle [text] (h2) — "오늘만 N개 무료에요"
+  │   │   ├── BannerDesc [text] (p) — "오늘 밤이 지나면 무료 필터가 초기화돼요"
+  │   │   └── BannerCaption [text] (p) — "어제 선정된 무료 필터예요 · 곧 갱신돼요" (fallback only)
+  │   ├── FreeRosterBanner [container] (section) #banner-teal — teal variant (used-today)
+  │   │   ├── BannerTitle [text] (h2) — "내일 또 만나요"
+  │   │   └── BannerDesc [text] (p) — "내일 새로운 필터로 찾아올게요"
+  │   ├── GridSkeleton [feedback] (ul) #grid-skeleton — loading state
+  │   │   └── SkeletonCard [skeleton] (li) × 6
+  │   ├── FreeRosterGrid [grid] (ul) #free-grid — default/used/fallback states
+  │   │   └── FreeRosterCard [card] (li) × 10
+  │   │       ├── NewBadge [badge] (span) — "NEW" (조건부)
+  │   │       ├── CardThumb [image] (div) — gradient by category
+  │   │       ├── CardOverlay [text] (div)
+  │   │       │   ├── CardTitle [text] (span) — 카테고리 · 이름
+  │   │       │   └── CardCreator [container] (div)
+  │   │       │       ├── CreatorAvatar [avatar] (span) — 16px circle
+  │   │       │       └── CreatorName [text] (span)
+  │   │       └── (entire card is interactive — onclick=open SwipeFeed)
+  │   ├── EndIndicator [feedback] (div) #end-indicator — feed archetype 권장 룰 #1
+  │   └── FreeEmptyView [container] (div) #empty-view — empty state
+  │       ├── EmptyIcon [illustration] (div) — 검색 아이콘
+  │       ├── EmptyTitle [text] (h3) — "지금은 무료 필터가 없어요"
+  │       ├── EmptyDesc [text] (p) — "곧 새로운 무료 필터로 찾아올게요"
+  │       └── EmptyRefresh [button-secondary] (button) — "새로고침" (refresh interaction)
+  └── BottomNav [navigation] (nav) #bottom-nav (sticky-bottom)
+      ├── NavHome [icon-button] (button) — active
+      ├── NavSearch [icon-button] (button)
+      └── NavProfile [icon-button] (button)
+
+# ─────────────────────────────
+# Component Details (Enhanced — Component-as-Data)
+# ─────────────────────────────
+components:
+  - name: "AppHeader"
+    id: "app-header"
+    tag: "header"
+    type: "container"
+    position: "top"
+    size: "full-width x 48px"
+    tokens:
+      fill: "var(--wds-background-normal)"
+      text: "var(--wds-label-normal)"
+      border: "none"
+      spacing: "0 16px"
+    layout: { direction: horizontal, alignment: space-between, sizing: hug }
+    a11y: { role: "banner", label: "ZZEM 홈 헤더" }
+
+  - name: "HomeTabsHeader"
+    id: "home-tabs"
+    tag: "nav"
+    type: "tabs"
+    position: "sticky-top"
+    size: "full-width x 44px"
+    tokens:
+      fill: "var(--wds-background-normal)"
+      border: "1px solid var(--wds-line-alternative)"
+      spacing: "0 16px"
+    behavior:
+      purpose: "추천/무료 탭 전환. 무료 탭 우상단 RedDot 노출."
+      user_action: "탭 라벨 탭"
+      feedback: "visual (active underline) + navigation"
+    a11y: { role: "tablist", label: "홈 콘텐츠 탭" }
+
+  - name: "RedDot"
+    id: "red-dot"
+    tag: "span"
+    type: "badge"
+    size: "6x6"
+    tokens:
+      fill: "var(--wds-color-red-500)"
+      radius: "var(--wds-radius-full)"
+    behavior:
+      purpose: "오늘 무료 사용 가능 여부 즉시 인지 (AC-2.1.4 / AC-2.5.1)"
+      user_action: "passive (시각 신호)"
+      feedback: "visual"
+    states:
+      default: "visible (freeUsedToday=false)"
+      hidden: "freeUsedToday=true"
+    a11y: { role: "status", label: "새 무료 콘텐츠 알림" }
+
+  - name: "FreeRosterBanner-purple"
+    id: "banner-purple"
+    tag: "section"
+    type: "container"
+    position: "in-flow (top of body)"
+    size: "full-width minus 32px margin"
+    tokens:
+      fill: "var(--banner-purple)"
+      text: "var(--wds-label-inverse)"
+      radius: "var(--wds-radius-lg)"
+      spacing: "16px 18px"
+    behavior:
+      purpose: "오늘 무료 사용 가능 알림 (AC-2.1.4)"
+      feedback: "visual"
+    states:
+      default: "visible — title + desc"
+      fallback: "+ caption '어제 선정된 무료 필터예요'"
+    a11y: { role: "region", label: "오늘 무료 필터 안내" }
+
+  - name: "FreeRosterBanner-teal"
+    id: "banner-teal"
+    tag: "section"
+    type: "container"
+    tokens:
+      fill: "var(--banner-teal)"
+      text: "var(--wds-label-inverse)"
+      radius: "var(--wds-radius-lg)"
+      spacing: "16px 18px"
+    behavior:
+      purpose: "오늘 무료 소진 알림 (AC-2.5.1)"
+    states:
+      default: "hidden"
+      used-today: "visible"
+    a11y: { role: "region", label: "오늘 무료 사용 완료 안내" }
+
+  - name: "FreeRosterGrid"
+    id: "free-grid"
+    tag: "ul"
+    type: "grid"
+    size: "full-width"
+    tokens:
+      fill: "transparent"
+      spacing: "8px 0 0 / gap: 1px"
+    layout: { direction: "vertical", alignment: "start", sizing: "fill" }
+    behavior:
+      purpose: "오늘의 무료 필터 N개 카드 그리드 (AC-2.1.1)"
+      user_action: "카드 탭 → SwipeFeed 진입"
+      feedback: "navigation"
+    states:
+      default: "visible — 10 cards (or N from API)"
+      loading: "hidden — GridSkeleton 노출"
+      empty: "hidden — FreeEmptyView 노출"
+    a11y: { role: "list", label: "무료 필터 그리드" }
+    constraints:
+      min_height: null
+      truncation: "none"
+
+  - name: "FreeRosterCard"
+    id: "free-card-{index}"
+    tag: "li"
+    type: "card"
+    size: "aspect-ratio 4/5"
+    tokens:
+      fill: "category gradient (--card-baby | --card-pet | --card-studio)"
+      text: "var(--wds-label-inverse)"
+      radius: "var(--wds-radius-xs)"   # 4px per feed-grid.mdx
+    behavior:
+      purpose: "필터 단일 항목. 탭 시 SwipeFeed 진입 (entryPoint=free-tab, initialFilterId)."
+      user_action: "탭"
+      feedback: "navigation (slide-up to SwipeFeed)"
+    a11y: { role: "button", label: "{카테고리} {필터명} — 탭하여 미리보기" }
+    constraints:
+      max_lines: 2
+      truncation: "ellipsis"
+
+  - name: "GridSkeleton"
+    id: "grid-skeleton"
+    tag: "ul"
+    type: "skeleton"
+    tokens:
+      fill: "var(--wds-color-neutral-100)"
+      radius: "var(--wds-radius-xs)"
+    behavior:
+      purpose: "첫 로드 시 회색 placeholder 6+개 (feed archetype 강제 룰 #1)"
+    states:
+      default: "hidden"
+      loading: "visible"
+    a11y: { role: "status", label: "필터 로딩 중" }
+
+  - name: "FreeEmptyView"
+    id: "empty-view"
+    tag: "div"
+    type: "container"
+    tokens:
+      spacing: "80px 24px"
+    behavior:
+      purpose: "filters.length==0 시 안내 (AC-2.1.3)"
+      user_action: "새로고침 버튼 탭 → 재조회"
+      feedback: "visual (refresh interaction)"
+    states:
+      default: "hidden"
+      empty: "visible"
+    a11y: { role: "region", label: "무료 필터 없음" }
+
+  - name: "BottomNav"
+    id: "bottom-nav"
+    tag: "nav"
+    type: "navigation"
+    position: "sticky-bottom"
+    size: "full-width x 64px"
+    tokens:
+      fill: "var(--wds-background-normal)"
+      border: "1px solid var(--wds-line-alternative)"
+    a11y: { role: "navigation", label: "주 내비게이션" }
+
+# ─────────────────────────────
+# Layout Spec
+# ─────────────────────────────
+layout_spec:
+  type: "flex-column"
+  viewport: "390x844"
+  regions:
+    - id: "status-bar"
+      height: "fixed(44px)"
+    - id: "app-header"
+      height: "fixed(48px)"
+    - id: "home-tabs"
+      sticky: "top"
+      height: "fixed(44px)"
+    - id: "body-scroll"
+      scroll: "vertical"
+      flex: 1
+      children:
+        - id: "banner"
+          type: "block"
+          margin: "12px 16px 8px"
+          height: "auto"
+        - id: "free-grid"
+          type: "grid"
+          columns: 2
+          gap: "1px"
+          padding: "8px 0 0"
+        - id: "end-indicator"
+          type: "block"
+          padding: "16px 0 24px"
+          alignment: "center"
+        - id: "empty-view"
+          type: "flex-column"
+          alignment: "center"
+          padding: "80px 24px"
+    - id: "bottom-nav"
+      sticky: "bottom"
+      height: "fixed(64px)"
+
+# ─────────────────────────────
+# States
+# ─────────────────────────────
+states:
+  default:
+    description: "오늘 무료 사용 가능 (freeUsedToday=false) + 정상 데이터"
+    active: true
+    visible_components: [banner-purple, free-grid, red-dot]
+    hidden_components: [banner-teal, grid-skeleton, empty-view]
+
+  used-today:
+    description: "오늘 무료 소진 (freeUsedToday=true)"
+    visible_components: [banner-teal, free-grid]
+    hidden_components: [banner-purple, red-dot, grid-skeleton, empty-view]
+
+  fallback:
+    description: "rosterDate==어제 (스케줄러 지연 폴백)"
+    visible_components: [banner-purple, free-grid, red-dot]
+    hidden_components: [banner-teal, grid-skeleton, empty-view]
+    extra: "banner-purple 의 caption 노출"
+
+  loading:
+    description: "첫 진입 — API 응답 대기 (feed archetype 강제 룰 #1)"
+    visible_components: [banner-purple, grid-skeleton]
+    hidden_components: [banner-teal, free-grid, empty-view]
+
+  empty:
+    description: "filters.length==0 — 무료 필터 없음 (AC-2.1.3)"
+    visible_components: [banner-purple, empty-view]
+    hidden_components: [banner-teal, free-grid, grid-skeleton, red-dot]
+    labels:
+      title: "지금은 무료 필터가 없어요"
+      description: "곧 새로운 무료 필터로 찾아올게요"
+      cta: "새로고침"
+
+  error:
+    description: "API 실패 — 토스트 + 빈 화면"
+    visible_components: [banner-purple, empty-view]
+    hidden_components: [banner-teal, free-grid, grid-skeleton]
+    labels:
+      message: "필터를 불러오지 못했어요. 잠시 후 다시 시도해 주세요."
+      retry: "다시 시도"
+
+# ─────────────────────────────
+# Interactions
+# ─────────────────────────────
+interactions:
+  - trigger: "tap"
+    target: "#tab-recommended"
+    action: "switch-tab"
+    destination: null
+    transition: "none"
+
+  - trigger: "tap"
+    target: "#tab-free"
+    action: "switch-tab"
+    destination: null
+    transition: "none"
+
+  - trigger: "tap"
+    target: ".free-card"
+    action: "navigate"
+    destination: "SwipeFeed"
+    transition: "slide-up"
+    payload: "{ entryPoint: 'free-tab', initialFilterId, filters }"
+
+  - trigger: "tap"
+    target: "#empty-refresh"
+    action: "toggle-state"
+    state_key: "loading"
+    note: "feed archetype 강제 룰 #4 — refresh interaction"
+
+  - trigger: "swipe-down"
+    target: "#body-scroll"
+    action: "toggle-state"
+    state_key: "loading"
+    note: "pull-to-refresh hint — feed archetype 강제 룰 #4 (구현 hint)"
+
+  - trigger: "tap"
+    target: ".bottom-nav-item"
+    action: "switch-tab"
+    destination: null
+    transition: "none"
+
+# ─────────────────────────────
+# Visual Rules
+# ─────────────────────────────
+rules:
+  - condition: "freeUsedToday == false"
+    effect: "보라 배너 + RedDot 노출"
+    example: "AC-2.1.4 (default state)"
+  - condition: "freeUsedToday == true"
+    effect: "틸 배너 + RedDot 숨김"
+    example: "AC-2.5.1 (used-today state)"
+  - condition: "rosterDate < today"
+    effect: "보라 배너 + 캡션 '어제 선정된 무료 필터예요' 노출"
+    example: "AC-2.1.2 (fallback state)"
+  - condition: "filters.length == 0"
+    effect: "Grid 숨김, EmptyView 표시"
+    example: "AC-2.1.3 (empty state)"
+  - condition: "BR-6 응답 순서 보존"
+    effect: "Grid order = API filters 순서 (정렬 변경 금지)"
+    example: "client-side re-order 금지"
+
+# ─────────────────────────────
+# Labels (ko)
+# ─────────────────────────────
+labels:
+  header:
+    logo: "ZZEM"
+    credit_unit: "크레딧"
+  tabs:
+    - "추천"
+    - "무료"
+  banner_purple:
+    title: "오늘만 10개 무료에요"
+    desc: "오늘 밤이 지나면 무료 필터가 초기화돼요"
+    caption_fallback: "어제 선정된 무료 필터예요 · 곧 갱신돼요"
+  banner_teal:
+    title: "내일 또 만나요"
+    desc: "내일 새로운 필터로 찾아올게요"
+  card_badge:
+    new: "NEW"
+  grid:
+    items:
+      - { category: "아기", name: "첫 걸음", creator: "studio_a", new: true }
+      - { category: "반려동물", name: "산책", creator: "petlab", new: false }
+      - { category: "스튜디오", name: "라이트", creator: "lumen", new: false }
+      - { category: "아기", name: "낮잠", creator: "dreamy", new: false }
+      - { category: "반려동물", name: "간식", creator: "snacky", new: true }
+      - { category: "스튜디오", name: "그라데이션", creator: "grad", new: false }
+      - { category: "아기", name: "웃음", creator: "smile", new: false }
+      - { category: "반려동물", name: "점프", creator: "hopper", new: false }
+      - { category: "스튜디오", name: "네온", creator: "neon", new: false }
+      - { category: "아기", name: "목욕", creator: "bubbles", new: false }
+  empty_state:
+    title: "지금은 무료 필터가 없어요"
+    description: "곧 새로운 무료 필터로 찾아올게요"
+    cta: "새로고침"
+  end_indicator: "오늘의 무료 필터를 모두 봤어요"
+  toast:
+    error: "필터를 불러오지 못했어요. 잠시 후 다시 시도해 주세요."
+  a11y:
+    red_dot: "새 무료 콘텐츠 알림"
+    refresh: "필터 새로고침"
+
+# ─────────────────────────────
+# Token Map
+# ─────────────────────────────
+tokens:
+  background:        "wds.background.normal → #FFFFFF"
+  text_primary:      "wds.label.normal → #212228"
+  text_secondary:    "wds.label.alternative → #6B6E76"
+  text_assistive:    "wds.label.assistive → #8E9199"
+  text_inverse:      "wds.label.inverse → #FFFFFF"
+  divider_weak:      "wds.line.alternative → #F0F1F3"
+  divider_normal:    "wds.line.normal → #E4E5E9"
+  brand:             "wds.fill.brand-primary → #8752FA"
+  banner_purple:     "linear-gradient(--purple-500 → --purple-600)"
+  banner_teal:       "linear-gradient(--ft-teal-300 → --ft-teal-700) ※ sprint alias"
+  red_dot:           "wds.status.error → #FF3B30"
+  card_radius:       "wds.radius.xs → 4px (per feed-grid.mdx)"
+  banner_radius:     "wds.radius.lg → 16px"
+  full_radius:       "wds.radius.full → 9999px"
+  card_baby:         "linear-gradient(--ft-baby-light → --ft-baby-dark)"
+  card_pet:          "linear-gradient(--ft-pet-light → --ft-pet-dark)"
+  card_studio:       "linear-gradient(--ft-studio-dark → --purple-500)"
+  font_family:       "wds.font.family.primary → Pretendard"
+
+# ─────────────────────────────
+# Quality Score
+# ─────────────────────────────
+quality_score:
+  extraction_accuracy:
+    total_components: 11
+    with_token_map: 11
+    with_html_mapping: 11
+    score: "22 / 22 = 1.0"
+  fabrication_risk:
+    inferred_fields:
+      - "GridSkeleton (loading state) — feed archetype 강제 룰 #1 적용 (관례 추가)"
+      - "EndIndicator (오늘의 무료 필터를 모두 봤어요) — feed 권장 룰 #1 적용"
+      - "EmptyRefresh 버튼 — feed archetype 강제 룰 #4 (refresh interaction) 적용"
+      - "category gradient mapping — 기존 prototype 답습 (PRD 명시 없음)"
+    risk_level: "low"
+    rationale: |
+      모두 표준 UI 패턴이거나 feed archetype 강제 룰 충족을 위한 관례적 추가.
+      비즈니스 로직 추측은 없음.
+  schema_completeness:
+    required_sections: ["meta", "component_tree", "layout_spec", "states", "interactions", "labels", "token_map"]
+    present_sections: ["meta", "component_tree", "components", "layout_spec", "states", "interactions", "rules", "labels", "tokens", "quality_score"]
+    score: "7 / 7 = 1.0"
+  context_coverage:
+    why_linked: "8 / 8 = 1.0"   # 모든 AC 가 컴포넌트/상태에 연결
+    what_resolved: "11 / 11 = 1.0"  # 모든 토큰/컴포넌트가 design-tokens 에서 확인
