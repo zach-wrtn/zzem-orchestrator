@@ -1,0 +1,10 @@
+{
+  "name": "zzem-orchestrator-root",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Root scripts for zzem-orchestrator. Subpackages (sprint-gallery, sprint-orchestrator/evals) own their own dependencies.",
+  "scripts": {
+    "de-eval": "cd sprint-orchestrator/evals && pnpm exec tsx scripts/run-de-eval.ts",
+    "de-eval:snapshot": "cd sprint-orchestrator/evals && pnpm exec tsx scripts/snapshot-baseline.ts"
+  }
+}
