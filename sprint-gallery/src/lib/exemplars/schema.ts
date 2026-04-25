@@ -22,6 +22,7 @@ export const ScreenArchetype = z.enum([
   'form',         // 입력 (validation + 버튼 상태)
   'modal',        // 모달/시트 (backdrop + focus)
   'empty_state',  // 빈 상태 (illustration + CTA)
+  'nav_list',     // 설정/메뉴 list — homogeneous nav (post-zzem-orchestrator#41)
 ]);
 export type ScreenArchetype = z.infer<typeof ScreenArchetype>;
 

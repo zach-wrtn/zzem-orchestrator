@@ -171,10 +171,22 @@ export function checkAntiSlop(
     : defaultQualityReportPath(repoRoot, sprint, task, screen);
   if (existsSync(qualityPath)) {
     const yaml = parseYaml(readFileSync(qualityPath, 'utf8')) as Record<string, unknown>;
-    // Accept either top-level `anti_slop_audit: passed` (canonical) or
-    // `pass6_audit.status: passed` (DE protocol v2 quality-report layout).
+    // Accept any of:
+    //  - top-level `anti_slop_audit: passed` (canonical scalar)
+    //  - top-level `anti_slop_audit.status: passed` (nested object, ugc-qa-2 app-016 variant)
+    //  - top-level `pass6_audit.status: passed` (DE protocol v2 nested layout)
+    //  - top-level `pass_6_anti_slop.status: passed` (ugc-qa-2 app-013 variant)
     const pass6 = yaml?.pass6_audit as Record<string, unknown> | undefined;
-    if (yaml?.anti_slop_audit === 'passed' || pass6?.status === 'passed') {
+    const pass6alt = yaml?.pass_6_anti_slop as Record<string, unknown> | undefined;
+    const antiSlopObj = (typeof yaml?.anti_slop_audit === 'object' && yaml?.anti_slop_audit !== null)
+      ? (yaml.anti_slop_audit as Record<string, unknown>)
+      : undefined;
+    if (
+      yaml?.anti_slop_audit === 'passed' ||
+      antiSlopObj?.status === 'passed' ||
+      pass6?.status === 'passed' ||
+      pass6alt?.status === 'passed'
+    ) {
       return { passed: true, source: qualityPath, detail: 'quality-report passed' };
     }
   }
@@ -182,7 +194,7 @@ export function checkAntiSlop(
     passed: false,
     source: qualityPath,
     detail:
-      'anti_slop_audit: passed (or pass6_audit.status: passed) not found in approval-status.yaml or quality-report yaml',
+      'anti_slop_audit: passed (scalar) or anti_slop_audit.status / pass6_audit.status / pass_6_anti_slop.status: passed (nested) not found in approval-status.yaml or quality-report yaml',
   };
 }
 
