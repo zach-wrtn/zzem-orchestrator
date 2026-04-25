@@ -1,0 +1,60 @@
+# Sprint Configuration — ugc-platform-integration-qa-2
+# Follow-up of ugc-platform-integration-qa (1차).
+# Focus: 카메라/차단/알림 3 features × 23 screens + v2 prototype pipeline (PR #29-#36) 첫 라이브 dogfood.
+
+sprint_id: "ugc-platform-integration-qa-2"
+branch_prefix: "sprint"
+
+repositories:
+  backend:
+    source: ~/dev/work/wrtn-backend
+    base: "apple"
+    mode: worktree
+  app:
+    source: ~/dev/work/app-core-packages
+    base: "epic/ugc-platform-final"
+    mode: worktree
+  tokens:
+    source: ~/dev/work/wds-tokens
+    base: "main"
+    mode: symlink
+
+defaults:
+  base: "main"
+
+team:
+  teammates:
+    - be-engineer
+    - fe-engineer
+    - design-engineer
+    - evaluator
+  settings:
+    eval_retry_limit: 2
+    max_parallel_tasks: 4
+
+display:
+  title: "UGC Platform Integration QA 2차 — 카메라/차단/알림 + v2 Pipeline Dogfood"
+  startDate: "2026-04-25"
+  endDate: "2026-04-25"
+  status: "active"
+  tags:
+    - ugc-platform
+    - integration-qa-2
+    - feature-addition
+    - v2-pipeline-dogfood
+    - camera
+    - block
+    - notification
+  summary: |
+    UGC Platform Phase 4 — 카메라/차단/알림 3 features (23 screens).
+    동시에 v2.1 prototype pipeline (PR #29-#36) 의 첫 라이브 dogfood:
+    Pass 6 anti-slop (10 checks) + Assumption Preview Gate + Asset
+    Layer + Archetype Persona (5 of 6) + Variants Mode (조건부) +
+    Curated Exemplars (feed 자동 인라인 첫 검증).
+
+follow_up:
+  previous_sprint: "ugc-platform-integration-qa"
+  inherited:
+    api_contract: true
+    deferred_items: 0  # 1차 deferred 는 별 BE 스프린트에서 처리
+    patterns: 6
