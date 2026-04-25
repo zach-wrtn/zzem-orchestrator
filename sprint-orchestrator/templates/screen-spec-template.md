@@ -8,6 +8,7 @@
 ```yaml
 screen_name: "{ScreenName}"
 screen_archetype: "{feed | detail | onboarding | form | modal | empty_state}"
+modal_subtype: "{dialog | picker | action_sheet | sheet | null}"  # modal archetype 한정 — picker/action_sheet 시 modal #3 면제. modal 외 archetype 은 null
 task_id: "{task-id}"
 sprint_id: "{sprint-id}"
 app: "ZZEM"
@@ -29,6 +30,8 @@ theme: "light"
 | **empty_state** | 컨텐츠 0건 안내 + 1 primary CTA | 빈 피드, 검색결과 없음, 첫 사용자 |
 
 복합 화면 (예: detail + 하단 form) 인 경우 가장 시각 면적 큰 영역 기준. 분류 모호 시 Sprint Lead 에 질의.
+
+**`modal_subtype` 플래그**: modal archetype 에 한해 의미. `picker` 또는 `action_sheet` 시 modal persona #3 (primary 1개) 면제. 자세한 면제 조건은 `.claude/teammates/design-engineer-archetypes/modal.md > 면제 조건 (Picker / Action Sheet)` 참조.
 
 DE 는 본 `screen_archetype` 필드를 읽고 `.claude/teammates/design-engineer-archetypes/{archetype}.md` 의 persona 룰을 적용한다 (자세한 룰은 design-engineer.md Step C 참조).
 
