@@ -179,3 +179,5 @@ activity_log:
     message: "modal 권장 룰 #3 (첫 input autofocus) 거절: destructive primary autofocus 위험"
   - phase: "completed"
     message: "Pass 6 9/9 + persona 4/4 + fabrication low + intent.md gate 대기"
+
+anti_slop_audit: passed  # Top-level scalar alias for exemplar-add CLI

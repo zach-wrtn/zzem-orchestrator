@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-25T05:37:31.653Z",
+  "generated_at": "2026-04-25T09:24:01.933Z",
   "exemplars": [
     {
       "id": "v2-dogfood-free-tab-app-001-freetabscreen",
@@ -18,9 +18,69 @@
       ],
       "added_by": "zach@wrtn.io",
       "added_at": "2026-04-25T05:37:31.653Z",
-      "last_validated_at": "2026-04-25T05:37:31.653Z",
+      "last_validated_at": "2026-04-25T09:24:01.933Z",
       "validation_status": "valid",
       "notes": "Bootstrap from PR #29-#35 dogfood. See sprint-orchestrator/dogfood/v2-exercise/free-tab-app-001/comparison-report.md for v2-vs-existing analysis."
+    },
+    {
+      "id": "ugc-qa-2-app-021-notificationsemptyscreen",
+      "sprint_id": "ugc-qa-2",
+      "task_id": "app-021",
+      "screen_name": "NotificationsEmptyScreen",
+      "archetype": "empty_state",
+      "why_curated": "v2 dogfood (UGC QA 2차) — empty_state with 96px brand-weak icon anchor + headline + body + 1 primary CTA. PRD copy preserved per #42 conflict resolution option A.",
+      "prototype_path": "sprint-orchestrator/sprints/ugc-platform-integration-qa-2/prototypes/app/app-021/prototype.html",
+      "screenshot_path": "sprint-orchestrator/sprints/ugc-platform-integration-qa-2/prototypes/app/app-021/screenshots/default.png",
+      "design_dimensions": [
+        "archetype_fit",
+        "token_compliance",
+        "empty_state_handling"
+      ],
+      "added_by": "zach@wrtn.io",
+      "added_at": "2026-04-25T09:19:36.605Z",
+      "last_validated_at": "2026-04-25T09:24:01.933Z",
+      "validation_status": "valid",
+      "notes": "Bootstrap from PR #579 sprint dogfood. See sprint-orchestrator/sprints/ugc-platform-integration-qa-2/prototypes/app/app-021/ for full v2 artifacts."
+    },
+    {
+      "id": "ugc-qa-2-app-013-blockconfirmsheet",
+      "sprint_id": "ugc-qa-2",
+      "task_id": "app-013",
+      "screen_name": "BlockConfirmSheet",
+      "archetype": "modal",
+      "why_curated": "v2 dogfood (UGC QA 2차) — modal confirm with destructive primary + ghost secondary + 3 info rows. backdrop 0.5 + 2-way close. Reference for confirm/dialog patterns.",
+      "prototype_path": "sprint-orchestrator/sprints/ugc-platform-integration-qa-2/prototypes/app/app-013/prototype.html",
+      "screenshot_path": "sprint-orchestrator/sprints/ugc-platform-integration-qa-2/prototypes/app/app-013/screenshots/default.png",
+      "design_dimensions": [
+        "archetype_fit",
+        "interaction_completeness",
+        "token_compliance"
+      ],
+      "added_by": "zach@wrtn.io",
+      "added_at": "2026-04-25T09:21:07.351Z",
+      "last_validated_at": "2026-04-25T09:24:01.933Z",
+      "validation_status": "valid",
+      "notes": "Bootstrap from PR #579 sprint dogfood."
+    },
+    {
+      "id": "ugc-qa-2-app-001",
+      "sprint_id": "ugc-qa-2",
+      "task_id": "app-001",
+      "screen_name": "프로필편집",
+      "archetype": "form",
+      "why_curated": "v2 dogfood (UGC QA 2차) — form baseline. Inline validation + char counter + submit disabled-until-valid + inline error + 1 primary action. Reference for edit form pattern.",
+      "prototype_path": "sprint-orchestrator/sprints/ugc-platform-integration-qa-2/prototypes/app/app-001/prototype.html",
+      "screenshot_path": "sprint-orchestrator/sprints/ugc-platform-integration-qa-2/prototypes/app/app-001/screenshots/default.png",
+      "design_dimensions": [
+        "archetype_fit",
+        "interaction_completeness",
+        "token_compliance"
+      ],
+      "added_by": "zach@wrtn.io",
+      "added_at": "2026-04-25T09:21:07.784Z",
+      "last_validated_at": "2026-04-25T09:24:01.933Z",
+      "validation_status": "valid",
+      "notes": "Bootstrap from PR #579 sprint dogfood."
     }
   ]
 }

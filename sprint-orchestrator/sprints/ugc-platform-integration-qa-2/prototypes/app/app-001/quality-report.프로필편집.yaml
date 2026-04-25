@@ -215,3 +215,5 @@ files_generated:
   - "quality-report.프로필편집.yaml"
 sprint_files_modified:
   - "../../context/tokens.css (PE 별칭 16개 추가 — pe-input-*, pe-save-*, pe-camera-*, pe-text-*, pe-avatar-*)"
+
+anti_slop_audit: passed  # Top-level scalar alias for exemplar-add CLI
