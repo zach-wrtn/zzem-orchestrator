@@ -14,6 +14,7 @@
     "sync:tokens": "tsx scripts/sync-tokens.ts",
     "gallery:exemplar:add": "tsx scripts/exemplar-add.ts",
     "gallery:exemplar:validate": "tsx scripts/exemplar-validate.ts",
+    "gallery:exemplar:lookup": "tsx scripts/exemplar-lookup.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",

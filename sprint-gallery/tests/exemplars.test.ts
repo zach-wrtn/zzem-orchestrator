@@ -4,7 +4,12 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { addExemplar } from '../scripts/exemplar-add.js';
 import { validateExemplars } from '../scripts/exemplar-validate.js';
-import { ExemplarIndex, type ExemplarIndex as ExemplarIndexType } from '../src/lib/exemplars/schema.js';
+import { lookupExemplars, formatExemplarsAsMarkdown } from '../scripts/exemplar-lookup.js';
+import {
+  ExemplarIndex,
+  type ExemplarIndex as ExemplarIndexType,
+  type ExemplarMeta,
+} from '../src/lib/exemplars/schema.js';
 
 interface Fixture {
   repoRoot: string;
@@ -237,5 +242,86 @@ describe('exemplar-validate', () => {
     expect(result.exitCode).toBe(0);
     const index = readIndex(fixture.indexPath);
     expect(index.exemplars[0].validation_status).toBe('stale');
+  });
+});
+
+async function seedTwo(
+  fixture: Fixture,
+  archetype: ExemplarMeta['archetype'],
+  sprintA: string,
+  sprintB: string,
+): Promise<void> {
+  seedSprintArtifacts(fixture.repoRoot, sprintA, 'app-001', 'Home');
+  seedSprintArtifacts(fixture.repoRoot, sprintB, 'app-001', 'Feed');
+  await addExemplar({
+    sprint: sprintA,
+    task: 'app-001',
+    screen: 'Home',
+    archetype,
+    reason: 'First exemplar — sprint A — used to verify lookup ordering and archetype filter.',
+    dimensions: ['token_compliance'],
+    addedBy: 'tester@example.com',
+    now: '2026-04-25T00:00:00Z',
+    indexPath: fixture.indexPath,
+    repoRoot: fixture.repoRoot,
+    galleryRoot: fixture.galleryRoot,
+  });
+  await addExemplar({
+    sprint: sprintB,
+    task: 'app-001',
+    screen: 'Feed',
+    archetype,
+    reason: 'Second exemplar — sprint B — used to verify exclude-sprint and limit options.',
+    dimensions: ['archetype_fit'],
+    addedBy: 'tester@example.com',
+    now: '2026-04-25T00:00:00Z',
+    indexPath: fixture.indexPath,
+    repoRoot: fixture.repoRoot,
+    galleryRoot: fixture.galleryRoot,
+  });
+}
+
+describe('exemplar-lookup', () => {
+  it('returns valid exemplars matching the requested archetype', async () => {
+    await seedTwo(fixture, 'feed', 'sprint-a', 'sprint-b');
+    const results = await lookupExemplars({
+      archetype: 'feed',
+      indexPath: fixture.indexPath,
+    });
+    expect(results).toHaveLength(2);
+    expect(results.every((r) => r.archetype === 'feed')).toBe(true);
+  });
+
+  it('excludes exemplars from --exclude-sprint', async () => {
+    await seedTwo(fixture, 'feed', 'sprint-a', 'sprint-b');
+    const results = await lookupExemplars({
+      archetype: 'feed',
+      excludeSprint: 'sprint-a',
+      indexPath: fixture.indexPath,
+    });
+    expect(results).toHaveLength(1);
+    expect(results[0].sprint_id).toBe('sprint-b');
+  });
+
+  it('respects --limit', async () => {
+    await seedTwo(fixture, 'feed', 'sprint-a', 'sprint-b');
+    const results = await lookupExemplars({
+      archetype: 'feed',
+      limit: 1,
+      indexPath: fixture.indexPath,
+    });
+    expect(results).toHaveLength(1);
+  });
+
+  it('renders markdown output that DEs can inline directly', async () => {
+    await seedTwo(fixture, 'feed', 'sprint-a', 'sprint-b');
+    const results = await lookupExemplars({
+      archetype: 'feed',
+      indexPath: fixture.indexPath,
+    });
+    const md = formatExemplarsAsMarkdown(results);
+    expect(md).toContain('## Exemplar References');
+    expect(md).toContain('- id:');
+    expect(md).toContain('why_curated:');
   });
 });
