@@ -150,6 +150,70 @@ v2.1 prototype pipeline (PR #29-#36 머지 산물) 의 **첫 라이브 dogfood**
 
 ---
 
+## Phase 4-5 Update (post-merge addendum)
+
+> 작성: 2026-04-25 (sprint closeout). Phase 4 Build / Phase 5 PR / BE reconciliation mini-sprint / v2.2 follow-up plans / KB lesson promotion 모두 같은 날 종결.
+
+### Phase 4 Build summary
+
+- 12 commits / 23 task variations 처리.
+- **핵심 발견 (key finding)**: Phase 4 build 가 시작되자마자 prior sprints 의 production code 가 PRD AC 의 majority 를 이미 구현하고 있다는 사실이 드러났다. ProfileEditScreen, useUnblockUser, NotificationCenterScreen 등 핵심 화면/훅이 ugc-platform-001/002/003 에서 머지된 상태였고, qa-2 sprint 의 Phase 4 build 는 사실상 polish/extension (ImageCropper wiring, USER_AVATAR enum, blocked-profile 카피 보강) 으로 80% 이상 축소되었다.
+- 이 발견이 본 sprint 의 가장 큰 메타-결과 — "Prototype-led Code Audit" 패턴 (KB reflection 참조).
+
+### PR 머지 결과
+
+- **PR #579 (app)**: ImageCropper + ProfileEdit polish — **MERGED**. Phase 4 build 의 1차 통합.
+- **PR #580 (app)**: ImageCropper wiring (Group 001 사진 흐름 마무리) — **MERGED**.
+- **PR #581 (app)**: Lint fix follow-up — **MERGED**.
+  - 부수효과로 실 버그 발견: `blocked-profile-state.tsx` 에 `jsx-no-undef` ERROR (prior sprint 누락). lint fix 가 prototype 검증을 통해 bug 노출.
+
+### BE reconciliation mini-sprint discovery
+
+- 별 sprint `ugc-platform-be-reconciliation` 신설 (본 sprint 의 발견에서 파생).
+- **7/7 endpoints 모두 production 에 이미 존재** — Mock BE spec 7건 모두 actual BE source 와 path/payload 0/7 일치 (mock 부정확).
+- spec engineer (qa-2 Phase 2) 가 BE OUT OF SCOPE 라벨링 시 actual BE source 를 grep 하지 않고 추론으로 mock 작성 → 7/7 실패.
+- **BE USER_AVATAR enum 추가**:
+  - BE PR `#842` — UserActivityType enum 에 USER_AVATAR 추가.
+  - app PR `#583` — 신규 enum 사용 wire-up.
+  - 양쪽 머지로 사용자 아바타 변경 → 활동 타임라인 노출 흐름 완결.
+
+### Phase 2 BE Grep Protocol (재발 방지)
+
+- v2.2 follow-up `docs/superpowers/plans/2026-04-25-phase2-be-grep-protocol.md` 작성.
+- PR 흐름: orchestrator `#45` → reissued/cleaned `#46` (둘 다 머지 — 후속 sprint 가 spec engineer 단계에서 actual BE source 를 grep 하도록 강제).
+
+### 6 v2.2 follow-up plans 머지 결과
+
+| # | Plan | PR | Status |
+|---|------|----|--------|
+| 1 | form-persona instant-save clause | #38 | MERGED |
+| 2 | archetype enum 6→7 (nav_list) | #41 | MERGED |
+| 3 | empty_state PRD copy 충돌 해결 | #42 | MERGED |
+| 4 | modal picker exception clause | #39 | MERGED |
+| 5 | DE archetype self-reclassification | #37 | MERGED |
+| 6 | detail blocked variant clause | #40 | MERGED |
+
+**6/6 모두 머지 완료** — v2 → v2.2 진화 완료.
+
+### 6 archetype exemplars status
+
+- exemplar CLI v2 + 3 archetype exemplars (PR #43) 머지 — detail / nav_list / spec align.
+- 활성 exemplar: **6/7** (form, modal, feed, detail, empty_state, nav_list).
+- **유일하게 미커버**: onboarding (본 sprint 가 노출하지 않은 archetype, 별 sprint 큐레이션 필요).
+
+### Sprint 종결 결정
+
+본 sprint 는 이제 **completed** 로 전환:
+
+- v2 prototype pipeline dogfood: **완료** (23/23 prototype + retrospective).
+- Phase 4 build (predicted 별 sprint): **본 sprint 일정 내 완료** (#579/#580/#581 머지).
+- BE reconciliation: **별 sprint 로 분리 후 완료** (USER_AVATAR enum 머지 포함).
+- v2.2 follow-up plans: **6/6 완료**.
+- KB reflection draft: **본 sprint retrospective 디렉토리에 첨부** (`kb-reflection-draft.md`).
+- iOS Manual QA: **test plan 산출** (`ios-manual-qa-test-plan.md`) → 빌드 후 수동 실행 대기.
+
+---
+
 ## 산출 아티팩트 (이 retrospective 의 외부 참조)
 
 - 23 prototype 디렉토리 (`prototypes/app/app-{001..023}/`)
