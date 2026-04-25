@@ -1,0 +1,234 @@
+# Context Engine — ugc-platform-integration-qa-2 / app-006
+# Step A output of Design Engineer protocol v2.
+# Source PRD: docs/prds/ugc-platform-integration-qa-2.md (Group 001 — AC-1.3 / AC-1.5)
+# Source task: sprint-orchestrator/sprints/ugc-platform-integration-qa-2/tasks/app/app-006.md
+# Figma frame: 7hozJ6Pvs09q98BxvChj08 / 37160:80066 (프로필편집_사진_저장가능)
+# Reference: app-001 (form baseline) + app-002 task (저장가능 active 패턴 spec)
+
+meta:
+  sprint_id: "ugc-platform-integration-qa-2"
+  task_id: "app-006"
+  generated_at: "2026-04-25T17:00:00Z"
+  schema_version: "1.0"
+  figma_file: "7hozJ6Pvs09q98BxvChj08"
+  figma_node: "37160:80066"
+  archetype: "form"
+  parent_baseline: "app-001 (프로필편집_메인 — clean/disabled)"
+  sibling_pattern: "app-002 (닉네임 변경 → 활성 form)"
+
+# ─────────────────────────────
+# Layer 1: WHY (Business Intent)
+# ─────────────────────────────
+why:
+  product_intent: |
+    프로필 사진을 새로 선택한 직후 (라이브러리 / 크롭 완료 / 기본 이미지 변경) "저장 가능"
+    상태로 즉시 진입한다. 닉네임은 변경되지 않은 채 그대로 유지되고, 사진만 변경되어
+    isDirty=true 가 된 케이스. 사용자는 "사진 변경이 정확히 인지되었고 저장 한 번이면 적용된다"
+    는 신호를 받아야 한다 (Group 001 카메라 funnel 의 핵심 confirmation 단계).
+  target_user: "ZZEM 일반 유저 (사진 변경 진행 중)"
+  success_metric: "사진 변경 → 저장 활성 인지 → 저장 tap 비율 (Group 001 funnel · AC-1.5)"
+  user_stories:
+    - id: "US-1"
+      as_a: "ZZEM 유저"
+      i_want: "사진을 새로 선택한 즉시 '저장' 버튼이 활성화된 모습"
+      so_that: "선택이 정상적으로 적용되었음을 시각적으로 확신"
+    - id: "US-2"
+      as_a: "ZZEM 유저"
+      i_want: "닉네임은 그대로 둔 채 사진만 저장"
+      so_that: "원하지 않는 추가 변경 없이 정확히 한 가지만 갱신"
+  acceptance_criteria:
+    - id: "AC-1.3.a"
+      given: "app-005 (사진 시트) 또는 app-008 (크롭) 에서 사진 선택 완료"
+      when: "프로필편집 메인으로 복귀"
+      then: "Avatar 영역에 새 사진 미리보기 (원형 마스크)"
+      ui_impact: "Avatar = 새 이미지 fill (placeholder allowed per asset layer)"
+    - id: "AC-1.3.b"
+      given: "사진만 변경 + 닉네임 미변경"
+      when: "화면 진입 직후"
+      then: "SaveButton 활성 색상 (#262626 / #FFFFFF)"
+      ui_impact: "SaveButton state=enabled — 즉시 활성"
+    - id: "AC-1.3.c"
+      given: "닉네임 input 그대로 (원본 prefill)"
+      when: "사진만 변경된 상태"
+      then: "닉네임 인풋은 변경 표시 없음 (원본 value 유지)"
+      ui_impact: "NicknameInput value = 원본; CharCounter hidden (focus 전)"
+    - id: "AC-1.3.d"
+      given: "SaveButton 활성 상태"
+      when: "저장 tap"
+      then: "presigned URL 발급 → 업로드 → PATCH → 결과 화면 (app-010)"
+      ui_impact: "SaveButton state=loading (spinner) → navigate app-010"
+    - id: "AC-1.3.e"
+      given: "사진 변경된 상태"
+      when: "BackButton tap"
+      then: "나가기 confirm modal (app-007) 오픈"
+      ui_impact: "BackButton tap (with photo dirty) → open-overlay → app-007"
+    - id: "AC-1.3.f"
+      given: "presigned URL 발급 실패 또는 업로드 실패"
+      when: "저장 시도 중 오류"
+      then: "inline error 표시 + SaveButton 다시 활성"
+      ui_impact: "UploadError 인라인 (input/avatar 직하) — form persona 룰 #3"
+
+# ─────────────────────────────
+# Layer 2: WHAT (Design System)
+# ─────────────────────────────
+what:
+  tokens_needed:
+    colors:
+      - "wds.color.neutral.0"          # bg #FFFFFF
+      - "wds.color.neutral.900"        # label primary
+      - "pe.input.fill"                # #F7F7F7 input bg (닉네임 unchanged)
+      - "pe.input.border"              # #F1F1F1 input border
+      - "pe.save.active"               # #262626 (저장 활성 — AC-1.3.b)
+      - "pe.save.active-label"         # #FFFFFF
+      - "pe.save.disabled"             # #F1F1F1 (loading 후 fallback)
+      - "pe.save.disabled-label"       # #8A8A8A
+      - "pe.camera.badge.fill"         # #E2E2E2
+      - "pe.camera.badge.border"       # #FFFFFF
+      - "pe.text-primary"              # #262626
+      - "pe.text-secondary"            # #656565
+      - "pe.text-tertiary"             # #8A8A8A
+      - "pe.avatar.empty.bg"           # #F5F3FF (placeholder fill 분위기)
+      - "pe.avatar.border"             # rgba(136,136,136,0.2)
+      - "wds.label.error"              # #FF3B30 (upload error)
+      - "wds.color.red.100"            # #FFE5E3 (error tint)
+    typography:
+      - "wds.font.size.xs"             # 12px char counter / error
+      - "wds.font.size.md"             # 14px input label
+      - "wds.font.size.lg"             # 16px input value, save button
+      - "wds.font.size.xl"             # 18px header title
+      - "wds.font.weight.medium"       # 500 input label
+      - "wds.font.weight.semibold"     # 600 header title, save
+    spacing: ["wds.spacing.4", "wds.spacing.8", "wds.spacing.12", "wds.spacing.16", "wds.spacing.20", "wds.spacing.32"]
+    radius: ["wds.radius.lg", "wds.radius.full", "wds.radius.md"]
+
+  components_needed:
+    - name: "StatusBar"
+      category: "navigation"
+    - name: "HeaderBar"
+      category: "navigation"
+      pattern_ref: "docs/designs/patterns/profile-edit.mdx"
+      note: "← back + 중앙 '프로필 편집' SemiBold 18px"
+    - name: "ProfileImg (변경된 photo)"
+      category: "input"
+      pattern_ref: "docs/designs/patterns/profile-edit.mdx"
+      note: "100px circular avatar with new uploaded photo + 24px 카메라 배지"
+    - name: "NicknameLabel"
+      category: "content"
+      note: "'닉네임' Pretendard Medium 14px"
+    - name: "NicknameInput (unchanged)"
+      category: "input"
+      note: "원본 value prefill (사진만 변경 케이스 — AC-1.3.c)"
+    - name: "CharCounter"
+      category: "content"
+      note: "focus 전 hidden (AC-1.3.c)"
+    - name: "UploadError"
+      category: "feedback"
+      note: "inline below avatar — form persona 룰 #3 (presigned/upload 실패 시)"
+    - name: "SaveButton (active)"
+      category: "control"
+      pattern_ref: "docs/designs/components/button.mdx"
+      note: "h-56 sticky bottom; 활성 (#262626 / #FFFFFF) — AC-1.3.b 즉시 활성"
+
+  patterns_needed:
+    - name: "form: photo-dirty active state"
+      description: "사진 변경만으로 isDirty=true → SaveButton enabled"
+    - name: "circular avatar with real-image fill"
+      description: "100px circle + 24px camera badge — fill = 새 사진 (placeholder allowed)"
+    - name: "preserved input (value unchanged)"
+      description: "닉네임은 원본 그대로 — 변경 표시 없음"
+    - name: "upload-error inline"
+      description: "presigned/PATCH 실패 시 avatar 직하 inline error"
+    - name: "loading on submit"
+      description: "저장 tap 후 spinner — form persona 권장 룰 #2"
+
+# ─────────────────────────────
+# Layer 3: HOW (Orchestration)
+# ─────────────────────────────
+how:
+  composition_rules:
+    - rule: "StatusBar(44px) → HeaderBar(48px) → Profile(124px) → Input(72px) → spacer → SaveButton(sticky bottom 100px) — app-001 동일 골격"
+      applies_to: ["프로필편집_사진_저장가능"]
+    - rule: "Avatar 가운데 정렬 (100x100, frame x=121.5 in 375 frame)"
+      applies_to: ["프로필편집_사진_저장가능"]
+    - rule: "Avatar 슬롯 = 새 사진 (real-image kind). placeholder gradient fill 허용 (per asset layer 승인) — Pass 6 #6 면제"
+      applies_to: ["프로필편집_사진_저장가능"]
+    - rule: "닉네임 input value = 원본 prefill 그대로 (변경 흔적 표시 금지 — AC-1.3.c)"
+      applies_to: ["프로필편집_사진_저장가능"]
+    - rule: "SaveButton init = enabled (default state) — app-001 과 다른 핵심 차이"
+      applies_to: ["프로필편집_사진_저장가능"]
+    - rule: "어떤 인터랙티브 요소도 alert/confirm/prompt 사용 금지 (Pass 6 #8 — verifier 호환)"
+      applies_to: ["프로필편집_사진_저장가능"]
+  conditional_rendering:
+    - condition: "init (사진 변경 완료 직후)"
+      variant_a: "SaveButton enabled (#262626/#FFFFFF), Avatar=새 사진, Nickname=원본"
+      variant_b: null
+    - condition: "BackButton tap (photo dirty 유지)"
+      variant_a: "open-overlay → app-007 (사진 confirm modal)"
+      variant_b: null
+    - condition: "SaveButton tap"
+      variant_a: "loading state (spinner) → POST presigned → PUT upload → PATCH → app-010"
+      variant_b: null
+    - condition: "presigned/upload 실패 (4xx/5xx/network)"
+      variant_a: "UploadError 인라인 (avatar 직하) + SaveButton 재활성 — 재시도 가능"
+      variant_b: null
+    - condition: "닉네임 input focus (사용자가 추가로 닉네임도 만지면)"
+      variant_a: "CharCounter visible — 단 본 화면 default 상태에서는 focus 없음"
+      variant_b: null
+  constraints:
+    - "form persona 강제 룰 #1: inline validation 정의 — 사진 슬롯의 경우 size/format 실패 → UploadError"
+    - "form persona 강제 룰 #2: SaveButton submit_disabled / submit_enabled 둘 다 정의 (loading 도)"
+    - "form persona 강제 룰 #3: 모든 error message inline (avatar 직하 — alert 박스 금지)"
+    - "form persona 강제 룰 #4: primary action 1개만 (저장)"
+    - "Lucide-style inline SVG 만 사용 (이모지 인터랙티브 금지 — Pass 6 #2)"
+    - "Tokens-only color (Pass 6 #1) — 모든 hex tokens.css 등재"
+    - "Pretendard 외 font-family 금지 (Pass 6 #4)"
+    - "브랜드 보라 그라디언트 배경 금지 (Pass 6 #5) — 본 화면 보라 미사용"
+    - "Avatar = real-image kind. placeholder gradient fill 허용 (asset layer needs_real_content: false)"
+    - "default state init 활성 — app-001 과 핵심 차이"
+  priority_order:
+    - "1. SaveButton 활성 상태 (즉시 인지 — 화면 존재 이유)"
+    - "2. Avatar 새 사진 미리보기 (변경 결과 확인)"
+    - "3. NicknameInput 원본 값 유지 (의도 외 변경 없음 확인)"
+    - "4. BackButton (변경 미저장 보호 진입 — app-007)"
+    - "5. UploadError (실패 시 회복 경로)"
+
+# ─────────────────────────────
+# Layer 4: ASSETS (v1)
+# ─────────────────────────────
+# 본 화면의 핵심 변경: avatar 슬롯이 "새 사진" 으로 채워진 상태.
+# Sprint Lead 기존 승인 (app-001 §Asset Layer): avatar = 사용자 업로드 (placeholder 허용).
+# 본 화면도 동일 정책 — placeholder gradient fill 로 시각화.
+assets:
+  avatars:
+    kind: real-image
+    source: "user-uploaded (runtime); prototype = placeholder gradient fill (옅은 분홍/베이지 톤 simulating photo)"
+    count: 1
+    license: "user-provided"
+    needs_real_content: false   # PRD §Asset Layer 명시 승인 (app-001 baseline 동일 카메라 그룹)
+    note: |
+      Pass 6 #6 면제. 본 화면은 "사진 변경 완료 직후" 상태이므로 새 photo 가
+      avatar 영역에 표시되어야 함. runtime 에서는 사용자 업로드 사진 <img> 로
+      교체. prototype 에서는 토큰화된 graident fill (--pe-avatar-photo-fill)
+      로 새 사진 placeholder 시각화 — kind=real-image 이지만 needs_real_content
+      false (Sprint Lead 카메라 그룹 정책 승인). app-001 의 빈 avatar (lucide
+      user 아이콘) 와 시각적으로 명확히 구분되는 fill 처리.
+  feed_thumbnails:
+    kind: real-image
+    source: null
+    needs_real_content: false
+    note: "이 화면 슬롯 없음"
+  meme_images:
+    kind: real-image
+    source: null
+    needs_real_content: false
+    note: "이 화면 슬롯 없음"
+  icons:
+    kind: illustration
+    source: "lucide inline SVG (chevron-left, camera)"
+    fallback: "text-placeholder"
+    needs_real_content: false
+  hero_banners:
+    kind: real-image
+    source: null
+    needs_real_content: false
+    note: "이 화면 슬롯 없음"

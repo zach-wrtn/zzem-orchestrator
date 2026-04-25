@@ -1,0 +1,113 @@
+task_id: "app-012"
+sprint_id: "ugc-platform-integration-qa-2"
+generated_at: "2026-04-25"
+archetype: "modal"
+references:
+  - "app-013 BlockConfirmSheet (modal persona — 시각/구조 모방 base)"
+  - "app-005 사진선택 (picker exception 패턴 인용)"
+  - "Figma 37211:162175 (canonical 옵션 명세)"
+
+screen: "MoreActionsSheet"
+
+modal_persona_audit:
+  rule_1_backdrop_opacity:
+    status: passed
+    note: "rgba(0,0,0,0.50) ≥ 0.4 (token wds.background.dimmed)"
+  rule_2_two_way_close:
+    status: passed
+    channels:
+      - "(a) backdrop tap"
+      - "(b) ESC key (a11y nicety, redundancy)"
+      - "(implicit picker) 모든 옵션 tap → dismiss after action"
+    note: "Cancel row 없음 — picker exception (app-005 동일). backdrop+ESC 2-way 충족."
+  rule_3_cta_hierarchy:
+    status: exception_picker
+    applied_alternative: "picker exception (app-005 사진선택 동일 패턴)"
+    rationale: |
+      Action sheet picker 는 N개 옵션 중 1개 선택 패턴. confirm modal 의
+      single-decision (primary/secondary) 패턴과 다르다. spec MoreActionsSheet.spec.md
+      의 ## Picker Exception Documentation 섹션 + context-engine.yaml constraints 에 문서화.
+      시각 위계는 color (destructive red vs neutral) 로 표현.
+  rule_4_title_or_context:
+    status: passed
+    note: |
+      Modal title 은 의도적으로 생략 (Figma frame 37211:162175 따름 — iOS HIG action sheet 표준).
+      대신 부모 surface 의 헤더 더보기 (•••) 가 시각 컨텍스트 제공 + drag handle 이
+      sheet 임을 시각적으로 알림. picker 패턴에서 옵션 자체가 self-describing.
+
+pass_6_anti_slop_audit:
+  status: passed (9/9 — #10 N/A)
+  results:
+    - check: 1
+      name: "hex-not-in-tokens"
+      result: pass
+      note: ".screen 후손의 모든 hex 는 tokens.css 정의값 (toast 배경 #212228 = wds-color-neutral-900). #1a1a2e/#2a2a3e 등은 .control-panel 한정."
+    - check: 2
+      name: "unicode-emoji-in-interactive"
+      result: pass
+      note: "모든 아이콘 inline SVG (Lucide link/ban/flag + arrow-left + dots + settings + status-bar SVG). interactive 요소에 emoji 없음."
+    - check: 3
+      name: "border-left-card-stripe"
+      result: pass
+      note: "card-stripe 패턴 0건"
+    - check: 4
+      name: "font-family-non-pretendard"
+      result: pass
+      note: ".screen 후손 모두 inherit (var(--wds-font-family-primary)). monospace 는 .control-panel 한정."
+    - check: 5
+      name: "brand-purple-gradient"
+      result: pass
+      note: "보라 그라디언트 0건. 그라디언트는 .parent-avatar (neutral-300→neutral-400) 와 .parent-tile (neutral-200→neutral-300) 만 사용 — neutral 토큰 한정. 보라 토큰 미사용."
+    - check: 6
+      name: "placeholder-image-as-content"
+      result: pass
+      note: ".placeholder-image 클래스 0건. parent-avatar/parent-tile 은 토큰 그라디언트 (kind: gradient-token equivalent — neutral 토큰만)."
+    - check: 7
+      name: "spec-interaction-event-mismatch"
+      result: pass
+      note: "Spec interactions 5건 (backdrop / copy / block / report / ESC). HTML addEventListener 5건 매칭."
+    - check: 8
+      name: "alert-confirm-prompt-blocking"
+      result: pass
+      note: "alert/confirm/prompt 0건. 모든 피드백은 toast + setState."
+    - check: 9
+      name: "archetype-persona-strict-rules"
+      result: passed (4/4 — #3 picker exception 명시 회피)
+    - check: 10
+      name: "exemplar-drift-warning"
+      result: not_applicable
+      note: "exemplar 미참조 (app-013/app-005 는 reference 이지 exemplar 아님)"
+
+fabrication_risk:
+  level: low
+  inferred_fields:
+    - "toasts.copied / report_oos / block_navigate 한국어 카피 (스프린트 표준 대화체로 추론)"
+    - "block-transition state 명 + 1.6s timing (UX demo 용 — 실 구현은 navigation push)"
+  source_of_truth_resolution:
+    conflict: "task spec 옵션 (차단/신고/취소) ↔ Figma 37211:162175 (URL 복사/차단/신고)"
+    chosen: "Figma — intent.md gate question #1 로 Sprint Lead 확정 요청"
+
+intent_md_status:
+  generated: true
+  path: "MoreActionsSheet.intent.md"
+  trigger:
+    - "fabrication_risk: low"
+    - "task spec ↔ Figma 옵션 불일치 — gate 결정 필요"
+  gate_questions: 4
+
+tokens_used:
+  inline_in_html: true
+  source: "sprint-orchestrator/sprints/ugc-platform-integration-qa-2/prototypes/context/tokens.css"
+  variables_referenced: 28
+
+deliverables:
+  - "MoreActionsSheet.spec.md (machine-readable spec, picker exception 문서화 포함)"
+  - "MoreActionsSheet.intent.md (Sprint Lead gate — 4 questions)"
+  - "context-engine.yaml (WHY 1 story / 3 AC + WHAT 7 components + HOW 4 constraints + assets 2)"
+  - "prototype.html (self-contained, tokens.css inlined, 4 states, control panel preserved)"
+  - "quality-report.yaml (this file)"
+
+next_steps:
+  - "Sprint Lead intent.md gate — proceed/adjust/stop"
+  - "Adjust 시 prototype.html 재생성 (≤2 loop 상한)"
+  - "screenshots/ 캡처는 Sprint Lead 승인 후"

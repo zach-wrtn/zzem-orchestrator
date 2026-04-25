@@ -1,0 +1,214 @@
+# Context Engine — ugc-platform-integration-qa-2 / app-004
+# Generated: 2026-04-25 (DE Step A output)
+# Schema: v1.0 (template: sprint-orchestrator/templates/context-engine-template.yaml)
+
+meta:
+  sprint_id: "ugc-platform-integration-qa-2"
+  task_id: "app-004"
+  generated_at: "2026-04-25T00:00:00Z"
+  schema_version: "1.0"
+  figma_frame: "37160:80000"
+  figma_file: "7hozJ6Pvs09q98BxvChj08"
+  archetype: "form"
+  baseline_ref: "app-001 (프로필편집_메인 form baseline)"
+  exemplar_refs: []   # form archetype — exemplars 인라인 없음 (이번 스프린트 exemplars=feed 한정)
+
+# ─────────────────────────────
+# Layer 1: WHY (Business Intent)
+# ─────────────────────────────
+why:
+  product_intent: |
+    닉네임 input 에 focus 가 들어간 직후의 키보드 활성 상태를 정확히 시각화한다.
+    사용자가 키보드 위에서 input + 카운터 + (가능하면) 저장 버튼의 시인성을 확보할 수 있는지
+    검증한다 — 키보드가 화면의 절반 가까이를 점유하는 상태에서 layout 안정성이 핵심.
+  target_user: "프로필 편집 중 닉네임을 변경하려는 ZZEM 사용자 (input tap 직후)"
+  success_metric: "AC-1.2 통과 — 닉네임 입력 키보드 활성 상태에서 input/카운터 가시성 + sticky 저장 버튼 위계 검증"
+  user_stories:
+    - id: "US-1"
+      as_a: "닉네임을 바꾸려고 input 을 탭한 사용자"
+      i_want: "키보드가 올라온 상태에서도 내가 입력하는 글자와 글자수를 한눈에 본다"
+      so_that: "키보드 가림 없이 안전하게 입력하고 저장 위치를 인지한다"
+  acceptance_criteria:
+    - id: "AC-1.2"
+      given: "프로필편집_메인 (app-001) 에서 닉네임 input 을 tap"
+      when: "키보드가 slide-up 으로 활성화된다"
+      then: "input focus 시각 (caret + border) + 카운터 'n/20' 표시 + 저장 버튼이 키보드 위 sticky 또는 헤더 우측에 잔존한다"
+      ui_impact: |
+        form archetype: input focus state (caret+border highlight) + 키보드 placeholder
+        시각 mock (~290px iOS-style 그레이 + suggestion bar) + 카운터 visible + Save sticky
+        키보드 직상.
+    - id: "AC-1.2a"
+      given: "키보드가 활성된 상태"
+      when: "글자를 입력한다"
+      then: "카운터 'n/20' 이 실시간 갱신 + 저장 버튼이 enabled 로 토글"
+      ui_impact: "input event → counter text 갱신 + saveBtn class toggle"
+    - id: "AC-1.2b"
+      given: "키보드가 활성된 상태"
+      when: "키보드 외부 (콘텐츠 영역) 를 tap 한다"
+      then: "키보드 dismiss + input focus 유지 또는 해제 (PRD 기본: dismiss)"
+      ui_impact: "outside tap → setState('default-with-content') — caret hidden + suggestion bar hidden"
+    - id: "AC-1.2c"
+      given: "키보드 위 저장 버튼을 tap"
+      when: "validation 통과"
+      then: "loading state → 결과 화면 navigate"
+      ui_impact: "form persona 권장 룰 #2 — submit 후 loading + 중복 제출 방지"
+
+# ─────────────────────────────
+# Layer 2: WHAT (Design System)
+# ─────────────────────────────
+what:
+  tokens_needed:
+    colors:
+      - "wds-background-normal (#FFFFFF) — 화면 배경"
+      - "pe-text-primary (#262626) — 헤더/입력값"
+      - "pe-text-secondary (#656565) — 보조"
+      - "pe-text-tertiary (#8A8A8A) — placeholder/카운터 기본"
+      - "pe-input-fill (#F7F7F7) — input 박스"
+      - "pe-input-border (#F1F1F1) — input border"
+      - "pe-save-disabled (#F1F1F1) — 저장 비활성"
+      - "pe-save-disabled-label (#8A8A8A)"
+      - "pe-save-active (#262626) — 저장 활성"
+      - "pe-save-active-label (#FFFFFF)"
+      - "pe-avatar-empty-bg (#F5F3FF) — avatar"
+      - "pe-avatar-border (rgba(136,136,136,0.2))"
+      - "pe-camera-badge-fill (#E2E2E2)"
+      - "pe-camera-badge-border (#FFFFFF)"
+      - "wds-label-error (#FF3B30) — inline error"
+      - "wds-color-red-100 (#FFE5E3) — error tint"
+      - "kbd-bg (#D1D5DB) — iOS keyboard surface (sprint tokens.css 신규 별칭 등록)"
+      - "kbd-key-fill (#FFFFFF) — 키 캡"
+      - "kbd-key-shadow (rgba(0,0,0,0.18)) — 키 그림자"
+      - "kbd-key-fn (#ABB0BC) — 기능키 surface"
+      - "kbd-suggestion-bar (#D1D5DB) — 추천 바 surface"
+      - "kbd-suggestion-divider (rgba(0,0,0,0.2)) — divider"
+      - "kbd-text (#000000) — 키 라벨"
+    typography:
+      - "wds-font-size-xs (12px) — 카운터/추천바"
+      - "wds-font-size-md (14px) — 키 캡 라벨"
+      - "wds-font-size-lg (16px) — input/저장"
+      - "wds-font-size-xl (18px) — 헤더 타이틀"
+      - "wds-font-weight-medium (500)"
+      - "wds-font-weight-semibold (600)"
+    spacing:
+      - "wds-spacing-4 / 6 / 8 / 12 / 16 / 24 / 32"
+    radius:
+      - "wds-radius-sm (8px) — 키 캡"
+      - "wds-radius-md (12px) — 카메라 배지"
+      - "wds-radius-lg (16px) — input + 저장 + 큰 키"
+      - "wds-radius-full — avatar + spinner"
+  components_needed:
+    - name: "StatusBar"
+      category: "layout"
+    - name: "HeaderBar"
+      category: "navigation"
+    - name: "BackButton"
+      category: "input"
+    - name: "HeaderTitle"
+      category: "content"
+    - name: "Profile"
+      category: "content"
+    - name: "Avatar"
+      category: "content"
+    - name: "CameraBadge"
+      category: "content"
+    - name: "NicknameLabel"
+      category: "content"
+    - name: "NicknameField"
+      category: "input"
+    - name: "NicknameInput"
+      category: "input"
+    - name: "Caret"
+      category: "feedback"
+    - name: "CharCounter"
+      category: "feedback"
+    - name: "NicknameError"
+      category: "feedback"
+    - name: "ContentDismissArea"
+      category: "input"          # outside tap dismiss
+    - name: "SaveButton"
+      category: "input"
+      sticky: "above-keyboard"
+    - name: "Keyboard (mock)"
+      category: "feedback"
+      note: "iOS QWERTY placeholder — 시각 mock. 실 입력은 hidden input"
+    - name: "SuggestionBar"
+      category: "feedback"
+    - name: "KeyboardKeys"
+      category: "feedback"
+    - name: "KeyboardBottomBar"
+      category: "feedback"       # globe/space/return
+    - name: "HomeIndicator"
+      category: "layout"
+  patterns_needed:
+    - name: "iOS QWERTY keyboard placeholder (290px)"
+      description: "키보드는 prototype 한정 시각 mock — suggestion bar (~36px) + 4 row keys + 키 캡 + bottom bar + home indicator"
+    - name: "Sticky-above-keyboard primary CTA"
+      description: "Save 버튼은 키보드 직상에 sticky — task AC '저장 버튼 키보드 위 sticky 표시' 직접 명시"
+    - name: "Outside tap dismiss (콘텐츠 영역)"
+      description: "iOS HIG — 키보드 외부 영역 tap 시 키보드 dismiss"
+
+# ─────────────────────────────
+# Layer 3: HOW (Orchestration)
+# ─────────────────────────────
+how:
+  composition_rules:
+    - rule: "키보드는 화면 하단 fixed (~290px). Save 버튼은 키보드 상단에 직접 붙어 sticky 노출 (z-index 키보드보다 +1)"
+      applies_to: ["프로필편집_닉네임_키보드"]
+    - rule: "Avatar 영역은 키보드 활성 상태에서도 노출 유지하되 contents 영역이 짧아지므로 vertical padding 축소 가능"
+      applies_to: ["프로필편집_닉네임_키보드"]
+    - rule: "Caret 은 input value 직후 1px 검정 막대 + blink 1s. .is-error 시 caret 색은 그대로 유지 (정보 단순화)"
+      applies_to: ["프로필편집_닉네임_키보드"]
+    - rule: "Suggestion bar 는 카운터와 별개 — 카운터는 input 우측 absolute, suggestion bar 는 키보드 최상단 row"
+      applies_to: ["프로필편집_닉네임_키보드"]
+    - rule: "키보드는 inline SVG/CSS 만으로 그린다 — 외부 이미지 / 시스템 캡처 절대 금지 (Pass 6 #6 회피)"
+      applies_to: ["프로필편집_닉네임_키보드"]
+  conditional_rendering:
+    - condition: "state == 'focused' (init focus, 변경 전)"
+      variant_a: "input border highlight + caret blink + counter visible + suggestion bar visible + Save disabled"
+      variant_b: "(state == 'typing-dirty') 변경 발생 → Save enabled, 카운터 숫자 갱신"
+    - condition: "state == 'error' (length > 20)"
+      variant_a: "input border error + counter is-error + nickname-error visible + Save disabled"
+      variant_b: "(state == 'loading') Save enabled + spinner + 사용자 input lock"
+  constraints:
+    - "키보드 mock 의 모든 색은 tokens.css 의 --kbd-* 별칭만 사용 — raw hex 직접 사용 금지 (Pass 6 #1)"
+    - "키보드 키들은 button 이 아닌 div span 으로 그린다 — interactive 가 아닌 시각 mock (Pass 6 #7 interaction count 정합성)"
+    - "Save sticky 위 키보드 z-index = 90; Save z-index = 100"
+    - "Pretendard 외 font 금지 (Pass 6 #4)"
+    - "blocking dialog (alert/confirm/prompt) 금지 (Pass 6 #8)"
+    - "interactive 요소에 unicode emoji 금지 — Lucide-style inline SVG (Pass 6 #2)"
+    - "form persona 강제 룰 4/4 충족 — submit_disabled/enabled 둘 다, inline error, 1 primary"
+  priority_order:
+    - "Input + Caret + CharCounter (사용자 attention 1순위)"
+    - "Save 버튼 (CTA — 키보드 위 sticky)"
+    - "Keyboard mock (시각 컨텍스트 — '키보드 활성' 상태 전달)"
+    - "Header + Avatar (보조)"
+
+# ─────────────────────────────
+# Layer 4: ASSETS
+# ─────────────────────────────
+# app-004 form — 부모와 동일한 avatar 슬롯 + 키보드 mock 만. 실 이미지 슬롯 0.
+assets:
+  avatars:
+    kind: illustration
+    source: "inline lucide user SVG + --pe-avatar-empty-bg circle (app-001 baseline 재사용)"
+    count: "1"
+    license: "internal-test"
+    needs_real_content: false   # PRD §Asset Layer '카메라 그룹 placeholder 허용' (app-001 동일 승인)
+  feed_thumbnails:
+    kind: "n/a"
+    note: "이 화면 슬롯 없음"
+  meme_images:
+    kind: "n/a"
+    note: "이 화면 슬롯 없음"
+  icons:
+    kind: illustration
+    source: "Lucide inline SVG (chevron-left, camera, user, globe, mic, delete, arrow-up)"
+    fallback: "text-placeholder (단, interactive 버튼에는 미사용)"
+  hero_banners:
+    kind: "n/a"
+    note: "이 화면 슬롯 없음"
+  keyboard_mock:
+    kind: illustration
+    source: "inline CSS grid + lucide SVG glyphs (Globe, Mic, Delete) — 외부 이미지 0건"
+    needs_real_content: false   # 시각 컨텍스트 mock — 디자인 시스템 외 표현 의도
+    note: "iOS QWERTY 시각 mock. 키 캡은 div, 라벨은 inline 텍스트. 키 자체는 비-인터랙티브"

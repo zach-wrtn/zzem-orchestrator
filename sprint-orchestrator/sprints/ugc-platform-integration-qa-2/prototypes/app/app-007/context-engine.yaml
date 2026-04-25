@@ -1,0 +1,188 @@
+# Context Engine — ugc-platform-integration-qa-2 / app-007
+# Step A output of Design Engineer protocol v2.
+# Source PRD: docs/prds/ugc-platform-integration-qa-2.md (Group 001)
+# Source task: sprint-orchestrator/sprints/ugc-platform-integration-qa-2/tasks/app/app-007.md
+# Figma frame: 7hozJ6Pvs09q98BxvChj08 / 37160:80081 (프로필편집_사진_바텀시트_나가기확인)
+# Sibling: app-003 (닉네임 변경 中 나가기) — 동일 패턴, 사진 컨텍스트로 변형
+
+meta:
+  sprint_id: "ugc-platform-integration-qa-2"
+  task_id: "app-007"
+  generated_at: "2026-04-25T00:00:00Z"
+  schema_version: "1.0"
+  figma_file: "7hozJ6Pvs09q98BxvChj08"
+  figma_node: "37160:80081"
+  archetype: "modal"
+  parent_task: "app-001 (프로필편집_메인) — isDirty=true (사진만 변경)"
+  sibling_task: "app-003 (닉네임 confirm) — 동일 confirm 패턴"
+
+# ─────────────────────────────
+# Layer 1: WHY (Business Intent)
+# ─────────────────────────────
+why:
+  product_intent: |
+    프로필 편집 中 사진을 변경한 사용자가 좌측 back 으로 화면을 떠날 때
+    "변경분이 저장되지 않음" 을 명시적으로 알리고 두 가지 결정을 제시한다:
+    (a) 변경 폐기하고 나가기, (b) sheet 만 닫고 편집 계속.
+    의도치 않은 사진 변경 손실을 방지한다 (AC-1.4 사진 컨텍스트).
+  target_user: "ZZEM 일반 유저 — 프로필 사진 변경 중 의도/실수로 back tap"
+  success_metric:
+    - "사진 변경 → modal 노출 → '계속 편집' 비율 (잘못된 back 차단)"
+    - "사진 변경 → modal 노출 → '나가기' 비율 (의도된 폐기)"
+    - "modal 노출 후 30초 내 결정 도달율"
+  user_stories:
+    - id: "US-1"
+      as_a: "ZZEM 유저"
+      i_want: "사진을 잘못 바꾸고 뒤로 가려할 때 경고를 보고 싶다"
+      so_that: "실수로 변경분이 사라지지 않게"
+    - id: "US-2"
+      as_a: "ZZEM 유저"
+      i_want: "정말 나가고 싶을 땐 한 탭으로 바로 나가고 싶다"
+      so_that: "의도된 폐기에는 마찰을 최소화"
+  acceptance_criteria:
+    - id: "AC-007.a"
+      given: "프로필편집_메인에서 사진을 변경한 dirty 상태"
+      when: "유저가 좌측 back 탭"
+      then: "backdrop dim + bottom sheet slide-up — 나가기 confirm modal 노출"
+      ui_impact: "Backdrop opacity 0.5 + ConfirmSheet translateY(0); ParentScaffold 사진 dirty 상태 미러"
+    - id: "AC-007.b"
+      given: "modal 오픈 상태"
+      when: "유저가 ' 나가기' tap"
+      then: "편집 화면 dismiss (parent pop) + 사진 변경분 폐기"
+      ui_impact: "ExitButton tap → close-overlay + parent screen pop, isDirty reset"
+    - id: "AC-007.c"
+      given: "modal 오픈 상태"
+      when: "유저가 '계속 편집' tap"
+      then: "bottom sheet 만 dismiss, 편집 상태 (사진 dirty) 보존"
+      ui_impact: "ContinueEditButton tap → close-overlay (parent 유지)"
+    - id: "AC-007.d"
+      given: "modal 오픈 상태"
+      when: "유저가 backdrop 영역 tap"
+      then: "bottom sheet dismiss (계속 편집 과 동일 의미)"
+      ui_impact: "Backdrop tap → close-overlay (parent 유지). modal persona #2 충족"
+
+# ─────────────────────────────
+# Layer 2: WHAT (Design System)
+# ─────────────────────────────
+what:
+  tokens_needed:
+    colors:
+      - "wds.background.dimmed"           # rgba(0,0,0,0.50) — backdrop ≥0.4
+      - "wds.background.elevated"         # #FFFFFF — sheet
+      - "wds.color.neutral.300"           # #D1D3D8 — drag handle
+      - "wds.color.neutral-900"           # #212228 — title label
+      - "wds.color.neutral-600"           # #6B6E76 — description label
+      - "pe.confirm-btn"                  # #262626 — Exit primary destructive
+      - "pe.surface-hover"                # #F1F1F1 — Continue ghost
+      - "pe.save-active-label"            # #FFFFFF — Exit label
+      - "wds.color.purple-50/100/400"     # avatar mock (parent 미러)
+      - "pe.camera-badge-fill/border"     # #E2E2E2 / #FFFFFF
+    typography:
+      - "wds.font.size.xl (18px) bold"    # title
+      - "wds.font.size.md (14px) regular" # description
+      - "wds.font.size.lg (16px) semibold" # buttons
+    spacing: ["wds.spacing.4..40"]
+    radius:
+      - "wds.radius.md (12px) — buttons"
+      - "wds.radius.full (9999) — handle, avatar"
+      - "20px (component-bottom-sheet-radius — top only)"
+  components_needed:
+    - name: "Backdrop"
+      category: "feedback"
+    - name: "BottomSheet"
+      category: "feedback"
+    - name: "DragHandle"
+      category: "feedback"
+    - name: "SheetTitle"
+      category: "content"
+    - name: "SheetDescription"
+      category: "content"
+    - name: "PrimaryDestructiveButton"
+      category: "input"
+    - name: "SecondaryGhostButton"
+      category: "input"
+  patterns_needed:
+    - name: "Confirm Modal"
+      description: "Backdrop + bottom sheet + title + description + 2 actions (1 primary destructive + 1 secondary ghost). iOS HIG / Material Design dialog 표준."
+    - name: "Parent Scaffold Mirror"
+      description: "Modal 떠있는 동안 부모 화면을 backdrop 아래 그대로 노출 — 컨텍스트 보존. app-005 와 동일 기법."
+
+# ─────────────────────────────
+# Layer 3: HOW (Orchestration Rules)
+# ─────────────────────────────
+how:
+  composition_rules:
+    - rule: "Modal 은 부분 화면 — 부모 ParentScaffold 를 z=0, backdrop z=10, sheet z=20 으로 stacking"
+      applies_to: ["프로필편집_사진_바텀시트_나가기확인"]
+    - rule: "ParentScaffold 는 pointer-events:none — modal open 동안 부모 인터랙션 차단"
+      applies_to: ["프로필편집_사진_바텀시트_나가기확인"]
+    - rule: "ParentSaveCTA 는 active(#262626) 색 유지 — 사진 dirty 컨텍스트 신호 (modal 발동 이유)"
+      applies_to: ["프로필편집_사진_바텀시트_나가기확인"]
+    - rule: "Sheet 내부는 vertical flow — DragHandle → Title → Description → Actions(row)"
+      applies_to: ["ConfirmSheet"]
+  conditional_rendering:
+    - condition: "data-state == 'default' or 'open'"
+      variant_a: "backdrop opacity 1, sheet translateY(0)"
+      variant_b: "(default 진입 시 시각 안정 — 진입 애니메이션은 verify 단계 데모용)"
+    - condition: "data-state == 'dismissing'"
+      variant_a: "backdrop opacity 0 (transition 0.25s), sheet translateY(100%) (transition 0.28s)"
+      variant_b: "이후 자동 default 로 복귀 (verifier-friendly cycle)"
+    - condition: "data-state == 'parent-only'"
+      variant_a: "backdrop opacity 0, sheet hidden, parent pointer-events 활성 (계속 편집 결과 시뮬레이션)"
+      variant_b: null
+  constraints:
+    - "Backdrop opacity ≥ 0.4 (modal persona #1) — 본 화면 0.50"
+    - "Close 2-way 보장 (modal persona #2) — ContinueEditButton + Backdrop tap (+ 보너스 keydown)"
+    - "Primary 1 + Secondary 0-1 (modal persona #3) — Exit primary + Continue secondary 정확히 1+1"
+    - "Title 명확 (modal persona #4) — '변경사항이 저장되지 않아요' h2 xl bold"
+    - "Pass 6 #5 brand-purple-500 gradient 금지 — 본 화면 미사용"
+    - "Pass 6 #8 alert/confirm/prompt 금지 — setState + setTimeout 사용"
+  priority_order:
+    - "ConfirmSheet (modal 본체) — Title → Description → Actions"
+    - "Backdrop (시각 분리 + dismiss surface)"
+    - "ParentScaffold (컨텍스트 미러 — 사진 dirty 시각화)"
+
+# ─────────────────────────────
+# Asset Layer (A.5)
+# ─────────────────────────────
+assets:
+  avatars:
+    kind: "illustration"
+    source: "inline SVG (Lucide user) + soft purple gradient (purple-100→purple-50) — 변경된 사진 mock"
+    needs_real_content: false
+    rationale: "ParentAvatar 는 backdrop 아래 muted, 주 콘텐츠 아님. modal 평가 대상은 ConfirmSheet."
+  icons:
+    kind: "illustration"
+    source: "Lucide inline SVG (chevron-left, user, camera, status icons)"
+    fallback: "(미사용)"
+  hero_banners:
+    kind: "n/a"
+    note: "본 화면에 hero banner 슬롯 없음"
+
+# ─────────────────────────────
+# Sibling Reuse (app-003 → app-007)
+# ─────────────────────────────
+sibling_reuse:
+  base_pattern: "app-003 (닉네임 변경 中 나가기 confirm)"
+  reused:
+    - "Backdrop opacity (0.50)"
+    - "BottomSheet 구조 (DragHandle + Title + Description + Actions row)"
+    - "Button 색 (Exit #262626 / Continue #F1F1F1)"
+    - "Button 좌우 배치 (좌 ContinueEdit / 우 Exit)"
+    - "Modal persona 4/4 충족 방식"
+  varied:
+    - "ParentScaffold — 사진 dirty 미러 (purple gradient avatar mock + ParentSaveCTA active)"
+    - "SheetDescription 카피 — 닉네임 → 사진"
+    - "Toast 메시지 — '편집 화면을 나갔어요 (사진 변경 폐기)'"
+  rationale: "ugc-platform-integration-qa-2 Group 001 confirm 패턴 일관성 — 사용자가 닉네임/사진 어느 dirty 든 동일한 인터랙션 학습. 사진 컨텍스트는 ParentScaffold 미러로만 차별화."
+
+# ─────────────────────────────
+# Quality (Step A self-check)
+# ─────────────────────────────
+quality:
+  why_extraction: "all from task spec + sibling app-003 pattern; no PRD-fabricated criteria"
+  what_resolution: "all tokens resolved against tokens.css (sprint-level)"
+  how_alignment:
+    - "modal persona 강제 룰 4/4 충족 검증"
+    - "Pass 6 mechanical checks (1, 2, 3, 5, 8) 통과 예상"
+  fabrication_risk: "low (3 inferred fields — copy 의역, color choice, button order — intent.md Q1~Q4 로 escalation)"

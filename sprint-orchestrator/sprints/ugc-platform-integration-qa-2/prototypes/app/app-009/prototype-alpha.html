@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>app-009 alpha — Structure + Components</title>
+<style>
+  /* alpha = structure + components only. Pass 3-6 in prototype.html */
+  :root { --grid-cols: 3; --gap: 2px; }
+  body { font-family: 'Pretendard', sans-serif; }
+  .device-frame { width: 390px; height: 844px; position: relative; border: 1px solid #ccc; }
+  .screen { display: flex; flex-direction: column; height: 100%; }
+  .status-bar { height: 44px; }
+  .header { height: 52px; display: flex; justify-content: space-between; align-items: center; }
+  .photo-grid { flex: 1; display: grid; grid-template-columns: repeat(var(--grid-cols), 1fr); gap: var(--gap); padding: var(--gap); overflow-y: auto; }
+  .photo-cell { aspect-ratio: 1; position: relative; border: none; cursor: pointer; }
+  .select-indicator { position: absolute; top: 8px; right: 8px; width: 24px; height: 24px; border-radius: 50%; }
+  .bottom-bar { height: 96px; display: flex; flex-direction: column; padding: 12px 16px 32px; }
+  .selection-count { font-size: 13px; }
+  .actions-row { display: flex; justify-content: space-between; align-items: center; }
+  .cancel-btn, .submit-btn { padding: 12px 24px; }
+  .error-msg { display: none; padding: 8px 12px; }
+</style>
+</head>
+<body>
+<div class="device-frame">
+  <section class="screen" id="photo-picker">
+    <div class="status-bar">9:41</div>
+    <header class="header">
+      <button class="header-close">×</button>
+      <h1 class="header-title">최근 항목 ⌄</h1>
+      <span style="width:40px"></span>
+    </header>
+    <section class="photo-grid">
+      <button class="photo-cell" data-cell="1"><span class="select-indicator"></span></button>
+      <button class="photo-cell" data-cell="2"><span class="select-indicator"></span></button>
+      <button class="photo-cell" data-cell="3"><span class="select-indicator"></span></button>
+      <button class="photo-cell" data-cell="4"><span class="select-indicator"></span></button>
+      <button class="photo-cell" data-cell="5"><span class="select-indicator"></span></button>
+      <button class="photo-cell" data-cell="6"><span class="select-indicator"></span></button>
+      <button class="photo-cell" data-cell="7"><span class="select-indicator"></span></button>
+      <button class="photo-cell" data-cell="8"><span class="select-indicator"></span></button>
+      <button class="photo-cell" data-cell="9"><span class="select-indicator"></span></button>
+      <button class="photo-cell" data-cell="10"><span class="select-indicator"></span></button>
+      <button class="photo-cell" data-cell="11"><span class="select-indicator"></span></button>
+      <button class="photo-cell" data-cell="12"><span class="select-indicator"></span></button>
+    </section>
+    <div class="error-msg">사진을 1장 선택해 주세요</div>
+    <footer class="bottom-bar">
+      <span class="selection-count">0장 선택</span>
+      <div class="actions-row">
+        <button class="cancel-btn">취소</button>
+        <button class="submit-btn" disabled>선택</button>
+      </div>
+    </footer>
+  </section>
+</div>
+</body>
+</html>

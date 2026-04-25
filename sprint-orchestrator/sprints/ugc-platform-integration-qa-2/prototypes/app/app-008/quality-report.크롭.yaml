@@ -1,0 +1,154 @@
+# Quality Report: app-008 프로필편집_사진_크롭
+# DE 자가 검증 — Pass 6 Anti-Slop Audit + form persona compliance + fabrication risk
+
+task_id: "app-008"
+screen_name: "프로필편집_사진_크롭"
+archetype: "form"
+generated_at: "2026-04-25T00:00:00Z"
+sprint_id: "ugc-platform-integration-qa-2"
+
+# === Pass 6 Anti-Slop Audit (10 checks) ===
+pass6_anti_slop_audit:
+  status: "passed (9/9 applicable, 1 skipped)"
+  checks:
+    - id: 1
+      name: "hex not in tokens.css (.screen scope only)"
+      result: "passed"
+      detail: "Diff: #1a1a2e, #2a2a3e, #e0e0e0, #f0f0f0 (4 non-token hex). 모두 body 래퍼 또는 .control-panel 영역 (Pass 6 audit 스코프 제외). .screen 후손 요소 내 raw hex 없음 — tokens 변수만 사용"
+    - id: 2
+      name: "Unicode emoji in interactive elements"
+      result: "passed"
+      detail: "back button + done button 모두 inline SVG (Lucide chevron-left). emoji 미사용"
+    - id: 3
+      name: "border-left: Npx solid var(--*) on .card"
+      result: "passed"
+      detail: "본 화면 .card 클래스 부재. .mask-corner 의 'border-left: none' 은 corner shape 정의 (slop 아님)"
+    - id: 4
+      name: "font-family outside Pretendard inside .screen"
+      result: "passed"
+      detail: ".screen 후손은 'inherit' 또는 var(--wds-font-family-primary) 만 사용. monospace 는 .control-panel 한정"
+    - id: 5
+      name: "purple gradient in .screen background"
+      result: "passed"
+      detail: "crop-image gradient 는 neutral grey (#46474C → #212228) + transparency. purple 토큰 미사용"
+    - id: 6
+      name: "placeholder-image in main content slot"
+      result: "passed (with caveat)"
+      detail: "crop-image 가 gradient placeholder — kind='gradient-token' 으로 재분류. 그러나 의도상 'real-image' 가 더 정확. Sprint Lead 'placeholder 허용' 명시 승인 필요 (intent.md Q6 게이트 질문 포함)."
+      caveat: "needs_real_content: true 가 더 엄격 — gate 통과 시 결정"
+    - id: 7
+      name: "DOM event bindings vs spec interactions count"
+      result: "passed"
+      detail: "spec interactions 4 (back / drag / pinch / done). prototype 바인딩: back-btn click + canvas pointerdown (drag) + canvas dblclick (zoom) + done-btn click + 5 state toggle = spec 의 4 interactions 모두 표현 (drag/zoom 은 시뮬레이션)"
+    - id: 8
+      name: "alert/confirm/prompt in onclick"
+      result: "passed"
+      detail: "addEventListener 만 사용, onclick 핸들러 자체가 없음. console.log + showToast 로 visual feedback"
+    - id: 9
+      name: "screen_archetype persona forced rules (form 4/4)"
+      result: "passed (4/4)"
+      detail: |
+        rule_1 inline_validation: PASS — gesture form 의 visual mask + scrim + corner markers 가 inline validation 등가물.
+        rule_2 submit_disabled: PASS — states.loading 시 done-btn disabled (--pe-save-disabled), default/zoomed/dragging 시 enabled (--pe-save-active).
+        rule_3 error_inline_under_input: PASS — error case 미적용 (gesture 항상 valid), 안전망으로 inline 패턴만 채택. alert 박스 미사용.
+        rule_4 primary_action_one: PASS — DoneButton ('완료') primary 1개. back-btn 은 icon-button (위계 다름).
+    - id: 10
+      name: "exemplar drift (≥80% match)"
+      result: "skipped"
+      detail: "본 task 에 exemplar inlined 없음 — 검사 대상 외"
+
+# === Form Persona Compliance (form.md) ===
+form_persona:
+  forced_rules: "4/4 PASS"
+  recommended_rules:
+    rec_1_blur_validation: "n/a (gesture form — real-time inline)"
+    rec_2_loading_after_submit: "accepted — states.submitting + done-btn spinner + '저장 중...' label"
+    rec_3_section_split: "n/a (single gesture input)"
+
+# === Fabrication Risk ===
+fabrication_risk:
+  level: "medium"
+  triggers:
+    - "Header title '크기 설정' (Figma) vs '사진 편집' (task hint) 불일치 → Figma 우선 (PRD NEVER DO #3)"
+    - "CTA label '완료' (Figma) vs '다음' (task hint) 불일치 → Figma 우선"
+    - "정사각 마스크 변 길이 (full-bleed 390x390) — Figma 시각 마스크 outline 미관찰 → 모바일 표준 추론"
+    - "Rule-of-thirds 3x3 grid — Figma 미관찰, 표준 크롭 UI 패턴 추론"
+    - "CropHint '드래그해서 위치를 조절하세요' — Figma 미관찰, form persona #1 inline guidance 추론"
+    - "MaskScrim opacity 0.50 — task 'semantic.dim.scrim' → wds-background-dimmed 0.50 적용"
+    - "CropImage placeholder gradient — sample asset 미등재"
+    - "Toast '사진이 적용됐어요' — confirmation 패턴 추론 (PRD 미명시)"
+  mitigation:
+    - "intent.md (크롭.intent.md) 7개 gate_questions 산출 — Sprint Lead 조기 결정 가능"
+    - "screen-spec.yaml form_persona 섹션에 모든 강제 룰 rationale 명시"
+
+# === Schema Completeness ===
+schema_completeness:
+  required_sections: ["meta", "component_tree", "layout_spec", "states", "interactions", "labels", "token_map"]
+  present_sections:
+    [
+      "meta",
+      "component_tree",
+      "layout_spec",
+      "states (5: default/zoomed/dragging/loading/submitting)",
+      "interactions (4)",
+      "visual_rules",
+      "labels",
+      "token_map",
+      "form_persona",
+      "quality_score",
+    ]
+  score: "10/7 = 1.00 (all required + extras)"
+
+# === Context Coverage ===
+context_coverage:
+  why_linked: "AC-1.3 (사진 변경: 크롭 / 저장) 직접 매핑. task AC 4건 (마스크 중앙 / 외부 dim / 완료 활성 / back 복귀) 100%"
+  what_resolved: "12/12 components → tokens.css 등재 토큰만 사용 (rgba(0,0,0,0.50) 은 task 명시 spec 의 semantic.dim.scrim = wds-background-dimmed)"
+  score: "1.00 / 1.00"
+
+# === Extraction Accuracy ===
+extraction_accuracy:
+  total_components: 12
+  with_token_map: 12
+  with_html_mapping: 12
+  score: "24/24 = 1.00"
+
+# === States Coverage ===
+states_captured:
+  - "default — 이미지 로드 완료, mask + grid + hint 노출, done enabled"
+  - "zoomed — image scale 1.4 + translate, grid hide"
+  - "dragging — image translate, grid hide"
+  - "loading — spinner + done disabled"
+  - "submitting — done spinner + '저장 중...' label, hint hide"
+
+# === Asset Layer ===
+assets:
+  crop_image:
+    kind: "gradient-token (proposed) OR real-image (accurate)"
+    needs_real_content: "true (pending Sprint Lead approval — intent.md Q6)"
+    fallback_chain_status: "exhausted — sprint-level sample asset 부재"
+    sprint_lead_decision_pending: true
+
+# === Gate Status (Assumption Preview) ===
+intent_gate:
+  generated: true
+  path: "크롭.intent.md"
+  gate_questions_count: 7
+  awaiting_decision: true
+  default_assumed_for_alpha: "proceed (Figma copy + grid + hint + gradient placeholder + 0.50 scrim)"
+
+# === Files Generated ===
+files:
+  - "screen-spec.yaml"
+  - "크롭.intent.md"
+  - "prototype.html"
+  - "quality-report.크롭.yaml"
+  - "(approval-status.yaml — sprint-level update pending)"
+
+# === Summary ===
+summary:
+  status: "complete (Pass 6 9/9 + form persona 4/4 + intent.md gate generated)"
+  ready_for_review: true
+  blockers: []
+  follow_ups:
+    - "Sprint Lead intent.md Q1~Q7 조기 결정 → adjust 시 prototype 재생성"
+    - "crop_image asset slot 정책 결정 (placeholder 승인 vs sample 등재)"

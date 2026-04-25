@@ -1,0 +1,621 @@
+# Screen Spec — 프로필편집_닉네임_키보드
+# Machine-readable form spec. DE Step B output.
+# Source: docs/prds/ugc-platform-integration-qa-2.md (Group 001 AC-1.2.*)
+#       + Figma 7hozJ6Pvs09q98BxvChj08 / 37160:80000 (frame metadata)
+#       + app-001 baseline (프로필편집_메인 form)
+#       + docs/designs/patterns/profile-edit.mdx
+#       + iOS 17 system keyboard reference (시각 mock)
+
+meta:
+  screen_name: "프로필편집_닉네임_키보드"
+  screen_archetype: "form"   # B.1.1 결정 — form persona 강제 룰 4개 모두 적용 (app-001 동일 패턴)
+  task_id: "app-004"
+  sprint_id: "ugc-platform-integration-qa-2"
+  app: "ZZEM"
+  platform: "iOS / Android (React Native) — 본 화면은 iOS 키보드 mock"
+  language: "ko"
+  frame: "390x844"
+  theme: "light"
+  figma_node: "37160:80000"
+  baseline_ref: "app-001 (프로필편집_메인) — 본 화면은 input focus + 키보드 활성 상태"
+
+# ─────────────────────────────
+# Component Tree
+# ─────────────────────────────
+component_tree: |
+  Screen [frame: 390x844] #screen-profile-edit-keyboard
+  ├── StatusBar [system] (div) #status-bar
+  ├── HeaderBar [container] (header) #header-bar
+  │   ├── BackButton [icon-button] (button) #back-button — 뒤로가기 (chevron-left)
+  │   ├── HeaderTitle [text] (h1) #header-title — "프로필 편집"
+  │   └── HeaderSpacer [layout] (span) #header-spacer
+  ├── Contents [scroll-container] (main) #contents
+  │   ├── DismissArea [pressable] (div) #dismiss-area — 키보드 외부 tap dismiss (AC-1.2b)
+  │   ├── Profile [container] (section) #profile
+  │   │   └── ProfileImg [composed] (button) #profile-img-trigger
+  │   │       ├── Avatar [avatar] (div) #avatar
+  │   │       │   └── AvatarUserIcon [icon] (svg) — lucide user
+  │   │       └── CameraBadge [icon-badge] (span) #camera-badge — lucide camera
+  │   └── Input [container] (section) #input
+  │       ├── NicknameLabel [text] (label) #nickname-label — "닉네임"
+  │       ├── NicknameField [input-wrapper] (div) #nickname-field — focus 활성 (border highlight)
+  │       │   ├── NicknameInput [text-input] (input) #nickname-input — caret + value
+  │       │   ├── Caret [text-caret] (span) #caret — 1px blink (CSS animation)
+  │       │   └── CharCounter [text] (span) #char-counter — "n/20" visible
+  │       └── NicknameError [text] (p) #nickname-error — inline validation (form 룰 #3, hidden default)
+  ├── StickyAction [container] (div) #sticky-action — 키보드 위 sticky (z-index 100)
+  │   └── SaveButton [button-primary] (button) #save-button — "저장" (disabled init)
+  └── KeyboardMock [container] (div) #keyboard — 시각 mock (z-index 90, 비-인터랙티브)
+      ├── SuggestionBar [container] (div) #kbd-suggestion-bar
+      │   ├── SuggestionItem (span) — "지구"
+      │   ├── SuggestionDivider (span)
+      │   ├── SuggestionItem (span) — "지구촌"
+      │   ├── SuggestionDivider (span)
+      │   └── SuggestionItem (span) — "지구과학"
+      ├── KeyboardRow1 [container] (div) — ㅂ ㅈ ㄷ ㄱ ㅅ ㅛ ㅕ ㅑ ㅐ ㅔ
+      ├── KeyboardRow2 [container] (div) — ㅁ ㄴ ㅇ ㄹ ㅎ ㅗ ㅓ ㅏ ㅣ
+      ├── KeyboardRow3 [container] (div) — ⇧ ㅋ ㅌ ㅊ ㅍ ㅠ ㅜ ㅡ ⌫
+      ├── KeyboardRow4 [container] (div) — 123 🌐(Globe) space return
+      └── HomeIndicator (div) #home-indicator — iOS bottom bar
+
+# ─────────────────────────────
+# Component Details (Component-as-Data)
+# ─────────────────────────────
+components:
+  - name: "StatusBar"
+    id: "status-bar"
+    tag: "div"
+    type: "container"
+    position: "top"
+    size: "full-width x 44px"
+    tokens: { fill: "transparent", text: "wds.label.normal → #212228" }
+    notes: "iPhone status bar mock — 9:41 + signal/battery"
+
+  - name: "HeaderBar"
+    id: "header-bar"
+    tag: "header"
+    type: "container"
+    position: "sticky-top"
+    size: "full-width x 48px"
+    tokens: { fill: "wds.background.normal → #FFFFFF", border: none, spacing: "0 4 0 4" }
+    layout: { direction: horizontal, alignment: space-between, sizing: fill }
+    a11y: { role: heading, label: "프로필 편집 헤더" }
+
+  - name: "BackButton"
+    id: "back-button"
+    tag: "button"
+    type: "icon-button"
+    position: "left"
+    size: "44x44"
+    tokens: { fill: transparent, text: "pe.text-primary → #262626" }
+    behavior:
+      purpose: "이전 화면 복귀; isDirty 시 confirm modal 분기 (app-001 과 동일 분기)"
+      user_action: "tap"
+      feedback: "navigation (clean) | overlay (dirty)"
+    states: { default: "chevron-left 24px", disabled: null, loading: null, error: null }
+    a11y: { role: button, label: "뒤로 가기" }
+
+  - name: "HeaderTitle"
+    id: "header-title"
+    tag: "h1"
+    type: "text"
+    position: "center"
+    size: "wrap-content"
+    tokens: { text: "pe.text-primary → #262626" }
+    constraints: { max_lines: 1, truncation: ellipsis }
+    a11y: { role: heading, label: "프로필 편집" }
+
+  - name: "DismissArea"
+    id: "dismiss-area"
+    tag: "div"
+    type: "pressable"
+    position: "absolute (covers contents below status+header above keyboard)"
+    size: "full-width x flex"
+    tokens: { fill: transparent }
+    behavior:
+      purpose: "키보드 외부 영역 tap 시 키보드 dismiss (AC-1.2b)"
+      user_action: "tap"
+      feedback: "visual (키보드 slide-down via state change)"
+    states:
+      default: "노출 (focused/typing-dirty/error 상태에서)"
+      disabled: "default-with-content state 에선 pointer-events none (이미 dismiss됨)"
+      loading: null
+      error: null
+    a11y: { role: button, label: "키보드 닫기" }
+    notes: "iOS HIG outside-tap-dismiss 패턴. PRD AC-1.2b 직접 명시."
+
+  - name: "ProfileImg"
+    id: "profile-img-trigger"
+    tag: "button"
+    type: "composed"
+    position: "center"
+    size: "100x100"
+    tokens: { fill: transparent, radius: "full (9999px)" }
+    behavior:
+      purpose: "프로필 사진 변경 진입 (app-005 시트 오픈) — 키보드 활성 시에도 노출 유지"
+      user_action: "tap"
+      feedback: "navigation (open-overlay → app-005)"
+    states: { default: "current avatar + camera badge", disabled: null, loading: null, error: null }
+    a11y: { role: button, label: "프로필 사진 변경" }
+
+  - name: "Avatar"
+    id: "avatar"
+    tag: "div"
+    type: "avatar"
+    position: "center"
+    size: "100x100"
+    tokens:
+      fill: "pe.avatar.empty.bg → #F5F3FF"
+      border: "1px solid pe.avatar.border (rgba(136,136,136,0.2))"
+      radius: "full"
+    constraints: { min_height: "100px" }
+    notes: "init 상태 = lucide user 아이콘. 본 화면도 동일 (app-001 baseline)."
+
+  - name: "CameraBadge"
+    id: "camera-badge"
+    tag: "span"
+    type: "icon-badge"
+    position: "absolute (bottom-right of Avatar)"
+    size: "24x24"
+    tokens:
+      fill: "pe.camera.badge.fill → #E2E2E2"
+      border: "4px solid pe.camera.badge.border (#FFFFFF)"
+      radius: "full"
+      text: "pe.text-primary → #262626"
+    a11y: { role: img, label: "사진 변경 가능 표시" }
+
+  - name: "NicknameLabel"
+    id: "nickname-label"
+    tag: "label"
+    type: "text"
+    position: "above input"
+    size: "full-width x 20px"
+    tokens: { text: "pe.text-primary → #262626", spacing: "0 0 0 4" }
+    a11y: { role: text, label: "닉네임 라벨" }
+
+  - name: "NicknameField"
+    id: "nickname-field"
+    tag: "div"
+    type: "input-wrapper"
+    position: "below NicknameLabel"
+    size: "full-width x 44px"
+    tokens:
+      fill: "pe.input.fill → #F7F7F7"
+      border: "1px solid pe.input.border (#F1F1F1)"
+      radius: "lg (16px)"
+    states:
+      default: "border #F1F1F1 (no focus)"
+      focused: "border-color → pe.text-primary (#262626) + bg #FFFFFF — focus highlight"
+      error: "border-color → wds.label.error (#FF3B30) + bg wds.color.red.100 (#FFE5E3)"
+
+  - name: "NicknameInput"
+    id: "nickname-input"
+    tag: "input"
+    type: "text-input"
+    position: "inside NicknameField"
+    size: "fill"
+    tokens:
+      text: "pe.text-primary → #262626"
+      spacing: "12 16 12 16 (padding-right 60 for counter)"
+    behavior:
+      purpose: "닉네임 입력 — 이 화면에서 input 은 focus 활성 + 키보드 mock 노출 상태"
+      user_action: "type (실 입력 hidden — 키보드는 시각 mock)"
+      feedback: "visual (caret blink + counter 갱신 + Save toggle)"
+    states:
+      focused: "value prefill, caret visible, counter visible, 키보드 노출"
+      typing-dirty: "value 변경 (예: '까망콩 V2'), counter 갱신, Save enabled"
+      error: "border-color error, NicknameError visible, Save disabled, counter is-error"
+      loading: null
+    constraints: { max_lines: 1, truncation: none, content_policy: "최대 20자 (app-001 baseline 동일)" }
+    a11y: { role: text, label: "닉네임 입력", hint: "최대 20자" }
+
+  - name: "Caret"
+    id: "caret"
+    tag: "span"
+    type: "text-caret"
+    position: "inline (after value)"
+    size: "1px x 18px"
+    tokens: { fill: "pe.text-primary → #262626" }
+    states:
+      default: "hidden (focus 해제 시)"
+      focused: "blink animation 1s steps(2,start)"
+      error: "blink 유지 (정보 단순화)"
+      loading: "hidden"
+    notes: "CSS @keyframes blink — 시각 mock. 실 caret 은 input native (시각적 보강)."
+
+  - name: "CharCounter"
+    id: "char-counter"
+    tag: "span"
+    type: "text"
+    position: "absolute (bottom-right inside NicknameField)"
+    size: "wrap-content"
+    tokens:
+      text: "pe.text-tertiary → #8A8A8A (default) | wds.label.error → #FF3B30 (error)"
+    states:
+      focused: "visible 'n/20'"
+      typing-dirty: "visible — 갱신"
+      error: "color → error 'n/20' (n>20)"
+    a11y: { role: text, label: "글자수 카운터" }
+
+  - name: "NicknameError"
+    id: "nickname-error"
+    tag: "p"
+    type: "text"
+    position: "below NicknameField"
+    size: "full-width"
+    tokens: { text: "wds.label.error → #FF3B30", spacing: "6 4 0 4" }
+    states:
+      default: "hidden"
+      error: "visible — '20자 이내로 입력해주세요'"
+    a11y: { role: text, label: "닉네임 에러 메시지" }
+    notes: "form 룰 #3 — input 직하 inline (alert 박스 금지)"
+
+  - name: "SaveButton"
+    id: "save-button"
+    tag: "button"
+    type: "button-primary"
+    position: "sticky-above-keyboard (z-index 100)"
+    size: "full-width x 56px"
+    tokens:
+      fill: "pe.save.disabled (#F1F1F1) → pe.save.active (#262626) on enabled"
+      text: "pe.save.disabled-label (#8A8A8A) → pe.save.active-label (#FFFFFF) on enabled"
+      radius: "lg (16px)"
+      spacing: "outer 8 16 8 16"
+    behavior:
+      purpose: "변경분 저장 (form persona 강제 룰 #4 — primary 1개)"
+      user_action: "tap (enabled only)"
+      feedback: "navigation (분기 → 결과 화면)"
+    states:
+      submit_disabled: "isDirty == false → bg #F1F1F1, label #8A8A8A"
+      submit_enabled:  "isDirty == true → bg #262626, label #FFFFFF"
+      loading: "spinner inline, 텍스트 숨김, aria-busy=true"
+      error: null
+    a11y: { role: button, label: "변경 사항 저장" }
+    notes: "task AC '저장 버튼이 키보드 위에 sticky 로 표시' — task 직접 명시"
+
+  - name: "Keyboard"
+    id: "keyboard"
+    tag: "div"
+    type: "container (visual mock)"
+    position: "fixed-bottom (z-index 90)"
+    size: "full-width x ~290px"
+    tokens:
+      fill: "kbd.bg → #D1D5DB"
+    behavior:
+      purpose: "iOS 키보드 시각 mock — 키보드 활성 상태 시각 컨텍스트 제공"
+      user_action: "none (비-인터랙티브)"
+      feedback: "none — 시각 정보만"
+    states:
+      focused: "노출 (slide-up CSS transform)"
+      typing-dirty: "노출 유지"
+      error: "노출 유지"
+      default-with-content: "hidden (slide-down CSS transform)"
+      loading: "hidden"
+    a11y: { role: img, label: "키보드 활성 상태 (시각 mock)" }
+    notes: "Pass 6 #6 — placeholder-image 슬롯 아님 (CSS+SVG 전부 inline). #7 — 비-인터랙티브 (interaction 카운트 영향 없음)."
+
+  - name: "SuggestionBar"
+    id: "kbd-suggestion-bar"
+    tag: "div"
+    type: "container (visual)"
+    size: "full-width x 36px"
+    tokens:
+      fill: "kbd.suggestion-bar → #D1D5DB"
+      text: "kbd.text → #000000"
+      divider: "kbd.suggestion-divider → rgba(0,0,0,0.2)"
+    notes: "iOS predictive text bar — 3 단어 + 2 divider"
+
+  - name: "KeyboardKeys"
+    id: "kbd-keys"
+    tag: "div"
+    type: "container (visual)"
+    size: "4 rows x ~46px each"
+    tokens:
+      key_fill: "kbd.key-fill → #FFFFFF"
+      key_fn:   "kbd.key-fn-fill → #ABB0BC"
+      shadow:   "0 1px 0 var(--kbd-key-shadow)"
+      radius:   "wds.radius.sm → 8px (small keys) / wds.radius-md → 12px (large)"
+    notes: "한글 두벌식 + Shift + Delete + 123 + Globe + Space + Return."
+
+  - name: "HomeIndicator"
+    id: "home-indicator"
+    tag: "div"
+    type: "container (visual)"
+    size: "134x5px centered"
+    tokens: { fill: "kbd.home-indicator → #000000" }
+    notes: "iOS bottom bar — 키보드 직하."
+
+# ─────────────────────────────
+# Layout Spec
+# ─────────────────────────────
+layout_spec:
+  type: flex-column
+  viewport: 390x844
+  regions:
+    - id: status-bar
+      height: fixed(44px)
+    - id: header-bar
+      sticky: top
+      height: fixed(48px)
+      padding: "0 4px"
+    - id: contents
+      scroll: vertical
+      flex: 1
+      padding: "0"
+      children:
+        - id: dismiss-area
+          type: absolute
+          z: 1
+          note: "covers above sticky-action+keyboard region"
+        - id: profile
+          type: flex-column
+          padding: "8 16 8 16"
+          align: center
+        - id: input
+          type: flex-column
+          padding: "0 16 0 16"
+          gap: "8px"
+    - id: sticky-action
+      sticky: bottom (above-keyboard)
+      z: 100
+      height: fixed(72px)
+      padding: "8 16 8 16"
+      background: var(--wds-background-normal)
+    - id: keyboard
+      fixed: bottom
+      z: 90
+      height: fixed(290px)
+      padding: 0
+      children:
+        - id: kbd-suggestion-bar
+          height: 36px
+        - id: kbd-row-1..4
+          height: ~46px each
+          gap: 6px
+        - id: home-indicator
+          height: 8px (5px bar centered)
+
+# ─────────────────────────────
+# States
+# ─────────────────────────────
+states:
+  focused:
+    description: "init focus — 닉네임 prefill, isDirty=false, 키보드 활성, CharCounter visible, Save disabled"
+    active: true
+    visible_components: [status-bar, header-bar, profile, input, char-counter, caret, sticky-action, save-button, keyboard, dismiss-area]
+    hidden_components: [nickname-error]
+    submit_disabled: true
+    labels:
+      save_button: "저장"
+      char_counter: "11/20"
+
+  typing-dirty:
+    description: "변경 발생 (닉네임 변경) — Save enabled, 키보드 유지, counter 갱신"
+    visible_components: [status-bar, header-bar, profile, input, char-counter, caret, sticky-action, save-button, keyboard, dismiss-area]
+    hidden_components: [nickname-error]
+    submit_enabled: true
+    labels:
+      save_button: "저장"
+      char_counter: "8/20"
+
+  error:
+    description: "닉네임 length > 20 — inline error + Save disabled (form 룰 #1)"
+    visible_components: [status-bar, header-bar, profile, input, char-counter, caret, nickname-error, sticky-action, save-button, keyboard, dismiss-area]
+    submit_disabled: true
+    validation_rules:
+      - field: "nickname-input"
+        rule: "length <= 20"
+        on_fail: "show #nickname-error '20자 이내로 입력해주세요' + border-color error + counter is-error"
+    labels:
+      nickname_error: "20자 이내로 입력해주세요"
+      char_counter: "21/20"
+
+  loading:
+    description: "저장 요청 중 — spinner, button disabled (form 권장 룰 #2). 키보드는 dismiss 됨 (UX 표준)"
+    visible_components: [status-bar, header-bar, profile, input, sticky-action, save-button]
+    hidden_components: [keyboard, dismiss-area, nickname-error]
+    submit_disabled: true
+    labels:
+      save_button: "저장 중…"
+
+  default-with-content:
+    description: "키보드 외부 tap → 키보드 dismiss (AC-1.2b). 입력 값 유지, focus 해제, Save 상태는 isDirty 따름"
+    visible_components: [status-bar, header-bar, profile, input, sticky-action, save-button]
+    hidden_components: [keyboard, dismiss-area, caret, nickname-error]
+    submit_disabled: "depends on isDirty (init focused → false; typing-dirty 후 dismiss → true)"
+    labels:
+      save_button: "저장"
+
+# ─────────────────────────────
+# Interactions
+# ─────────────────────────────
+interactions:
+  - trigger: tap
+    target: "#back-button"
+    action: navigate-or-confirm
+    destination: "back (clean) | confirm-modal app-007 (dirty)"
+    transition: slide-right
+    note: "AC-1.1.f / app-001 동일 분기"
+
+  - trigger: tap
+    target: "#profile-img-trigger"
+    action: open-overlay
+    destination: "app-005 (이미지 소스 바텀시트)"
+    transition: slide-up
+    note: "키보드 활성 시에도 사진 변경 진입 가능"
+
+  - trigger: input
+    target: "#nickname-input"
+    action: toggle-state
+    state_key: "typing-dirty (or error if length > 20)"
+    note: "AC-1.2a — counter 갱신 + Save toggle"
+
+  - trigger: focus
+    target: "#nickname-input"
+    action: toggle-state
+    state_key: "focused"
+    note: "AC-1.2 — 키보드 활성 (slide-up)"
+
+  - trigger: tap
+    target: "#dismiss-area"
+    action: toggle-state
+    state_key: "default-with-content"
+    note: "AC-1.2b — 키보드 외부 tap → dismiss"
+
+  - trigger: tap
+    target: "#save-button"
+    action: submit
+    destination: "결과 화면 (loading 거쳐 → app-002)"
+    transition: slide-left
+    note: "AC-1.2c — submit_enabled 시에만"
+
+# ─────────────────────────────
+# Visual Rules
+# ─────────────────────────────
+rules:
+  - condition: "state in {focused, typing-dirty, error}"
+    effect: "Keyboard mock visible (slide-up) + Save sticky 위로"
+    example: "input focus 직후"
+
+  - condition: "state == default-with-content"
+    effect: "Keyboard hidden (slide-down) + dismiss-area pointer-events none"
+    example: "키보드 외부 tap"
+
+  - condition: "isDirty == false (focused init)"
+    effect: "SaveButton disabled (bg #F1F1F1, label #8A8A8A)"
+    example: "닉네임 input focus 직후 — 아직 입력 변경 없음"
+
+  - condition: "isDirty == true (typing-dirty)"
+    effect: "SaveButton enabled (bg #262626, label #FFFFFF)"
+    example: "1글자라도 변경"
+
+  - condition: "NicknameInput length > 20"
+    effect: "border error + NicknameError visible + Save disabled"
+    example: "21자 입력"
+
+  - condition: "loading state"
+    effect: "Keyboard slide-down + 입력 lock + spinner"
+    example: "저장 tap"
+
+# ─────────────────────────────
+# Labels (ko)
+# ─────────────────────────────
+labels:
+  header:
+    title: "프로필 편집"
+    back_aria: "뒤로 가기"
+  body:
+    nickname_label: "닉네임"
+    nickname_placeholder: "닉네임을 입력해주세요"
+    char_counter_template: "{n}/20"
+  buttons:
+    save: "저장"
+    save_loading: "저장 중…"
+  errors:
+    nickname_too_long: "20자 이내로 입력해주세요"
+  keyboard_mock:
+    suggestions: ["지구", "지구촌", "지구과학"]
+    keys_row1: ["ㅂ","ㅈ","ㄷ","ㄱ","ㅅ","ㅛ","ㅕ","ㅑ","ㅐ","ㅔ"]
+    keys_row2: ["ㅁ","ㄴ","ㅇ","ㄹ","ㅎ","ㅗ","ㅓ","ㅏ","ㅣ"]
+    keys_row3_letters: ["ㅋ","ㅌ","ㅊ","ㅍ","ㅠ","ㅜ","ㅡ"]
+    keys_row3_fn_left: "shift"   # ⇧ icon
+    keys_row3_fn_right: "delete" # ⌫ icon
+    keys_row4_left: "123"
+    keys_row4_globe: "globe"     # 🌐 → lucide globe SVG
+    keys_row4_space: "space"
+    keys_row4_return: "return"
+
+# ─────────────────────────────
+# Token Map
+# ─────────────────────────────
+token_map:
+  background: "wds.background.normal → #FFFFFF"
+  text_primary: "pe.text-primary → #262626"
+  text_secondary: "pe.text-secondary → #656565"
+  text_tertiary: "pe.text-tertiary → #8A8A8A"
+  divider: "wds.line.normal → #E4E5E9"
+  input_fill: "pe.input.fill → #F7F7F7"
+  input_border: "pe.input.border → #F1F1F1"
+  input_border_focus: "pe.text-primary → #262626"
+  input_radius: "wds.radius.lg → 16px"
+  input_text: "pe.text-primary → #262626"
+  save_disabled_fill: "pe.save.disabled → #F1F1F1"
+  save_disabled_label: "pe.save.disabled-label → #8A8A8A"
+  save_active_fill: "pe.save.active → #262626"
+  save_active_label: "pe.save.active-label → #FFFFFF"
+  save_radius: "wds.radius.lg → 16px"
+  avatar_empty_bg: "pe.avatar.empty.bg → #F5F3FF"
+  avatar_border: "pe.avatar.border → rgba(136,136,136,0.2)"
+  camera_badge_fill: "pe.camera.badge.fill → #E2E2E2"
+  camera_badge_border: "pe.camera.badge.border → #FFFFFF"
+  error_text: "wds.label.error → #FF3B30"
+  error_bg:   "wds.color.red.100 → #FFE5E3"
+  kbd_bg: "kbd.bg → #D1D5DB"
+  kbd_key_fill: "kbd.key-fill → #FFFFFF"
+  kbd_key_shadow: "kbd.key-shadow → rgba(0,0,0,0.18)"
+  kbd_key_fn: "kbd.key-fn-fill → #ABB0BC"
+  kbd_suggestion_bar: "kbd.suggestion-bar → #D1D5DB"
+  kbd_suggestion_divider: "kbd.suggestion-divider → rgba(0,0,0,0.2)"
+  kbd_text: "kbd.text → #000000"
+  kbd_home_indicator: "kbd.home-indicator → #000000"
+
+# ─────────────────────────────
+# Quality Score
+# ─────────────────────────────
+quality_score:
+  extraction_accuracy:
+    total_components: 18   # 본 화면은 키보드 mock 키들 포함하여 노출 요소 다수
+    with_token_map: 18
+    with_html_mapping: 18
+    score: "36 / 36 = 1.0"
+  fabrication_risk:
+    inferred_fields:
+      - "Keyboard mock 의 키 배열 (한글 두벌식) — task 'iOS 키보드' 명시 + 표준 한글 두벌식 채택 (low)"
+      - "Suggestion bar 내용 ('지구','지구촌','지구과학') — 닉네임 prefill '지구 정복하는 까망콩' 에서 추론 (low)"
+      - "DismissArea (키보드 외부 tap dismiss) — AC-1.2b 명시 직접 매핑 (none)"
+      - "Caret blink animation — task 'caret' 명시 + 시각 보강 (low)"
+      - "Sticky-above-keyboard layout — task AC '저장 버튼이 키보드 위에 sticky' 직접 명시 (none)"
+    risk_level: "low"
+    note: "PRD/task 직접 명시 + app-001 baseline 토큰 100% 재사용. 키보드 mock 만 표준 패턴 추론."
+  schema_completeness:
+    required_sections: ["meta", "component_tree", "layout_spec", "states", "interactions", "labels", "token_map"]
+    present_sections:  ["meta", "component_tree", "components", "layout_spec", "states", "interactions", "rules", "labels", "token_map", "quality_score", "form_persona_check"]
+    score: "11 / 7 = 1.0 (all required + 4 enrichment sections)"
+  context_coverage:
+    why_linked: "4 / 4 = 1.0 (AC-1.2 + AC-1.2a/b/c 모두 components/interactions 에 연결됨)"
+    what_resolved: "18 / 18 = 1.0 (모든 component → token + pattern 해소)"
+
+# ─────────────────────────────
+# Form Persona Compliance (cross-check)
+# ─────────────────────────────
+form_persona_check:
+  forced_rules:
+    - id: 1
+      rule: "inline validation 정의 — error.{field-id} 또는 validation_rules"
+      result: "met"
+      evidence: "states.error.validation_rules + #nickname-error inline component"
+    - id: 2
+      rule: "Submit 버튼 disabled / enabled 둘 다 정의"
+      result: "met"
+      evidence: "states.focused.submit_disabled + states.typing-dirty.submit_enabled + components.SaveButton.states 둘 다 명시"
+    - id: 3
+      rule: "Error message inline 직하 (alert 박스 금지)"
+      result: "met"
+      evidence: "#nickname-error <p> 가 #nickname-field 직하 block; alert/confirm/prompt 미사용"
+    - id: 4
+      rule: "Primary action 1개만 (Submit/Save)"
+      result: "met"
+      evidence: "type=button-primary 인 컴포넌트 SaveButton 1개. BackButton 은 icon-button. 키보드 키들은 button 이 아닌 div (시각 mock)."
+  recommended_rules:
+    - id: 1
+      rule: "Validation 시점 focus-out (blur)"
+      result: "skipped"
+      rationale: "app-001 동일 — char counter 즉시 피드백 UX 가 모바일에서 더 자연스러움. archetype_recommendation_skipped 로깅."
+    - id: 2
+      rule: "Submit 후 loading state"
+      result: "met"
+      evidence: "states.loading + SaveButton.states.loading + onSave() spinner"
+    - id: 3
+      rule: "긴 form 섹션 분할 (8개 미만)"
+      result: "n/a"
+      evidence: "본 화면 입력 슬롯 1개 (닉네임) — 분할 불필요"

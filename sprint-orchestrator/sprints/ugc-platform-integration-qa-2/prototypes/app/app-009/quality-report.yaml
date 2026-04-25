@@ -1,0 +1,250 @@
+# Quality Report: 프로필편집_사진_앨범선택 (app-009)
+# Generated: 2026-04-25 (DE Step C completion)
+# Schema: v2 (Pass 6 + archetype persona + asset layer)
+
+meta:
+  task_id: "app-009"
+  screen_name: "프로필편집_사진_앨범선택"
+  sprint_id: "ugc-platform-integration-qa-2"
+  archetype: "form"
+  generated_at: "2026-04-25T00:00:00Z"
+  figma_frame: "37160:80126"
+  figma_file: "7hozJ6Pvs09q98BxvChj08"
+  parent_screen: "app-005"
+  next_screen: "app-008"
+  resolution: "in-app picker (intent.md gate Q1)"
+
+# ─────────────────────────────
+# Pass 6 Anti-Slop Audit (9/9 — no exemplar inlined → #10 N/A)
+# ─────────────────────────────
+anti_slop_audit:
+  status: "passed"
+  score: "9/9"
+  exemplar_drift_check_run: false
+  checks:
+    - id: 1
+      name: "hex tokens compliance"
+      result: "pass"
+      detail: |
+        proto-only hex diff vs tokens.css = {#1a1a2e, #2a2a3e, #e0e0e0, #f0f0f0} —
+        all in body / .control-panel (Pass 6 검사 범위 제외).
+        .screen 후손 색상은 모두 var(--wds-*)/var(--pe-*)/var(--thumb-grad-*) 토큰만 사용.
+        그라디언트 색은 모두 tokens.css purple-50/100, red-100, neutral-50/100/200 hex 조합.
+    - id: 2
+      name: "emoji on interactive"
+      result: "pass"
+      detail: |
+        모든 아이콘은 inline Lucide SVG (close-x, chevron-down, check, image, alert-circle, signal/battery).
+        photo-cell SelectIndicator check 마크 = inline SVG, 이모지 미사용.
+        cancel-btn, submit-btn 모두 텍스트 only.
+    - id: 3
+      name: "border-left card slop"
+      result: "pass"
+      detail: "no border-left:Npx solid pattern. 선택 강조는 box-shadow inset 3px var(--wds-fill-brand-primary) 사용."
+    - id: 4
+      name: "font-family Pretendard only"
+      result: "pass"
+      detail: |
+        body / .screen / .header / .submit-btn / .cancel-btn 모두 var(--wds-font-family-primary) 또는 inherit.
+        ui-monospace 는 .control-panel 셀렉터 4건 (Pass 6 검사 제외 영역).
+    - id: 5
+      name: "no brand-purple gradient"
+      result: "pass"
+      detail: |
+        --thumb-grad-a/d 가 purple-50→100 light variant 그라디언트.
+        Pass 6 #5 트리거는 'linear-gradient(... #8752FA ...)' (purple-500 자체).
+        본 prototype 의 모든 그라디언트는 #F5F0FF, #EBE1FF, #FFE5E3, #F0F1F3, #F7F8F9, #E4E5E9 만 사용 — purple-500 미사용 → PASS.
+    - id: 6
+      name: "no placeholder-image on main content"
+      result: "pass"
+      detail: |
+        photo-cell 12개 = gradient-token kind (assets.feed_thumbnails.kind: gradient-token).
+        <div class='placeholder-image'> 미사용. context-engine.assets.feed_thumbnails.needs_real_content: false.
+        gradient 색은 모두 tokens.css 등재 hex (#1 검사도 면제).
+    - id: 7
+      name: "interaction count parity"
+      result: "pass"
+      detail: |
+        spec interactions = 4 (header-close, photo-cell tap, cancel-btn, submit-btn).
+        addEventListener bindings = 4 (cells.forEach=1 generic + header-close + cancel-btn + submit-btn) + 5 stateButtons (control-panel, 검사 제외).
+        DOM-spec parity OK.
+    - id: 8
+      name: "no blocking dialog"
+      result: "pass"
+      detail: |
+        no alert/confirm/prompt — verifier-safe.
+        navigation 시뮬레이션은 counter 텍스트 변경 + setTimeout 으로 처리.
+    - id: 9
+      name: "archetype persona (form) 강제 룰 4/4"
+      result: "pass"
+      detail: "see form_persona section below"
+    - id: 10
+      name: "exemplar drift"
+      result: "skipped"
+      detail: "no exemplar inlined for app-009 form picker — Pass 6 #10 N/A"
+
+# ─────────────────────────────
+# Form Archetype Persona (form.md 강제 룰 4/4)
+# ─────────────────────────────
+form_persona:
+  status: "passed"
+  score: "4/4"
+  forced_rules:
+    - id: 1
+      name: "Inline validation 정의"
+      result: "pass"
+      actual: |
+        validation_rules.field=selection-count rule '≥1 photo selected' + error_message '사진을 1장 선택해 주세요'.
+        DOM: #error-msg (role=alert, aria-live=assertive) — state=invalid_attempt 시 .shown 클래스 추가.
+        screen-spec.yaml validation_rules + states.invalid_attempt 둘 다 정의.
+
+    - id: 2
+      name: "Submit disabled / enabled 둘 다 정의"
+      result: "pass"
+      actual: |
+        submit_state_transitions.submit_disabled (selectedCount==0) + submit_enabled (>=1).
+        Visual tokens 명확 분리:
+          disabled: var(--pe-save-disabled) #F1F1F1 + var(--pe-save-disabled-label) #8A8A8A
+          enabled : var(--wds-fill-brand-primary) #8752FA + var(--wds-label-inverse) #FFFFFF
+        JS: submitBtn.classList.add/remove('enabled') + aria-disabled toggle.
+
+    - id: 3
+      name: "Error message inline (위·우측 alert 박스 금지)"
+      result: "pass"
+      actual: |
+        #error-msg 위치: bottom-bar 직상 (input area = photo-grid 의 직하).
+        모바일 picker UX 표준: input → error → submit 순서.
+        margin: 0 16px 8px (좌우 padding 16px, submit 위 8px gap).
+        상단 alert 박스 미사용 — 인라인 변형 (background fill-status-error-weak + label-error red).
+
+    - id: 4
+      name: "Primary action 1개"
+      result: "pass"
+      actual: |
+        button-primary: submit-btn (#submit-btn) — 1개.
+        button-secondary: cancel-btn (ghost text, label-alternative — 동급 강조 없음).
+        icon-button: header-close (별도 카테고리, 상단 닫기).
+        동급 시각 weight 의 primary 충돌 없음.
+
+  recommended_rules:
+    - id: 1
+      name: "Validation on focus-out (blur)"
+      result: "accepted"
+      actual: |
+        Tap-based picker — focus-out 개념 N/A.
+        대신 selectionCount 변화 시 즉시 submit 상태 토글 (즉각 피드백).
+        타이핑이 없는 picker form 특성으로 blur 룰 적용 불가.
+
+    - id: 2
+      name: "Submit loading state"
+      result: "skipped"
+      log: "archetype_recommendation_skipped"
+      rationale: |
+        submit → in-app navigation (app-008 크롭). async API call 없음.
+        loading state 추가 시 사용자가 잘못된 신호 받음 ('서버 처리 중' 오인).
+        app-008 진입 후 크롭 화면이 자체 loading 처리.
+
+    - id: 3
+      name: "긴 form 분할 (8개 미만 input)"
+      result: "accepted"
+      actual: "단일 input field (grid 자체 = 1 input). N장 사진은 single-select 토글로 1 field 처리. 8개 미만 input rule 자동 충족."
+
+# ─────────────────────────────
+# Asset Layer (Pass 6 #6 연결)
+# ─────────────────────────────
+assets:
+  feed_thumbnails:
+    kind: "gradient-token"
+    source: "tokens.css derived (purple-50/100, red-100, neutral-50/100/200 조합 그라디언트 4종)"
+    needs_real_content: false
+    rationale: |
+      sprint-level 사진 자산 미공급. context-engine.assets.feed_thumbnails.kind: gradient-token 으로 등록.
+      그라디언트 hex 모두 tokens.css 등재 → Pass 6 #1 도 면제 통과.
+      사용자가 실제 사진 mock 요구 시 (intent.md Q4) → real-image kind 변경 + KB sample_image 또는 Sprint Lead 자산 질의.
+  icons:
+    kind: "illustration"
+    source: "Lucide inline SVG (x close, chevron-down, check, image, alert-circle, signal, battery)"
+    fallback: "text-placeholder (미사용)"
+
+# ─────────────────────────────
+# Quality Score (from screen-spec.yaml)
+# ─────────────────────────────
+quality_score:
+  extraction_accuracy: "22/22 = 1.00"
+  fabrication_risk: "medium"
+  inferred_fields:
+    - "in-app picker 구현 결정 (vs iOS 시스템 picker — task '시스템 picker 풍' 모호) — intent.md Q1"
+    - "single-select 가정 (PRD/task 명시 없음, 프로필 1장 표준 패턴)"
+    - "BottomBar SelectionCounter '{n}장 선택' 카피 (iOS Photos 한국 표준 추론)"
+    - "ErrorMessage '사진을 1장 선택해 주세요' 카피 (form persona #1 표준)"
+    - "PhotoThumb gradient-token 4종 순환 (실제 사진 자산 부재)"
+    - "HeaderTitle '최근 항목' (iOS Photos 한국 표준)"
+    - "Header chevron(앨범전환) disabled visual hint (out-of-scope, 시각 컨텍스트만 유지)"
+  schema_completeness: "11/7 = 1.00 (all required + extras)"
+  context_coverage:
+    why_linked: "5/5 ACs (3-col grid + 6+ thumbs + tap → 크롭 + close → 시트복귀 + loading skeleton)"
+    what_resolved: "11/11 components → tokens.css 등재 토큰만 사용 (그라디언트 4종 토큰 hex 조합)"
+
+# ─────────────────────────────
+# Tokens used (consolidated)
+# ─────────────────────────────
+tokens_used:
+  semantic:
+    - "wds-background-normal"
+    - "wds-surface-secondary"
+    - "wds-surface-tertiary"
+    - "wds-fill-brand-primary"
+    - "wds-fill-brand-strong"
+    - "wds-fill-status-error-weak"
+    - "wds-label-normal"
+    - "wds-label-alternative"
+    - "wds-label-assistive"
+    - "wds-label-inverse"
+    - "wds-label-brand"
+    - "wds-label-error"
+    - "wds-line-alternative"
+  gradient_tokens:
+    - "thumb-grad-a (purple-50 → purple-100)"
+    - "thumb-grad-b (red-100 → neutral-100)"
+    - "thumb-grad-c (neutral-50 → neutral-200)"
+    - "thumb-grad-d (purple-100 → purple-50)"
+  spacing: ["wds-spacing-2..40 grid"]
+  radius: ["wds-radius-sm", "wds-radius-md", "wds-radius-full"]
+  typography:
+    - "wds-font-family-primary (Pretendard)"
+    - "wds-font-size-lg (16px) — title/cancel/submit"
+    - "wds-font-size-sm (13px) — counter/error"
+    - "wds-font-weight-medium/semibold"
+  profile_edit_aliases:
+    - "pe-save-disabled / pe-save-disabled-label (form persona #2 disabled visual)"
+    - "pe-text-primary / pe-text-secondary"
+
+# ─────────────────────────────
+# Files emitted
+# ─────────────────────────────
+files:
+  context_engine: "sprints/ugc-platform-integration-qa-2/prototypes/context/context-engine.yaml"
+  tokens_css: "sprints/ugc-platform-integration-qa-2/prototypes/context/tokens.css"
+  screen_spec: "sprints/ugc-platform-integration-qa-2/prototypes/app/app-009/screen-spec.yaml"
+  intent_md: "sprints/ugc-platform-integration-qa-2/prototypes/app/app-009/intent.md"
+  prototype_alpha: "sprints/ugc-platform-integration-qa-2/prototypes/app/app-009/prototype-alpha.html"
+  prototype_html: "sprints/ugc-platform-integration-qa-2/prototypes/app/app-009/prototype.html"
+  quality_report: "sprints/ugc-platform-integration-qa-2/prototypes/app/app-009/quality-report.yaml"
+
+# ─────────────────────────────
+# Final verdict
+# ─────────────────────────────
+verdict:
+  status: "READY_FOR_REVIEW (intent.md gate 권장 — fabrication_risk medium)"
+  pass_6: "9/9"
+  form_persona: "4/4"
+  fabrication_risk: "medium"
+  intent_md_emitted: true
+  blockers: []
+  notes:
+    - "intent.md gate 권장 (B.6 트리거: fabrication_risk medium + system vs in-app picker 결정 모호)."
+    - "Q1 (CRITICAL): in-app vs system picker — Sprint Lead 결정 필요. in-app 가정으로 진행."
+    - "Q2: single-select 가정 — multi-select 요구 시 SelectIndicator 순번 표시로 변경 필요."
+    - "Q4: PhotoThumb gradient-token 4종 — 실제 사진 자산 요구 시 KB sample_image 또는 Sprint Lead 질의."
+    - "Form persona rec #2 (submit loading) skipped — in-app navigation, async 불필요. archetype_recommendation_skipped logged."
+    - "control-panel preserved: 5 states (default, selected, invalid_attempt, loading, empty) + breadcrumb + screen select."

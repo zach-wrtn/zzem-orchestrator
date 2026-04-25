@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>app-009 · 프로필편집_사진_앨범선택 (form)</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+<style>
+  /* === tokens.css inline (sprint-level — ugc-platform-integration-qa-2) === */
+  :root {
+    /* PRIMITIVE - Purple */
+    --wds-color-purple-50:  #F5F0FF;
+    --wds-color-purple-100: #EBE1FF;
+    --wds-color-purple-400: #A17BFF;
+    --wds-color-purple-500: #8752FA;
+    --wds-color-purple-600: #7040E0;
+    --wds-color-purple-700: #5A30C0;
+
+    /* PRIMITIVE - Neutral */
+    --wds-color-neutral-0:   #FFFFFF;
+    --wds-color-neutral-50:  #F7F8F9;
+    --wds-color-neutral-100: #F0F1F3;
+    --wds-color-neutral-200: #E4E5E9;
+    --wds-color-neutral-300: #D1D3D8;
+    --wds-color-neutral-400: #B5B8BF;
+    --wds-color-neutral-500: #8E9199;
+    --wds-color-neutral-600: #6B6E76;
+    --wds-color-neutral-700: #46474C;
+    --wds-color-neutral-900: #212228;
+    --wds-color-neutral-1000: #000000;
+
+    /* PRIMITIVE - Status */
+    --wds-color-red-100: #FFE5E3;
+    --wds-color-red-500: #FF3B30;
+    --wds-color-red-600: #E0241A;
+    --wds-color-green-500: #34C759;
+    --wds-color-yellow-500: #FFCC00;
+
+    /* SEMANTIC - Background */
+    --wds-background-normal:    var(--wds-color-neutral-0);
+    --wds-background-elevated:  var(--wds-color-neutral-0);
+    --wds-background-dimmed:    rgba(0, 0, 0, 0.50);
+
+    /* SEMANTIC - Surface */
+    --wds-surface-primary:   var(--wds-color-neutral-0);
+    --wds-surface-secondary: var(--wds-color-neutral-50);
+    --wds-surface-tertiary:  var(--wds-color-neutral-100);
+
+    /* SEMANTIC - Fill */
+    --wds-fill-brand-primary: var(--wds-color-purple-500);
+    --wds-fill-brand-weak:    var(--wds-color-purple-50);
+    --wds-fill-brand-strong:  var(--wds-color-purple-600);
+    --wds-fill-neutral:       var(--wds-color-neutral-100);
+    --wds-fill-status-error:  var(--wds-color-red-500);
+    --wds-fill-status-error-weak: var(--wds-color-red-100);
+
+    /* SEMANTIC - Label */
+    --wds-label-normal:      var(--wds-color-neutral-900);
+    --wds-label-alternative: var(--wds-color-neutral-600);
+    --wds-label-assistive:   var(--wds-color-neutral-500);
+    --wds-label-disabled:    var(--wds-color-neutral-300);
+    --wds-label-inverse:     var(--wds-color-neutral-0);
+    --wds-label-brand:       var(--wds-color-purple-500);
+    --wds-label-error:       var(--wds-color-red-500);
+
+    /* SEMANTIC - Line */
+    --wds-line-normal:      var(--wds-color-neutral-200);
+    --wds-line-alternative: var(--wds-color-neutral-100);
+
+    /* PROFILE EDIT (Group 001) aliases */
+    --pe-input-fill: #F7F7F7;
+    --pe-save-disabled: #F1F1F1;
+    --pe-save-disabled-label: #8A8A8A;
+    --pe-save-active: #262626;
+    --pe-save-active-label: #FFFFFF;
+    --pe-text-primary: #262626;
+    --pe-text-secondary: #656565;
+    --pe-text-tertiary: #8A8A8A;
+
+    /* Photo thumb gradient tokens (Pass 6 #6 면제 — gradient-token kind) */
+    --thumb-grad-a: linear-gradient(135deg, #F5F0FF 0%, #EBE1FF 100%);
+    --thumb-grad-b: linear-gradient(135deg, #FFE5E3 0%, #F0F1F3 100%);
+    --thumb-grad-c: linear-gradient(135deg, #F7F8F9 0%, #E4E5E9 100%);
+    --thumb-grad-d: linear-gradient(135deg, #EBE1FF 0%, #F5F0FF 100%);
+
+    /* SPACING */
+    --wds-spacing-2:  2px;
+    --wds-spacing-4:  4px;
+    --wds-spacing-6:  6px;
+    --wds-spacing-8:  8px;
+    --wds-spacing-12: 12px;
+    --wds-spacing-16: 16px;
+    --wds-spacing-20: 20px;
+    --wds-spacing-24: 24px;
+    --wds-spacing-32: 32px;
+    --wds-spacing-40: 40px;
+
+    /* RADIUS */
+    --wds-radius-xs:   4px;
+    --wds-radius-sm:   8px;
+    --wds-radius-md:   12px;
+    --wds-radius-lg:   16px;
+    --wds-radius-xl:   20px;
+    --wds-radius-full: 9999px;
+
+    /* TYPOGRAPHY */
+    --wds-font-family-primary: 'Pretendard', -apple-system, 'SF Pro Display', sans-serif;
+    --wds-font-weight-regular:  400;
+    --wds-font-weight-medium:   500;
+    --wds-font-weight-semibold: 600;
+    --wds-font-weight-bold:     700;
+    --wds-font-size-2xs: 11px;
+    --wds-font-size-xs:  12px;
+    --wds-font-size-sm:  13px;
+    --wds-font-size-md:  14px;
+    --wds-font-size-lg:  16px;
+    --wds-font-size-xl:  18px;
+    --wds-font-size-2xl: 20px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--wds-font-family-primary);
+    background: #f0f0f0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 16px;
+    color: var(--wds-label-normal);
+  }
+
+  /* === Control Panel (Pass 6 audit 제외 영역) === */
+  .control-panel {
+    width: 390px;
+    background: #1a1a2e;
+    color: #e0e0e0;
+    border-radius: 12px 12px 0 0;
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 13px;
+    font-family: ui-monospace, monospace;
+  }
+  .control-panel__row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .control-panel__label { color: #888; font-size: 11px; min-width: 56px; }
+  .control-panel select {
+    background: #2a2a3e; color: #e0e0e0; border: 1px solid #444;
+    border-radius: 6px; padding: 4px 8px; font-size: 12px; flex: 1;
+    font-family: ui-monospace, monospace;
+  }
+  .control-panel__states { display: flex; gap: 4px; flex-wrap: wrap; flex: 1; }
+  .control-panel__state-btn {
+    background: #2a2a3e; color: #bbb; border: 1px solid #444;
+    border-radius: 6px; padding: 4px 10px; font-size: 11px; cursor: pointer;
+    transition: all 0.15s;
+    font-family: ui-monospace, monospace;
+  }
+  .control-panel__state-btn.active {
+    background: #8752FA; color: #fff; border-color: #8752FA;
+  }
+  .control-panel__breadcrumb { color: #666; font-size: 11px; font-family: ui-monospace, monospace; }
+  .control-panel__hint { color: #999; font-size: 10px; font-style: italic; }
+
+  /* === Device Frame === */
+  .device-frame {
+    width: 390px;
+    height: 844px;
+    background: var(--wds-background-normal);
+    overflow: hidden;
+    position: relative;
+    border: 1px solid #ddd;
+    border-radius: 0 0 12px 12px;
+    isolation: isolate;
+  }
+
+  .screen {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    position: relative;
+  }
+
+  /* === Status Bar === */
+  .status-bar {
+    height: 44px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 var(--wds-spacing-24);
+    font-size: var(--wds-font-size-md);
+    font-weight: var(--wds-font-weight-semibold);
+    color: var(--wds-label-normal);
+    flex-shrink: 0;
+  }
+  .status-bar__icons { display: flex; gap: 6px; align-items: center; }
+
+  /* === Header === */
+  .header {
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 var(--wds-spacing-12);
+    border-bottom: 1px solid var(--wds-line-alternative);
+    background: var(--wds-background-normal);
+    flex-shrink: 0;
+  }
+  .header__icon-btn {
+    background: none;
+    border: none;
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--pe-text-primary);
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .header__title-wrap {
+    display: flex;
+    align-items: center;
+    gap: var(--wds-spacing-4);
+  }
+  .header__title {
+    font-size: var(--wds-font-size-lg);
+    font-weight: var(--wds-font-weight-semibold);
+    color: var(--pe-text-primary);
+    letter-spacing: -0.2px;
+  }
+  .header__chevron {
+    color: var(--pe-text-secondary);
+    display: inline-flex;
+  }
+  .header__spacer { width: 40px; height: 40px; }
+
+  /* === Photo Grid === */
+  .photo-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--wds-spacing-2);
+    padding: var(--wds-spacing-2);
+    overflow-y: auto;
+    background: var(--wds-background-normal);
+  }
+
+  .photo-cell {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    overflow: hidden;
+    background: var(--thumb-grad-a);
+    transition: opacity 0.15s ease, box-shadow 0.15s ease;
+  }
+  /* gradient-token rotation across 12 cells (Pass 6 #6 면제 kind) */
+  .photo-cell:nth-child(4n+1) { background: var(--thumb-grad-a); }
+  .photo-cell:nth-child(4n+2) { background: var(--thumb-grad-b); }
+  .photo-cell:nth-child(4n+3) { background: var(--thumb-grad-c); }
+  .photo-cell:nth-child(4n+4) { background: var(--thumb-grad-d); }
+
+  .photo-cell:hover { opacity: 0.92; }
+  .photo-cell:active { opacity: 0.85; }
+
+  .photo-cell.selected {
+    opacity: 0.85;
+    box-shadow: inset 0 0 0 3px var(--wds-fill-brand-primary);
+  }
+
+  .select-indicator {
+    position: absolute;
+    top: var(--wds-spacing-8);
+    right: var(--wds-spacing-8);
+    width: 24px;
+    height: 24px;
+    border-radius: var(--wds-radius-full);
+    background: rgba(255, 255, 255, 0.6);
+    box-shadow: 0 0 0 2px var(--wds-color-neutral-0);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: transparent;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .photo-cell.selected .select-indicator {
+    background: var(--wds-fill-brand-primary);
+    color: var(--wds-label-inverse);
+    box-shadow: 0 0 0 2px var(--wds-color-neutral-0);
+  }
+
+  /* === Error Message (form persona #1+#3 — inline, just above bottom-bar) === */
+  .error-msg {
+    display: none;
+    margin: 0 var(--wds-spacing-16) var(--wds-spacing-8);
+    padding: var(--wds-spacing-8) var(--wds-spacing-12);
+    background: var(--wds-fill-status-error-weak);
+    color: var(--wds-label-error);
+    font-size: var(--wds-font-size-sm);
+    font-weight: var(--wds-font-weight-medium);
+    border-radius: var(--wds-radius-sm);
+    flex-shrink: 0;
+  }
+  .error-msg.shown { display: flex; align-items: center; gap: var(--wds-spacing-6); }
+  .error-msg__icon { display: inline-flex; flex-shrink: 0; }
+
+  /* === Bottom Bar === */
+  .bottom-bar {
+    background: var(--wds-background-normal);
+    border-top: 1px solid var(--wds-line-alternative);
+    padding: var(--wds-spacing-12) var(--wds-spacing-16) var(--wds-spacing-32);
+    display: flex;
+    flex-direction: column;
+    gap: var(--wds-spacing-8);
+    flex-shrink: 0;
+  }
+  .selection-count {
+    font-size: var(--wds-font-size-sm);
+    font-weight: var(--wds-font-weight-medium);
+    color: var(--wds-label-assistive);
+    transition: color 0.15s ease;
+  }
+  .selection-count.active {
+    color: var(--wds-label-brand);
+  }
+  .actions-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--wds-spacing-12);
+  }
+
+  /* form persona #4: cancel = ghost text (secondary), submit = primary (single primary) */
+  .cancel-btn {
+    background: transparent;
+    border: none;
+    color: var(--wds-label-alternative);
+    font-family: inherit;
+    font-size: var(--wds-font-size-lg);
+    font-weight: var(--wds-font-weight-medium);
+    padding: var(--wds-spacing-12) var(--wds-spacing-16);
+    cursor: pointer;
+    border-radius: var(--wds-radius-md);
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .cancel-btn:hover { background: var(--wds-surface-secondary); color: var(--wds-label-normal); }
+  .cancel-btn:active { background: var(--wds-surface-tertiary); }
+
+  .submit-btn {
+    background: var(--pe-save-disabled);
+    color: var(--pe-save-disabled-label);
+    border: none;
+    font-family: inherit;
+    font-size: var(--wds-font-size-lg);
+    font-weight: var(--wds-font-weight-semibold);
+    padding: var(--wds-spacing-12) var(--wds-spacing-24);
+    border-radius: var(--wds-radius-md);
+    cursor: not-allowed;
+    min-width: 88px;
+    transition: background 0.18s ease, color 0.18s ease, transform 0.1s ease;
+  }
+  .submit-btn.enabled {
+    background: var(--wds-fill-brand-primary);
+    color: var(--wds-label-inverse);
+    cursor: pointer;
+  }
+  .submit-btn.enabled:hover { background: var(--wds-fill-brand-strong); }
+  .submit-btn.enabled:active { transform: scale(0.98); }
+
+  /* === Skeleton (loading state) === */
+  .skeleton-cell {
+    aspect-ratio: 1 / 1;
+    background: var(--wds-surface-tertiary);
+    background-image: linear-gradient(90deg,
+      var(--wds-surface-tertiary) 0%,
+      var(--wds-surface-secondary) 50%,
+      var(--wds-surface-tertiary) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s ease-in-out infinite;
+  }
+  @keyframes shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* === Empty State === */
+  .empty-state {
+    display: none;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--wds-spacing-12);
+    padding: var(--wds-spacing-40);
+    color: var(--wds-label-assistive);
+  }
+  .empty-state__icon {
+    width: 64px;
+    height: 64px;
+    border-radius: var(--wds-radius-full);
+    background: var(--wds-surface-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--wds-label-assistive);
+  }
+  .empty-state__text {
+    font-size: var(--wds-font-size-md);
+    font-weight: var(--wds-font-weight-medium);
+    color: var(--wds-label-alternative);
+  }
+
+  /* === State overrides === */
+  .device-frame[data-state="loading"] .photo-grid .photo-cell { display: none; }
+  .device-frame[data-state="loading"] .photo-grid .skeleton-cell { display: block; }
+  .device-frame[data-state="loading"] .selection-count { color: var(--wds-label-assistive); }
+
+  .device-frame:not([data-state="loading"]) .skeleton-cell { display: none; }
+
+  .device-frame[data-state="empty"] .photo-grid { display: none; }
+  .device-frame[data-state="empty"] .empty-state { display: flex; }
+
+  .device-frame[data-state="invalid_attempt"] .error-msg { display: flex; }
+
+  @media (max-width: 480px) {
+    body { padding: 0; align-items: stretch; min-height: 100dvh; }
+    .control-panel { display: none; }
+    .device-frame {
+      width: 100dvw;
+      height: 100dvh;
+      border: none;
+      border-radius: 0;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- Control Panel (verifier-friendly — Pass 6 audit 제외 영역) -->
+<div class="control-panel">
+  <div class="control-panel__row">
+    <span class="control-panel__label">Screen</span>
+    <select id="screen-select">
+      <option value="photo-picker">프로필편집_사진_앨범선택</option>
+    </select>
+  </div>
+  <div class="control-panel__row">
+    <span class="control-panel__label">State</span>
+    <div class="control-panel__states" id="state-toggles">
+      <button class="control-panel__state-btn active" data-state="default" data-state-toggle>default</button>
+      <button class="control-panel__state-btn" data-state="selected" data-state-toggle>selected</button>
+      <button class="control-panel__state-btn" data-state="invalid_attempt" data-state-toggle>invalid_attempt</button>
+      <button class="control-panel__state-btn" data-state="loading" data-state-toggle>loading</button>
+      <button class="control-panel__state-btn" data-state="empty" data-state-toggle>empty</button>
+    </div>
+  </div>
+  <div class="control-panel__row">
+    <span class="control-panel__breadcrumb" id="breadcrumb">photo-picker · default</span>
+  </div>
+  <div class="control-panel__row">
+    <span class="control-panel__hint">v2 dogfood — form archetype persona enforced (4/4) · in-app picker (intent.md gate Q1)</span>
+  </div>
+</div>
+
+<!-- Device Frame -->
+<div class="device-frame" id="device-frame" data-state="default">
+  <section class="screen" id="photo-picker" aria-label="프로필 사진 앨범 선택">
+
+    <!-- Status Bar -->
+    <div class="status-bar">
+      <span>9:41</span>
+      <span class="status-bar__icons">
+        <svg width="16" height="11" viewBox="0 0 16 11" fill="none" aria-hidden="true">
+          <path d="M1 6.5a6.5 6.5 0 0 1 13 0v3.75a.75.75 0 0 1-.75.75H1.75A.75.75 0 0 1 1 10.25z" fill="currentColor"/>
+        </svg>
+        <svg width="16" height="11" viewBox="0 0 16 11" fill="none" aria-hidden="true">
+          <rect x="0.5" y="0.5" width="13" height="9" rx="1.5" stroke="currentColor"/>
+          <rect x="14.25" y="3.5" width="1.25" height="3" rx="0.5" fill="currentColor"/>
+          <rect x="2" y="2" width="10" height="6" rx="0.5" fill="currentColor"/>
+        </svg>
+      </span>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+      <button class="header__icon-btn" id="header-close" type="button" aria-label="닫기">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M18 6 6 18"/>
+          <path d="m6 6 12 12"/>
+        </svg>
+      </button>
+      <div class="header__title-wrap">
+        <h1 class="header__title" id="header-title">최근 항목</h1>
+        <span class="header__chevron" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m6 9 6 6 6-6"/>
+          </svg>
+        </span>
+      </div>
+      <span class="header__spacer"></span>
+    </header>
+
+    <!-- Empty State (state=empty) -->
+    <div class="empty-state" id="empty-state" aria-hidden="true">
+      <div class="empty-state__icon" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+          <circle cx="9" cy="9" r="2"/>
+          <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+        </svg>
+      </div>
+      <div class="empty-state__text">표시할 사진이 없어요</div>
+    </div>
+
+    <!-- Photo Grid (default — 12 cells) -->
+    <section class="photo-grid" id="photo-grid" role="list" aria-label="사진 12장">
+      <button class="photo-cell" type="button" data-cell="1" role="checkbox" aria-checked="false" aria-label="사진 1">
+        <span class="select-indicator" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        </span>
+      </button>
+      <button class="photo-cell" type="button" data-cell="2" role="checkbox" aria-checked="false" aria-label="사진 2">
+        <span class="select-indicator" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        </span>
+      </button>
+      <button class="photo-cell" type="button" data-cell="3" role="checkbox" aria-checked="false" aria-label="사진 3">
+        <span class="select-indicator" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        </span>
+      </button>
+      <button class="photo-cell" type="button" data-cell="4" role="checkbox" aria-checked="false" aria-label="사진 4">
+        <span class="select-indicator" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        </span>
+      </button>
+      <button class="photo-cell" type="button" data-cell="5" role="checkbox" aria-checked="false" aria-label="사진 5">
+        <span class="select-indicator" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        </span>
+      </button>
+      <button class="photo-cell" type="button" data-cell="6" role="checkbox" aria-checked="false" aria-label="사진 6">
+        <span class="select-indicator" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        </span>
+      </button>
+      <button class="photo-cell" type="button" data-cell="7" role="checkbox" aria-checked="false" aria-label="사진 7">
+        <span class="select-indicator" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        </span>
+      </button>
+      <button class="photo-cell" type="button" data-cell="8" role="checkbox" aria-checked="false" aria-label="사진 8">
+        <span class="select-indicator" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        </span>
+      </button>
+      <button class="photo-cell" type="button" data-cell="9" role="checkbox" aria-checked="false" aria-label="사진 9">
+        <span class="select-indicator" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        </span>
+      </button>
+      <button class="photo-cell" type="button" data-cell="10" role="checkbox" aria-checked="false" aria-label="사진 10">
+        <span class="select-indicator" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        </span>
+      </button>
+      <button class="photo-cell" type="button" data-cell="11" role="checkbox" aria-checked="false" aria-label="사진 11">
+        <span class="select-indicator" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        </span>
+      </button>
+      <button class="photo-cell" type="button" data-cell="12" role="checkbox" aria-checked="false" aria-label="사진 12">
+        <span class="select-indicator" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        </span>
+      </button>
+
+      <!-- Loading skeleton cells (state=loading shows these) -->
+      <div class="skeleton-cell" aria-hidden="true"></div>
+      <div class="skeleton-cell" aria-hidden="true"></div>
+      <div class="skeleton-cell" aria-hidden="true"></div>
+      <div class="skeleton-cell" aria-hidden="true"></div>
+      <div class="skeleton-cell" aria-hidden="true"></div>
+      <div class="skeleton-cell" aria-hidden="true"></div>
+      <div class="skeleton-cell" aria-hidden="true"></div>
+      <div class="skeleton-cell" aria-hidden="true"></div>
+      <div class="skeleton-cell" aria-hidden="true"></div>
+      <div class="skeleton-cell" aria-hidden="true"></div>
+      <div class="skeleton-cell" aria-hidden="true"></div>
+      <div class="skeleton-cell" aria-hidden="true"></div>
+    </section>
+
+    <!-- Inline Error (form persona #1+#3 — just above bottom-bar) -->
+    <div class="error-msg" id="error-msg" role="alert" aria-live="assertive">
+      <span class="error-msg__icon" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" x2="12" y1="8" y2="12"/>
+          <line x1="12" x2="12.01" y1="16" y2="16"/>
+        </svg>
+      </span>
+      <span>사진을 1장 선택해 주세요</span>
+    </div>
+
+    <!-- Bottom Bar -->
+    <footer class="bottom-bar">
+      <span class="selection-count" id="selection-count" role="status" aria-live="polite">0장 선택</span>
+      <div class="actions-row">
+        <button class="cancel-btn" id="cancel-btn" type="button" aria-label="취소">취소</button>
+        <button class="submit-btn" id="submit-btn" type="button" aria-label="선택" aria-disabled="true">선택</button>
+      </div>
+    </footer>
+
+  </section>
+</div>
+
+<script>
+  // === State management ===
+  const frame = document.getElementById('device-frame');
+  const breadcrumb = document.getElementById('breadcrumb');
+  const stateButtons = document.querySelectorAll('.control-panel__state-btn');
+  const cells = document.querySelectorAll('.photo-cell');
+  const counter = document.getElementById('selection-count');
+  const submitBtn = document.getElementById('submit-btn');
+  const errorMsg = document.getElementById('error-msg');
+
+  let selectedCell = null;  // single-select state
+
+  function setState(state) {
+    frame.setAttribute('data-state', state);
+    stateButtons.forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.state === state);
+    });
+    breadcrumb.textContent = 'photo-picker · ' + state;
+    console.log('[state]', state);
+
+    // demo: 'selected' state auto-selects cell 1
+    if (state === 'selected' && !selectedCell) {
+      selectCell(cells[0]);
+    } else if (state === 'default') {
+      clearSelection();
+    } else if (state === 'invalid_attempt') {
+      clearSelection();
+      errorMsg.classList.add('shown');
+    }
+    if (state !== 'invalid_attempt') {
+      errorMsg.classList.remove('shown');
+    }
+  }
+
+  stateButtons.forEach(btn => {
+    btn.addEventListener('click', () => setState(btn.dataset.state));
+  });
+
+  // === Single-select toggle (form persona — input field interaction) ===
+  function selectCell(cell) {
+    // clear previous
+    if (selectedCell && selectedCell !== cell) {
+      selectedCell.classList.remove('selected');
+      selectedCell.setAttribute('aria-checked', 'false');
+    }
+
+    if (selectedCell === cell) {
+      // toggle off
+      cell.classList.remove('selected');
+      cell.setAttribute('aria-checked', 'false');
+      selectedCell = null;
+    } else {
+      cell.classList.add('selected');
+      cell.setAttribute('aria-checked', 'true');
+      selectedCell = cell;
+    }
+
+    updateCounterAndSubmit();
+    // hide error if user has now selected
+    if (selectedCell) {
+      errorMsg.classList.remove('shown');
+    }
+  }
+
+  function clearSelection() {
+    if (selectedCell) {
+      selectedCell.classList.remove('selected');
+      selectedCell.setAttribute('aria-checked', 'false');
+      selectedCell = null;
+    }
+    updateCounterAndSubmit();
+  }
+
+  function updateCounterAndSubmit() {
+    const count = selectedCell ? 1 : 0;
+    counter.textContent = count + '장 선택';
+    counter.classList.toggle('active', count >= 1);
+
+    if (count >= 1) {
+      submitBtn.classList.add('enabled');
+      submitBtn.removeAttribute('aria-disabled');
+      submitBtn.removeAttribute('disabled');
+    } else {
+      submitBtn.classList.remove('enabled');
+      submitBtn.setAttribute('aria-disabled', 'true');
+    }
+  }
+
+  cells.forEach(cell => {
+    cell.addEventListener('click', () => {
+      selectCell(cell);
+    });
+  });
+
+  // === Header close → navigate-back to app-005 ===
+  document.getElementById('header-close').addEventListener('click', () => {
+    console.log('[navigate-back]', 'app-005 (sheet)');
+    counter.textContent = '← app-005 시트로 복귀';
+    counter.classList.add('active');
+    setTimeout(() => {
+      counter.textContent = (selectedCell ? '1' : '0') + '장 선택';
+      counter.classList.toggle('active', !!selectedCell);
+    }, 1400);
+  });
+
+  // === Cancel → navigate-back to app-005 ===
+  document.getElementById('cancel-btn').addEventListener('click', () => {
+    console.log('[navigate-back]', 'app-005 (sheet) · cancel');
+    counter.textContent = '← 취소 (app-005 복귀)';
+    counter.classList.add('active');
+    setTimeout(() => {
+      counter.textContent = (selectedCell ? '1' : '0') + '장 선택';
+      counter.classList.toggle('active', !!selectedCell);
+    }, 1400);
+  });
+
+  // === Submit → navigate to app-008 (크롭) ===
+  submitBtn.addEventListener('click', () => {
+    if (submitBtn.classList.contains('enabled')) {
+      console.log('[navigate]', 'app-008 (크롭)', 'cell:', selectedCell?.dataset.cell);
+      counter.textContent = '→ app-008 크롭 화면 진입 (cell ' + selectedCell?.dataset.cell + ')';
+      counter.classList.add('active');
+      setTimeout(() => {
+        counter.textContent = '1장 선택';
+      }, 1600);
+    } else {
+      // form persona #1 — invalid_attempt 시 inline error 표시 (defensive)
+      console.log('[invalid]', 'no selection');
+      setState('invalid_attempt');
+    }
+  });
+
+  // === Init ===
+  setState('default');
+</script>
+
+</body>
+</html>

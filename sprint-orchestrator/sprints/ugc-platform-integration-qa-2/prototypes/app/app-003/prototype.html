@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>app-003 · 프로필편집_닉네임_바텀시트_나가기확인 (modal · v2)</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+<style>
+  /* === tokens.css inline (Step A output — sprint-level) === */
+  :root {
+    /* PRIMITIVE — Color Purple */
+    --wds-color-purple-50:  #F5F0FF;
+    --wds-color-purple-100: #EBE1FF;
+    --wds-color-purple-400: #A17BFF;
+    --wds-color-purple-500: #8752FA;
+    --wds-color-purple-600: #7040E0;
+    --wds-color-purple-700: #5A30C0;
+    /* PRIMITIVE — Color Neutral */
+    --wds-color-neutral-0:   #FFFFFF;
+    --wds-color-neutral-50:  #F7F8F9;
+    --wds-color-neutral-100: #F0F1F3;
+    --wds-color-neutral-200: #E4E5E9;
+    --wds-color-neutral-300: #D1D3D8;
+    --wds-color-neutral-400: #B5B8BF;
+    --wds-color-neutral-500: #8E9199;
+    --wds-color-neutral-600: #6B6E76;
+    --wds-color-neutral-700: #46474C;
+    --wds-color-neutral-900: #212228;
+    --wds-color-neutral-1000: #000000;
+    /* Status */
+    --wds-color-red-100: #FFE5E3;
+    --wds-color-red-500: #FF3B30;
+    --wds-color-red-600: #E0241A;
+    --wds-color-green-500: #34C759;
+    --wds-color-yellow-500: #FFCC00;
+
+    /* SEMANTIC */
+    --wds-background-normal:    var(--wds-color-neutral-0);
+    --wds-background-elevated:  var(--wds-color-neutral-0);
+    --wds-background-dimmed:    rgba(0, 0, 0, 0.50);
+    --wds-surface-primary:   var(--wds-color-neutral-0);
+    --wds-surface-secondary: var(--wds-color-neutral-50);
+    --wds-surface-tertiary:  var(--wds-color-neutral-100);
+    --wds-fill-brand-primary: var(--wds-color-purple-500);
+    --wds-fill-brand-weak:    var(--wds-color-purple-50);
+    --wds-fill-brand-strong:  var(--wds-color-purple-600);
+    --wds-fill-neutral:       var(--wds-color-neutral-100);
+    --wds-fill-status-error:        var(--wds-color-red-500);
+    --wds-fill-status-error-strong: var(--wds-color-red-600);
+    --wds-fill-status-error-weak:   var(--wds-color-red-100);
+    --wds-label-normal:       var(--wds-color-neutral-900);
+    --wds-label-alternative:  var(--wds-color-neutral-600);
+    --wds-label-assistive:    var(--wds-color-neutral-500);
+    --wds-label-disabled:     var(--wds-color-neutral-300);
+    --wds-label-inverse:      var(--wds-color-neutral-0);
+    --wds-label-brand:        var(--wds-color-purple-500);
+    --wds-label-error:        var(--wds-color-red-500);
+    --wds-line-normal:        var(--wds-color-neutral-200);
+    --wds-line-alternative:   var(--wds-color-neutral-100);
+    --wds-status-error:       var(--wds-color-red-500);
+
+    /* COMPONENT — Button (Primary destructive registered for exit confirm) */
+    --component-button-primary-fill:               var(--wds-fill-brand-primary);
+    --component-button-primary-label:              var(--wds-label-inverse);
+    --component-button-destructive-fill:           var(--wds-fill-status-error);
+    --component-button-destructive-label:          var(--wds-label-inverse);
+    --component-button-destructive-fill-pressed:   var(--wds-fill-status-error-strong);
+    --component-button-secondary-ghost-fill:       transparent;
+    --component-button-secondary-ghost-label:      var(--wds-label-alternative);
+    --component-button-radius:                     12px;
+
+    /* COMPONENT — Bottom Sheet */
+    --component-bottom-sheet-fill:    var(--wds-background-elevated);
+    --component-bottom-sheet-radius:  20px;
+    --component-bottom-sheet-handle:  var(--wds-color-neutral-300);
+
+    /* COMPONENT — Avatar */
+    --component-avatar-fill: var(--wds-surface-tertiary);
+    --component-avatar-ring: var(--wds-line-normal);
+
+    /* PROFILE EDIT (Group 001) — concrete aliases (parent surface) */
+    --pe-input-fill: #F7F7F7;
+    --pe-input-border: #F1F1F1;
+    --pe-save-disabled: #F1F1F1;
+    --pe-save-disabled-label: #8A8A8A;
+    --pe-save-active: #262626;
+    --pe-save-active-label: #FFFFFF;
+    --pe-camera-badge-fill: #E2E2E2;
+    --pe-camera-badge-border: #FFFFFF;
+    --pe-destructive-text: #D92800;
+    --pe-confirm-btn: #262626;
+    --pe-surface-hover: #F1F1F1;
+    --pe-text-primary: #262626;
+    --pe-text-secondary: #656565;
+    --pe-text-tertiary: #8A8A8A;
+    --pe-avatar-empty-bg: #F5F3FF;
+    --pe-avatar-border: rgba(136, 136, 136, 0.2);
+
+    /* SPACING (4px grid) */
+    --wds-spacing-0: 0px;  --wds-spacing-1: 1px;  --wds-spacing-2: 2px;
+    --wds-spacing-4: 4px;  --wds-spacing-6: 6px;  --wds-spacing-8: 8px;
+    --wds-spacing-10: 10px; --wds-spacing-12: 12px; --wds-spacing-14: 14px;
+    --wds-spacing-16: 16px; --wds-spacing-20: 20px; --wds-spacing-24: 24px;
+    --wds-spacing-28: 28px; --wds-spacing-32: 32px; --wds-spacing-40: 40px;
+    --wds-spacing-48: 48px; --wds-spacing-56: 56px; --wds-spacing-64: 64px;
+    --wds-spacing-80: 80px;
+
+    /* RADIUS */
+    --wds-radius-none: 0px; --wds-radius-xs: 4px;  --wds-radius-sm: 8px;
+    --wds-radius-md: 12px;  --wds-radius-lg: 16px; --wds-radius-xl: 20px;
+    --wds-radius-2xl: 24px; --wds-radius-full: 9999px;
+
+    /* TYPOGRAPHY */
+    --wds-font-family-primary: 'Pretendard', -apple-system, 'SF Pro Display', sans-serif;
+    --wds-font-weight-regular: 400;
+    --wds-font-weight-medium: 500;
+    --wds-font-weight-semibold: 600;
+    --wds-font-weight-bold: 700;
+    --wds-font-size-2xs: 11px;
+    --wds-font-size-xs: 12px;
+    --wds-font-size-sm: 13px;
+    --wds-font-size-md: 14px;
+    --wds-font-size-lg: 16px;
+    --wds-font-size-xl: 18px;
+    --wds-font-size-2xl: 20px;
+    --wds-font-size-3xl: 24px;
+
+    /* Convenience aliases */
+    --color-brand-primary:   var(--wds-color-purple-500);
+    --color-bg-normal:       var(--wds-color-neutral-0);
+    --color-fill-neutral:    var(--wds-color-neutral-100);
+    --color-label-normal:    var(--wds-color-neutral-900);
+    --color-label-assistive: var(--wds-color-neutral-500);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--wds-font-family-primary);
+    background: #f0f0f0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: var(--wds-spacing-16);
+    color: var(--wds-label-normal);
+  }
+
+  /* === Control Panel (Pass 6 audit 제외 영역) === */
+  .control-panel {
+    width: 390px;
+    background: #1a1a2e;
+    color: #e0e0e0;
+    border-radius: 12px 12px 0 0;
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 13px;
+    font-family: ui-monospace, monospace;
+  }
+  .control-panel__row { display: flex; align-items: center; gap: 8px; }
+  .control-panel__label { color: #888; font-size: 11px; min-width: 56px; }
+  .control-panel select {
+    background: #2a2a3e; color: #e0e0e0; border: 1px solid #444;
+    border-radius: 6px; padding: 4px 8px; font-size: 12px; flex: 1;
+    font-family: ui-monospace, monospace;
+  }
+  .control-panel__states { display: flex; gap: 4px; flex-wrap: wrap; flex: 1; }
+  .control-panel__state-btn {
+    background: #2a2a3e; color: #bbb; border: 1px solid #444;
+    border-radius: 6px; padding: 4px 10px; font-size: 11px; cursor: pointer;
+    transition: all 0.15s;
+    font-family: ui-monospace, monospace;
+  }
+  .control-panel__state-btn.active {
+    background: var(--color-brand-primary); color: #fff; border-color: var(--color-brand-primary);
+  }
+  .control-panel__breadcrumb { color: #666; font-size: 11px; font-family: ui-monospace, monospace; }
+  .control-panel__hint { color: #999; font-size: 10px; font-style: italic; }
+
+  /* === Device Frame === */
+  .device-frame {
+    width: 390px;
+    height: 844px;
+    background: var(--wds-background-normal);
+    overflow: hidden;
+    position: relative;
+    border: 1px solid #ddd;
+    border-radius: 0 0 12px 12px;
+  }
+  .screen { display: flex; flex-direction: column; height: 100%; position: relative; }
+
+  /* === Parent surface (편집 form dirty 캡처 — 시각 컨텍스트만) === */
+  .parent-surface {
+    position: absolute;
+    inset: 0;
+    background: var(--wds-background-normal);
+    display: flex;
+    flex-direction: column;
+  }
+  .parent-status-bar {
+    height: 44px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 var(--wds-spacing-24);
+    font-size: var(--wds-font-size-md);
+    font-weight: var(--wds-font-weight-semibold);
+    color: var(--pe-text-primary);
+    flex-shrink: 0;
+  }
+  .parent-status-bar__icons { display: flex; gap: 6px; align-items: center; }
+  .parent-header {
+    height: 48px;
+    display: grid;
+    grid-template-columns: 44px 1fr 44px;
+    align-items: center;
+    padding: 0 var(--wds-spacing-4);
+    background: var(--wds-background-normal);
+    flex-shrink: 0;
+  }
+  .parent-header__back {
+    width: 44px; height: 44px;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: none; border: none; cursor: default;
+    color: var(--pe-text-primary);
+    font-family: inherit;
+  }
+  .parent-header__title {
+    text-align: center;
+    font-size: var(--wds-font-size-xl);
+    font-weight: var(--wds-font-weight-semibold);
+    color: var(--pe-text-primary);
+    letter-spacing: -0.2px;
+  }
+  .parent-contents {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .parent-profile {
+    padding: var(--wds-spacing-12) var(--wds-spacing-16) var(--wds-spacing-12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .parent-profile-img-wrap {
+    position: relative;
+    width: 100px;
+    height: 100px;
+  }
+  .parent-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: var(--wds-radius-full);
+    background: var(--pe-avatar-empty-bg);
+    border: 1px solid var(--pe-avatar-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--wds-color-purple-400);
+    overflow: hidden;
+  }
+  .parent-camera-badge {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: var(--wds-radius-full);
+    background: var(--pe-camera-badge-fill);
+    border: 4px solid var(--pe-camera-badge-border);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--pe-text-primary);
+    box-sizing: content-box;
+  }
+  .parent-camera-badge svg { width: 14px; height: 14px; }
+  .parent-input-section {
+    padding: var(--wds-spacing-8) var(--wds-spacing-16) 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--wds-spacing-8);
+  }
+  .parent-input-label {
+    padding-left: var(--wds-spacing-4);
+    font-size: var(--wds-font-size-md);
+    font-weight: var(--wds-font-weight-medium);
+    color: var(--pe-text-primary);
+    line-height: 20px;
+  }
+  .parent-input-field {
+    position: relative;
+    height: 44px;
+    background: var(--pe-input-fill);
+    border: 1px solid var(--pe-input-border);
+    border-radius: var(--wds-radius-lg);
+    display: flex;
+    align-items: center;
+  }
+  .parent-input-text {
+    flex: 1;
+    padding: 12px 16px;
+    padding-right: 60px;
+    font-size: var(--wds-font-size-lg);
+    font-weight: var(--wds-font-weight-medium);
+    color: var(--pe-text-primary);
+  }
+  .parent-char-counter {
+    position: absolute;
+    right: var(--wds-spacing-12);
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: var(--wds-font-size-xs);
+    color: var(--pe-text-tertiary);
+    font-weight: var(--wds-font-weight-medium);
+  }
+  .parent-bottom-action {
+    padding: var(--wds-spacing-12) var(--wds-spacing-16) var(--wds-spacing-32);
+    flex-shrink: 0;
+    background: var(--wds-background-normal);
+  }
+  .parent-save-btn {
+    width: 100%;
+    height: 56px;
+    border: none;
+    border-radius: var(--wds-radius-lg);
+    background: var(--pe-save-active);
+    color: var(--pe-save-active-label);
+    font-family: inherit;
+    font-size: var(--wds-font-size-lg);
+    font-weight: var(--wds-font-weight-semibold);
+    cursor: default;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* === Modal Overlay === */
+  .modal-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    pointer-events: none;
+  }
+  .backdrop {
+    position: absolute;
+    inset: 0;
+    background: var(--wds-background-dimmed);
+    opacity: 0;
+    transition: opacity 0.24s ease-out;
+    cursor: pointer;
+    pointer-events: none;
+  }
+  .bottom-sheet {
+    position: relative;
+    background: var(--component-bottom-sheet-fill);
+    border-top-left-radius: var(--component-bottom-sheet-radius);
+    border-top-right-radius: var(--component-bottom-sheet-radius);
+    padding: var(--wds-spacing-12) var(--wds-spacing-20) var(--wds-spacing-24);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transform: translateY(110%);
+    transition: transform 0.28s cubic-bezier(0.32, 0.72, 0, 1);
+    box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.08);
+    pointer-events: auto;
+    width: 100%;
+    max-height: 85%;
+  }
+
+  /* States: open (default) */
+  .modal-overlay[data-state="open"] { pointer-events: auto; }
+  .modal-overlay[data-state="open"] .backdrop { opacity: 1; pointer-events: auto; }
+  .modal-overlay[data-state="open"] .bottom-sheet { transform: translateY(0); }
+
+  /* States: dismissing */
+  .modal-overlay[data-state="dismissing"] { pointer-events: none; }
+  .modal-overlay[data-state="dismissing"] .backdrop { opacity: 0; pointer-events: none; }
+  .modal-overlay[data-state="dismissing"] .bottom-sheet { transform: translateY(110%); }
+
+  /* === Sheet inner === */
+  .drag-handle {
+    width: 40px;
+    height: 4px;
+    border-radius: var(--wds-radius-full);
+    background: var(--component-bottom-sheet-handle);
+    flex-shrink: 0;
+  }
+  .sheet-title {
+    font-size: var(--wds-font-size-xl);
+    font-weight: var(--wds-font-weight-bold);
+    color: var(--wds-label-normal);
+    text-align: center;
+    margin-top: var(--wds-spacing-16);
+    margin-bottom: var(--wds-spacing-4);
+    line-height: 1.4;
+    letter-spacing: -0.3px;
+  }
+  .sheet-desc {
+    font-size: var(--wds-font-size-md);
+    font-weight: var(--wds-font-weight-regular);
+    color: var(--wds-label-alternative);
+    text-align: center;
+    margin-bottom: var(--wds-spacing-20);
+    line-height: 1.45;
+    letter-spacing: -0.1px;
+  }
+
+  .button-pair {
+    display: flex;
+    flex-direction: row;
+    gap: var(--wds-spacing-8);
+    width: 100%;
+  }
+  .btn {
+    flex: 1;
+    height: 56px;
+    border-radius: var(--component-button-radius);
+    border: none;
+    font-family: inherit;
+    font-size: var(--wds-font-size-lg);
+    font-weight: var(--wds-font-weight-semibold);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--wds-spacing-8);
+    transition: background-color 0.12s ease;
+  }
+  .btn--keep {
+    background: var(--component-button-secondary-ghost-fill);
+    color: var(--component-button-secondary-ghost-label);
+    border: 1px solid var(--wds-line-normal);
+  }
+  .btn--keep:hover { background: var(--wds-surface-secondary); }
+  .btn--exit {
+    background: var(--component-button-destructive-fill);
+    color: var(--component-button-destructive-label);
+  }
+  .btn--exit:hover,
+  .btn--exit:active { background: var(--component-button-destructive-fill-pressed); }
+
+  /* === Toast === */
+  .toast {
+    display: none;
+    position: absolute;
+    bottom: 24px;
+    left: 16px;
+    right: 16px;
+    background: var(--wds-color-neutral-900);
+    color: var(--wds-label-inverse);
+    padding: var(--wds-spacing-12) var(--wds-spacing-16);
+    border-radius: var(--wds-radius-md);
+    font-size: var(--wds-font-size-sm);
+    z-index: 200;
+    text-align: center;
+    font-weight: var(--wds-font-weight-medium);
+  }
+  .toast.show { display: block; }
+
+  @media (max-width: 480px) {
+    body { padding: 0; align-items: stretch; min-height: 100dvh; }
+    .control-panel { display: none; }
+    .device-frame {
+      width: 100dvw;
+      height: 100dvh;
+      border: none;
+      border-radius: 0;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- Control Panel (verifier-friendly, Pass 6 audit 제외 영역) -->
+<div class="control-panel">
+  <div class="control-panel__row">
+    <span class="control-panel__label">Screen</span>
+    <select id="screen-select">
+      <option value="exit-confirm">ExitConfirmSheet</option>
+    </select>
+  </div>
+  <div class="control-panel__row">
+    <span class="control-panel__label">State</span>
+    <div class="control-panel__states" id="state-toggles">
+      <button class="control-panel__state-btn active" data-state="open" data-state-toggle>open</button>
+      <button class="control-panel__state-btn" data-state="dismissing" data-state-toggle>dismissing</button>
+    </div>
+  </div>
+  <div class="control-panel__row">
+    <span class="control-panel__breadcrumb" id="breadcrumb">exit-confirm · open</span>
+  </div>
+  <div class="control-panel__row">
+    <span class="control-panel__hint">v2 dogfood — modal archetype persona enforced (4/4)</span>
+  </div>
+</div>
+
+<!-- Device Frame -->
+<div class="device-frame" id="device-frame">
+  <section class="screen" id="exit-confirm">
+
+    <!-- Parent surface (편집 form dirty 캡처 — 시각 컨텍스트, 인터랙션 비활성) -->
+    <div class="parent-surface" id="parent-edit-form" aria-hidden="true">
+      <div class="parent-status-bar">
+        <span>9:41</span>
+        <span class="parent-status-bar__icons">
+          <svg width="16" height="11" viewBox="0 0 16 11" fill="none" aria-hidden="true"><path d="M1 6.5a6.5 6.5 0 0 1 13 0v3.75a.75.75 0 0 1-.75.75H1.75A.75.75 0 0 1 1 10.25z" fill="currentColor"/></svg>
+          <svg width="16" height="11" viewBox="0 0 16 11" fill="none" aria-hidden="true"><rect x="0.5" y="0.5" width="13" height="9" rx="1.5" stroke="currentColor"/><rect x="14.25" y="3.5" width="1.25" height="3" rx="0.5" fill="currentColor"/><rect x="2" y="2" width="10" height="6" rx="0.5" fill="currentColor"/></svg>
+        </span>
+      </div>
+      <header class="parent-header">
+        <span class="parent-header__back" aria-label="뒤로 가기 (비활성)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+        </span>
+        <h1 class="parent-header__title">프로필 편집</h1>
+        <span aria-hidden="true"></span>
+      </header>
+      <main class="parent-contents">
+        <section class="parent-profile" aria-label="프로필 사진">
+          <div class="parent-profile-img-wrap">
+            <span class="parent-avatar" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+            </span>
+            <span class="parent-camera-badge" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/>
+                <circle cx="12" cy="13" r="3"/>
+              </svg>
+            </span>
+          </div>
+        </section>
+        <section class="parent-input-section">
+          <span class="parent-input-label">닉네임</span>
+          <div class="parent-input-field">
+            <span class="parent-input-text">까망콩 V2</span>
+            <span class="parent-char-counter">7/20</span>
+          </div>
+        </section>
+      </main>
+      <div class="parent-bottom-action">
+        <span class="parent-save-btn" role="presentation">저장</span>
+      </div>
+    </div>
+
+    <!-- Modal overlay -->
+    <div class="modal-overlay" id="modal-overlay" data-state="open" role="dialog" aria-modal="true" aria-labelledby="sheet-title" aria-describedby="sheet-desc">
+
+      <div class="backdrop" id="backdrop" data-action="close" role="presentation" aria-label="나가기확인 바텀시트 외부 영역. 탭하면 닫혀요."></div>
+
+      <div class="bottom-sheet" id="exit-confirm-sheet">
+        <div class="drag-handle" aria-hidden="true"></div>
+
+        <h2 class="sheet-title" id="sheet-title">변경 사항이 저장되지 않습니다</h2>
+        <p class="sheet-desc" id="sheet-desc">정말 나가시겠어요?</p>
+
+        <div class="button-pair" id="button-pair">
+          <button class="btn btn--keep" id="keep-btn" type="button" data-action="close" aria-label="계속 편집">
+            계속 편집
+          </button>
+          <button class="btn btn--exit" id="exit-btn" type="button" data-action="confirm-exit" aria-label="나가기">
+            나가기
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  </section>
+</div>
+
+<script>
+  // === State management ===
+  const overlay = document.getElementById('modal-overlay');
+  const breadcrumb = document.getElementById('breadcrumb');
+  const stateButtons = document.querySelectorAll('.control-panel__state-btn');
+  const toast = document.getElementById('toast');
+
+  function setState(state) {
+    overlay.setAttribute('data-state', state);
+    stateButtons.forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.state === state);
+    });
+    breadcrumb.textContent = 'exit-confirm · ' + state;
+    console.log('[state]', state);
+  }
+
+  stateButtons.forEach(btn => {
+    btn.addEventListener('click', () => setState(btn.dataset.state));
+  });
+
+  // === Toast helper ===
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2000);
+  }
+
+  // === Action handlers (no alert/confirm/prompt — verifier safe, Pass 6 #8) ===
+  function closeSheet(source) {
+    setState('dismissing');
+    showToast('편집을 계속해요 (' + source + ')');
+    // Demo: 1.4초 후 다시 open 상태로 복원 (verifier flow 지속)
+    setTimeout(() => setState('open'), 1400);
+  }
+
+  function confirmExit() {
+    if (overlay.getAttribute('data-state') !== 'open') return;
+    setState('dismissing');
+    showToast('변경 폐기 + 이전 화면으로 이동');
+    // Reset for demo
+    setTimeout(() => setState('open'), 1800);
+  }
+
+  // === Event bindings (Screen Spec interactions) ===
+  document.getElementById('backdrop').addEventListener('click', () => closeSheet('backdrop'));
+  document.getElementById('keep-btn').addEventListener('click', () => closeSheet('keep-button'));
+  document.getElementById('exit-btn').addEventListener('click', () => confirmExit());
+
+  // Stop propagation on sheet itself so backdrop click only triggers from outside
+  document.getElementById('exit-confirm-sheet').addEventListener('click', (e) => e.stopPropagation());
+
+  // ESC key — additional close (a11y nicety, modal 강제 룰 #2 보조 channel)
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeSheet('escape-key');
+  });
+
+  // === Init ===
+  setState('open');
+</script>
+
+</body>
+</html>

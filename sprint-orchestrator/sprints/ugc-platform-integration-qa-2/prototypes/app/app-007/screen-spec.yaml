@@ -1,0 +1,475 @@
+# Screen Spec: 프로필편집_사진_바텀시트_나가기확인 (app-007)
+# Machine-readable. DE Step B output. (산문 금지 — YAML/표/트리만)
+# Sibling: app-003 (닉네임 변경 中 나가기) — 동일 패턴, 사진 변경 컨텍스트.
+
+## Meta
+meta:
+  screen_name: "프로필편집_사진_바텀시트_나가기확인"
+  screen_archetype: "modal"
+  task_id: "app-007"
+  sprint_id: "ugc-platform-integration-qa-2"
+  app: "ZZEM"
+  platform: "iOS / Android (React Native)"
+  language: "ko"
+  frame: "390x844"
+  theme: "light"
+  figma_frame: "37160:80081"
+  figma_file: "7hozJ6Pvs09q98BxvChj08"
+  parent_screen: "app-001 (프로필편집_메인) — 사진 변경 dirty 상태"
+  archetype_classification:
+    chosen: "modal"
+    rationale: "부분 화면 + backdrop + 단일 결정 (나가기 vs 계속 편집) — confirm dialog 형 modal"
+    alternatives_considered: ["form (rejected — 입력 없음, 결정만)"]
+
+## Component Tree
+component_tree: |
+  Screen [frame: 390x844]
+  ├── ParentScaffold [container] (div) #parent-scaffold — 부모 화면 (사진 dirty 상태 미러)
+  │   ├── ParentStatusBar [system] (div) #parent-status-bar
+  │   ├── ParentHeader [container] (header) #parent-header
+  │   │   ├── ParentBack [icon-button] (button) #parent-back — chevron-left
+  │   │   ├── ParentTitle [text] (h1) #parent-title — "프로필 편집"
+  │   │   └── ParentSpacer [div] #parent-spacer
+  │   ├── ParentAvatarRegion [container] (section) #parent-avatar-region
+  │   │   ├── ParentAvatar [avatar] (div) #parent-avatar — 100x100 (변경된 사진 mock)
+  │   │   └── ParentCameraBadge [badge] (div) #parent-camera-badge — 24x24 camera
+  │   ├── ParentNicknameField [input] (div) #parent-nickname-field — "닉네임" + filled box (unchanged)
+  │   └── ParentSaveCTA [button-primary] (button) #parent-save-cta — "저장" enabled (isDirty=true)
+  ├── Backdrop [feedback] (div) #backdrop — opacity 0.5, full overlay, tap-to-dismiss
+  └── ConfirmSheet [bottom-sheet] (div) #exit-confirm-sheet — slide-up, anchored bottom
+      ├── DragHandle [feedback] (div) #drag-handle — 40x4 rounded full
+      ├── SheetHeader [container] (div) #sheet-header
+      │   └── SheetTitle [text] (h2) #sheet-title — "변경사항이 저장되지 않아요"
+      ├── SheetBody [container] (div) #sheet-body
+      │   └── SheetDescription [text] (p) #sheet-description — "변경한 프로필 사진이 저장되지 않아요. 정말 나가시겠어요?"
+      └── SheetActions [container] (div) #sheet-actions
+          ├── ContinueEditButton [button-secondary] (button) #continue-edit-btn — "계속 편집" (ghost)
+          └── ExitButton [button-primary] (button) #exit-btn — "나가기" (destructive primary)
+
+## Component Details
+components:
+  - name: "ParentScaffold"
+    id: "parent-scaffold"
+    tag: "div"
+    type: "container"
+    position: "absolute (full overlay below backdrop)"
+    size: "390x844"
+    tokens:
+      fill: "var(--wds-background-normal)"
+      text: "var(--wds-label-normal)"
+    behavior:
+      purpose: "modal 떠있는 동안 부모 화면 위치 유지 — 사용자 컨텍스트 (사진 dirty 상태) 보존"
+      user_action: "(none — passive scaffold under backdrop)"
+      feedback: "visual"
+    a11y:
+      role: "region"
+      label: "프로필 편집 화면 (배경)"
+    layout:
+      direction: "vertical"
+      sizing: "fill"
+
+  - name: "ParentAvatar"
+    id: "parent-avatar"
+    tag: "div"
+    type: "avatar"
+    position: "center (avatar region)"
+    size: "100x100"
+    tokens:
+      fill: "var(--pe-avatar-empty-bg)  # 변경된 사진 mock (purple tint)"
+      border: "1px solid var(--pe-avatar-border)"
+      radius: "var(--wds-radius-full)"
+    behavior:
+      purpose: "사진 변경된 상태 시각 표현 — purple-100 fill 로 갱신 신호"
+      user_action: "(none — passive)"
+      feedback: "visual"
+    a11y:
+      role: "img"
+      label: "변경된 프로필 사진"
+
+  - name: "ParentSaveCTA"
+    id: "parent-save-cta"
+    tag: "button"
+    type: "button-primary"
+    position: "absolute bottom (parent CTA bar)"
+    size: "full-width x 56px"
+    tokens:
+      fill: "var(--pe-save-active)  # #262626 — isDirty 활성"
+      text: "var(--pe-save-active-label)  # #FFFFFF"
+      radius: "var(--wds-radius-md)"
+    behavior:
+      purpose: "사진 변경 dirty 상태 표시 (저장 가능) — 사용자에게 '저장 안하고 나가는 중' 컨텍스트"
+      user_action: "(disabled — pointer-events:none under backdrop)"
+      feedback: "visual"
+    states:
+      active: "bg #262626, label #FFFFFF (modal open 상태에서도 시각적 active 유지)"
+    a11y:
+      role: "button"
+      label: "저장 (배경)"
+
+  - name: "Backdrop"
+    id: "backdrop"
+    tag: "div"
+    type: "feedback"
+    position: "overlay (full screen)"
+    size: "390x844"
+    tokens:
+      fill: "var(--wds-background-dimmed)  # rgba(0,0,0,0.50) — modal persona #1 ≥0.4"
+    behavior:
+      purpose: "부모 시각 분리 + 외부 탭 dismiss (modal persona #2 close 2-way 중 하나)"
+      user_action: "tap"
+      feedback: "navigation (close-overlay → 부모 편집 상태 보존)"
+    states:
+      default: "opacity 1, pointer-events auto"
+      dismissing: "opacity 0, pointer-events none (transition 0.25s)"
+    a11y:
+      role: "button"
+      label: "바텀시트 닫기 (배경 영역)"
+
+  - name: "ConfirmSheet"
+    id: "exit-confirm-sheet"
+    tag: "div"
+    type: "bottom-sheet"
+    position: "absolute bottom (full-width)"
+    size: "390 x auto (content-driven)"
+    tokens:
+      fill: "var(--component-bottom-sheet-fill)  # #FFFFFF"
+      radius: "var(--component-bottom-sheet-radius) on top corners (20px)"
+    behavior:
+      purpose: "사진 변경 손실 방지 confirm dialog — 단일 결정 surface"
+      user_action: "(container — 결정은 자식 버튼)"
+      feedback: "navigation"
+    states:
+      default: "transform translateY(0) — fully visible"
+      dismissing: "transform translateY(100%), transition 0.28s cubic-bezier"
+    a11y:
+      role: "dialog"
+      label: "변경사항 저장 확인"
+      modal: true
+
+  - name: "DragHandle"
+    id: "drag-handle"
+    tag: "div"
+    type: "feedback"
+    position: "top-center of sheet"
+    size: "40x4"
+    tokens:
+      fill: "var(--component-bottom-sheet-handle)  # #D1D3D8"
+      radius: "var(--wds-radius-full)"
+    a11y:
+      role: "presentation"
+      hidden: true
+
+  - name: "SheetTitle"
+    id: "sheet-title"
+    tag: "h2"
+    type: "text"
+    position: "below handle"
+    size: "wrap-content"
+    tokens:
+      text: "var(--wds-label-normal)  # #212228"
+      font_size: "var(--wds-font-size-xl)  # 18px"
+      font_weight: "var(--wds-font-weight-bold)"
+    constraints:
+      max_lines: 2
+      truncation: none
+    a11y:
+      role: "heading"
+      label: "변경사항이 저장되지 않아요"
+
+  - name: "SheetDescription"
+    id: "sheet-description"
+    tag: "p"
+    type: "text"
+    position: "below title"
+    size: "full-width"
+    tokens:
+      text: "var(--wds-label-alternative)  # #6B6E76"
+      font_size: "var(--wds-font-size-md)  # 14px"
+      font_weight: "var(--wds-font-weight-regular)"
+    constraints:
+      max_lines: 3
+      truncation: none
+    a11y:
+      role: "text"
+      label: "변경한 프로필 사진이 저장되지 않아요. 정말 나가시겠어요?"
+
+  - name: "ContinueEditButton"
+    id: "continue-edit-btn"
+    tag: "button"
+    type: "button-secondary"
+    position: "left (sheet actions row)"
+    size: "flex 1 x 52px"
+    tokens:
+      fill: "var(--pe-surface-hover)  # #F1F1F1 — ghost-ish neutral"
+      text: "var(--wds-label-normal)  # #212228"
+      radius: "var(--wds-radius-md)"
+    behavior:
+      purpose: "수정 흐름 복귀 — modal dismiss 후 편집 상태 보존"
+      user_action: "tap"
+      feedback: "navigation (close-overlay → 사진 dirty 상태 유지)"
+    states:
+      default: "bg #F1F1F1, label #212228"
+    a11y:
+      role: "button"
+      label: "계속 편집"
+
+  - name: "ExitButton"
+    id: "exit-btn"
+    tag: "button"
+    type: "button-primary"
+    position: "right (sheet actions row)"
+    size: "flex 1 x 52px"
+    tokens:
+      fill: "var(--pe-confirm-btn)  # #262626 — destructive 의미 (변경 폐기)"
+      text: "var(--pe-save-active-label)  # #FFFFFF"
+      radius: "var(--wds-radius-md)"
+    behavior:
+      purpose: "사진 변경 폐기 + 부모 화면 pop"
+      user_action: "tap"
+      feedback: "navigation (close-overlay + parent-pop, 변경 폐기)"
+    states:
+      default: "bg #262626, label #FFFFFF"
+      pressed: "bg darken (browser default)"
+    a11y:
+      role: "button"
+      label: "나가기"
+
+## Layout Spec
+layout_spec:
+  type: overlay
+  viewport: 390x844
+  z_layers:
+    - z: 0
+      id: parent-scaffold
+      role: muted-background-mirror
+    - z: 10
+      id: backdrop
+      role: scrim
+    - z: 20
+      id: exit-confirm-sheet
+      role: confirm-dialog
+  sheet_internal:
+    direction: vertical
+    padding: "8px 0 32px"
+    children:
+      - id: drag-handle
+        margin: "8px auto 16px"
+      - id: sheet-header
+        padding: "0 24px 8px"
+        align: start
+      - id: sheet-body
+        padding: "0 24px 24px"
+        align: start
+      - id: sheet-actions
+        padding: "0 16px"
+        layout:
+          type: flex-row
+          gap: "8px"
+          children:
+            - id: continue-edit-btn
+              flex: 1
+            - id: exit-btn
+              flex: 1
+
+## States
+states:
+  default:
+    description: "open — backdrop visible (opacity 1) + sheet at translateY(0). 부모는 사진 dirty 상태."
+    active: true
+    visible_components:
+      - parent-scaffold
+      - parent-status-bar
+      - parent-header
+      - parent-avatar-region
+      - parent-nickname-field
+      - parent-save-cta
+      - backdrop
+      - exit-confirm-sheet
+      - drag-handle
+      - sheet-title
+      - sheet-description
+      - continue-edit-btn
+      - exit-btn
+    hidden_components: []
+
+  dismissing:
+    description: "exit animation — backdrop fades, sheet slides down. 다음 frame에 부모로 복귀 (or pop)."
+    active: false
+    visible_components:
+      - parent-scaffold
+      - parent-status-bar
+      - parent-header
+      - parent-avatar-region
+      - parent-nickname-field
+      - parent-save-cta
+    hidden_components:
+      - backdrop
+      - exit-confirm-sheet
+
+  parent-only:
+    description: "modal closed — 부모 화면 (사진 dirty) 만 표시. '계속 편집' tap 결과 시뮬레이션."
+    active: false
+    visible_components:
+      - parent-scaffold
+      - parent-status-bar
+      - parent-header
+      - parent-avatar-region
+      - parent-nickname-field
+      - parent-save-cta
+    hidden_components:
+      - backdrop
+      - exit-confirm-sheet
+
+## Interactions
+interactions:
+  - trigger: tap
+    target: "#exit-btn"
+    action: confirm-and-pop
+    destination: "previous screen (변경 폐기)"
+    transition: "sheet slide-down + screen pop"
+    feedback: "navigation (parent screen pop, dirty state 폐기)"
+
+  - trigger: tap
+    target: "#continue-edit-btn"
+    action: close-overlay
+    destination: "stay on app-001 (사진 dirty 보존)"
+    transition: "sheet slide-down + backdrop fade-out"
+    feedback: "navigation (close-overlay)"
+
+  - trigger: tap
+    target: "#backdrop"
+    action: close-overlay
+    destination: "stay on app-001 (사진 dirty 보존) — modal persona #2 외부 탭 dismiss"
+    transition: "sheet slide-down + backdrop fade-out"
+    feedback: "navigation (close-overlay)"
+
+  - trigger: keydown
+    target: "#backdrop"
+    keys: ["Enter", "Space"]
+    action: close-overlay
+    destination: "stay on app-001"
+    transition: "동일"
+    feedback: "navigation (a11y backdrop)"
+
+## Visual Rules
+rules:
+  - condition: "modal open"
+    effect: "ParentSaveCTA 시각적으로 active (#262626) 유지 — 사진 dirty 컨텍스트 신호"
+    note: "isDirty=true 가 modal 의 존재 이유 — 부모 CTA 도 그 상태를 반영"
+
+  - condition: "ParentScaffold 영역"
+    effect: "pointer-events: none (modal open 동안 클릭 차단)"
+    note: "backdrop tap 으로만 dismiss — 부모 인터랙션 차단"
+
+  - condition: "ExitButton tap"
+    effect: "변경분 폐기 + 이전 화면 pop"
+    note: "PRD: '나가기 → 편집 화면 dismiss + 변경분 폐기' (사진 컨텍스트)"
+
+  - condition: "ContinueEditButton tap"
+    effect: "sheet 만 dismiss, 사진 dirty 상태 보존"
+    note: "PRD: '계속 편집 → bottom sheet 만 dismiss, 편집 상태 보존'"
+
+  - condition: "Backdrop tap"
+    effect: "ContinueEditButton 과 동일 — sheet dismiss, 부모 보존"
+    note: "modal persona 강제 룰 #2 — backdrop 의 안전 의미는 cancel"
+
+## Labels (ko)
+labels:
+  sheet:
+    title: "변경사항이 저장되지 않아요"
+    description: "변경한 프로필 사진이 저장되지 않아요. 정말 나가시겠어요?"
+  buttons:
+    continue_edit: "계속 편집"
+    exit: "나가기"
+  a11y:
+    backdrop: "바텀시트 닫기 (배경 영역)"
+    sheet: "변경사항 저장 확인"
+
+## Token Map
+token_map:
+  background:
+    page: "var(--wds-background-normal) → #FFFFFF"
+    backdrop: "var(--wds-background-dimmed) → rgba(0,0,0,0.50)"
+    sheet: "var(--component-bottom-sheet-fill) → #FFFFFF"
+  surface:
+    ghost_button_fill: "var(--pe-surface-hover) → #F1F1F1"
+  fill:
+    primary_button: "var(--pe-confirm-btn) → #262626"
+    parent_save: "var(--pe-save-active) → #262626"
+  label:
+    title: "var(--wds-label-normal) → #212228"
+    description: "var(--wds-label-alternative) → #6B6E76"
+    primary_button: "var(--pe-save-active-label) → #FFFFFF"
+    secondary_button: "var(--wds-label-normal) → #212228"
+  radius:
+    sheet: "var(--component-bottom-sheet-radius) → 20px (top only)"
+    button: "var(--wds-radius-md) → 12px"
+    handle: "var(--wds-radius-full) → 9999px"
+  spacing:
+    sheet_padding_x: "var(--wds-spacing-24) → 24px (header/body)"
+    sheet_padding_actions_x: "var(--wds-spacing-16) → 16px"
+    button_gap: "var(--wds-spacing-8) → 8px"
+  typography:
+    family: "var(--wds-font-family-primary) → Pretendard"
+    title_size: "var(--wds-font-size-xl) → 18px / weight bold (700)"
+    description_size: "var(--wds-font-size-md) → 14px / weight regular (400)"
+    button_size: "var(--wds-font-size-lg) → 16px / weight semibold (600)"
+
+## Quality Score
+quality_score:
+  extraction_accuracy:
+    total_components: 11
+    with_token_map: 11
+    with_html_mapping: 11
+    score: "22 / 22 = 1.00"
+  fabrication_risk:
+    inferred_fields:
+      - "SheetDescription 카피 '변경한 프로필 사진이 저장되지 않아요. 정말 나가시겠어요?' — task '사진 변경이 저장 안됨, 정말 나가시겠어요?' 의역 (low)"
+      - "ContinueEdit/Exit 좌우 배치 (left=secondary, right=primary destructive) — iOS HIG 표준 confirm dialog 패턴 (low)"
+      - "ExitButton 색을 #262626 (neutral dark) 로 — task '나가기 destructive' 인데 brand red 대신 high-contrast neutral 사용. PRD/디자인이 빨강 명시 안 함 + 닉네임 confirm (app-003) 와 일관성 위해 neutral dark. (low)"
+    risk_level: "low"
+    note: "PRD/task 명시 항목만 사용; 표준 confirm modal 패턴 (action 좌우, 카피 의역) 만 추가. ExitButton 색은 destructive 의미를 '되돌릴 수 없음 + visual weight' 로 표현 — 빨간색은 별도 페일오버 커뮤니티/안전 confirm 으로 예약."
+  schema_completeness:
+    required_sections: ["meta", "component_tree", "layout_spec", "states", "interactions", "labels", "token_map"]
+    present_sections: ["meta", "component_tree", "components", "layout_spec", "states", "interactions", "rules", "labels", "token_map", "quality_score", "modal_persona_check"]
+    score: "11 / 7 = 1.57 (all required + 4 enrichment sections)"
+  context_coverage:
+    why_linked: "4 / 4 = 1.00 (모든 AC 가 components/interactions 에 연결됨)"
+    what_resolved: "11 / 11 = 1.00 (모든 component 가 token + pattern 으로 해소됨)"
+
+## Modal Persona Compliance (cross-check)
+modal_persona_check:
+  forced_rules:
+    - id: 1
+      rule: "Backdrop opacity ≥0.4"
+      result: "met"
+      evidence: "var(--wds-background-dimmed) = rgba(0,0,0,0.50) — 0.50 ≥ 0.40"
+    - id: 2
+      rule: "Close 2-way (X/cancel + backdrop tap)"
+      result: "met"
+      evidence:
+        - "ContinueEditButton (cancel-equivalent) → close-overlay"
+        - "Backdrop tap → close-overlay"
+        - "(bonus) Backdrop keydown Enter/Space → close-overlay (a11y)"
+    - id: 3
+      rule: "Primary CTA 1 + secondary 0-1"
+      result: "met"
+      evidence: "ExitButton = primary 1 (destructive intent) / ContinueEditButton = secondary 1 (ghost). 정확히 1+1 — 결정 단순화 충족"
+    - id: 4
+      rule: "Title or clear context"
+      result: "met"
+      evidence: "SheetTitle h2 '변경사항이 저장되지 않아요' (xl bold, label-normal) — modal 만 떠있어도 사용자가 무엇을 결정하는지 즉시 인지"
+  recommended_rules:
+    - id: 1
+      rule: "Bottom sheet form (mobile standard)"
+      result: "accepted"
+      evidence: "bottom-sheet (anchor: bottom, slide-up transform)"
+    - id: 2
+      rule: "Drag handle visible"
+      result: "accepted"
+      evidence: "DragHandle 40x4 rounded-full, var(--component-bottom-sheet-handle) #D1D3D8"
+    - id: 3
+      rule: "First input/option auto-focus"
+      result: "skipped"
+      log: "archetype_recommendation_skipped"
+      rationale: "destructive confirm 에서 default focus 는 사용자 실수로 enter 입력 시 의도치 않은 폐기 위험 — Apple HIG 도 destructive 에 대해 default focus 권장하지 않음"

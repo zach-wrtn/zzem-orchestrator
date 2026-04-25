@@ -1,0 +1,199 @@
+# Quality Report — app-003 ExitConfirmSheet
+# Pass 6 anti-slop audit + modal archetype persona
+# Generated: 2026-04-25
+
+sprint_id: "ugc-platform-integration-qa-2"
+task_id: "app-003"
+screen: "ExitConfirmSheet"
+archetype: "modal"
+figma_frame: "37160:79969"
+parent_screen: "app-001 (프로필편집_메인)"
+
+# ─────────────────────────────
+# Pass 6 Anti-Slop Audit (10 checks)
+# ─────────────────────────────
+pass_6_anti_slop:
+  status: "passed"
+  checks:
+    - id: 1
+      name: "hex-not-in-tokens (.screen 후손)"
+      status: "pass"
+      detail: |
+        prototype.html 의 hex 34개 추출. tokens.css 에 미정의된 4개 (#1a1a2e, #2a2a3e,
+        #e0e0e0, #f0f0f0) 는 모두 .control-panel 또는 body bg 영역 — .screen 외부.
+        검사 범위 (.screen 후손) 내 모든 hex 는 tokens.css 정의됨.
+        Body/control-panel 내부 미정의 raw 색상: #444 #888 #bbb #666 #999 #fff #ddd
+        (모두 .control-panel scope).
+    - id: 2
+      name: "emoji on interactive elements"
+      status: "pass"
+      detail: |
+        모든 button (keep, exit) + parent surface 의 비활성 back/save 는 한국어 텍스트
+        또는 lucide inline SVG 만 사용. status bar / camera badge / parent avatar 도 lucide SVG.
+        이모지 0건.
+    - id: 3
+      name: "card border-left slop"
+      status: "pass"
+      detail: "border-left 사용 없음. button-pair 는 gap + 동일 폭 1:1 flex."
+    - id: 4
+      name: "font-family Pretendard 외 (.screen 후손)"
+      status: "pass"
+      detail: |
+        font-family 선언 9건:
+        - 'Pretendard' (var --wds-font-family-primary) — body
+        - ui-monospace ×4 — .control-panel scope (audit 제외 영역)
+        - inherit ×3 — .screen 내부 button (parent-header__back, parent-save-btn (span),
+          .btn) — Pretendard 로 resolve
+        .screen 후손에 Pretendard 외 명시 0건.
+    - id: 5
+      name: "브랜드 보라 그라디언트 전면 사용"
+      status: "pass"
+      detail: |
+        gradient 사용 0건. parent-avatar 만 단색 fill (--pe-avatar-empty-bg #F5F3FF).
+        modal 자체는 destructive 빨강 (#FF3B30) + 중성 surface (#FFFFFF) + ghost outline.
+    - id: 6
+      name: "placeholder-image 주 콘텐츠 점유"
+      status: "pass"
+      detail: |
+        ParentSurface 의 100x100 avatar — context-engine.yaml assets.avatars.kind: gradient-token
+        선언 (needs_real_content: false). app-001 와 동일 fallback (lucide user 아이콘 + 단색 fill).
+        Pass 6 #6 면제 (의도된 디자인 시스템 fallback). modal 자체는 placeholder 슬롯 없음.
+    - id: 7
+      name: "DOM 이벤트 바인딩 ↔ Spec interactions 정합"
+      status: "pass"
+      detail: |
+        Spec interactions: 4개 (backdrop tap, keep-btn tap, exit-btn tap, ESC keydown).
+        prototype.html bindings: backdrop click + keep-btn click + exit-btn click + ESC keydown
+        + sheet click stopPropagation + state buttons (control-panel).
+        Spec 4개 user-facing interaction 모두 바인딩됨. ESC 는 강제 룰 #2 보조 channel.
+    - id: 8
+      name: "alert/confirm/prompt 사용"
+      status: "pass"
+      detail: |
+        grep 결과 0건 (onclick 핸들러 0개 — 모두 addEventListener).
+        모든 피드백은 toast + setState 로 구현. verifier hang 차단.
+    - id: 9
+      name: "modal archetype persona 강제 룰 4/4"
+      status: "pass"
+      detail: "modal_persona 섹션 참조 — 4/4 모두 통과."
+    - id: 10
+      name: "exemplar drift"
+      status: "n/a"
+      detail: |
+        modal archetype 은 exemplar 인라인 대상 아님 (feed 만 — PRD §v2 메커니즘).
+        단, 본 modal 은 app-013 (BlockConfirmSheet) 와 동일 패턴 (bottom sheet + destructive
+        primary + ghost cancel) 을 의도적으로 재사용 — 이는 exemplar drift 가 아닌 KB 패턴
+        consistency 로 분류. quality-consistency dimension PASS.
+
+# ─────────────────────────────
+# Modal Archetype Persona (강제 룰 4/4)
+# ─────────────────────────────
+modal_persona:
+  status: "passed"
+  rules:
+    - id: 1
+      name: "Backdrop opacity ≥ 0.4"
+      status: "pass"
+      detail: |
+        --wds-background-dimmed: rgba(0, 0, 0, 0.50). 0.50 ≥ 0.4. ParentSurface (편집 form
+        dirty 캡처) 명확히 dim 처리 + 시트 콘텐츠 가독성 확보.
+    - id: 2
+      name: "닫기 2-way 보장 (X + 외부 backdrop tap)"
+      status: "pass"
+      detail: |
+        Close trigger 3개:
+        (a) #keep-btn '계속 편집' 명시적 cancel (secondary ghost) — strong "edit-continue" intent
+        (b) #backdrop tap — 외부 영역 click 핸들러
+        + bonus: ESC keydown
+        Figma frame 에 X 버튼 없음 — '계속 편집' 이 1차 cancel channel. 강제 룰 #2 충족
+        (X 또는 명시적 cancel + backdrop tap 양자 택일 + 둘 다).
+        screen-spec.yaml interactions 에 close-overlay 트리거 3개 (backdrop, keep-btn, esc) 명시.
+    - id: 3
+      name: "Primary CTA 1개 + secondary 0-1개"
+      status: "pass"
+      detail: |
+        Primary: #exit-btn '나가기' (destructive 빨강 #FF3B30) — 1개
+        Secondary: #keep-btn '계속 편집' (ghost outline) — 1개
+        총 1+1 정확히 충족. 결정 단순화 (편집 지속 vs 변경 폐기).
+    - id: 4
+      name: "Title / 명확한 콘텍스트"
+      status: "pass"
+      detail: |
+        sheet-title h2: "변경 사항이 저장되지 않습니다"
+        sheet-desc p:   "정말 나가시겠어요?"
+        modal 만 떠있을 때도 사용자가 '무엇이 일어났는가' (변경 미저장) + '무엇을 결정하는가'
+        (계속 / 나가기) 즉시 인지 가능. ParentSurface (dimmed) 노출로 "어떤 작업 도중인지"
+        시각 컨텍스트 보강.
+
+  recommended_rules:
+    - id: 1
+      name: "Bottom sheet 형태 (모바일 표준)"
+      status: "applied"
+      detail: "화면 하단 anchor + slide-up transition (transform 0.28s cubic-bezier)."
+    - id: 2
+      name: "Drag handle 가시"
+      status: "applied"
+      detail: "40x4 pill (Figma frame 일치), neutral-300 색, 시트 상단 center."
+    - id: 3
+      name: "첫 input/option 자동 focus"
+      status: "skipped"
+      reason: |
+        confirm modal 에는 input 필드가 없음 (CTA 만). destructive primary ('나가기') 를
+        autofocus 하면 사용자가 ENTER 로 의도치 않게 변경 폐기 실행할 위험 — 권장 룰 거절.
+        대신 secondary ('계속 편집') 가 좌측 (default tab order) 로 안전한 default 제공.
+        archetype_recommendation_skipped 로 로깅.
+
+# ─────────────────────────────
+# Quality Score (from spec)
+# ─────────────────────────────
+quality_score:
+  extraction_accuracy: "1.0 (20/20)"
+  schema_completeness: "1.0+ (9/7 — required + visual_rules + quality_score)"
+  fabrication_risk: "low"
+  context_coverage:
+    why_linked: "3/3 AC (AC-1.4, AC-1.4.a, AC-1.4.b) 모두 ui_impact 매핑됨"
+    what_resolved: "10/10 컴포넌트 토큰 매핑 완료"
+
+# ─────────────────────────────
+# Inferred Fields (intent.md 게이트 후 확정 필요)
+# ─────────────────────────────
+inferred_fields:
+  - field: "Title 카피"
+    detail: |
+      Sprint Lead prompt 의 '변경 사항이 저장되지 않습니다' 채택. Figma 원문은
+      '수정사항이 있습니다. 그래도 나가시겠습니까?' (단일 텍스트). intent.md gate-question #1.
+  - field: "Description ('정말 나가시겠어요?') 분리"
+    detail: |
+      Figma 단일 텍스트 → spec title+desc 두 줄 분리. iOS HIG / Material 표준 alert 패턴.
+      intent.md gate-question #2.
+  - field: "Button 라벨 '계속 편집' / '나가기'"
+    detail: |
+      Sprint Lead prompt 의 라벨 채택. Figma frame 의 RegularButton 텍스트 노드는 별도
+      추출 불가 (instance) — intent.md gate-question #3 (Figma 원문 대조 필요).
+
+# ─────────────────────────────
+# Logging
+# ─────────────────────────────
+activity_log:
+  - phase: "started"
+    message: "app-003 modal v2 prototype 태스크 수령"
+  - phase: "context_engine"
+    message: "WHY 3 ACs / WHAT 9 components / HOW 4 rules / Assets 4 slots 조립"
+  - phase: "tokens_generated"
+    message: "tokens.css 재사용 (app-013 에서 등록된 modal 토큰 0개 신규 추가)"
+  - phase: "spec_complete"
+    message: "ExitConfirmSheet.spec.md 작성 — accuracy 1.0, fabrication low"
+  - phase: "preview_generated"
+    message: "ExitConfirmSheet.intent.md 생성 (fabrication low + Figma 카피 불일치 트리거), gate_questions 5개"
+  - phase: "html_alpha"
+    message: "prototype-alpha 생략 — single-screen modal, structure + content 단일 Write 로 통합"
+  - phase: "html_final"
+    message: "prototype.html 생성 (open / dismissing 2 states + parent surface 시각 컨텍스트)"
+  - phase: "anti_slop_audit"
+    message: "Pass 6 anti-slop audit 9/9 (10번 exemplar n/a) 통과"
+  - phase: "archetype_persona_passed"
+    message: "modal persona 강제 룰 4/4 통과"
+  - phase: "archetype_recommendation_skipped"
+    message: "modal 권장 룰 #3 (첫 input autofocus) 거절: destructive primary autofocus 위험"
+  - phase: "completed"
+    message: "Pass 6 9/9 + persona 4/4 + fabrication low + intent.md gate (5 questions) 대기"

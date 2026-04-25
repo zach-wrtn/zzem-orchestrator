@@ -1,0 +1,199 @@
+# Quality Report: 프로필편집_사진_바텀시트_나가기확인 (app-007)
+# Generated: 2026-04-25 (DE Step C completion)
+# Schema: v2 (Pass 6 + archetype persona + asset layer)
+# Sibling: app-003 (닉네임 변경 中 나가기) — 동일 패턴, 사진 컨텍스트
+
+meta:
+  task_id: "app-007"
+  screen_name: "프로필편집_사진_바텀시트_나가기확인"
+  sprint_id: "ugc-platform-integration-qa-2"
+  archetype: "modal"
+  generated_at: "2026-04-25T00:00:00Z"
+  figma_frame: "37160:80081"
+  figma_file: "7hozJ6Pvs09q98BxvChj08"
+
+# ─────────────────────────────
+# Pass 6 Anti-Slop Audit (9/9 — no exemplar = no #10)
+# ─────────────────────────────
+anti_slop_audit:
+  status: "passed"
+  score: "9/9"
+  exemplar_drift_check_run: false   # no inlined exemplar for app-007 modal
+  checks:
+    - id: 1
+      name: "hex tokens compliance"
+      result: "pass"
+      detail: "proto-unique hex diff vs tokens.css = {#1a1a2e, #2a2a3e, #e0e0e0, #f0f0f0} — 모두 .control-panel / body 영역 (Pass 6 검사 범위 제외). .screen 후손에서는 var(--*) 토큰만 사용. 검증: grep lines 139, 151, 152, 164, 170 모두 control-panel 스코프 확인."
+    - id: 2
+      name: "emoji on interactive"
+      result: "pass"
+      detail: "all icons are inline Lucide SVG (chevron-left, user, camera). No unicode emoji on <button>. 모든 button label 은 한국어 텍스트 ('계속 편집', '나가기', '저장')."
+    - id: 3
+      name: "border-left card slop"
+      result: "pass"
+      detail: "grep 'border-left:Npx' = 0 hits. .card 계열 요소 자체 미사용 (modal sheet 은 .confirm-sheet 클래스)."
+    - id: 4
+      name: "font-family Pretendard only"
+      result: "pass"
+      detail: "body uses var(--wds-font-family-primary). monospace는 .control-panel selectors (검사 제외). .screen 내부 모든 button/text는 font-family: inherit."
+    - id: 5
+      name: "no brand-purple gradient"
+      result: "pass"
+      detail: "grep linear-gradient containing #8752FA = 0 hits. 한 개의 linear-gradient (line 277) 는 var(--wds-color-purple-100) → var(--wds-color-purple-50) — 100x100 avatar circle 영역 placeholder (전면 배경 아님). 브랜드 purple-500 은 사용 안 됨."
+    - id: 6
+      name: "no placeholder-image on main content"
+      result: "pass"
+      detail: "<div class='placeholder-image'> 미사용. ParentAvatar 는 inline SVG (user) + camera badge SVG + soft purple gradient (변경 사진 mock). modal 평가 대상은 ConfirmSheet 자체 — 부모는 backdrop 아래 muted, context-engine.assets.avatars.needs_real_content: false."
+    - id: 7
+      name: "interaction count parity"
+      result: "pass"
+      detail: "spec interactions = 4 (exit-btn, continue-edit-btn, backdrop tap, backdrop keydown). addEventListener bindings = 4. DOM-spec parity OK. (state-toggle 버튼은 .control-panel 스코프 — 검사 제외)"
+    - id: 8
+      name: "no blocking dialog"
+      result: "pass"
+      detail: "grep onclick=*alert/confirm/prompt = 0 hits. dismissSheet uses setState + setTimeout (verifier-safe). 'confirm modal' 의미는 UX 패턴이며 window.confirm() 미사용."
+    - id: 9
+      name: "archetype persona (modal) 강제 룰 4/4"
+      result: "pass"
+      detail: "see modal_persona section below — 4/4 통과"
+    - id: 10
+      name: "exemplar drift"
+      result: "skipped"
+      detail: "no exemplar inlined for app-007 — Pass 6 #10 N/A"
+
+# ─────────────────────────────
+# Modal Archetype Persona (modal.md 강제 룰 4/4)
+# ─────────────────────────────
+modal_persona:
+  status: "passed"
+  score: "4/4"
+  forced_rules:
+    - id: 1
+      name: "Backdrop opacity ≥0.4"
+      result: "pass"
+      actual: "rgba(0,0,0,0.50) via var(--wds-background-dimmed) — 0.50 ≥ 0.40"
+    - id: 2
+      name: "Close 2-way (X/cancel + backdrop tap)"
+      result: "pass"
+      actual:
+        - "ContinueEditButton (cancel-equivalent) → dismissSheet('continue-edit')"
+        - "Backdrop tap #backdrop → dismissSheet('backdrop-tap')"
+        - "(bonus) Backdrop keydown Enter/Space → dismissSheet('backdrop-keyboard') for a11y"
+    - id: 3
+      name: "Primary CTA 1 + secondary 0-1"
+      result: "pass"
+      actual: "ExitButton = primary 1 (destructive intent, #262626 high-contrast) / ContinueEditButton = secondary 1 (ghost #F1F1F1). 정확히 1+1 — 결정 단순화 충족. iOS HIG confirm dialog 표준 패턴."
+    - id: 4
+      name: "Title or clear context"
+      result: "pass"
+      actual: "SheetTitle h2 '변경사항이 저장되지 않아요' (font-size-xl=18px, weight-bold, label-normal #212228). + SheetDescription '변경한 프로필 사진이 저장되지 않아요. 정말 나가시겠어요?' 로 컨텍스트 명확화."
+
+  recommended_rules:
+    - id: 1
+      name: "Bottom sheet form (mobile standard)"
+      result: "accepted"
+      actual: "bottom-sheet (anchor: bottom, slide-up transform, border-radius 20px top-only)"
+    - id: 2
+      name: "Drag handle visible"
+      result: "accepted"
+      actual: "DragHandle 40x4 rounded-full, var(--component-bottom-sheet-handle) #D1D3D8"
+    - id: 3
+      name: "First option auto-focus"
+      result: "skipped"
+      log: "archetype_recommendation_skipped"
+      rationale: "destructive confirm 에서 default focus 는 Enter 키 실수로 의도치 않은 폐기 위험 — Apple HIG 도 destructive 에 default focus 권장하지 않음. 사용자가 명시적으로 tap 해야 폐기 진행."
+
+# ─────────────────────────────
+# Asset Layer (Pass 6 #6 연결)
+# ─────────────────────────────
+assets:
+  avatars:
+    kind: "illustration"
+    source: "inline SVG (Lucide user) + soft purple gradient mark (변경 사진 mock)"
+    needs_real_content: false
+    rationale: "부모 ParentAvatar 는 backdrop 아래 muted, modal 평가 대상 아님. modal evaluation target 은 ConfirmSheet 자체."
+  icons:
+    kind: "illustration"
+    source: "Lucide inline SVG (chevron-left, user, camera, status battery/signal)"
+    fallback: "(미사용)"
+
+# ─────────────────────────────
+# Quality Score (from screen-spec.yaml)
+# ─────────────────────────────
+quality_score:
+  extraction_accuracy: "22/22 = 1.00"
+  fabrication_risk: "low"
+  inferred_fields:
+    - "SheetDescription 카피 — task '사진 변경이 저장 안됨, 정말 나가시겠어요?' 의역"
+    - "ExitButton 색 #262626 (neutral dark) — task 'destructive' 인데 빨강 명시 없음, app-003 닉네임 confirm 일관성 + community-safety red 예약"
+    - "버튼 좌우 배치 (좌 ContinueEdit / 우 Exit) — iOS HIG 표준"
+  schema_completeness: "11/7 = 1.57 (all required + 4 enrichment sections)"
+  context_coverage:
+    why_linked: "4/4 ACs"
+    what_resolved: "11/11 components"
+
+# ─────────────────────────────
+# Tokens used (consolidated)
+# ─────────────────────────────
+tokens_used:
+  semantic:
+    - "wds-background-normal"
+    - "wds-background-dimmed (modal #1)"
+    - "wds-background-elevated"
+    - "wds-surface-secondary"
+    - "wds-surface-tertiary"
+    - "wds-color-purple-50 / 100 / 400 / 500 (avatar mock + 컨텍스트)"
+    - "wds-color-neutral-200 / 300 / 700 / 900 / 1000 (button hover/active)"
+    - "wds-label-normal"
+    - "wds-label-alternative"
+    - "wds-label-inverse"
+    - "wds-line-normal"
+    - "wds-line-alternative"
+  component:
+    - "component-bottom-sheet-fill"
+    - "component-bottom-sheet-radius"
+    - "component-bottom-sheet-handle"
+  spacing: ["wds-spacing-4..40 grid"]
+  radius: ["wds-radius-md (button)", "wds-radius-full (handle/avatar)", "20px (sheet top)"]
+  typography:
+    - "wds-font-family-primary (Pretendard)"
+    - "wds-font-size-xl (18px) — sheet title"
+    - "wds-font-size-md (14px) — description"
+    - "wds-font-size-lg (16px) — button labels"
+    - "wds-font-weight-bold/semibold/regular"
+  profile_edit_aliases:
+    - "pe-confirm-btn (#262626 — Exit primary)"
+    - "pe-surface-hover (#F1F1F1 — ContinueEdit ghost)"
+    - "pe-save-active / pe-save-active-label (parent CTA + Exit label)"
+    - "pe-camera-badge-fill / pe-camera-badge-border"
+    - "pe-text-primary / pe-text-secondary"
+    - "pe-avatar-empty-bg / pe-avatar-border"
+    - "pe-input-fill / pe-input-border"
+
+# ─────────────────────────────
+# Files emitted
+# ─────────────────────────────
+files:
+  context_engine: "sprints/ugc-platform-integration-qa-2/prototypes/context/context-engine.yaml"
+  tokens_css: "sprints/ugc-platform-integration-qa-2/prototypes/context/tokens.css"
+  screen_spec: "sprints/ugc-platform-integration-qa-2/prototypes/app/app-007/screen-spec.yaml"
+  intent_md: "sprints/ugc-platform-integration-qa-2/prototypes/app/app-007/나가기확인.intent.md"
+  prototype_html: "sprints/ugc-platform-integration-qa-2/prototypes/app/app-007/prototype.html"
+  quality_report: "sprints/ugc-platform-integration-qa-2/prototypes/app/app-007/quality-report.나가기확인.yaml"
+
+# ─────────────────────────────
+# Final verdict
+# ─────────────────────────────
+verdict:
+  status: "READY_FOR_REVIEW"
+  pass_6: "9/9"
+  modal_persona: "4/4"
+  fabrication_risk: "low"
+  intent_md_emitted: true
+  blockers: []
+  notes:
+    - "Sibling of app-003 (닉네임 confirm) — 동일 패턴/색/배치, 컨텍스트만 사진으로 변경"
+    - "ExitButton color (#262626) 정책 결정은 intent.md Q1 으로 Sprint Lead 검토 권장 (status-error 빨강 vs neutral dark)"
+    - "Recommended rule #3 (auto-focus) skipped — destructive confirm 표준 (Apple HIG)"
+    - "Pass 6 #1 hex diff = {#1a1a2e, #2a2a3e, #e0e0e0, #f0f0f0} — 모두 .control-panel / body 스코프 (검사 제외)"
+    - "Pass 6 #5 — 한 개의 linear-gradient 존재하나 purple-100→purple-50 (avatar 100x100 mock) 으로 brand-500 배경 전면 사용 아님 → pass"

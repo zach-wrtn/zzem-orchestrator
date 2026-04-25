@@ -1,0 +1,116 @@
+# Context Engine — app-012 / 타유저_더보기메뉴 (MoreActionsSheet)
+# v2 pipeline (Pass 6 anti-slop + modal archetype persona)
+
+meta:
+  task_id: "app-012"
+  sprint_id: "ugc-platform-integration-qa-2"
+  generated_at: "2026-04-25"
+  archetype: "modal"
+  persona_inlined: ".claude/teammates/design-engineer-archetypes/modal.md"
+  references:
+    - id: "app-013"
+      dimension_focus: "modal persona (4 강제 룰) + 부모 surface mock"
+    - id: "app-005"
+      dimension_focus: "picker exception (action sheet ≠ confirm modal — N row picker)"
+  source_of_truth_resolution:
+    conflict: "task spec 옵션 (차단/신고/취소) ↔ Figma 37211:162175 옵션 (URL 복사/차단/신고)"
+    chosen: "Figma (디자인 표면 truth) + 취소 row 는 backdrop+ESC 로 대체"
+
+why:
+  product_intent: "타유저 프로필에서 차단·신고·URL공유 등 액션에 빠르게 접근하게 한다."
+  target_user: "타유저 프로필 방문 사용자 (잠재적 차단/신고/공유 의도)"
+  user_stories:
+    - id: "US-2.1"
+      as_a: "타유저 프로필을 보던 사용자"
+      i_want: "우상단 더보기(•••)를 탭하여 액션 시트를 띄운다"
+      so_that: "차단 / 신고 / 링크 복사 중 빠르게 선택할 수 있다"
+  acceptance_criteria:
+    - id: "AC-2.1"
+      given: "타유저 프로필 진입"
+      when: "우상단 더보기 (•••) 탭"
+      then: "Bottom sheet menu 표시 (URL 복사 / 차단 / 신고)"
+      ui_impact: "modal overlay — backdrop dim + sheet slide-up"
+    - id: "AC-2.1.a"
+      given: "더보기 시트 open"
+      when: "차단 row 탭"
+      then: "차단확인 modal (app-013) 로 진입"
+      ui_impact: "current sheet dismiss → BlockConfirmSheet open"
+    - id: "AC-2.1.b"
+      given: "더보기 시트 open"
+      when: "backdrop / ESC 탭"
+      then: "시트 닫힘"
+      ui_impact: "modal slide-down + backdrop fade-out"
+
+what:
+  tokens_needed:
+    colors:
+      - "wds.background.dimmed (#000 alpha 0.50)"
+      - "component.bottom-sheet.fill (#FFFFFF)"
+      - "component.bottom-sheet.handle (#D1D3D8)"
+      - "wds.label.normal (#212228)"
+      - "wds.label.error (#FF3B30)"
+      - "wds.surface.secondary (#F7F8F9)"
+      - "wds.line.alternative (#F0F1F3)"
+    typography:
+      - "wds.font-size.lg 16px (row label)"
+      - "wds.font-weight.medium 500 (row label)"
+    spacing: ["8", "12", "16", "20", "24"]
+    radius: ["full", "xl"]
+  components_needed:
+    - name: "Backdrop"
+      category: "feedback"
+    - name: "BottomSheet"
+      category: "layout"
+    - name: "DragHandle"
+      category: "feedback"
+    - name: "ActionList"
+      category: "navigation"
+    - name: "ActionRow"
+      category: "navigation"
+    - name: "RowDivider"
+      category: "layout"
+    - name: "Toast"
+      category: "feedback"
+  patterns_needed:
+    - name: "Action sheet (picker exception)"
+      description: "N개 옵션 중 하나를 picker 처럼 선택. 시각 위계는 color (destructive vs neutral). app-005 동일 패턴."
+
+how:
+  composition_rules:
+    - rule: "Action row 는 full-bleed (좌우 padding 20, 위아래 padding 16, height 56)"
+      applies_to: ["MoreActionsSheet"]
+    - rule: "Destructive (block/report) row 는 label + icon color = label.error"
+      applies_to: ["MoreActionsSheet"]
+    - rule: "Row 간 1px divider with margin 0 20 (full-bleed 면 여백)"
+      applies_to: ["MoreActionsSheet"]
+  conditional_rendering:
+    - condition: "row tap == copy"
+      variant_a: "URL 클립보드 복사 + 토스트 + 1.4s 후 sheet dismiss"
+      variant_b: null
+    - condition: "row tap == block"
+      variant_a: "current sheet dismiss → app-013 BlockConfirmSheet open"
+      variant_b: null
+    - condition: "row tap == report"
+      variant_a: "OOS 토스트 '신고 기능은 곧 제공돼요' + dismiss"
+      variant_b: null
+  constraints:
+    - "Backdrop opacity ≥ 0.4 (modal 강제 룰 #1) — 0.50 사용"
+    - "Close 2-way: backdrop tap + ESC key (Cancel row 없는 picker — 모바일 표준)"
+    - "Picker exception: primary/secondary 분류 회피 (app-005 동일)"
+    - "Title 생략 (action sheet picker — Figma 명세 따라 옵션만; 헤더 더보기 ••• 컨텍스트 활용)"
+  priority_order:
+    - "차단하기 (AC-2.1 차단 진입점 — 본 시트의 핵심 entry)"
+    - "신고하기 (스프린트 OOS — 시각 노출만)"
+    - "프로필 URL 복사 (Figma 명시 — 부가 액션)"
+
+assets:
+  icons:
+    kind: "illustration"
+    needs_real_content: false
+    source: "Lucide inline SVG (link / ban / flag)"
+    notes: "PR #31 패턴 — 모든 아이콘 inline SVG, 외부 fetch 0"
+  parent_surface:
+    kind: "real-image"
+    needs_real_content: false
+    source: "app-013 prototype 내 mock 프로필 surface 재사용 (시각 컨텍스트만 — 가운데 정렬 avatar + nickname + stats + 팔로우 CTA)"
+    notes: "decorative aria-hidden — 본 화면의 콘텐츠는 modal overlay"

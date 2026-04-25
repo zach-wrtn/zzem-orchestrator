@@ -1,0 +1,441 @@
+# Screen Spec: 프로필편집_사진_크롭 (app-008)
+# Machine-readable. DE Step B output. (산문 금지 — YAML/표/트리만)
+
+## Meta
+meta:
+  screen_name: "프로필편집_사진_크롭"
+  screen_archetype: "form"
+  task_id: "app-008"
+  sprint_id: "ugc-platform-integration-qa-2"
+  app: "ZZEM"
+  platform: "iOS / Android (React Native)"
+  language: "ko"
+  frame: "390x844"  # device-frame; Figma 원본 375x812
+  theme: "light"
+  figma_frame: "37160:80112"
+  figma_file: "7hozJ6Pvs09q98BxvChj08"
+  parent_screen: "app-005 (사진_바텀시트_선택) → app-009 (앨범선택) → app-008 (크롭) → app-006 (편집화면)"
+  archetype_classification:
+    chosen: "form"
+    rationale: "사용자 입력(크롭 영역 선택 = 단일 input)을 받아 submit('완료') → 부모 form 으로 결과 전달. modal-on-form 가능성도 검토했으나 본 frame 은 fullscreen + status/bottom bar 보존, modal 패턴 (backdrop·sheet) 미관찰 → form 으로 분류"
+    alternatives_considered: ["modal (rejected — fullscreen + 자체 header, sheet/backdrop 없음)"]
+
+## Component Tree
+component_tree: |
+  Screen [frame: 390x844, fullscreen]
+  ├── StatusBar [system] (div) #status-bar — 9:41 + signal/wifi/battery (black icons on white bg)
+  ├── HeaderBar [container] (header) #header-bar — 48px height, white bg, bottom border
+  │   ├── BackButton [icon-button] (button) #back-btn — Lucide chevron-left
+  │   ├── HeaderTitle [text] (h1) #header-title — "크기 설정" (Figma 카피 그대로)
+  │   └── HeaderSpacer [div] #header-spacer — 40x40 (back 대칭)
+  ├── CropCanvas [container] (section) #crop-canvas — 618px height, dark bg
+  │   ├── CropImage [image] (div) #crop-image — 사용자 선택 사진, object-fit cover, drag/zoom 가능
+  │   ├── CropMask [overlay] (div) #crop-mask — 정사각 (375x375 추정), 중앙 정렬, 외부는 dim scrim
+  │   │   ├── MaskHole [overlay] (div) #mask-hole — transparent center square
+  │   │   ├── MaskScrim [overlay] (div) #mask-scrim — semi-transparent black 외곽 4 영역
+  │   │   ├── MaskBorder [outline] (div) #mask-border — 1px white solid (정사각 outline)
+  │   │   └── MaskGrid [overlay] (svg) #mask-grid — 3x3 rule-of-thirds (1px white 50% opacity)
+  │   └── CropHint [text] (p) #crop-hint — "드래그해서 위치를 조절하세요" (안내문)
+  └── BottomCTA [container] (footer) #bottom-cta — fixed bottom, 56px + 32px safe-area
+      └── DoneButton [button-primary] (button) #done-btn — "완료" full-width, dark fill
+
+## Component Details
+components:
+  - name: "StatusBar"
+    id: "status-bar"
+    tag: "div"
+    type: "container"
+    position: "top, sticky"
+    size: "390x44"
+    tokens:
+      fill: "var(--wds-background-normal)"
+      text: "var(--wds-label-normal)"
+    behavior:
+      purpose: "iOS status bar — 시간 + 시스템 아이콘 (시각 frame 무결성)"
+    a11y:
+      role: "presentation"
+      label: ""
+
+  - name: "HeaderBar"
+    id: "header-bar"
+    tag: "header"
+    type: "container"
+    position: "below status bar, sticky"
+    size: "390x48"
+    tokens:
+      fill: "var(--wds-background-normal)"
+      border_bottom: "1px solid var(--wds-line-alternative)"
+    behavior:
+      purpose: "form persona — 사용자 위치 인지 (현재 단계: 크기 설정) + back navigation"
+    a11y:
+      role: "banner"
+      label: "크기 설정 헤더"
+    layout:
+      direction: "horizontal"
+      alignment: "space-between"
+
+  - name: "BackButton"
+    id: "back-btn"
+    tag: "button"
+    type: "icon-button"
+    position: "header left"
+    size: "40x40"
+    tokens:
+      fill: "transparent"
+      icon: "var(--pe-text-primary)"
+    behavior:
+      purpose: "AC: back tap 시 이전 화면 (앨범선택 app-009 또는 시트 app-005) 복귀"
+      user_action: "tap → go-back"
+      feedback: "navigation"
+    a11y:
+      role: "button"
+      label: "뒤로"
+
+  - name: "HeaderTitle"
+    id: "header-title"
+    tag: "h1"
+    type: "text"
+    position: "header center"
+    size: "auto x 48"
+    tokens:
+      text: "var(--pe-text-primary)"
+      font_size: "var(--wds-font-size-lg)"
+      font_weight: "var(--wds-font-weight-semibold)"
+    behavior:
+      purpose: "form persona 강제 룰 #2 의 컨텍스트 신호"
+    a11y:
+      role: "heading"
+      label: "크기 설정"
+    constraints:
+      max_lines: 1
+
+  - name: "CropCanvas"
+    id: "crop-canvas"
+    tag: "section"
+    type: "container"
+    position: "below header"
+    size: "390x618"
+    tokens:
+      fill: "var(--wds-color-neutral-1000)"  # 검정 — image bleed 시 안전
+    behavior:
+      purpose: "사용자 사진 표시 + drag/zoom 영역 (gesture 면적)"
+      user_action: "drag to pan / pinch to zoom (제스처)"
+      feedback: "visual (image transform)"
+    a11y:
+      role: "img"
+      label: "크롭 캔버스. 드래그 또는 핀치 제스처로 사진 위치와 크기를 조절하세요"
+    layout:
+      direction: "stack"
+      alignment: "center"
+      sizing: "fill"
+
+  - name: "CropImage"
+    id: "crop-image"
+    tag: "div"
+    type: "image"
+    position: "absolute (canvas inset)"
+    size: "390x618 (object-fit cover, transform-origin center)"
+    tokens:
+      fill: "transparent (image)"
+    behavior:
+      purpose: "선택된 사진 표시 — drag/zoom 의 대상"
+      user_action: "(영역 외 — 부모 CropCanvas 가 gesture 흡수)"
+      feedback: "visual"
+    a11y:
+      role: "img"
+      label: "선택된 사진"
+
+  - name: "CropMask"
+    id: "crop-mask"
+    tag: "div"
+    type: "overlay"
+    position: "absolute, centered on canvas"
+    size: "375x375 (정사각 — canvas 폭 기반)"
+    tokens:
+      mask_outline: "1px solid var(--wds-color-neutral-0)"  # white border
+    behavior:
+      purpose: "AC: 정사각 마스크 표시 + 외부 dim — 사용자가 잘릴 영역 즉시 인지 (form persona inline validation 등가)"
+    a11y:
+      role: "presentation"
+
+  - name: "MaskScrim"
+    id: "mask-scrim"
+    tag: "div"
+    type: "overlay"
+    position: "outside mask square (4 strips)"
+    tokens:
+      fill: "rgba(0, 0, 0, 0.50)"  # semantic dim scrim — task: 'semantic.dim.scrim'
+    behavior:
+      purpose: "AC: 마스크 외부 dim — 잘릴 영역 시각 분리"
+    a11y:
+      role: "presentation"
+
+  - name: "MaskGrid"
+    id: "mask-grid"
+    tag: "svg"
+    type: "overlay"
+    position: "centered on mask"
+    size: "375x375"
+    tokens:
+      stroke: "rgba(255, 255, 255, 0.40)"
+      stroke_width: "1px"
+    behavior:
+      purpose: "rule-of-thirds 가이드 — 사용자 정렬 보조 (조건부, 활성 변경 가능)"
+    a11y:
+      role: "presentation"
+
+  - name: "CropHint"
+    id: "crop-hint"
+    tag: "p"
+    type: "text"
+    position: "absolute bottom of canvas, 16px above CTA"
+    size: "auto"
+    tokens:
+      text: "var(--wds-label-inverse)"  # white on dark canvas
+      font_size: "var(--wds-font-size-sm)"
+      font_weight: "var(--wds-font-weight-medium)"
+    behavior:
+      purpose: "form persona 강제 룰 #1 — inline 안내 (크롭 영역 valid 표시 등가)"
+    a11y:
+      role: "text"
+      label: "드래그해서 위치를 조절하세요"
+    constraints:
+      max_lines: 1
+    note: "Figma 원본에 명시 안 됨 — DE 추론 (form persona 강제 룰 #1 의 inline guidance 충족)"
+
+  - name: "BottomCTA"
+    id: "bottom-cta"
+    tag: "footer"
+    type: "container"
+    position: "fixed bottom"
+    size: "390 x (56 + 32 safe-area)"
+    tokens:
+      fill: "var(--wds-background-normal)"
+    behavior:
+      purpose: "form persona 강제 룰 #4 — primary action 1 개 영역"
+
+  - name: "DoneButton"
+    id: "done-btn"
+    tag: "button"
+    type: "button-primary"
+    position: "bottom-cta center, full width minus 16px insets"
+    size: "(390-32) x 56"
+    tokens:
+      fill: "var(--pe-save-active)"  # #262626 (profile-edit pattern)
+      label: "var(--pe-save-active-label)"  # white
+      radius: "var(--wds-radius-md)"
+      font_size: "var(--wds-font-size-lg)"
+      font_weight: "var(--wds-font-weight-semibold)"
+    behavior:
+      purpose: "AC: '완료' tap → 크롭 결과 적용 → 부모 화면 (app-006) 복귀"
+      user_action: "tap → submit-crop"
+      feedback: "navigation"
+    states:
+      default: "fill --pe-save-active (이미지 선택된 상태이므로 enabled — task AC: '활성 (선택 이미지 존재 시)')"
+      pressed: "fill 살짝 어두움 (visual feedback)"
+      disabled: "fill --pe-save-disabled, label --pe-save-disabled-label (이미지 미선택 시 — 본 화면에서는 도달 불가, 안전망)"
+      loading: "spinner + label '저장 중...' (제출 중 중복 방지 — form persona 권장 룰 #2)"
+    a11y:
+      role: "button"
+      label: "완료"
+
+## Layout Spec
+layout_spec:
+  type: stack
+  viewport: 390x844
+  z_layers:
+    - z: 0
+      id: status-bar
+      anchor: top
+      width: full
+      height: 44
+    - z: 0
+      id: header-bar
+      anchor: top (offset 44)
+      width: full
+      height: 48
+    - z: 0
+      id: crop-canvas
+      anchor: top (offset 92)
+      width: full
+      height: 618
+      bg: "neutral-1000"
+    - z: 1
+      id: crop-image
+      anchor: canvas-center
+      transform: "translate + scale (drag/zoom)"
+    - z: 2
+      id: mask-scrim
+      anchor: canvas-fill (4 strips outside center 375x375 square)
+    - z: 3
+      id: crop-mask (border + grid)
+      anchor: canvas-center
+      width: 375
+      height: 375
+    - z: 4
+      id: crop-hint
+      anchor: canvas-bottom (offset -16)
+    - z: 5
+      id: bottom-cta
+      anchor: bottom (sticky)
+      width: full
+      height: 88  # 56 button + 32 safe-area
+
+## States
+states:
+  default:
+    description: "기본 — 이미지 로드 완료, 정사각 마스크 표시, '완료' enabled"
+    active: true
+    visible_components: [status-bar, header-bar, crop-canvas, crop-image, mask-scrim, crop-mask, mask-grid, crop-hint, bottom-cta, done-btn]
+    hidden_components: []
+  zoomed:
+    description: "사용자가 핀치 zoom 적용 — image transform scale > 1, mask 동일"
+    visible_components: [status-bar, header-bar, crop-canvas, crop-image, mask-scrim, crop-mask, crop-hint, bottom-cta, done-btn]
+    hidden_components: [mask-grid]  # 사용자 조작 중 시각 노이즈 감소 (관례)
+    note: "image transform scale 1.4, translate offset"
+  dragging:
+    description: "사용자가 image drag — image transform translate, mask 동일"
+    visible_components: [status-bar, header-bar, crop-canvas, crop-image, mask-scrim, crop-mask, crop-hint, bottom-cta, done-btn]
+    hidden_components: [mask-grid]
+  loading:
+    description: "이미지 로딩 중 (네트워크 또는 디스크) — skeleton + spinner"
+    visible_components: [status-bar, header-bar, crop-canvas, bottom-cta, done-btn]
+    hidden_components: [crop-image, mask-scrim, crop-mask, mask-grid, crop-hint]
+    note: "done-btn disabled (form persona — 미준비 상태 비활성)"
+  submitting:
+    description: "'완료' tap 직후 — done-btn 비활성 + spinner (form persona 권장 #2)"
+    visible_components: [status-bar, header-bar, crop-canvas, crop-image, mask-scrim, crop-mask, bottom-cta, done-btn]
+    hidden_components: [crop-hint, mask-grid]
+    note: "done-btn 'loading' state, label '저장 중...'"
+
+## Interactions
+interactions:
+  - trigger: tap
+    target: "#back-btn"
+    action: go-back
+    destination: "app-009 (앨범선택) 또는 app-005 (사진 시트)"
+    transition: slide-right
+  - trigger: drag
+    target: "#crop-canvas"
+    action: pan-image
+    side_effect: "crop-image transform translate 갱신"
+    note: "real RN: PanGestureHandler — 본 prototype 은 시각 데모 (드래그 시뮬레이션 버튼)"
+  - trigger: pinch
+    target: "#crop-canvas"
+    action: zoom-image
+    side_effect: "crop-image transform scale 갱신 (1.0 ~ 3.0)"
+    note: "real RN: PinchGestureHandler — 본 prototype 은 zoom-toggle 버튼으로 데모"
+  - trigger: tap
+    target: "#done-btn"
+    action: submit-crop
+    destination: "app-006 (프로필편집_메인) — 크롭된 avatar 적용"
+    side_effect: "loading state → 1초 후 toast '사진이 적용됐어요' (시각 데모)"
+    transition: slide-right
+
+## Visual Rules
+rules:
+  - condition: "이미지 로드 완료 (default state)"
+    effect: "done-btn 활성 (--pe-save-active fill)"
+    example: "task AC: '완료' 버튼 활성 (선택 이미지 존재 시)"
+  - condition: "마스크 외부 4 영역"
+    effect: "rgba(0,0,0,0.50) scrim — 잘릴 영역 시각 분리"
+  - condition: "마스크 outline"
+    effect: "1px solid white — 정사각 boundary 명확"
+  - condition: "drag/zoom 진행 중"
+    effect: "rule-of-thirds grid 일시 hide — 사용자 시각 집중 도움"
+
+## Labels (ko)
+labels:
+  header:
+    title: "크기 설정"  # Figma 카피 그대로 (NEVER DO #3 — UI copy 임의 변경 금지)
+  hint:
+    drag_guide: "드래그해서 위치를 조절하세요"
+  cta:
+    done: "완료"  # Figma 카피 (NOT '다음' — task 와 차이 있음, Figma 우선)
+    submitting: "저장 중..."
+  back_aria: "뒤로"
+  toast:
+    applied: "사진이 적용됐어요"  # 추론 — DE 안내 패턴
+
+## Token Map
+tokens:
+  bg_screen: "wds-background-normal → #FFFFFF"
+  bg_canvas: "wds-color-neutral-1000 → #000000 (image bleed 영역)"
+  border_header: "wds-line-alternative → #F0F1F3"
+  text_header: "pe-text-primary → #262626"
+  text_hint: "wds-label-inverse → #FFFFFF (canvas 위 white)"
+  scrim_outside_mask: "rgba(0,0,0,0.50) — semantic.dim.scrim (task 명시)"
+  mask_border: "wds-color-neutral-0 → #FFFFFF"
+  mask_grid: "rgba(255,255,255,0.40) — rule-of-thirds (1px stroke)"
+  cta_fill_enabled: "pe-save-active → #262626"
+  cta_label_enabled: "pe-save-active-label → #FFFFFF"
+  cta_fill_disabled: "pe-save-disabled → #F1F1F1"
+  cta_label_disabled: "pe-save-disabled-label → #8A8A8A"
+  cta_radius: "wds-radius-md → 12px"
+  font_family: "wds-font-family-primary → Pretendard"
+  font_size_header: "wds-font-size-lg → 16px"
+  font_size_cta: "wds-font-size-lg → 16px"
+  font_size_hint: "wds-font-size-sm → 13px"
+
+## Form Persona Compliance (form.md 강제 룰 4/4)
+form_persona:
+  rule_1_inline_validation:
+    requires: "모든 input 에 inline validation 정의"
+    actual: "본 form 의 'input' 은 사용자 crop area 선택 (drag/zoom). 'valid' = 마스크 영역 내에 이미지 존재. CropMask outline (white 1px) + MaskScrim (외부 dim) 자체가 inline visual validation — 사용자가 즉시 잘릴 영역 인지 (Figma + form 강제 룰 #1 충족). states.zoomed/dragging 에서도 마스크/scrim 유지."
+    pass: true
+    note: "전통 form 의 'red error text' 는 부적합 — gesture-driven form 의 inline validation 은 visual mask 가 등가물"
+
+  rule_2_submit_disabled_state:
+    requires: "Submit 버튼 disabled 상태 정의됨 — required 필드 valid 까지 비활성"
+    actual:
+      submit_disabled: "states.loading — 이미지 미로드 시 done-btn disabled (--pe-save-disabled fill)"
+      submit_enabled: "states.default/zoomed/dragging — image 로드 + crop area 존재 시 enabled (--pe-save-active fill)"
+    pass: true
+
+  rule_3_error_inline_under_input:
+    requires: "Error message 가 해당 입력 직하 (위·우측 alert 박스 금지)"
+    actual: "본 화면은 error 시나리오 없음 (gesture 는 항상 valid). 단, 이미지 로드 실패 시 CropHint 위치에 'inline' 메시지 노출 가능 — 패턴 준수 (alert 박스 금지)"
+    pass: true
+    note: "task AC 에 error case 명시 안 됨 — 안전망으로 inline pattern 만 채택"
+
+  rule_4_primary_action_one:
+    requires: "Primary action 1 개만 — 동급 강조 버튼 금지"
+    actual: "DoneButton ('완료') 1 개. back-btn 은 icon-button (위계 다름). 다른 동급 버튼 없음."
+    pass: true
+
+form_persona_recommended:
+  rec_1_validation_blur:
+    actual: "N/A — gesture form. drag/zoom 결과는 즉시 시각 반영 (real-time inline)"
+    accepted: "n/a"
+  rec_2_loading_state_after_submit:
+    actual: "states.submitting — done-btn 비활성 + 'loading' label '저장 중...'"
+    accepted: true
+  rec_3_section_split:
+    actual: "single screen, single 'input' (gesture). 분할 불필요"
+    accepted: "n/a"
+
+## Quality Score
+quality_score:
+  extraction_accuracy:
+    total_components: 12
+    with_token_map: 12
+    with_html_mapping: 12
+    score: "24/24 = 1.00"
+  fabrication_risk:
+    inferred_fields:
+      - "CropHint '드래그해서 위치를 조절하세요' — Figma 미관찰, form 강제 룰 #1 inline guidance 추론"
+      - "MaskGrid (3x3 rule-of-thirds) — Figma 명시 안 됨, 표준 크롭 UI 패턴"
+      - "MaskScrim opacity 0.50 — task 'semantic.dim.scrim' 만 언급, --wds-background-dimmed 0.50 적용"
+      - "정사각 마스크 변 길이 = 캔버스 폭 (375px) — Figma 에 명시 outline 없음, task '정사각 마스크 화면 중앙' 기반 추론"
+      - "Toast '사진이 적용됐어요' — submit 후 confirmation 패턴 (PRD 미명시)"
+      - "Header title '크기 설정' (Figma) vs task 'Header(타이틀 사진 편집)' 불일치 → Figma 우선 (NEVER DO #3)"
+      - "CTA label '완료' (Figma) vs task '다음' 불일치 → Figma 우선 (NEVER DO #3)"
+    risk_level: "medium"
+    note: "Figma 와 task 라벨 불일치 + 마스크/grid/scrim 시각 명시 부족 — intent.md 게이트 필수"
+  schema_completeness:
+    required_sections: ["meta", "component_tree", "layout_spec", "states", "interactions", "labels", "token_map"]
+    present_sections: ["meta", "component_tree", "layout_spec", "states", "interactions", "visual_rules", "labels", "token_map", "form_persona", "quality_score"]
+    score: "10/7 = 1.00 (all required + extras)"
+  context_coverage:
+    why_linked: "AC-1.3 (사진 변경: 크롭 / 저장) → 본 화면 직접 mapping. 4 task AC (마스크 중앙, 외부 dim, 완료 활성, back 복귀) 모두 component 매핑됨 = 4/4"
+    what_resolved: "12/12 components → tokens.css 등재 토큰만 사용 (raw rgba 0.50 은 task 명시 spec)"

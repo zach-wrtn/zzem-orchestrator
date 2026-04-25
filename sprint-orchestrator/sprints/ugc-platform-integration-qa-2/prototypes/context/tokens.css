@@ -127,6 +127,19 @@
   --pe-avatar-empty-bg: #F5F3FF;       /* avatar 비어있을 때 (MY 프로필 §3) */
   --pe-avatar-border: rgba(136, 136, 136, 0.2);  /* avatar ring */
 
+  /* === KEYBOARD MOCK (Group 001 / app-004) — iOS QWERTY 시각 mock 전용 ===
+   * 본 별칭들은 prototype 내 키보드 그래픽 mock 에만 사용. 실 컴포넌트 디자인 시스템 아님.
+   * 색상 출처: iOS 17 system keyboard (light) reference snapshot.
+   */
+  --kbd-bg:                 #D1D5DB;             /* 키보드 surface */
+  --kbd-key-fill:           #FFFFFF;             /* 일반 키 캡 */
+  --kbd-key-shadow:         rgba(0, 0, 0, 0.18); /* 키 캡 drop shadow */
+  --kbd-key-fn-fill:        #ABB0BC;             /* shift / 123 / delete 기능키 */
+  --kbd-suggestion-bar:     #D1D5DB;             /* 추천 단어 바 surface */
+  --kbd-suggestion-divider: rgba(0, 0, 0, 0.20); /* 추천 단어 사이 divider */
+  --kbd-text:               #000000;             /* 키 라벨 / 추천 텍스트 */
+  --kbd-home-indicator:     #000000;             /* iOS home indicator bar */
+
   /* === SPACING (4px grid) === */
   --wds-spacing-0:  0px;
   --wds-spacing-1:  1px;

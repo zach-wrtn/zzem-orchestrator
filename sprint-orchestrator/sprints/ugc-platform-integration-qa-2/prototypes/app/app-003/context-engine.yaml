@@ -1,0 +1,196 @@
+# Context Engine — ugc-platform-integration-qa-2 / app-003
+# Step A output of Design Engineer protocol v2.
+# Source PRD: docs/prds/ugc-platform-integration-qa-2.md (Group 001 AC-1.4)
+# Source task: sprint-orchestrator/sprints/ugc-platform-integration-qa-2/tasks/app/app-003.md
+# Figma frame: 37160:79969 (file 7hozJ6Pvs09q98BxvChj08) "프로필편집_닉네임_바텀시트_나가기확인"
+
+meta:
+  sprint_id: "ugc-platform-integration-qa-2"
+  task_id: "app-003"
+  screen_archetype: "modal"
+  generated_at: "2026-04-25T00:00:00Z"
+  schema_version: "1.0"
+  figma_frame: "37160:79969"
+  parent_screen: "app-001 (프로필편집_메인)"
+  related: ["app-007 (사진_바텀시트_나가기확인 — 같은 패턴 재사용)", "app-013 (modal pattern 참조)"]
+
+# ─────────────────────────────
+# Layer 1: WHY (Business Intent)
+# ─────────────────────────────
+why:
+  product_intent: |
+    프로필편집 화면에서 닉네임을 변경한 dirty 상태로 좌상단 back tap 시,
+    저장되지 않은 변경분이 폐기되기 직전 사용자에게 의도 확인을 요구한다.
+    의도치 않은 변경 손실(특히 키 큰 닉네임 입력 직후 실수로 back 탭)을 방지한다.
+  target_user: "ZZEM 사용자 — 프로필편집 진입 후 닉네임 입력 도중 의도치 않게 또는 의도적으로 back 탭한 사용자"
+  success_metric: "back tap 후 '계속 편집' 비율 (실수 방지 효과) + '나가기' 비율 (정상 종료 의도)"
+  user_stories:
+    - id: "US-1.4"
+      as_a: "ZZEM 사용자"
+      i_want: "닉네임 변경 도중 실수로 뒤로가기를 눌렀을 때 변경분이 즉시 사라지지 않기를"
+      so_that: "다시 입력하는 마찰 없이 작업을 이어가거나, 명시적으로 폐기를 결정할 수 있다"
+  acceptance_criteria:
+    - id: "AC-1.4"
+      given: "프로필편집 화면 — 닉네임 dirty 상태"
+      when: "사용자가 좌상단 back tap"
+      then: "Bottom sheet confirm 노출: 타이틀 + 설명 + '나가기' destructive primary + '계속 편집' secondary"
+      ui_impact: "Bottom sheet 컴포넌트 트리: BottomSheet > DragHandle + Title + Description + ButtonPair"
+    - id: "AC-1.4.a"
+      given: "나가기확인 바텀시트 노출"
+      when: "사용자가 backdrop tap 또는 '계속 편집' tap"
+      then: "Sheet dismiss + 편집 form 상태 보존 (입력값 유지)"
+      ui_impact: "2-way close: backdrop + secondary 버튼. 편집 form 변경분은 유지."
+    - id: "AC-1.4.b"
+      given: "나가기확인 바텀시트 노출"
+      when: "사용자가 '나가기' tap"
+      then: "Sheet dismiss + 편집 form pop (이전 화면 — MY 프로필) + 변경분 폐기"
+      ui_impact: "destructive primary 버튼 → 부모 화면 navigation back + dirty state 폐기"
+
+# ─────────────────────────────
+# Layer 2: WHAT (Design System)
+# ─────────────────────────────
+what:
+  tokens_needed:
+    colors:
+      - "wds.background.dimmed"           # backdrop rgba(0,0,0,0.50) — modal 강제 룰 #1
+      - "wds.background.elevated"         # sheet fill #FFFFFF
+      - "wds.color.red.500"               # 나가기 destructive primary fill (alias --pe-destructive-text 와 다름)
+      - "wds.color.red.600"               # destructive pressed
+      - "wds.color.neutral-100"           # ghost cancel hover bg / parent surface input
+      - "wds.color.neutral-200"           # parent surface line
+      - "wds.color.neutral-300"           # drag handle
+      - "wds.color.neutral-500"           # parent surface placeholder
+      - "wds.color.neutral-600"           # secondary 버튼 ghost label
+      - "wds.color.neutral-900"           # title primary text
+      - "wds.color.purple-400"            # parent avatar icon (pe-avatar)
+    typography:
+      - "wds.font.size.sm"      # 13px - body desc 보조
+      - "wds.font.size.md"      # 14px - 부모 surface 보조
+      - "wds.font.size.lg"      # 16px - 버튼 라벨 + 시트 본문
+      - "wds.font.size.xl"      # 18px - 시트 타이틀 (bold)
+      - "wds.font.weight.semibold"
+      - "wds.font.weight.bold"
+    spacing:
+      - "wds.spacing.4"
+      - "wds.spacing.8"
+      - "wds.spacing.12"
+      - "wds.spacing.16"
+      - "wds.spacing.20"
+      - "wds.spacing.24"
+      - "wds.spacing.32"
+    radius:
+      - "wds.radius.md"     # 12px - 버튼
+      - "wds.radius.lg"     # 16px - 부모 input field
+      - "wds.radius.xl"     # 20px - 시트 상단 (top-only)
+      - "wds.radius.full"   # 9999 - drag handle pill, avatar circle
+
+  components_needed:
+    - name: "Backdrop"
+      category: "feedback"
+      ref: "modal archetype 강제 룰 #1 (opacity 0.4+)"
+    - name: "BottomSheet"
+      category: "layout"
+      ref: "wds-tokens semantic.bottom-sheet — 351x≈170 (Figma frame)"
+    - name: "DragHandle"
+      category: "feedback"
+      ref: "modal archetype 권장 룰 #2 — 40x4 pill"
+    - name: "Title"
+      category: "text"
+      ref: "modal archetype 강제 룰 #4 (명확한 콘텍스트) — '변경 사항이 저장되지 않습니다'"
+    - name: "Description"
+      category: "text"
+      ref: "본문 1줄 — '정말 나가시겠어요?' (선택적 보조 — Figma 는 단일 텍스트로 통합)"
+    - name: "RegularButton (Secondary ghost)"
+      category: "input"
+      ref: "modal archetype 강제 룰 #3 (secondary 0-1개) — '계속 편집'"
+    - name: "RegularButton (Primary destructive)"
+      category: "input"
+      ref: "modal archetype 강제 룰 #3 (primary 1개) — '나가기' (변경 폐기 — destructive)"
+    - name: "ParentSurface (NicknameEditForm)"
+      category: "layout"
+      ref: "시각 컨텍스트 — app-001 의 dirty 상태 캡처. modal 외부 표면 가독성 확인용"
+
+  patterns_needed:
+    - name: "Bottom sheet exit confirm"
+      description: "모바일 표준 — 화면 하단에서 슬라이드업, backdrop dim 0.4+, backdrop tap dismiss"
+    - name: "Destructive primary CTA + ghost cancel"
+      description: "변경 폐기 = destructive — 빨간 primary, ghost secondary. iOS HIG 표준."
+    - name: "Two-button row (1:1)"
+      description: "Figma frame: 좌 160.5 + 우 160.5 동일 폭. 좌 secondary + 우 destructive primary."
+
+# ─────────────────────────────
+# Layer 3: HOW (Orchestration)
+# ─────────────────────────────
+how:
+  composition_rules:
+    - rule: "ParentSurface (NicknameEditForm dirty) → Backdrop (full screen) → BottomSheet (bottom-anchored, slide-up)"
+      applies_to: ["ExitConfirmSheet"]
+    - rule: "BottomSheet 내부 vertical stack: DragHandle(center) → Title(20px gap) → ButtonPair(1:1)"
+      applies_to: ["ExitConfirmSheet"]
+    - rule: "ButtonPair: 좌측 '계속 편집' ghost + 우측 '나가기' destructive — 동일 폭 1:1, gap 8px"
+      applies_to: ["ExitConfirmSheet"]
+    - rule: "Sheet content padding: 12 (top, drag) + 20 28 24 (text + button area). Figma frame 351x170 wrap-content."
+      applies_to: ["ExitConfirmSheet"]
+  conditional_rendering:
+    - condition: "state == 'open' (default)"
+      variant_a: "Backdrop visible + Sheet slid-up + 모든 인터랙션 활성"
+      variant_b: null
+    - condition: "state == 'dismissing'"
+      variant_a: "Backdrop fade-out + Sheet slide-down + parent surface 인터랙션 복원"
+      variant_b: null
+  constraints:
+    - "Backdrop opacity 0.50 (modal archetype 강제 룰 #1: ≥0.4)"
+    - "Close trigger 2개 이상: '계속 편집' 버튼 (강제 룰 #2 (a) cancel channel) + backdrop tap (강제 룰 #2 (b))"
+    - "Primary CTA 1개 ('나가기' destructive 빨간색) + Secondary 1개 ('계속 편집' ghost). 정확히 1+1 (modal archetype 강제 룰 #3)"
+    - "Title 명확: '변경 사항이 저장되지 않습니다' — modal 만 떠도 사용자가 무엇을 결정하는지 즉시 인지 (강제 룰 #4)"
+    - "Figma 원문은 단일 텍스트 '수정사항이 있습니다. 그래도 나가시겠습니까?' — task spec 의 두 줄 패턴 (title + sub) 채택, 정확 카피는 Sprint Lead 게이트"
+    - "본 modal 은 Figma 에 X 버튼 없음 — close 2-way 는 (a) '계속 편집' 명시 cancel + (b) backdrop tap 으로 충족"
+    - "ParentSurface 는 시각 컨텍스트만 — 인터랙션 비활성 (aria-hidden + pointer-events: none)"
+    - "alert/confirm/prompt 절대 사용 금지 (verifier 호환 — Pass 6 #8)"
+    - "control-panel 영역 외 모든 텍스트 Pretendard (Pass 6 #4)"
+    - "icons: lucide inline SVG (back arrow, status bar icons) — Pass 6 #2 emoji 금지"
+  priority_order:
+    - "1. Title (왜 이 modal 이 떴는가 — 변경 손실 경고)"
+    - "2. ButtonPair (결정 — 계속 편집 vs 나가기)"
+    - "3. Backdrop (외부 영역 dim + tap close)"
+    - "4. ParentSurface (시각 컨텍스트 — 무엇을 편집 중이었는가)"
+
+# ─────────────────────────────
+# Layer 4: ASSETS
+# ─────────────────────────────
+assets:
+  avatars:
+    kind: gradient-token
+    source: "토큰화된 단색 fill (--pe-avatar-empty-bg = #F5F3FF) + lucide user 아이콘 — app-001 와 동일"
+    count: 1
+    license: "internal-test"
+    needs_real_content: false
+    note: |
+      ParentSurface 의 100x100 프로필 이미지 — app-001 과 동일 fallback (의도된 디자인).
+      Pass 6 #6 면제 (gradient-token kind).
+  feed_thumbnails:
+    kind: gradient-token
+    source: null
+    needs_real_content: false
+    note: "이 화면 (modal) 은 feed 썸네일 슬롯 없음"
+  meme_images:
+    kind: gradient-token
+    source: null
+    needs_real_content: false
+    note: "이 화면 meme image 없음"
+  icons:
+    kind: illustration
+    source: |
+      lucide inline SVG:
+      - chevron-left (parent header back button — 비활성)
+      - camera (parent profile camera badge — 비활성)
+      - user (parent avatar fallback)
+      - signal/battery (status bar)
+      ※ 본 modal 은 X 버튼 없음 (Figma frame 기준) — close 아이콘 SVG 없음
+    fallback: "기호 placeholder 금지 — Pass 6 #2 strict"
+    needs_real_content: false
+  hero_banners:
+    kind: gradient-token
+    source: null
+    needs_real_content: false
+    note: "modal 화면 — hero banner 슬롯 없음"

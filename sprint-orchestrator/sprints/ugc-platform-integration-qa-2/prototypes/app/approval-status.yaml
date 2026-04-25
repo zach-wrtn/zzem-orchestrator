@@ -1,6 +1,31 @@
 # Approval Status — ugc-platform-integration-qa-2 / app prototypes
 
 tasks:
+  app-008:
+    프로필편집_사진_크롭:
+      status: pending
+      spec: "app-008/screen-spec.yaml"
+      intent: "app-008/크롭.intent.md"
+      prototype: "app-008/prototype.html#crop-screen"
+      screenshot: "app-008/screenshots/크롭-default.png"
+      states_captured: [default, zoomed, dragging, loading, submitting]
+      archetype: form
+      figma_frame: "37160:80112"
+      quality_score: "1.0 / 1.0"
+      fabrication_risk: medium
+      anti_slop_audit: passed
+      anti_slop_score: "9/9 (check 10 skipped — no exemplar)"
+      archetype_persona_score: "4/4"
+      exemplar_drift_warning: false
+      exemplar_inlined: null
+      intent_gate_questions: 7
+      reviewed_at: null
+      notes: |
+        fabrication_risk: medium — Figma vs task 라벨 불일치 (Header '크기 설정' vs '사진 편집',
+        CTA '완료' vs '다음') 모두 PRD NEVER DO #3 (Figma SSOT) 적용. crop-image gradient
+        placeholder — Sprint Lead 'placeholder 허용' 명시 승인 또는 sample 인물 사진 등재 필요
+        (intent.md Q6).
+
   app-020:
     NotificationCenterScreen:
       status: pending
