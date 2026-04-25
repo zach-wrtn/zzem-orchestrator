@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head><meta charset="UTF-8"><title>aria roles fixture</title></head>
+<body>
+  <ul role="menu">
+    <li role="menuitem" id="m1">Item 1</li>
+    <li role="menuitem" id="m2">Item 2</li>
+  </ul>
+  <div role="tablist">
+    <button role="tab" data-tab="public">Public</button>
+    <button role="tab" data-tab="private">Private</button>
+  </div>
+  <script>
+    document.querySelectorAll('[role="menuitem"], [role="tab"]').forEach(el => {
+      el.addEventListener('click', () => { /* no-op */ });
+    });
+  </script>
+</body>
+</html>
