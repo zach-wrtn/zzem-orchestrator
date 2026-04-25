@@ -7,6 +7,7 @@
 
 ```yaml
 screen_name: "{ScreenName}"
+screen_archetype: "{feed | detail | onboarding | form | modal | empty_state}"
 task_id: "{task-id}"
 sprint_id: "{sprint-id}"
 app: "ZZEM"
@@ -15,6 +16,21 @@ language: "ko"
 frame: "390x844"
 theme: "light"
 ```
+
+**`screen_archetype` 선택 가이드** (한 화면 1개만 선택, 가장 우세한 패턴 기준):
+
+| archetype | 핵심 신호 | 예시 |
+|-----------|----------|------|
+| **feed** | 동질 아이템 N개 스크롤 | 홈 피드, 검색 결과, 알림 리스트 |
+| **detail** | 단일 객체 상세 (hero + body + CTAs) | 게시물 상세, 프로필 페이지, 상품 상세 |
+| **onboarding** | 다단계 진행 + large primary CTA | 가입 step 1/2/3, 튜토리얼, 설정 마법사 |
+| **form** | 입력 필드 + validation + submit | 로그인, 신고, 프로필 편집 |
+| **modal** | 부분 화면 + backdrop + dismiss | confirm, share sheet, filter 시트 |
+| **empty_state** | 컨텐츠 0건 안내 + 1 primary CTA | 빈 피드, 검색결과 없음, 첫 사용자 |
+
+복합 화면 (예: detail + 하단 form) 인 경우 가장 시각 면적 큰 영역 기준. 분류 모호 시 Sprint Lead 에 질의.
+
+DE 는 본 `screen_archetype` 필드를 읽고 `.claude/teammates/design-engineer-archetypes/{archetype}.md` 의 persona 룰을 적용한다 (자세한 룰은 design-engineer.md Step C 참조).
 
 ## Component Tree
 
