@@ -615,7 +615,7 @@ body {
       <span class="toast__icon" aria-hidden="true">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
       </span>
-      <span class="toast__text" id="toast-text">memer_kim님 차단을 해제했어요</span>
+      <span class="toast__text" id="toast-text">memer_kim님 차단 해제했어요</span>
     </div>
 
   </section>
@@ -669,7 +669,7 @@ body {
       followBtn.dataset.followed = 'false';
       followBtn.textContent = '팔로우';
       followBtn.setAttribute('aria-label', '팔로우');
-      showToast('memer_kim님 차단을 해제했어요', 3000);
+      showToast('memer_kim님 차단 해제했어요', 3000);
     } else if (state === 'toast-dismissed') {
       hideToast();
       followBtn.dataset.followed = 'false';

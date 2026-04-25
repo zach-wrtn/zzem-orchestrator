@@ -43,7 +43,7 @@ why:
     - id: "AC-2.5-toast"
       given: "해제 API 성공"
       when: "본 화면 진입 직후"
-      then: "'{nickname}님 차단을 해제했어요' Toast 가 표시되고 3s 내 auto-dismiss"
+      then: "'{nickname}님 차단 해제했어요' Toast 가 표시되고 3s 내 auto-dismiss"
       ui_impact: "Toast component (sticky bottom, single line, role=status) — 3s timer"
     - id: "AC-2.5-empty"
       given: "해제 후 차단 사용자가 0건이 되었다"

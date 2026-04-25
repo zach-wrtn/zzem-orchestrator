@@ -60,7 +60,7 @@ component_tree: |
   │       ├── EmptyTitle [text] (h3) — "차단한 사용자가 없어요"
   │       ├── EmptyDesc [text] (p)
   │       └── EmptyAction [button-secondary] (button)
-  └── Toast [feedback] (div) #toast — "{nickname}님 차단을 해제했어요" (default 진입 시 auto)
+  └── Toast [feedback] (div) #toast — "{nickname}님 차단 해제했어요" (default 진입 시 auto)
 
 # ─────────────────────────────
 # Component Details
@@ -251,7 +251,7 @@ components:
       text: "var(--wds-label-inverse)"
       radius: "var(--wds-radius-md)"
     behavior:
-      purpose: "AC: '차단을 해제했어요' Toast 표시 후 3s 내 auto-dismiss"
+      purpose: "AC: '차단 해제했어요' Toast 표시 후 3s 내 auto-dismiss"
       auto_dismiss_ms: 3000
       auto_show_on_mount: true
     a11y: { role: "status", label: "안내 메시지", live: "polite" }
@@ -300,7 +300,7 @@ states:
     visible_components: [count-summary, blocked-list, end-indicator, toast]
     hidden_components: [blocked-skeleton, empty-view]
     auto_actions:
-      - "showToast('달리는토끼님 차단을 해제했어요') on mount, dismiss after 3000ms"
+      - "showToast('달리는토끼님 차단 해제했어요') on mount, dismiss after 3000ms"
 
   loading:
     description: "새로고침 시 — feed 강제 룰 #1"
@@ -363,7 +363,7 @@ interactions:
   - trigger: "auto-mount"
     target: "#toast"
     action: "show-and-dismiss"
-    payload: "달리는토끼님 차단을 해제했어요"
+    payload: "달리는토끼님 차단 해제했어요"
     duration_ms: 3000
     note: "AC: Toast 자동 표시 후 3s 내 auto-dismiss"
 
@@ -372,7 +372,7 @@ interactions:
 # ─────────────────────────────
 rules:
   - condition: "진입 시점 (app-018 confirm 통과 직후)"
-    effect: "Toast '{nickname}님 차단을 해제했어요' 자동 표시"
+    effect: "Toast '{nickname}님 차단 해제했어요' 자동 표시"
     example: "AC-2.5 happy path"
   - condition: "blockedUsers.length == 6 (해제 후)"
     effect: "BlockedList 6 rows 노출, count-summary '차단된 사용자 6명'"
@@ -409,7 +409,7 @@ labels:
     cta: "설정으로 돌아가기"
   end_indicator: "마지막 차단 사용자입니다"
   toast:
-    unblocked_template: "{nickname}님 차단을 해제했어요"
+    unblocked_template: "{nickname}님 차단 해제했어요"
     refresh_in_progress: "차단 목록을 새로고침하고 있어요…"
     refresh_done: "차단 목록을 새로고침했어요"
     error: "차단 목록을 불러오지 못했어요. 잠시 후 다시 시도해 주세요."
