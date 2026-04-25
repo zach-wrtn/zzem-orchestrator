@@ -1,0 +1,54 @@
+# Sprint Configuration — ugc-platform-be-reconciliation
+# Mini-sprint follow-up of ugc-platform-integration-qa-2 dogfood discovery.
+# Scope: BE endpoint diff vs qa-2 api-contract Mock + app data layer reconcile.
+
+sprint_id: "ugc-platform-be-reconciliation"
+branch_prefix: "sprint"
+
+repositories:
+  backend:
+    source: ~/dev/work/wrtn-backend
+    base: "apple"
+    mode: worktree   # read-only investigation; no BE code changes per PRD
+  app:
+    source: ~/dev/work/app-core-packages
+    base: "epic/ugc-platform-final"
+    mode: worktree   # potential data layer fix
+  tokens:
+    source: ~/dev/work/wds-tokens
+    base: "main"
+    mode: symlink
+
+defaults:
+  base: "main"
+
+team:
+  teammates:
+    - be-engineer    # read-only investigation role
+    - fe-engineer    # data layer fix
+    - evaluator
+  settings:
+    eval_retry_limit: 1
+    max_parallel_tasks: 2
+
+display:
+  title: "UGC Platform BE Reconciliation — Mock spec vs production BE"
+  startDate: "2026-04-25"
+  endDate: "2026-04-25"
+  status: "active"
+  tags:
+    - ugc-platform
+    - reconciliation
+    - mini-sprint
+    - be-verify
+    - follow-up
+  summary: |
+    qa-2 sprint dogfood discovery: BE endpoints already exist in production.
+    Verify Mock spec (api-contract.yaml) vs actual BE path/payload + reconcile
+    differences. NO new BE code.
+
+follow_up:
+  previous_sprint: "ugc-platform-integration-qa-2"
+  inherited:
+    api_contract: true
+    deferred_items: 0
