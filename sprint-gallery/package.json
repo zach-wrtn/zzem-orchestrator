@@ -6,12 +6,15 @@
   "scripts": {
     "dev": "astro dev",
     "validate:tokens": "tsx scripts/validate-tokens.ts",
-    "build": "pnpm run sync:tokens && pnpm run validate:tokens && pnpm run verify:prototypes && pnpm run capture:screenshots && pnpm run copy:prototypes && astro build",
+    "build": "pnpm run sync:tokens && pnpm run validate:tokens && pnpm run verify:prototypes && pnpm run gallery:exemplar:validate && pnpm run capture:screenshots && pnpm run copy:prototypes && astro build",
     "preview": "astro preview",
     "copy:prototypes": "tsx scripts/copy-prototypes.ts",
     "verify:prototypes": "tsx scripts/verify-prototype.ts",
     "capture:screenshots": "tsx scripts/capture-screenshots.ts",
     "sync:tokens": "tsx scripts/sync-tokens.ts",
+    "gallery:exemplar:add": "tsx scripts/exemplar-add.ts",
+    "gallery:exemplar:validate": "tsx scripts/exemplar-validate.ts",
+    "gallery:exemplar:lookup": "tsx scripts/exemplar-lookup.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
@@ -25,7 +28,8 @@
     "marked": "^18.0.0",
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
-    "yaml": "^2.5.0"
+    "yaml": "^2.5.0",
+    "zod": "^3.23.0"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.11.2",
