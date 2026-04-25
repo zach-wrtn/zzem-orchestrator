@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-25T09:24:01.933Z",
+  "generated_at": "2026-04-25T10:18:49.726Z",
   "exemplars": [
     {
       "id": "v2-dogfood-free-tab-app-001-freetabscreen",
@@ -18,7 +18,7 @@
       ],
       "added_by": "zach@wrtn.io",
       "added_at": "2026-04-25T05:37:31.653Z",
-      "last_validated_at": "2026-04-25T09:24:01.933Z",
+      "last_validated_at": "2026-04-25T10:18:49.726Z",
       "validation_status": "valid",
       "notes": "Bootstrap from PR #29-#35 dogfood. See sprint-orchestrator/dogfood/v2-exercise/free-tab-app-001/comparison-report.md for v2-vs-existing analysis."
     },
@@ -38,7 +38,7 @@
       ],
       "added_by": "zach@wrtn.io",
       "added_at": "2026-04-25T09:19:36.605Z",
-      "last_validated_at": "2026-04-25T09:24:01.933Z",
+      "last_validated_at": "2026-04-25T10:18:49.726Z",
       "validation_status": "valid",
       "notes": "Bootstrap from PR #579 sprint dogfood. See sprint-orchestrator/sprints/ugc-platform-integration-qa-2/prototypes/app/app-021/ for full v2 artifacts."
     },
@@ -58,7 +58,7 @@
       ],
       "added_by": "zach@wrtn.io",
       "added_at": "2026-04-25T09:21:07.351Z",
-      "last_validated_at": "2026-04-25T09:24:01.933Z",
+      "last_validated_at": "2026-04-25T10:18:49.726Z",
       "validation_status": "valid",
       "notes": "Bootstrap from PR #579 sprint dogfood."
     },
@@ -78,9 +78,49 @@
       ],
       "added_by": "zach@wrtn.io",
       "added_at": "2026-04-25T09:21:07.784Z",
-      "last_validated_at": "2026-04-25T09:24:01.933Z",
+      "last_validated_at": "2026-04-25T10:18:49.726Z",
       "validation_status": "valid",
       "notes": "Bootstrap from PR #579 sprint dogfood."
+    },
+    {
+      "id": "ugc-qa-2-app-016-otherprofilescreenunblocked",
+      "sprint_id": "ugc-qa-2",
+      "task_id": "app-016",
+      "screen_name": "OtherProfileScreenUnblocked",
+      "archetype": "detail",
+      "why_curated": "v2 dogfood (UGC QA 2차) — detail with hero 320px+ + 3 metadata tiles + primary 1 (FollowButton) + secondary 1 (MessageButton) + ghost (more). Reference for user/object profile detail pattern. Toast on post-action.",
+      "prototype_path": "sprint-orchestrator/sprints/ugc-platform-integration-qa-2/prototypes/app/app-016/prototype.html",
+      "screenshot_path": "sprint-orchestrator/sprints/ugc-platform-integration-qa-2/prototypes/app/app-016/screenshots/default.png",
+      "design_dimensions": [
+        "archetype_fit",
+        "token_compliance",
+        "interaction_completeness"
+      ],
+      "added_by": "zach@wrtn.io",
+      "added_at": "2026-04-25T10:13:04.260Z",
+      "last_validated_at": "2026-04-25T10:18:49.726Z",
+      "validation_status": "valid",
+      "notes": "Bootstrap from PR #579 sprint dogfood. Uses nested anti_slop_audit.status pattern (CLI v2)."
+    },
+    {
+      "id": "ugc-qa-2-app-023-settingsmainscreen",
+      "sprint_id": "ugc-qa-2",
+      "task_id": "app-023",
+      "screen_name": "SettingsMainScreen",
+      "archetype": "nav_list",
+      "why_curated": "v2.2 post-#41 — first nav_list exemplar. Settings main menu primary 4 + secondary 1 + destructive 1 rows. All nav targets, chevron disclosure, no primary CTA. Reference for settings/menu list pattern.",
+      "prototype_path": "sprint-orchestrator/sprints/ugc-platform-integration-qa-2/prototypes/app/app-023/prototype.html",
+      "screenshot_path": "sprint-orchestrator/sprints/ugc-platform-integration-qa-2/prototypes/app/app-023/screenshots/default.png",
+      "design_dimensions": [
+        "archetype_fit",
+        "token_compliance",
+        "interaction_completeness"
+      ],
+      "added_by": "zach@wrtn.io",
+      "added_at": "2026-04-25T10:18:49.293Z",
+      "last_validated_at": "2026-04-25T10:18:49.726Z",
+      "validation_status": "valid",
+      "notes": "Reclassified post-#41 (archetype enum 6→7). Was form misfit during dogfood; nav_list persona 4/4 confirmed."
     }
   ]
 }
