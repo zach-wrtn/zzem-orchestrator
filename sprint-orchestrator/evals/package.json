@@ -1,0 +1,21 @@
+{
+  "name": "@zzem/sprint-evals",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Design Engineer eval harness — regression tests for DE/phase-prototype changes.",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "yaml": "^2.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.1.0"
+  }
+}
