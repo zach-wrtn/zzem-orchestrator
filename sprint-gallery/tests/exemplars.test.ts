@@ -1,8 +1,9 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { addExemplar } from '../scripts/exemplar-add.js';
+import { validateExemplars } from '../scripts/exemplar-validate.js';
 import { ExemplarIndex, type ExemplarIndex as ExemplarIndexType } from '../src/lib/exemplars/schema.js';
 
 interface Fixture {
@@ -129,5 +130,112 @@ describe('exemplar-add', () => {
         galleryRoot: fixture.galleryRoot,
       }),
     ).rejects.toThrow(/prototype\.html not found/);
+  });
+});
+
+describe('exemplar-validate', () => {
+  it('marks valid when verifier returns pass and refreshes last_validated_at', async () => {
+    seedSprintArtifacts(fixture.repoRoot, 'sprint-v', 'app-001', 'Home');
+    await addExemplar({
+      sprint: 'sprint-v',
+      task: 'app-001',
+      screen: 'Home',
+      archetype: 'feed',
+      reason: 'Reference for validation success path — verifier stub returns pass.',
+      dimensions: ['token_compliance'],
+      addedBy: 'tester@example.com',
+      now: '2026-04-01T00:00:00Z',
+      indexPath: fixture.indexPath,
+      repoRoot: fixture.repoRoot,
+      galleryRoot: fixture.galleryRoot,
+    });
+
+    const result = await validateExemplars({
+      indexPath: fixture.indexPath,
+      repoRoot: fixture.repoRoot,
+      galleryRoot: fixture.galleryRoot,
+      now: '2026-04-25T00:00:00Z',
+      verify: vi.fn().mockResolvedValue({
+        file: '',
+        status: 'pass',
+        consoleErrors: [],
+        unhandledRejections: [],
+        clickedElements: 1,
+        clickErrors: [],
+        durationMs: 10,
+      }),
+    });
+
+    expect(result.exitCode).toBe(0);
+    const index = readIndex(fixture.indexPath);
+    expect(index.exemplars[0].validation_status).toBe('valid');
+    expect(index.exemplars[0].last_validated_at).toBe('2026-04-25T00:00:00Z');
+  });
+
+  it('marks invalid + exit code 1 when verifier returns fail', async () => {
+    seedSprintArtifacts(fixture.repoRoot, 'sprint-v', 'app-002', 'Detail');
+    await addExemplar({
+      sprint: 'sprint-v',
+      task: 'app-002',
+      screen: 'Detail',
+      archetype: 'detail',
+      reason: 'Reference for validation failure path — verifier stub returns fail.',
+      dimensions: ['interaction_completeness'],
+      addedBy: 'tester@example.com',
+      now: '2026-04-01T00:00:00Z',
+      indexPath: fixture.indexPath,
+      repoRoot: fixture.repoRoot,
+      galleryRoot: fixture.galleryRoot,
+    });
+
+    const result = await validateExemplars({
+      indexPath: fixture.indexPath,
+      repoRoot: fixture.repoRoot,
+      galleryRoot: fixture.galleryRoot,
+      now: '2026-04-25T00:00:00Z',
+      verify: vi.fn().mockResolvedValue({
+        file: '',
+        status: 'fail',
+        consoleErrors: ['ReferenceError'],
+        unhandledRejections: [],
+        clickedElements: 1,
+        clickErrors: ['ReferenceError'],
+        durationMs: 10,
+      }),
+    });
+
+    expect(result.exitCode).toBe(1);
+    const index = readIndex(fixture.indexPath);
+    expect(index.exemplars[0].validation_status).toBe('invalid');
+  });
+
+  it('auto-marks stale when last_validated_at exceeds 30 days', async () => {
+    seedSprintArtifacts(fixture.repoRoot, 'sprint-v', 'app-003', 'Onb');
+    await addExemplar({
+      sprint: 'sprint-v',
+      task: 'app-003',
+      screen: 'Onb',
+      archetype: 'onboarding',
+      reason: 'Reference for stale-detection — last_validated_at older than 30 days.',
+      dimensions: ['archetype_fit'],
+      addedBy: 'tester@example.com',
+      now: '2026-01-01T00:00:00Z',
+      indexPath: fixture.indexPath,
+      repoRoot: fixture.repoRoot,
+      galleryRoot: fixture.galleryRoot,
+    });
+
+    const result = await validateExemplars({
+      indexPath: fixture.indexPath,
+      repoRoot: fixture.repoRoot,
+      galleryRoot: fixture.galleryRoot,
+      now: '2026-04-25T00:00:00Z',
+      verify: null,
+      skipVerify: true,
+    });
+
+    expect(result.exitCode).toBe(0);
+    const index = readIndex(fixture.indexPath);
+    expect(index.exemplars[0].validation_status).toBe('stale');
   });
 });
