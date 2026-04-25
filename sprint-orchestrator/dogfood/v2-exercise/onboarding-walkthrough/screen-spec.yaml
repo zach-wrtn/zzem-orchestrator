@@ -1,0 +1,399 @@
+# Screen Spec: OnboardingWalkthrough (v2 dogfood — onboarding archetype exemplar)
+# Step B output. Generated from context-engine.yaml.
+
+meta:
+  screen_name: "OnboardingWalkthrough"
+  screen_archetype: "onboarding"   # ← 7번째 archetype 커버
+  task_id: "onboarding-walkthrough"
+  sprint_id: "v2-dogfood-onboarding"
+  app: "ZZEM"
+  platform: "iOS / Android (React Native)"
+  language: "ko"
+  frame: "390x844"
+  theme: "light"
+
+# ─────────────────────────────
+# Component Tree
+# ─────────────────────────────
+component_tree: |
+  OnboardingWalkthrough [frame: 390x844]
+  ├── StatusBar [system] (div) #status-bar — 9:41 + 시스템 아이콘
+  ├── OnboardingHeader [container] (header) #onb-header
+  │   ├── BackButton [icon-button] (button) #back-btn — visible step 2/3 only ('←')
+  │   └── SkipButton [text-button] (button) #skip-btn — '건너뛰기' (강제 룰 #3)
+  ├── StepIndicator [feedback] (div) #step-indicator — 3 dots (강제 룰 #1)
+  │   ├── StepDot [dot] (span) × 3 — current step 강조 (pill 24x6)
+  ├── BodyContent [container] (main) #onb-body
+  │   ├── HeroIllustration [content] (div) #hero-illust — brand-weak card 200x200
+  │   │   └── HeroIcon [svg] — sparkles/image-plus/heart-handshake (80px lucide)
+  │   ├── Headline [text] (h1) #onb-headline — 24px bold
+  │   └── Body [text] (p) #onb-body-copy — 14-16px regular, 1-2 sentence
+  ├── PrimaryCTA [button-primary] (button) #primary-cta — 56px height (강제 룰 #2)
+  └── SuccessOverlay [feedback] (div) #success-overlay — 강제 룰 #4 (마지막 step → success)
+      ├── SuccessCard [container] (div)
+      │   ├── SuccessIcon [svg] — check-circle 80px brand-primary
+      │   ├── SuccessTitle [text] (h2) — '준비됐어요!'
+      │   └── SuccessHint [text] (p) — '잠시 후 홈으로 이동해요'
+
+# ─────────────────────────────
+# Component Details
+# ─────────────────────────────
+components:
+  - name: "OnboardingHeader"
+    id: "onb-header"
+    tag: "header"
+    type: "container"
+    position: "top"
+    size: "full-width x 56px"
+    tokens:
+      fill: "var(--wds-background-normal)"
+      text: "var(--wds-label-normal)"
+      spacing: "0 16px"
+    layout: { direction: horizontal, alignment: space-between, sizing: hug }
+    a11y: { role: "banner", label: "온보딩 헤더" }
+
+  - name: "BackButton"
+    id: "back-btn"
+    tag: "button"
+    type: "icon-button"
+    size: "44x44 (touch target)"
+    tokens:
+      fill: "transparent"
+      text: "var(--wds-label-normal)"
+      radius: "var(--wds-radius-sm)"
+    behavior:
+      purpose: "이전 step 으로 복귀 (AC-2.2 — 권장 룰 #3 정정 기회)"
+      user_action: "탭"
+      feedback: "step variant 전환 + indicator 갱신"
+    states:
+      step-1: "hidden (첫 step 이므로 뒤로 갈 곳 없음)"
+      step-2: "visible"
+      step-3: "visible"
+      success: "hidden"
+    a11y: { role: "button", label: "이전 단계로 돌아가기" }
+
+  - name: "SkipButton"
+    id: "skip-btn"
+    tag: "button"
+    type: "text-button"
+    size: "auto x 44px"
+    tokens:
+      fill: "transparent"
+      text: "var(--wds-label-alternative)"
+      font_size: "var(--wds-font-size-sm)"
+      font_weight: "var(--wds-font-weight-semibold)"
+    behavior:
+      purpose: "튜토리얼 강제 진행 거절 — 1-way dismiss (강제 룰 #3 / AC-2.1)"
+      user_action: "탭"
+      feedback: "success state 즉시 진입"
+    states:
+      step-1: "visible"
+      step-2: "visible"
+      step-3: "visible"
+      success: "hidden"
+    a11y: { role: "button", label: "온보딩 건너뛰기" }
+
+  - name: "StepIndicator"
+    id: "step-indicator"
+    tag: "div"
+    type: "feedback"
+    size: "auto x 16px"
+    tokens:
+      spacing: "0 / gap: 8px"
+    behavior:
+      purpose: "3 step 중 현재 위치 표시 (강제 룰 #1 / US-3 / AC-1.1)"
+      feedback: "passive (시각 신호)"
+    a11y: { role: "progressbar", label: "온보딩 진행 단계", value_now: "1-3", value_max: 3 }
+
+  - name: "StepDot"
+    id: "step-dot-{n}"
+    tag: "span"
+    type: "indicator"
+    size: "active 24x6 / inactive 6x6"
+    tokens:
+      fill_active: "var(--wds-fill-brand-primary)"
+      fill_inactive: "var(--wds-color-neutral-200)"
+      radius: "var(--wds-radius-full)"
+    states:
+      active: "fill-brand-primary, width 24px (pill)"
+      inactive: "neutral-200, width 6px (circle)"
+
+  - name: "HeroIllustration"
+    id: "hero-illust"
+    tag: "div"
+    type: "content"
+    position: "in-flow (top of body)"
+    size: "200x200 (권장 룰 #1: 160-240px 범위 내)"
+    tokens:
+      fill: "radial-gradient(--purple-100 0%, --purple-50 60%)"
+      radius: "var(--wds-radius-md)"
+    behavior:
+      purpose: "메시지 시각 보강 — 환영감 (권장 룰 #1)"
+      feedback: "passive"
+    states:
+      step-1: "sparkles icon"
+      step-2: "image-plus icon"
+      step-3: "heart-handshake icon"
+    a11y: { role: "img", label: "단계별 일러스트레이션" }
+
+  - name: "Headline"
+    id: "onb-headline"
+    tag: "h1"
+    type: "text"
+    tokens:
+      font_size: "var(--wds-font-size-3xl)"
+      font_weight: "var(--wds-font-weight-bold)"
+      text: "var(--wds-label-normal)"
+    behavior:
+      purpose: "메시지 헤드 (권장 룰 #2 — 1 headline)"
+    states:
+      step-1: "ZZEM 에 오신 것을 환영해요"
+      step-2: "사진 한 장으로 밈을 만들어요"
+      step-3: "친구를 팔로우하고 좋아요를 받아요"
+
+  - name: "Body"
+    id: "onb-body-copy"
+    tag: "p"
+    type: "text"
+    tokens:
+      font_size: "var(--wds-font-size-md)"
+      font_weight: "var(--wds-font-weight-regular)"
+      text: "var(--wds-label-alternative)"
+    behavior:
+      purpose: "메시지 본문 (권장 룰 #2 — 1-2 sentence)"
+    constraints:
+      max_lines: 2
+    states:
+      step-1: "오늘부터 짧고 강한 밈 한 장으로 표현해 보세요."
+      step-2: "카메라 한 번이면 ZZEM 의 필터로 바로 완성돼요."
+      step-3: "마음에 드는 크리에이터를 팔로우하고 매일 새로운 밈을 받아보세요."
+
+  - name: "PrimaryCTA"
+    id: "primary-cta"
+    tag: "button"
+    type: "button-primary"
+    position: "bottom-fixed (margin-bottom 32px)"
+    size: "full-width minus 48px x 56px (강제 룰 #2)"
+    tokens:
+      fill: "var(--wds-fill-brand-primary)"
+      text: "var(--wds-label-inverse)"
+      radius: "var(--wds-radius-lg)"
+      font_size: "var(--wds-font-size-lg)"
+      font_weight: "var(--wds-font-weight-semibold)"
+    behavior:
+      purpose: "다음 step 또는 완료 (AC-1.2/1.3/1.4 / AC-3.1)"
+      user_action: "탭"
+      feedback: "다음 step 전환 또는 success state"
+    states:
+      step-1: "label='다음'"
+      step-2: "label='다음'"
+      step-3: "label='시작하기' (AC-3.1 카피 변경)"
+      success: "hidden"
+    a11y: { role: "button", label: "다음 단계 또는 시작" }
+
+  - name: "SuccessOverlay"
+    id: "success-overlay"
+    tag: "div"
+    type: "feedback"
+    position: "absolute fill"
+    tokens:
+      fill: "rgba(255, 255, 255, 0.96)"
+    behavior:
+      purpose: "마지막 step 완료 / skip — 명확한 '다음 화면' 신호 (강제 룰 #4 / AC-1.4 / AC-2.1)"
+      feedback: "fade-in 0.3s + 1.6s 후 자동 진입 시뮬"
+    states:
+      step-1: "hidden"
+      step-2: "hidden"
+      step-3: "hidden"
+      success: "visible"
+    a11y: { role: "status", live: "polite", label: "온보딩 완료" }
+
+# ─────────────────────────────
+# Layout Spec
+# ─────────────────────────────
+layout_spec:
+  type: "flex-column"
+  viewport: "390x844"
+  regions:
+    - id: "status-bar"
+      height: "fixed(44px)"
+    - id: "onb-header"
+      height: "fixed(56px)"
+    - id: "step-indicator"
+      height: "fixed(16px)"
+      margin: "8px 0 0 0"
+      alignment: "center"
+    - id: "onb-body"
+      flex: 1
+      direction: "column"
+      alignment: "center"
+      justify: "center"
+      padding: "24px"
+      children:
+        - id: "hero-illust"
+          size: "200x200"
+          margin: "0 0 32px"
+        - id: "onb-headline"
+          margin: "0 0 12px"
+          alignment: "center"
+        - id: "onb-body-copy"
+          margin: "0"
+          alignment: "center"
+    - id: "primary-cta"
+      position: "bottom-fixed"
+      margin: "0 24px 32px"
+      height: "fixed(56px)"
+    - id: "success-overlay"
+      position: "absolute fill"
+      conditional: "currentStep == success"
+
+# ─────────────────────────────
+# States
+# ─────────────────────────────
+states:
+  step-1:
+    description: "환영 step — 첫 진입 (AC-1.1)"
+    active: true
+    visible_components: [skip-btn, step-indicator, hero-illust, onb-headline, onb-body-copy, primary-cta]
+    hidden_components: [back-btn, success-overlay]
+    labels:
+      headline: "ZZEM 에 오신 것을 환영해요"
+      body: "오늘부터 짧고 강한 밈 한 장으로 표현해 보세요."
+      cta: "다음"
+    indicator_active_dot: 0
+
+  step-2:
+    description: "밈 제작 가치 step (AC-1.2)"
+    visible_components: [back-btn, skip-btn, step-indicator, hero-illust, onb-headline, onb-body-copy, primary-cta]
+    hidden_components: [success-overlay]
+    labels:
+      headline: "사진 한 장으로 밈을 만들어요"
+      body: "카메라 한 번이면 ZZEM 의 필터로 바로 완성돼요."
+      cta: "다음"
+    indicator_active_dot: 1
+
+  step-3:
+    description: "친구/리액션 step + CTA 카피 변경 (AC-1.3 / AC-3.1)"
+    visible_components: [back-btn, skip-btn, step-indicator, hero-illust, onb-headline, onb-body-copy, primary-cta]
+    hidden_components: [success-overlay]
+    labels:
+      headline: "친구를 팔로우하고 좋아요를 받아요"
+      body: "마음에 드는 크리에이터를 팔로우하고 매일 새로운 밈을 받아보세요."
+      cta: "시작하기"
+    indicator_active_dot: 2
+
+  success:
+    description: "완료 / 건너뛰기 → 홈 진입 (강제 룰 #4 / AC-1.4 / AC-2.1)"
+    visible_components: [success-overlay]
+    hidden_components: [back-btn, skip-btn, step-indicator, hero-illust, onb-headline, onb-body-copy, primary-cta]
+    labels:
+      title: "준비됐어요!"
+      hint: "잠시 후 홈으로 이동해요"
+
+# ─────────────────────────────
+# Interactions
+# ─────────────────────────────
+interactions:
+  - trigger: "tap"
+    target: "#primary-cta"
+    action: "advance-step"
+    note: "step-1 → step-2 → step-3 → success (마지막 step CTA = '시작하기')"
+
+  - trigger: "tap"
+    target: "#back-btn"
+    action: "previous-step"
+    note: "step-2 → step-1, step-3 → step-2 (권장 룰 #3 정정 기회)"
+
+  - trigger: "tap"
+    target: "#skip-btn"
+    action: "skip-to-success"
+    note: "어느 step 에서든 success state 즉시 진입 (강제 룰 #3 / AC-2.1)"
+
+# ─────────────────────────────
+# Visual Rules
+# ─────────────────────────────
+rules:
+  - condition: "currentStep == 1"
+    effect: "back 숨김, dot[0] 활성, CTA '다음'"
+    example: "AC-1.1"
+  - condition: "currentStep == 2"
+    effect: "back 표시, dot[1] 활성, CTA '다음'"
+    example: "AC-1.2"
+  - condition: "currentStep == 3"
+    effect: "back 표시, dot[2] 활성, CTA '시작하기'"
+    example: "AC-1.3 / AC-3.1"
+  - condition: "currentStep == success"
+    effect: "오버레이 표시, 1.6s 후 자동 dismiss"
+    example: "AC-1.4 / AC-2.1"
+
+# ─────────────────────────────
+# Labels (ko)
+# ─────────────────────────────
+labels:
+  header:
+    skip: "건너뛰기"
+    back_aria: "이전 단계로 돌아가기"
+  step_1:
+    headline: "ZZEM 에 오신 것을 환영해요"
+    body: "오늘부터 짧고 강한 밈 한 장으로 표현해 보세요."
+    cta: "다음"
+  step_2:
+    headline: "사진 한 장으로 밈을 만들어요"
+    body: "카메라 한 번이면 ZZEM 의 필터로 바로 완성돼요."
+    cta: "다음"
+  step_3:
+    headline: "친구를 팔로우하고 좋아요를 받아요"
+    body: "마음에 드는 크리에이터를 팔로우하고 매일 새로운 밈을 받아보세요."
+    cta: "시작하기"
+  success:
+    title: "준비됐어요!"
+    hint: "잠시 후 홈으로 이동해요"
+  toast:
+    skipped: "튜토리얼을 건너뛰었어요"
+  a11y:
+    indicator: "온보딩 진행 단계"
+    success: "온보딩 완료"
+
+# ─────────────────────────────
+# Token Map
+# ─────────────────────────────
+tokens:
+  background:        "wds.background.normal → #FFFFFF"
+  text_primary:      "wds.label.normal → #212228"
+  text_secondary:    "wds.label.alternative → #6B6E76"
+  text_inverse:      "wds.label.inverse → #FFFFFF"
+  brand:             "wds.fill.brand-primary → #8752FA"
+  brand_weak:        "wds.fill.brand-weak → #F5F0FF"
+  brand_ring:        "wds.color.purple.100 → #EBE1FF"
+  hero_radius:       "wds.radius.md → 12px"
+  cta_radius:        "wds.radius.lg → 16px"
+  dot_radius:        "wds.radius.full → 9999px"
+  font_family:       "wds.font.family.primary → Pretendard"
+  cta_height:        "56px (onboarding 강제 룰 #2)"
+  hero_size:         "200px (onboarding 권장 룰 #1: 160-240px)"
+
+# ─────────────────────────────
+# Quality Score
+# ─────────────────────────────
+quality_score:
+  extraction_accuracy:
+    total_components: 9
+    with_token_map: 9
+    with_html_mapping: 9
+    score: "18 / 18 = 1.0"
+  fabrication_risk:
+    inferred_fields:
+      - "step 별 hero icon 매핑 (sparkles / image-plus / heart-handshake) — PRD 부재 (dogfood 합성), lucide 표준 매핑"
+      - "Body 카피 — ZZEM 도메인 톤 추정 (dogfood 합성용)"
+      - "success state 1.6s 자동 dismiss — 모바일 표준 / verifier 호환"
+    risk_level: "low"
+    rationale: |
+      이 task 는 archetype exemplar 보강용 dogfood — 합성 PRD.
+      모든 추론은 onboarding archetype 강제/권장 룰을 충족하는 표준 패턴.
+  schema_completeness:
+    required_sections: ["meta", "component_tree", "layout_spec", "states", "interactions", "labels", "token_map"]
+    present_sections: ["meta", "component_tree", "components", "layout_spec", "states", "interactions", "rules", "labels", "tokens", "quality_score"]
+    score: "7 / 7 = 1.0"
+  context_coverage:
+    why_linked: "7 / 7 = 1.0"   # 모든 AC 가 컴포넌트/상태에 연결
+    what_resolved: "9 / 9 = 1.0"

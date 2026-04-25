@@ -1,0 +1,213 @@
+# Context Engine — onboarding-walkthrough (v2 dogfood)
+# Step A output of Design Engineer protocol v2.
+# Bootstrap exercise: 7번째 (마지막) archetype 커버 — 'onboarding'.
+# Synthetic ZZEM 첫 사용자 walkthrough (3 step + success). 실제 sprint PRD 가
+# 아니라 archetype exemplar 보강을 목적으로 하는 dogfood 합성.
+
+meta:
+  sprint_id: "v2-dogfood-onboarding"
+  task_id: "onboarding-walkthrough"
+  generated_at: "2026-04-25T00:00:00Z"
+  schema_version: "1.0"
+  exercise: "v2-dogfood"
+  bootstrap_purpose: "7/7 archetype coverage — onboarding exemplar"
+
+# ─────────────────────────────
+# Layer 1: WHY (Business Intent)
+# ─────────────────────────────
+why:
+  product_intent: |
+    ZZEM 첫 사용자가 앱 핵심 가치 (밈 만들기, 친구 팔로우/리액션)를
+    3-step walkthrough 로 짧게 인지하고 본 앱에 빠르게 진입하도록 한다.
+    이탈 위험을 낮추기 위해 Skip 1-way 와 Step indicator 를 강제한다.
+  target_user: "ZZEM 신규 설치 + 첫 진입 사용자 (회원가입 직후)"
+  success_metric: "첫 진입 → 홈 화면 진입 완료율 (walkthrough completion or skip)"
+  user_stories:
+    - id: "US-1"
+      as_a: "ZZEM 신규 사용자"
+      i_want: "앱이 무엇을 할 수 있는지 3-4 화면 안에 알고 싶다"
+      so_that: "첫 액션을 빠르게 결정할 수 있다"
+    - id: "US-2"
+      as_a: "이미 비슷한 앱을 써본 사용자"
+      i_want: "튜토리얼을 건너뛰고 본 앱으로 바로 진입하고 싶다"
+      so_that: "시간 낭비 없이 핵심 기능 체험"
+    - id: "US-3"
+      as_a: "신규 사용자"
+      i_want: "현재 몇 단계 중 어디인지 명확히 알고 싶다"
+      so_that: "남은 부담을 인지하고 끝까지 따라간다"
+  acceptance_criteria:
+    - id: "AC-1.1"
+      given: "앱 첫 진입 (회원가입 직후 또는 fresh install)"
+      when: "OnboardingWalkthrough 진입"
+      then: "Step 1 (환영) 화면 + Step indicator '1/3' (3 dots, 1번 강조) 표시"
+      ui_impact: "OnboardingScreen variant=step-1, StepIndicator dot[0] active"
+    - id: "AC-1.2"
+      given: "Step 1 화면"
+      when: "'다음' 버튼 탭"
+      then: "Step 2 화면 (밈 제작 가치) 진입 + indicator '2/3'"
+      ui_impact: "variant=step-2, dot[1] active"
+    - id: "AC-1.3"
+      given: "Step 2 화면"
+      when: "'다음' 버튼 탭"
+      then: "Step 3 화면 (친구/리액션) 진입 + indicator '3/3'"
+      ui_impact: "variant=step-3, dot[2] active"
+    - id: "AC-1.4"
+      given: "Step 3 화면"
+      when: "'시작하기' 버튼 탭"
+      then: "Success state (완료 메시지) → 홈 화면 진입"
+      ui_impact: "variant=success, success message + 자동 dismiss/navigate"
+    - id: "AC-2.1"
+      given: "Step 1/2/3 어느 화면이든"
+      when: "'건너뛰기' 헤더 우측 탭"
+      then: "Success state (건너뛰기 메시지) → 홈 화면 진입"
+      ui_impact: "variant=success, skip message"
+    - id: "AC-2.2"
+      given: "Step 2 또는 3"
+      when: "헤더 좌측 '←' 탭"
+      then: "이전 step 으로 복귀 (입력/선택 정정 가능)"
+      ui_impact: "variant=step-{n-1}, dot[n-1] active"
+    - id: "AC-3.1"
+      given: "마지막 step (Step 3)"
+      when: "primary CTA 카피 변경"
+      then: "'다음' 대신 '시작하기' 표시 — 종료 신호 명확"
+      ui_impact: "PrimaryCTA label='시작하기' (vs '다음')"
+
+# ─────────────────────────────
+# Layer 2: WHAT (Design System)
+# ─────────────────────────────
+what:
+  tokens_needed:
+    colors:
+      - "wds.color.purple.50"    # weak brand surface (illust BG)
+      - "wds.color.purple.100"   # secondary illust ring
+      - "wds.color.purple.500"   # 브랜드 보라 #8752FA (primary CTA)
+      - "wds.color.purple.600"   # CTA hover/strong
+      - "wds.color.neutral.0"    # bg #FFFFFF
+      - "wds.color.neutral.50"   # surface secondary
+      - "wds.color.neutral.100"  # dot inactive
+      - "wds.color.neutral.300"  # dot inactive strong
+      - "wds.color.neutral-500"  # label assistive
+      - "wds.color.neutral-600"  # label alt
+      - "wds.color.neutral.900"  # label normal
+    typography:
+      - "wds.font.size.sm"       # 13px - skip
+      - "wds.font.size.md"       # 14px - body
+      - "wds.font.size.lg"       # 16px - CTA label
+      - "wds.font.size.2xl"      # 20px - sub
+      - "wds.font.size.3xl"      # 24px - headline
+      - "wds.font.weight.semibold"
+      - "wds.font.weight.bold"
+    spacing:
+      - "wds.spacing.4"
+      - "wds.spacing.8"
+      - "wds.spacing.12"
+      - "wds.spacing.16"
+      - "wds.spacing.24"
+      - "wds.spacing.32"
+      - "wds.spacing.48"
+    radius:
+      - "wds.radius.sm"   # 8px - dot active pill
+      - "wds.radius.md"   # 12px - illust card
+      - "wds.radius.lg"   # 16px - primary button
+      - "wds.radius.full" # 9999 - dot
+
+  components_needed:
+    - name: "OnboardingHeader"
+      category: "navigation"
+      note: "좌측 ← (back, step 2/3 only) + 우측 '건너뛰기' (skip 1-way, onboarding 강제 룰 #3)"
+    - name: "StepIndicator"
+      category: "feedback"
+      note: "3 dots, 현재 step 강조 — onboarding 강제 룰 #1"
+    - name: "HeroIllustration"
+      category: "content"
+      note: "200px 정사각 illust card. brand-weak BG + lucide SVG center icon (160-240px 권장 룰 #1 충족)"
+    - name: "OnboardingHeadline"
+      category: "content"
+    - name: "OnboardingBody"
+      category: "content"
+    - name: "PrimaryCTA"
+      category: "action"
+      note: "56px height (onboarding 강제 룰 #2), 카피 변경 (다음 → 시작하기)"
+    - name: "SuccessOverlay"
+      category: "feedback"
+      note: "마지막 step 완료 시 페이드인 메시지 (onboarding 강제 룰 #4)"
+
+  patterns_needed:
+    - name: "Step indicator (3 dots)"
+      description: "활성 dot 은 폭 24px (pill), 비활성은 6x6 원. 활성 색 brand-primary."
+    - name: "Hero illustration card"
+      description: "정사각 200px brand-weak (#F5F0FF) 배경 + 중앙 lucide SVG 80px brand-primary stroke."
+    - name: "Primary CTA bottom-fixed"
+      description: "하단 16px margin, full-width minus 48px, 56px height, brand-primary fill, 16px radius."
+    - name: "Skip + Back header (onboarding 강제 룰 #3)"
+      description: "skip 1-way 우상단 + back 좌상단 (Step 2/3 only)."
+    - name: "Success state overlay (onboarding 강제 룰 #4)"
+      description: "fade-in dim + 중앙 카드 (성공 아이콘 + 메시지). 명확한 '다음 화면' 신호."
+
+# ─────────────────────────────
+# Layer 3: HOW (Orchestration)
+# ─────────────────────────────
+how:
+  composition_rules:
+    - rule: "Header (skip + back) → StepIndicator → HeroIllustration → Headline → Body → PrimaryCTA (수직)"
+      applies_to: ["OnboardingWalkthrough"]
+    - rule: "PrimaryCTA 는 viewport 하단 고정 (margin-bottom: 32px, safe-area)"
+      applies_to: ["OnboardingWalkthrough"]
+    - rule: "step variant 은 동일 layout — content 만 swap (illust + headline + body)"
+      applies_to: ["OnboardingWalkthrough"]
+    - rule: "마지막 step PrimaryCTA 카피만 '다음' → '시작하기' 로 swap"
+      applies_to: ["Step3"]
+  conditional_rendering:
+    - condition: "currentStep == 1"
+      variant_a: "back 숨김 + skip 표시 + dot[0] active + CTA '다음'"
+      variant_b: null
+    - condition: "currentStep == 2"
+      variant_a: "back 표시 + skip 표시 + dot[1] active + CTA '다음'"
+      variant_b: null
+    - condition: "currentStep == 3"
+      variant_a: "back 표시 + skip 표시 + dot[2] active + CTA '시작하기' (카피 변경)"
+      variant_b: null
+    - condition: "currentStep == success"
+      variant_a: "SuccessOverlay 표시 (체크 아이콘 + 완료 메시지) — 1.6s 후 자동 dismiss(=홈 진입 시뮬)"
+      variant_b: null
+  constraints:
+    - "어떤 인터랙티브 요소도 alert/confirm/prompt 사용 금지 (verifier 호환)"
+    - "PrimaryCTA height 56px 강제 (onboarding 강제 룰 #2)"
+    - "StepIndicator 3 dots 가시 (onboarding 강제 룰 #1)"
+    - "skip 우상단, back 좌상단 — text 카피로 (icon-only 금지, 발견성)"
+    - "success state 는 명확한 '다음 화면' 신호 (dead-end 금지 — onboarding 강제 룰 #4)"
+  priority_order:
+    - "1. StepIndicator (위치 인지)"
+    - "2. HeroIllustration (메시지 시각)"
+    - "3. Headline + Body (메시지)"
+    - "4. PrimaryCTA (다음 행동)"
+    - "5. Header (skip + back)"
+
+# ─────────────────────────────
+# Layer 4: ASSETS (v1)
+# ─────────────────────────────
+assets:
+  hero_illustrations:
+    kind: gradient-token
+    source: |
+      각 step 별 lucide-style inline SVG (80px stroke 2.5):
+      - step-1 (환영): sparkles  — 환영/마법
+      - step-2 (밈 제작): image-plus — 사진 한 장으로 제작
+      - step-3 (친구/리액션): heart-handshake — 친구 팔로우/좋아요
+      배경: brand-weak (#F5F0FF) + radial-gradient (#EBE1FF 0% → #F5F0FF 60%)
+    count: 3
+    license: "internal-test (lucide MIT)"
+    needs_real_content: false
+    note: |
+      디자이너 제공 일러스트가 없으므로 lucide SVG + brand-weak gradient 카드로 대체.
+      Pass 6 #6 면제 (gradient-token kind 명시). 향후 designer-illustrated PNG 로 교체 가능.
+  success_icon:
+    kind: illustration
+    source: "lucide check-circle 80px stroke-2.5 wds-color-purple-500"
+    needs_real_content: false
+    note: "성공 신호 표준 패턴 (Lucide MIT)"
+  icons:
+    kind: illustration
+    source: "lucide inline SVG (arrow-left back, sparkles/image-plus/heart-handshake hero, check-circle success)"
+    fallback: "text-placeholder"
+    needs_real_content: false
