@@ -1,0 +1,174 @@
+# Quality Report — app-014 / OtherProfileScreen-Blocked
+# Sprint: ugc-platform-integration-qa-2
+# Generated: 2026-04-25 (DE Phase 3 v2 pipeline)
+
+task_id: app-014
+screen: OtherProfileScreen-Blocked
+archetype: detail
+figma_frame: "37211:162150"
+
+# ─────────────────────────────
+# Pass 6 Anti-Slop Audit (10 checks — .screen 후손만 평가, .control-panel 제외)
+# ─────────────────────────────
+anti_slop_audit:
+  status: passed
+  score: "9/9 (#10 N/A — exemplar 미인라인, sibling app-016 는 reference only)"
+  checks:
+    - id: 1
+      name: "hex-not-in-tokens"
+      result: pass
+      detail: |
+        .screen 후손 모든 hex 값은 sprint tokens.css 또는 prototype 내 :root 의 sprint-aliases (--pe-*) 로 등재.
+        Non-token hex (#1a1a2e #2a2a3e #e0e0e0 #444 #bbb #999 #888 #E7E8EB) 는 control-panel 또는 body 배경 영역 한정 — audit 제외.
+        검사 커맨드: grep -oE '#[0-9A-Fa-f]{6}' prototype.html | sort -u → 모두 :root 정의 또는 audit-excluded 영역 확인.
+    - id: 2
+      name: "emoji-on-interactive"
+      result: pass
+      detail: "모든 button/nav 는 lucide inline SVG 사용 (ArrowLeft, MoreVertical, Ban, Lock, Home, Search, User). body 텍스트 내 emoji 없음."
+    - id: 3
+      name: "border-left card slop"
+      result: pass
+      detail: "border-left: Npx solid var(--*) 패턴 0건. blocked-notice 카드는 fill 만 사용 (surface-secondary)."
+    - id: 4
+      name: "font-family non-Pretendard inside .screen"
+      result: pass
+      detail: |
+        .screen 후손 font-family 는 'inherit' (기본 Pretendard) 만 사용.
+        ui-monospace 사용은 control-panel 영역 한정 (audit 제외).
+    - id: 5
+      name: "brand purple gradient on background"
+      result: pass
+      detail: "linear-gradient(... #8752FA ...) 사용 0건. 본 화면은 차단 상태 — 브랜드 보라 사용 자체 0건 (button-primary 미렌더)."
+    - id: 6
+      name: "placeholder-image on main content"
+      result: pass
+      detail: |
+        .placeholder-image div 0건 — 본 화면은 차단 상태로 ContentGrid/feed thumbnails 부재.
+        Avatar 는 initial 'M' fallback (assets.avatars.kind=gradient-token, needs_real_content=false).
+        BlockedNotice 의 lock icon 은 illustration kind — Pass 6 #6 면제.
+    - id: 7
+      name: "interaction binding parity"
+      result: pass
+      detail: |
+        Spec interactions 3개 (back, more, bottom-nav).
+        DOM addEventListener 그룹: btn-back(1) + btn-more(1) + bottom-nav__item × 3 + state-btn × 2 (control-panel — 제외 영역).
+        화면 영역 정합성 OK (back + more + 3 nav = 5 listeners + 1 setTimeout-based hide).
+    - id: 8
+      name: "alert/confirm/prompt"
+      result: pass
+      detail: "alert(), confirm(), prompt() 사용 0건 (검증: grep -nE '\\b(alert|confirm|prompt)\\(' → 결과 0)."
+    - id: 9
+      name: "archetype persona enforced"
+      result: pass
+      score: "4/4"
+      detail: "detail persona 4 강제 룰 모두 통과 (#4 는 blocked variant 면제 — archetype_persona 참조)"
+    - id: 10
+      name: "exemplar drift"
+      result: skipped
+      detail: |
+        exemplar inlined 미존재. sibling app-016 는 reference only (반전 페어).
+        본 prototype 는 동일 hero 패턴이지만 콘텐츠/CTA/탭/카운트 모두 미렌더 — sibling 과 시각 차이 명확하므로 drift warning 없음.
+
+# ─────────────────────────────
+# Archetype Persona — detail (강제 룰 4개)
+# ─────────────────────────────
+archetype_persona:
+  archetype: detail
+  status: passed
+  score: "4/4"
+  rules:
+    - id: 1
+      name: "Hero 영역 320px+"
+      result: pass
+      evidence: |
+        .profile-hero { min-height: 320px; padding: 32px 20px 24px; gap: 16px; }
+        avatar(100) + nickname(~24) + badge(~28) + paddings(56) + gaps(32) ≈ 240px;
+        min-height: 320px CSS 강제 적용으로 충족.
+    - id: 2
+      name: "Back 1-way 보장"
+      result: pass
+      evidence: "#btn-back (좌상단 ←) 만 노출. swipe-down/close 미 추가 — Back 단일 경로."
+    - id: 3
+      name: "핵심 metadata 4 이내"
+      result: pass
+      evidence: |
+        Hero 내부 메타: avatar / nickname / blocked-badge — 3개 (4 이내).
+        BlockedNotice (icon + headline + subcopy) 는 hero 외부 region 으로 별도.
+        CountRow / Bio 모두 미렌더 — 정보 과잉 없음.
+    - id: 4
+      name: "Primary CTA 1 + secondary 0-2"
+      result: "pass (blocked variant exempt)"
+      score: "0 primary + 1 ghost (header-only)"
+      evidence: |
+        primary CTA 0개 — 차단 상태에서는 Follow/Message/CTA 노출 자체가 차단 의도 위반.
+        ghost: #btn-more × 1 (header 우상단) + #btn-back × 1 (header 좌상단) — 둘 다 secondary icon-only.
+        본 변형은 "차단된 사용자의 콘텐츠는 표시되지 않아요" empty-state 의도가 우선 — primary CTA 면제.
+        해제 액션은 #btn-more → app-015 sheet 로 격리 (PRD 명시 경로).
+      logged_as: "persona_rule_4_blocked_variant"
+  recommendations:
+    - id: rec-1
+      name: "Sticky bottom CTA"
+      taken: false
+      reason: "차단 상태 — CTA 자체가 부재. sticky 검토 N/A."
+      logged_as: "archetype_recommendation_skipped"
+    - id: rec-2
+      name: "관련 항목/추천 섹션"
+      taken: false
+      reason: "차단 상태에서 추천 섹션은 차단 의도 위반. dead-end 위험은 BottomNav (홈/검색/MY) + 헤더 ⋮ → app-015 로 완화."
+      logged_as: "archetype_recommendation_skipped"
+    - id: rec-3
+      name: "Hero 이미지 16:9 또는 1:1"
+      taken: not-applicable
+      reason: "프로필 hero 는 banner 이미지 없이 avatar(dim) + 텍스트 중심 — 비율 룰 N/A."
+
+# ─────────────────────────────
+# Quality Score (Spec self-review B.5)
+# ─────────────────────────────
+quality_score:
+  extraction_accuracy: "22 / 22 = 1.0"
+  schema_completeness: "7 / 7 = 1.0"
+  fabrication_risk: low
+  fabrication_risk_inferred:
+    - "Nickname 'memer_kim' (sibling app-016 와 동일 ID — 차단/해제 페어 시각 일관성)"
+    - "BlockedNotice subcopy '차단을 해제하면 다시 볼 수 있어요' (PRD 외 — 다음 행동 자연 안내)"
+    - "Avatar opacity 0.55 (차단 상태 시각 표현 관례)"
+    - "Bottom nav active=search (sibling 진입 경로 가정)"
+  context_coverage:
+    why_linked: "3 / 3 = 1.0 (AC-2.2-a, AC-2.2-b, AC-2.2-c)"
+    what_resolved: "11 / 11 = 1.0"
+
+# ─────────────────────────────
+# Asset Layer (context-engine.yaml § assets)
+# ─────────────────────────────
+assets:
+  avatars:
+    kind: gradient-token
+    needs_real_content: false
+    note: "차단된 타유저 avatar — initial 'M' fallback + opacity 0.55 (dim)"
+  feed_thumbnails:
+    kind: illustration
+    needs_real_content: false
+    note: "본 화면 차단 상태 — feed grid DOM 부재. 슬롯 미사용."
+  icons:
+    kind: illustration
+    needs_real_content: false
+    note: "lucide inline SVG (ArrowLeft, MoreVertical, Ban, Lock, Home, Search, User)"
+
+# ─────────────────────────────
+# Files
+# ─────────────────────────────
+files:
+  context_engine: "context-engine.yaml"
+  spec: "OtherProfileScreen-Blocked.spec.md"
+  intent: "OtherProfileScreen-Blocked.intent.md"
+  prototype: "prototype.html"
+  quality_report: "quality-report.yaml"
+
+# ─────────────────────────────
+# Approval (pending Sprint Lead)
+# ─────────────────────────────
+approval:
+  status: pending
+  reviewer: null
+  reviewed_at: null
+  notes: ""

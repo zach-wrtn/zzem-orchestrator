@@ -1,0 +1,191 @@
+# Context Engine — ugc-platform-integration-qa-2 / app-018
+# Generated: 2026-04-25 (DE Step A output, task-local snapshot)
+# Schema: v1.0
+# Sibling pattern: app-013 BlockConfirmSheet (confirm bottom sheet 동일 archetype, 색상/카피 반전)
+
+meta:
+  sprint_id: "ugc-platform-integration-qa-2"
+  task_id: "app-018"
+  generated_at: "2026-04-25T00:00:00Z"
+  schema_version: "1.0"
+  figma_frame: "37290:170093"
+  figma_file: "7hozJ6Pvs09q98BxvChj08"
+  archetype: "modal"
+  exemplar_refs: []   # exemplar 인라인 대상 아님 (modal — feed 만 인라인)
+  sibling_refs:
+    - task_id: "app-013"
+      screen: "BlockConfirmSheet"
+      relation: "inverse"  # 차단 ↔ 해제, destructive ↔ brand, 3 rows ↔ 2 rows
+      reuse:
+        - "BottomSheet 구조 + DragHandle + CloseButton + ProfileImage 100x100"
+        - "ButtonPair (좌 cancel ghost / 우 primary)"
+        - "InfoRowList wrapper (surface-secondary fill, lg radius)"
+        - "States open/loading/dismissed 동일 모델"
+
+# ─────────────────────────────
+# Layer 1: WHY (Business Intent)
+# ─────────────────────────────
+why:
+  product_intent: "차단된 사용자를 해제할 때 실수 해제를 방지하고, 해제의 결과 (콘텐츠/활동 재노출) 를 명확히 안내한다."
+  target_user: "차단관리 리스트 (app-017) 에서 특정 사용자 해제를 시도한 ZZEM 사용자"
+  success_metric: "AC-2.4 차단관리 리스트 일괄 해제 가능 + AC-2.5 차단/해제 시 confirm 1 step"
+  user_stories:
+    - id: "US-1"
+      as_a: "차단 목록을 정리하려는 사용자"
+      i_want: "특정 사용자의 해제 결과를 한눈에 확인한 뒤 결정한다"
+      so_that: "실수로 해제하거나, 다시 콘텐츠/알림이 노출되는 것을 모르는 일이 없다"
+  acceptance_criteria:
+    - id: "AC-2.4"
+      given: "사용자가 차단관리 리스트 (app-017) 에 있다"
+      when: "한 사용자의 '해제' 버튼을 tap"
+      then: "confirm bottom sheet 가 slide-up + backdrop dim. '@아이디님 차단을 해제하시겠어요?' + 안내 row + Primary '차단 해제하기' + Secondary '취소'"
+      ui_impact: "modal archetype: backdrop ≥0.4, drag handle, profile image, title with handle, 2 info rows, 2 buttons"
+    - id: "AC-2.5"
+      given: "confirm sheet 가 열려있다"
+      when: "'차단 해제하기' tap"
+      then: "loading → DELETE /v2/users/{userId}/block → app-019 (해제완료) 진입"
+      ui_impact: "loading state — primary 버튼 spinner + 모든 close trigger 비활성"
+    - id: "AC-2.5b"
+      given: "confirm sheet 가 열려있다"
+      when: "'취소' / X / backdrop tap"
+      then: "sheet dismiss + 차단관리 리스트 유지"
+      ui_impact: "modal persona 강제 룰 #2 — 닫기 2-way (X + backdrop) + 취소 ghost"
+
+# ─────────────────────────────
+# Layer 2: WHAT (Design System)
+# ─────────────────────────────
+what:
+  tokens_needed:
+    colors:
+      - "wds-background-dimmed (rgba(0,0,0,0.50))"
+      - "wds-background-elevated (#FFFFFF) — sheet fill"
+      - "wds-surface-secondary (#F7F8F9) — info-rows wrapper"
+      - "wds-fill-brand-primary (#8752FA) — unblock primary"
+      - "wds-fill-brand-strong (#7040E0) — unblock pressed"
+      - "wds-fill-brand-weak (#EBE1FF) — info-icon fill (회복 톤)"
+      - "wds-label-normal (#212228) — title / info title"
+      - "wds-label-alternative (#6B6E76) — close + cancel label"
+      - "wds-label-assistive (#8E9199) — info desc + parent date"
+      - "wds-label-inverse (#FFFFFF) — primary label"
+      - "wds-line-normal (#E4E5E9) — cancel outline"
+      - "wds-line-alternative (#F0F1F3) — list divider"
+      - "component-bottom-sheet-handle (#D1D3D8)"
+      - "component-avatar-fill (#D1D3D8)"
+    typography:
+      - "wds-font-size-xl (18px) — sheet title"
+      - "wds-font-size-lg (16px) — primary/cancel button"
+      - "wds-font-size-md (14px) — info title + parent nickname"
+      - "wds-font-size-sm (13px) — info desc + cancel/parent action"
+      - "wds-font-size-xs (12px) — parent date"
+      - "wds-font-weight-bold (700) — sheet title + parent avatar"
+      - "wds-font-weight-semibold (600) — info title + buttons"
+    spacing:
+      - "wds-spacing-8 (8px) — button gap"
+      - "wds-spacing-12 (12px) — close inset + info gap"
+      - "wds-spacing-16 (16px) — info-rows padding + sheet section gaps"
+      - "wds-spacing-20 (20px) — sheet horizontal padding"
+      - "wds-spacing-24 (24px) — sheet bottom padding + section gaps"
+    radius:
+      - "wds-radius-xl (20px) — sheet top corners"
+      - "wds-radius-lg (16px) — info-rows wrapper"
+      - "wds-radius-md (12px) — buttons"
+      - "wds-radius-full (9999px) — handle + close + avatar + info icon"
+  components_needed:
+    - { name: "Backdrop", category: "feedback" }
+    - { name: "BottomSheet", category: "layout" }
+    - { name: "DragHandle", category: "feedback" }
+    - { name: "CloseButton", category: "input" }
+    - { name: "ProfileImage", category: "content" }
+    - { name: "Title", category: "content" }
+    - { name: "InfoRowList", category: "content" }
+    - { name: "InfoRow", category: "content" }
+    - { name: "ButtonPair", category: "layout" }
+    - { name: "CancelButton", category: "input" }
+    - { name: "UnblockButton", category: "input" }
+    - { name: "ParentList (BlockManagementList — 시각 컨텍스트만)", category: "layout" }
+  patterns_needed:
+    - name: "Confirm Bottom Sheet"
+      description: "모바일 표준 — 하단 anchor + slide-up + backdrop + 2-way close + primary/secondary 버튼 페어"
+    - name: "Brand-color Primary for Recovery Action"
+      description: "destructive (#FF3B30) 가 아닌 brand (#8752FA) 사용 — 차단 해제는 회복 액션, 사용자 부정적 인지 회피"
+
+# ─────────────────────────────
+# Layer 3: HOW (Orchestration Rules)
+# ─────────────────────────────
+how:
+  composition_rules:
+    - rule: "BottomSheet 는 viewport 하단 anchor + transform translateY 100% → 0% 로 slide-up"
+      applies_to: ["UnblockConfirmSheet"]
+    - rule: "Backdrop opacity 0.50 ≥ 0.4 (modal 강제 룰 #1)"
+      applies_to: ["UnblockConfirmSheet"]
+    - rule: "Close trigger 3개 이상: X 버튼 + 취소 버튼 + backdrop tap (+ ESC). 강제 룰 #2 충족"
+      applies_to: ["UnblockConfirmSheet"]
+    - rule: "Primary 1 + Secondary 1 (강제 룰 #3) — primary 는 brand color (해제는 destructive 아님)"
+      applies_to: ["UnblockConfirmSheet"]
+    - rule: "Title h1 (강제 룰 #4) — 닉네임 + 액션 명시 ('@아이디님 차단을 해제하시겠어요?')"
+      applies_to: ["UnblockConfirmSheet"]
+    - rule: "Info row 2개 (sibling app-013 의 3개에서 알림 row 제외 — 사용자 호불호 보호)"
+      applies_to: ["UnblockConfirmSheet"]
+  conditional_rendering:
+    - condition: "loading state"
+      variant_a: "primary 버튼: spinner + '해제 중…' 라벨"
+      variant_b: "기본: '차단 해제하기' 라벨"
+    - condition: "loading state"
+      variant_a: "close trigger (backdrop, close-btn, cancel-btn): pointer-events none + opacity 0.4"
+      variant_b: "기본: 모두 활성"
+  constraints:
+    - "BottomSheet max-height 85% viewport (hug content 우선, ~480px)"
+    - "Primary 색상은 brand 만 사용 — destructive 사용 금지 (해제 = 회복)"
+    - "Info row 는 1-2개 (사용자 prompt 제약 — 안내 간소화)"
+    - "Profile image 100x100 — 닉네임 첫 글자 fallback"
+  priority_order:
+    - "Primary CTA (차단 해제하기) — 가장 큰 시각 무게 + brand fill"
+    - "Title — 결정 컨텍스트 명확화"
+    - "Info rows — 결과 안내 (배경 surface-secondary 로 secondary 위계)"
+    - "Cancel + Close — 탈출 경로 (필수, 시각 약화)"
+
+# ─────────────────────────────
+# Layer 4: ASSETS (v1)
+# ─────────────────────────────
+assets:
+  avatars:
+    main:
+      slot: "profile-image (100x100, sheet center)"
+      kind: "gradient-token"  # 단색 fill + initial 으로 fallback (의도된 디자인)
+      source: "tokens.css → --component-avatar-fill (#D1D3D8) + 닉네임 first char"
+      needs_real_content: false
+      note: "PRD 미명시 — 실 구현 시 user-uploaded URL 또는 ds/avatars/ 로 교체"
+    parent_list:
+      slot: "parent-list__avatar × 4 (48x48 list rows)"
+      kind: "gradient-token"
+      source: "tokens.css → --component-avatar-fill + 닉네임 first char"
+      needs_real_content: false
+  feed_thumbnails: {}   # N/A — modal 은 thumbnails 없음
+  meme_images: {}       # N/A
+  hero_banners: {}      # N/A
+  icons:
+    close:
+      slot: "#close-btn (sheet top-right)"
+      kind: "illustration"
+      source: "Lucide x (inline SVG)"
+      needs_real_content: false
+    info_unlock:
+      slot: "info-row[0] icon (40x40 circle)"
+      kind: "illustration"
+      source: "Lucide unlock (inline SVG)"
+      needs_real_content: false
+    info_eye:
+      slot: "info-row[1] icon"
+      kind: "illustration"
+      source: "Lucide eye (inline SVG)"
+      needs_real_content: false
+    parent_back:
+      slot: "parent-header back"
+      kind: "illustration"
+      source: "Lucide chevron-left (inline SVG)"
+      needs_real_content: false
+    parent_refresh:
+      slot: "parent-header refresh"
+      kind: "illustration"
+      source: "Lucide refresh-cw (inline SVG)"
+      needs_real_content: false

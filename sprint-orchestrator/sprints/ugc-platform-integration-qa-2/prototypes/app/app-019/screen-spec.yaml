@@ -1,0 +1,468 @@
+# Screen Spec: BlockManagementUnblockedScreen (v2 — feed archetype, post-unblock state)
+# Step B output. Generated from PRD AC-2.5 + task app-019.md + Frozen tokens.css.
+# Archetype: feed (refreshed list 상태 — app-018 confirm 통과 직후. detail 가능했으나 task 권장: feed)
+
+meta:
+  screen_name: "BlockManagementUnblockedScreen"
+  screen_archetype: "feed"
+  archetype_decision_note: |
+    Figma frame title 은 "차단관리_해제완료" 이며 명목상 detail 처럼 보이지만,
+    실제 UI 는 app-017 (차단관리 리스트, feed) 의 N-1 갱신 상태 + Toast 오버레이.
+    detail persona 의 hero/primary CTA 룰을 강제하면 list-row 구조와 충돌.
+    따라서 feed archetype 유지 + Toast 표시 변형으로 결정. (task spec 권장 일치)
+  task_id: "app-019"
+  sprint_id: "ugc-platform-integration-qa-2"
+  app: "ZZEM"
+  platform: "iOS / Android (React Native)"
+  language: "ko"
+  frame: "390x844"
+  theme: "light"
+  figma_frame: "37290:170246"
+  reference_screens:
+    - id: "app-017 / BlockManagementListScreen"
+      reuse: "list-row 구조 + skeleton + empty + refresh 패턴 동일"
+      diff: "items N → N-1, Toast 자동 노출, count 변화"
+    - id: "app-016 / OtherProfileScreen-Unblocked"
+      reuse: "Toast (3s auto-dismiss) 동작 패턴"
+      diff: "본 화면은 list 갱신, app-016 은 단일 프로필 detail"
+  exemplar_refs:
+    - id: "v2-dogfood-free-tab-app-001-freetabscreen"
+      dimension_focus:
+        - "archetype_fit"
+        - "interaction_completeness"
+        - "token_compliance"
+      structural_borrowing: "none — list-row (compact 72px), 카드 grid 모방 금지"
+
+# ─────────────────────────────
+# Component Tree
+# ─────────────────────────────
+component_tree: |
+  BlockManagementUnblockedScreen [frame: 390x844]
+  ├── StatusBar [system] (div) #status-bar
+  ├── AppHeader [container] (header) #app-header
+  │   ├── BackButton [icon-button] (button) #back-button — 설정으로 복귀
+  │   ├── HeaderTitle [text] (h1) #header-title — "차단 관리"
+  │   └── RefreshButton [icon-button] (button) #refresh-button — feed 강제 룰 #4
+  ├── BodyScroll [scroll-container] (main) #body-scroll
+  │   ├── PullToRefreshHint [feedback] (div) #ptr-hint
+  │   ├── BlockCountSummary [text] (div) #count-summary — "차단된 사용자 6명" (N-1)
+  │   ├── BlockedSkeleton [feedback] (ul) #blocked-skeleton — loading
+  │   ├── BlockedList [list] (ul) #blocked-list — 6 rows (해제된 사용자 제외)
+  │   │   └── BlockedUserRow × 6
+  │   │       ├── UserAvatar [avatar] (span) — 48px circle (이니셜 fallback)
+  │   │       ├── UserMeta [container] (div)
+  │   │       │   ├── UserNickname [text] (span)
+  │   │       │   └── BlockedDate [text] (span)
+  │   │       └── UnblockButton [button-secondary] (button) — "해제"
+  │   ├── EndIndicator [feedback] (div) #end-indicator
+  │   └── EmptyView [container] (div) #empty-view — 0건 분기
+  │       ├── EmptyIcon [illustration] (div) — Lucide shield-check
+  │       ├── EmptyTitle [text] (h3) — "차단한 사용자가 없어요"
+  │       ├── EmptyDesc [text] (p)
+  │       └── EmptyAction [button-secondary] (button)
+  └── Toast [feedback] (div) #toast — "{nickname}님 차단을 해제했어요" (default 진입 시 auto)
+
+# ─────────────────────────────
+# Component Details
+# ─────────────────────────────
+components:
+  - name: "AppHeader"
+    id: "app-header"
+    tag: "header"
+    type: "container"
+    position: "sticky-top"
+    size: "full-width x 56px"
+    tokens:
+      fill: "var(--wds-background-normal)"
+      text: "var(--wds-label-normal)"
+      border: "1px solid var(--wds-line-alternative)"
+      spacing: "0 8px 0 4px"
+    layout: { direction: horizontal, alignment: space-between, sizing: hug }
+    a11y: { role: "banner", label: "차단 관리 헤더" }
+
+  - name: "BackButton"
+    id: "back-button"
+    tag: "button"
+    type: "icon-button"
+    size: "44x44"
+    tokens:
+      fill: "transparent"
+      text: "var(--wds-label-normal)"
+    behavior:
+      purpose: "설정 화면으로 복귀 (AC: back tap → 설정)"
+      user_action: "탭"
+      feedback: "navigation (slide-right)"
+    a11y: { role: "button", label: "뒤로" }
+
+  - name: "HeaderTitle"
+    id: "header-title"
+    tag: "h1"
+    type: "text"
+    tokens:
+      text: "var(--wds-label-normal)"
+      font_size: "var(--wds-font-size-xl)"
+      font_weight: "var(--wds-font-weight-semibold)"
+    a11y: { role: "heading", label: "차단 관리" }
+
+  - name: "RefreshButton"
+    id: "refresh-button"
+    tag: "button"
+    type: "icon-button"
+    size: "44x44"
+    tokens:
+      fill: "transparent"
+      text: "var(--wds-label-alternative)"
+    behavior:
+      purpose: "feed archetype 강제 룰 #4 — 명시적 refresh"
+      user_action: "탭"
+      feedback: "loading state + toast"
+    a11y: { role: "button", label: "차단 목록 새로고침" }
+
+  - name: "BlockCountSummary"
+    id: "count-summary"
+    tag: "div"
+    type: "text"
+    tokens:
+      text: "var(--wds-label-alternative)"
+      font_size: "var(--wds-font-size-sm)"
+      spacing: "12px 20px 8px"
+    behavior:
+      purpose: "갱신된 차단 사용자 수 즉시 인지 — '7명' → '6명' 변화 demonstrate"
+    a11y: { role: "status", label: "차단된 사용자 수" }
+
+  - name: "BlockedList"
+    id: "blocked-list"
+    tag: "ul"
+    type: "list"
+    size: "full-width"
+    tokens:
+      fill: "transparent"
+      divider: "1px solid var(--wds-line-alternative)"
+    layout: { direction: vertical, alignment: start, sizing: fill }
+    behavior:
+      purpose: "AC: 해제된 사용자 row 제거된 N-1 리스트 (animation 선택)"
+      user_action: "행 내 '해제' 탭 → app-018 confirm sheet 재진입 가능"
+      feedback: "navigation (slide-up overlay)"
+    states:
+      default: "visible — 6 rows (7명 중 1명 해제)"
+      loading: "hidden — BlockedSkeleton 노출"
+      empty: "hidden — EmptyView 노출 (0건 분기)"
+    a11y: { role: "list", label: "차단된 사용자 목록" }
+
+  - name: "BlockedUserRow"
+    id: "blocked-row-{index}"
+    tag: "li"
+    type: "list-item"
+    size: "full-width x 72px"
+    tokens:
+      fill: "var(--wds-background-normal)"
+      spacing: "12px 20px"
+    layout: { direction: horizontal, alignment: space-between, sizing: fill }
+    behavior:
+      purpose: "1 차단된 사용자 — 해제된 '달리는토끼' 는 제외됨"
+      user_action: "우측 '해제' 버튼 → app-018 confirm sheet 진입"
+      feedback: "navigation"
+    a11y: { role: "listitem", label: "{닉네임}, {차단일} 차단됨" }
+    constraints:
+      min_height: "72px"
+      max_lines: 1
+      truncation: "ellipsis"
+
+  - name: "UserAvatar"
+    id: "user-avatar-{index}"
+    tag: "span"
+    type: "avatar"
+    size: "48x48"
+    tokens:
+      fill: "var(--component-avatar-fill)"
+      ring: "1px solid var(--component-avatar-ring)"
+      radius: "var(--wds-radius-full)"
+      text: "var(--wds-label-alternative)"
+    behavior:
+      purpose: "사용자 식별 — 이미지 부재 시 닉네임 첫 글자 fallback"
+    a11y: { role: "img", label: "{닉네임} 프로필 이미지" }
+
+  - name: "UnblockButton"
+    id: "unblock-btn-{index}"
+    tag: "button"
+    type: "button-secondary"
+    size: "wrap-content x 32px"
+    tokens:
+      fill: "var(--wds-fill-neutral)"
+      text: "var(--wds-label-normal)"
+      radius: "var(--component-button-radius)"
+      spacing: "0 14px"
+      font_size: "var(--wds-font-size-sm)"
+      font_weight: "var(--wds-font-weight-medium)"
+    behavior:
+      purpose: "추가 해제 가능 (AC: 추가 해제 가능 / app-018 재트리거)"
+      user_action: "탭"
+      feedback: "navigation (overlay slide-up)"
+    a11y: { role: "button", label: "{닉네임} 차단 해제" }
+
+  - name: "BlockedSkeleton"
+    id: "blocked-skeleton"
+    tag: "ul"
+    type: "skeleton"
+    tokens:
+      fill: "var(--wds-color-neutral-100)"
+      radius: "var(--wds-radius-sm)"
+    behavior:
+      purpose: "새로고침 시 placeholder 6개 (feed 강제 룰 #1)"
+    states:
+      default: "hidden"
+      loading: "visible — 6 SkeletonRow"
+    a11y: { role: "status", label: "차단 목록 불러오는 중" }
+
+  - name: "EmptyView"
+    id: "empty-view"
+    tag: "div"
+    type: "container"
+    tokens:
+      spacing: "80px 24px"
+    behavior:
+      purpose: "AC: 0건 도달 시 empty placeholder (마지막 1명 해제 후 빈 상태)"
+      user_action: "EmptyAction 탭 → 설정 복귀"
+      feedback: "navigation"
+    states:
+      default: "hidden"
+      empty: "visible"
+    a11y: { role: "region", label: "차단된 사용자 없음" }
+
+  - name: "EndIndicator"
+    id: "end-indicator"
+    tag: "div"
+    type: "text"
+    tokens:
+      text: "var(--wds-label-assistive)"
+      font_size: "var(--wds-font-size-xs)"
+      spacing: "20px 0 28px"
+    behavior:
+      purpose: "리스트 끝 명시 (feed 권장 룰 #1)"
+    a11y: { role: "status", label: "리스트 끝" }
+
+  - name: "Toast"
+    id: "toast"
+    tag: "div"
+    type: "feedback"
+    position: "bottom"
+    tokens:
+      fill: "var(--wds-color-neutral-900)"
+      text: "var(--wds-label-inverse)"
+      radius: "var(--wds-radius-md)"
+    behavior:
+      purpose: "AC: '차단을 해제했어요' Toast 표시 후 3s 내 auto-dismiss"
+      auto_dismiss_ms: 3000
+      auto_show_on_mount: true
+    a11y: { role: "status", label: "안내 메시지", live: "polite" }
+
+# ─────────────────────────────
+# Layout Spec
+# ─────────────────────────────
+layout_spec:
+  type: "flex-column"
+  viewport: "390x844"
+  regions:
+    - id: "status-bar"
+      height: "fixed(44px)"
+    - id: "app-header"
+      sticky: "top"
+      height: "fixed(56px)"
+    - id: "body-scroll"
+      scroll: "vertical"
+      flex: 1
+      children:
+        - id: "count-summary"
+          type: "block"
+          padding: "12px 20px 8px"
+        - id: "blocked-list"
+          type: "flex-column"
+          gap: "0px"
+        - id: "blocked-skeleton"
+          type: "flex-column"
+          gap: "0px"
+        - id: "end-indicator"
+          type: "block"
+          padding: "20px 0 28px"
+          alignment: "center"
+        - id: "empty-view"
+          type: "flex-column"
+          alignment: "center"
+          padding: "80px 24px"
+
+# ─────────────────────────────
+# States
+# ─────────────────────────────
+states:
+  default:
+    description: "AC happy path — 7명 중 '달리는토끼' 1명 해제 → 6명 남음. 진입 시 Toast auto-show."
+    active: true
+    visible_components: [count-summary, blocked-list, end-indicator, toast]
+    hidden_components: [blocked-skeleton, empty-view]
+    auto_actions:
+      - "showToast('달리는토끼님 차단을 해제했어요') on mount, dismiss after 3000ms"
+
+  loading:
+    description: "새로고침 시 — feed 강제 룰 #1"
+    visible_components: [blocked-skeleton]
+    hidden_components: [count-summary, blocked-list, end-indicator, empty-view]
+
+  empty:
+    description: "AC: 0건 도달 시 empty placeholder (해제 후 마지막 1명이었던 경우)"
+    visible_components: [empty-view, toast]
+    hidden_components: [count-summary, blocked-list, blocked-skeleton, end-indicator]
+    labels:
+      title: "차단한 사용자가 없어요"
+      description: "다른 사용자를 차단하면\n여기에 표시돼요"
+      cta: "설정으로 돌아가기"
+
+  error:
+    description: "API 실패 — empty UI 재사용 + 토스트"
+    visible_components: [empty-view]
+    hidden_components: [count-summary, blocked-list, blocked-skeleton, end-indicator]
+    labels:
+      message: "차단 목록을 불러오지 못했어요. 잠시 후 다시 시도해 주세요."
+
+# ─────────────────────────────
+# Interactions
+# ─────────────────────────────
+interactions:
+  - trigger: "tap"
+    target: "#back-button"
+    action: "go-back"
+    destination: "SettingsScreen"
+    transition: "slide-right"
+    note: "AC: back tap → 설정"
+
+  - trigger: "tap"
+    target: "#refresh-button"
+    action: "toggle-state"
+    state_key: "loading"
+    note: "feed 강제 룰 #4 — 명시적 refresh"
+
+  - trigger: "swipe-down"
+    target: "#body-scroll"
+    action: "toggle-state"
+    state_key: "loading"
+    note: "feed 강제 룰 #4 보조 — pull-to-refresh"
+
+  - trigger: "tap"
+    target: ".unblock-btn"
+    action: "open-overlay"
+    destination: "BlockManagementUnblockConfirmSheet"
+    transition: "slide-up"
+    payload: "{ userId, nickname }"
+    note: "AC: 추가 해제 가능 (app-018 재트리거)"
+
+  - trigger: "tap"
+    target: "#empty-action"
+    action: "go-back"
+    destination: "SettingsScreen"
+    transition: "slide-right"
+
+  - trigger: "auto-mount"
+    target: "#toast"
+    action: "show-and-dismiss"
+    payload: "달리는토끼님 차단을 해제했어요"
+    duration_ms: 3000
+    note: "AC: Toast 자동 표시 후 3s 내 auto-dismiss"
+
+# ─────────────────────────────
+# Visual Rules
+# ─────────────────────────────
+rules:
+  - condition: "진입 시점 (app-018 confirm 통과 직후)"
+    effect: "Toast '{nickname}님 차단을 해제했어요' 자동 표시"
+    example: "AC-2.5 happy path"
+  - condition: "blockedUsers.length == 6 (해제 후)"
+    effect: "BlockedList 6 rows 노출, count-summary '차단된 사용자 6명'"
+  - condition: "blockedUsers.length == 0 (마지막 1명 해제)"
+    effect: "EmptyView 노출 (AC: 0건 도달)"
+  - condition: "Toast 표시 후 3000ms 경과"
+    effect: "Toast auto-dismiss"
+
+# ─────────────────────────────
+# Labels (ko)
+# ─────────────────────────────
+labels:
+  header:
+    title: "차단 관리"
+    back: "뒤로"
+    refresh_a11y: "차단 목록 새로고침"
+  body:
+    count_template: "차단된 사용자 {count}명"
+    blocked_date_suffix: "차단"
+  buttons:
+    unblock: "해제"
+    empty_action: "설정으로 돌아가기"
+  list_items:
+    # app-017 의 7명 중 '달리는토끼' (u-001) 가 해제됨 → 6명 남음
+    - { nickname: "조용한새벽",   date: "2026.04.18", initial: "조" }
+    - { nickname: "햇살가득책방", date: "2026.04.15", initial: "햇" }
+    - { nickname: "구름위산책",   date: "2026.04.11", initial: "구" }
+    - { nickname: "심야라디오",   date: "2026.04.07", initial: "심" }
+    - { nickname: "민트초코러버", date: "2026.04.02", initial: "민" }
+    - { nickname: "노을사진가",   date: "2026.03.28", initial: "노" }
+  empty_state:
+    title: "차단한 사용자가 없어요"
+    description: "다른 사용자를 차단하면\n여기에 표시돼요"
+    cta: "설정으로 돌아가기"
+  end_indicator: "마지막 차단 사용자입니다"
+  toast:
+    unblocked_template: "{nickname}님 차단을 해제했어요"
+    refresh_in_progress: "차단 목록을 새로고침하고 있어요…"
+    refresh_done: "차단 목록을 새로고침했어요"
+    error: "차단 목록을 불러오지 못했어요. 잠시 후 다시 시도해 주세요."
+  unblocked_user:
+    nickname: "달리는토끼"
+    user_id: "u-001"
+
+# ─────────────────────────────
+# Token Map
+# ─────────────────────────────
+tokens:
+  background:        "wds.background.normal → #FFFFFF"
+  surface_secondary: "wds.surface.secondary → #F7F8F9"
+  text_primary:      "wds.label.normal → #212228"
+  text_secondary:    "wds.label.alternative → #6B6E76"
+  text_assistive:    "wds.label.assistive → #8E9199"
+  text_inverse:      "wds.label.inverse → #FFFFFF"
+  divider_weak:      "wds.line.alternative → #F0F1F3"
+  divider_normal:    "wds.line.normal → #E4E5E9"
+  brand:             "wds.fill.brand-primary → #8752FA"
+  fill_neutral:      "wds.fill.neutral → #F0F1F3"
+  avatar_fill:       "component.avatar.fill → #F0F1F3"
+  avatar_ring:       "component.avatar.ring → #E4E5E9"
+  toast_bg:          "wds.color.neutral-900 → #212228"
+  button_radius:     "component.button.radius → 12px"
+  full_radius:       "wds.radius.full → 9999px"
+  font_family:       "wds.font.family.primary → Pretendard"
+
+# ─────────────────────────────
+# Quality Score
+# ─────────────────────────────
+quality_score:
+  extraction_accuracy:
+    total_components: 12
+    with_token_map: 12
+    with_html_mapping: 12
+    score: "24 / 24 = 1.0"
+  fabrication_risk:
+    inferred_fields:
+      - "list_items 6명 (해제 후) — app-017 의 7명에서 '달리는토끼' 1건 제외. 다른 닉네임 변경 없음 (PRD/Figma 미공급, 일관성 유지)"
+      - "Toast 'auto-show on mount' — AC-2.5 의 '결과 즉시 확인' 의도 구체화 (자동 노출이 user trigger 보다 자연스러움)"
+      - "BlockCountSummary 6명 — feed 6+ 룰 충족 + 1명 변화 시각화"
+      - "feed archetype 결정 (vs detail) — task 의 'archetype 결정 필요' 에 대한 답변, 명시 권장 따름"
+    risk_level: "low"
+    rationale: |
+      AC-2.5 명시: row 제거, Toast 표시 후 3s auto-dismiss, 0건 empty, back 복귀 — 모두 직접 매핑.
+      Toast auto-show 는 "결과 즉시 확인" 목적의 합리적 추론.
+      list_items 더미는 app-017 일관성을 위한 의도적 reuse (해제된 1명 제외).
+      비즈니스 로직 추측 없음.
+  schema_completeness:
+    required_sections: ["meta", "component_tree", "layout_spec", "states", "interactions", "labels", "token_map"]
+    present_sections: ["meta", "component_tree", "components", "layout_spec", "states", "interactions", "rules", "labels", "tokens", "quality_score"]
+    score: "7 / 7 = 1.0"
+  context_coverage:
+    why_linked: "1 / 1 = 1.0"   # AC-2.5 → component/state 연결
+    what_resolved: "12 / 12 = 1.0"

@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>app-014 · 타유저 프로필 (차단됨)</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+<style>
+/* === tokens.css inline (sprint-level: ugc-platform-integration-qa-2/prototypes/context/tokens.css) === */
+:root {
+  --wds-color-purple-50:  #F5F0FF;
+  --wds-color-purple-100: #EBE1FF;
+  --wds-color-purple-400: #A17BFF;
+  --wds-color-purple-500: #8752FA;
+  --wds-color-purple-600: #7040E0;
+  --wds-color-purple-700: #5A30C0;
+  --wds-color-neutral-0:   #FFFFFF;
+  --wds-color-neutral-50:  #F7F8F9;
+  --wds-color-neutral-100: #F0F1F3;
+  --wds-color-neutral-200: #E4E5E9;
+  --wds-color-neutral-300: #D1D3D8;
+  --wds-color-neutral-400: #B5B8BF;
+  --wds-color-neutral-500: #8E9199;
+  --wds-color-neutral-600: #6B6E76;
+  --wds-color-neutral-700: #46474C;
+  --wds-color-neutral-900: #212228;
+  --wds-color-neutral-1000: #000000;
+  --wds-color-red-100: #FFE5E3;
+  --wds-color-red-500: #FF3B30;
+  --wds-color-red-600: #E0241A;
+  --wds-color-green-500: #34C759;
+  --wds-color-yellow-500: #FFCC00;
+
+  --wds-background-normal:    var(--wds-color-neutral-0);
+  --wds-background-elevated:  var(--wds-color-neutral-0);
+  --wds-background-dimmed:    rgba(0,0,0,0.50);
+  --wds-surface-primary:   var(--wds-color-neutral-0);
+  --wds-surface-secondary: var(--wds-color-neutral-50);
+  --wds-surface-tertiary:  var(--wds-color-neutral-100);
+  --wds-fill-brand-primary: var(--wds-color-purple-500);
+  --wds-fill-brand-weak:    var(--wds-color-purple-50);
+  --wds-fill-brand-strong:  var(--wds-color-purple-600);
+  --wds-fill-neutral:       var(--wds-color-neutral-100);
+  --wds-fill-status-error:  var(--wds-color-red-500);
+  --wds-label-normal:      var(--wds-color-neutral-900);
+  --wds-label-alternative: var(--wds-color-neutral-600);
+  --wds-label-assistive:   var(--wds-color-neutral-500);
+  --wds-label-disabled:    var(--wds-color-neutral-300);
+  --wds-label-inverse:     var(--wds-color-neutral-0);
+  --wds-label-brand:       var(--wds-color-purple-500);
+  --wds-line-normal:       var(--wds-color-neutral-200);
+  --wds-line-alternative:  var(--wds-color-neutral-100);
+  --wds-status-error:      var(--wds-color-red-500);
+
+  --component-button-primary-fill:   var(--wds-fill-brand-primary);
+  --component-button-primary-label:  var(--wds-label-inverse);
+  --component-button-radius:         12px;
+
+  --pe-text-primary:    #262626;
+  --pe-text-secondary:  #656565;
+  --pe-text-tertiary:   #8A8A8A;
+  --pe-avatar-empty-bg: #F5F3FF;
+  --pe-avatar-border:   rgba(136, 136, 136, 0.2);
+
+  --wds-spacing-0: 0px;
+  --wds-spacing-1: 1px;
+  --wds-spacing-2: 2px;
+  --wds-spacing-4: 4px;
+  --wds-spacing-6: 6px;
+  --wds-spacing-8: 8px;
+  --wds-spacing-10: 10px;
+  --wds-spacing-12: 12px;
+  --wds-spacing-14: 14px;
+  --wds-spacing-16: 16px;
+  --wds-spacing-20: 20px;
+  --wds-spacing-24: 24px;
+  --wds-spacing-32: 32px;
+  --wds-spacing-40: 40px;
+  --wds-spacing-48: 48px;
+  --wds-spacing-64: 64px;
+  --wds-spacing-80: 80px;
+  --wds-radius-xs:  4px;
+  --wds-radius-sm:  8px;
+  --wds-radius-md:  12px;
+  --wds-radius-lg:  16px;
+  --wds-radius-xl:  20px;
+  --wds-radius-full: 9999px;
+  --wds-font-family-primary: 'Pretendard', -apple-system, 'SF Pro Display', sans-serif;
+  --wds-font-weight-regular:  400;
+  --wds-font-weight-medium:   500;
+  --wds-font-weight-semibold: 600;
+  --wds-font-weight-bold:     700;
+  --wds-font-size-2xs: 11px;
+  --wds-font-size-xs:  12px;
+  --wds-font-size-sm:  13px;
+  --wds-font-size-md:  14px;
+  --wds-font-size-lg:  16px;
+  --wds-font-size-xl:  18px;
+  --wds-font-size-2xl: 20px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--wds-font-family-primary);
+  background: #E7E8EB;
+  display: flex; flex-direction: column; align-items: center;
+  min-height: 100vh; padding: 16px;
+  color: var(--wds-label-normal);
+}
+
+/* === Control Panel (외부 — Pass 6 audit 제외 영역) === */
+.control-panel {
+  width: 390px; background: #1a1a2e; color: #e0e0e0;
+  border-radius: 12px 12px 0 0; padding: 12px 16px;
+  display: flex; flex-direction: column; gap: 8px;
+  font-size: 13px; font-family: ui-monospace, monospace;
+}
+.control-panel__row { display: flex; align-items: center; gap: 8px; }
+.control-panel__label { color: #888; font-size: 11px; min-width: 56px; }
+.control-panel select {
+  background: #2a2a3e; color: #e0e0e0; border: 1px solid #444;
+  border-radius: 6px; padding: 4px 8px; font-size: 12px; flex: 1;
+  font-family: ui-monospace, monospace;
+}
+.control-panel__states { display: flex; gap: 4px; flex-wrap: wrap; flex: 1; }
+.control-panel__state-btn {
+  background: #2a2a3e; color: #bbb; border: 1px solid #444;
+  border-radius: 6px; padding: 4px 10px; font-size: 11px; cursor: pointer;
+  transition: all 0.15s; font-family: ui-monospace, monospace;
+}
+.control-panel__state-btn.active {
+  background: var(--wds-color-purple-500); color: #fff; border-color: var(--wds-color-purple-500);
+}
+.control-panel__breadcrumb { color: #888; font-size: 11px; font-family: ui-monospace, monospace; }
+.control-panel__hint { color: #999; font-size: 10px; font-style: italic; }
+
+/* === Device Frame === */
+.device-frame {
+  width: 390px; height: 844px;
+  background: var(--wds-background-normal);
+  overflow: hidden; position: relative;
+  border: 1px solid #ddd;
+  border-radius: 0 0 12px 12px;
+  display: flex; flex-direction: column;
+}
+.screen { display: flex; flex-direction: column; height: 100%; }
+
+/* === Status Bar === */
+.status-bar {
+  height: 44px;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 0 24px;
+  font-size: var(--wds-font-size-md);
+  font-weight: var(--wds-font-weight-semibold);
+  flex-shrink: 0;
+  color: var(--wds-label-normal);
+}
+.status-bar__icons { display: flex; gap: 6px; align-items: center; }
+.status-bar__icons svg { display: block; }
+
+/* === Header Bar === */
+.header-bar {
+  height: 48px;
+  display: grid; grid-template-columns: 48px 1fr 48px;
+  align-items: center;
+  padding: 0 var(--wds-spacing-8);
+  background: var(--wds-background-normal);
+  border-bottom: 1px solid var(--wds-line-alternative);
+  flex-shrink: 0;
+}
+.header-bar__title {
+  font-size: var(--wds-font-size-lg);
+  font-weight: var(--wds-font-weight-semibold);
+  text-align: center;
+  color: var(--wds-label-normal);
+  margin: 0;
+}
+.icon-btn {
+  width: 44px; height: 44px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: none; border: 0; cursor: pointer;
+  color: var(--wds-label-normal);
+  padding: 0;
+}
+
+/* === Body Scroll === */
+.body-scroll {
+  flex: 1; overflow-y: auto; position: relative;
+  padding-bottom: 64px;
+}
+
+/* === Profile Hero (detail persona 강제 룰 #1: ≥320px, blocked variant) === */
+.profile-hero {
+  display: flex; flex-direction: column; align-items: center;
+  padding: var(--wds-spacing-32) var(--wds-spacing-20) var(--wds-spacing-24);
+  gap: var(--wds-spacing-16);
+  background: var(--wds-background-normal);
+  min-height: 320px;
+}
+.avatar {
+  width: 100px; height: 100px;
+  border-radius: var(--wds-radius-full);
+  background: var(--pe-avatar-empty-bg);
+  border: 1px solid var(--pe-avatar-border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px; color: var(--wds-label-assistive);
+  font-weight: var(--wds-font-weight-bold);
+  flex-shrink: 0;
+  opacity: 0.55;
+}
+.nickname {
+  margin: 0;
+  font-size: var(--wds-font-size-xl);
+  font-weight: var(--wds-font-weight-bold);
+  line-height: 1.35;
+  color: var(--wds-label-alternative);
+}
+
+/* === Blocked Badge (Hero 직하 — AC-2.2-a status indicator) === */
+.blocked-badge {
+  display: inline-flex; align-items: center; gap: var(--wds-spacing-6);
+  padding: 6px var(--wds-spacing-12) 6px var(--wds-spacing-10);
+  border-radius: var(--wds-radius-full);
+  background: var(--wds-surface-tertiary);
+  color: var(--wds-label-alternative);
+  font-size: var(--wds-font-size-xs);
+  font-weight: var(--wds-font-weight-semibold);
+  line-height: 1.4;
+  margin-top: var(--wds-spacing-4);
+}
+.blocked-badge svg { width: 14px; height: 14px; display: block; }
+
+/* === Blocked Notice Card (콘텐츠 영역 자리 — empty-state) === */
+.blocked-notice {
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  background: var(--wds-surface-secondary);
+  border-radius: var(--wds-radius-lg);
+  padding: var(--wds-spacing-32) var(--wds-spacing-24);
+  margin: var(--wds-spacing-8) var(--wds-spacing-20) 0;
+  gap: var(--wds-spacing-12);
+}
+.blocked-notice__icon {
+  width: 64px; height: 64px;
+  border-radius: var(--wds-radius-full);
+  background: var(--wds-fill-neutral);
+  color: var(--wds-label-assistive);
+  display: inline-flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  margin-bottom: var(--wds-spacing-4);
+}
+.blocked-notice__icon svg { width: 32px; height: 32px; display: block; }
+.blocked-notice__headline {
+  margin: 0;
+  font-size: var(--wds-font-size-md);
+  font-weight: var(--wds-font-weight-semibold);
+  color: var(--wds-label-normal);
+  line-height: 1.45;
+  max-width: 280px;
+}
+.blocked-notice__subcopy {
+  margin: 0;
+  font-size: var(--wds-font-size-sm);
+  font-weight: var(--wds-font-weight-medium);
+  color: var(--wds-label-alternative);
+  line-height: 1.45;
+  max-width: 280px;
+}
+
+/* === Bottom Nav === */
+.bottom-nav {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 64px;
+  border-top: 0.5px solid var(--wds-line-alternative);
+  background: var(--wds-background-normal);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding-bottom: var(--wds-spacing-8);
+  z-index: 5;
+}
+.bottom-nav__item {
+  background: none; border: 0; cursor: pointer;
+  color: var(--wds-label-assistive);
+  padding: var(--wds-spacing-8) var(--wds-spacing-12);
+  display: inline-flex; flex-direction: column; align-items: center; gap: 2px;
+  font-size: var(--wds-font-size-2xs);
+  font-weight: var(--wds-font-weight-medium);
+  font-family: inherit;
+}
+.bottom-nav__item svg { width: 22px; height: 22px; display: block; }
+.bottom-nav__item.active { color: var(--wds-label-normal); }
+
+/* === Toast (mock — verifier-safe, no alert/confirm) === */
+.toast {
+  position: absolute;
+  left: var(--wds-spacing-16);
+  right: var(--wds-spacing-16);
+  bottom: 80px;
+  background: var(--wds-color-neutral-900);
+  color: var(--wds-label-inverse);
+  padding: var(--wds-spacing-12) var(--wds-spacing-16);
+  border-radius: var(--wds-radius-lg);
+  font-size: var(--wds-font-size-sm);
+  font-weight: var(--wds-font-weight-medium);
+  z-index: 50;
+  display: flex; align-items: center; gap: var(--wds-spacing-8);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.18s, transform 0.18s;
+  pointer-events: none;
+}
+.toast.show {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+@media (max-width: 480px) {
+  body { padding: 0; align-items: stretch; min-height: 100dvh; }
+  .control-panel { display: none; }
+  .device-frame {
+    width: 100dvw; height: 100dvh;
+    border: none; border-radius: 0;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- Control Panel (verifier-friendly, Pass 6 제외 영역) -->
+<div class="control-panel">
+  <div class="control-panel__row">
+    <span class="control-panel__label">Screen</span>
+    <select id="screen-select">
+      <option value="other-profile-blocked">OtherProfileScreen-Blocked (app-014)</option>
+    </select>
+  </div>
+  <div class="control-panel__row">
+    <span class="control-panel__label">State</span>
+    <div class="control-panel__states" id="state-toggles">
+      <button class="control-panel__state-btn active" data-state="default" data-state-toggle>default</button>
+      <button class="control-panel__state-btn" data-state="more-opened" data-state-toggle>more-opened</button>
+    </div>
+  </div>
+  <div class="control-panel__row">
+    <span class="control-panel__breadcrumb" id="breadcrumb">other-profile-blocked · default</span>
+  </div>
+  <div class="control-panel__row">
+    <span class="control-panel__hint">v2 sprint — detail archetype persona enforced (4/4, blocked variant — rule#4 면제)</span>
+  </div>
+</div>
+
+<!-- Device Frame -->
+<div class="device-frame" id="device-frame" data-state="default">
+  <section class="screen" id="other-profile-blocked" aria-label="타유저 프로필 (차단됨)">
+
+    <div class="status-bar">
+      <span>9:41</span>
+      <span class="status-bar__icons">
+        <svg width="16" height="11" viewBox="0 0 16 11" fill="none" aria-hidden="true"><path d="M1 6.5a6.5 6.5 0 0 1 13 0v3.75a.75.75 0 0 1-.75.75H1.75A.75.75 0 0 1 1 10.25z" fill="currentColor"/></svg>
+        <svg width="16" height="11" viewBox="0 0 16 11" fill="none" aria-hidden="true"><rect x="0.5" y="0.5" width="13" height="9" rx="1.5" stroke="currentColor"/><rect x="14.25" y="3.5" width="1.25" height="3" rx="0.5" fill="currentColor"/><rect x="2" y="2" width="10" height="6" rx="0.5" fill="currentColor"/></svg>
+      </span>
+    </div>
+
+    <header class="header-bar">
+      <button class="icon-btn" id="btn-back" type="button" aria-label="뒤로가기">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+      </button>
+      <h1 class="header-bar__title" id="header-title">memer_kim</h1>
+      <button class="icon-btn" id="btn-more" type="button" aria-label="더보기">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+      </button>
+    </header>
+
+    <main class="body-scroll" id="body-scroll">
+
+      <section class="profile-hero" id="profile-hero" aria-label="타유저 프로필 (차단됨)">
+        <div class="avatar" aria-label="memer_kim 프로필 이미지 (차단됨)">M</div>
+        <h2 class="nickname" id="nickname">memer_kim</h2>
+        <span class="blocked-badge" id="blocked-badge" role="status" aria-label="차단됨 상태">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></svg>
+          차단됨
+        </span>
+      </section>
+
+      <section class="blocked-notice" id="blocked-notice" aria-label="차단된 사용자 콘텐츠 안내">
+        <div class="blocked-notice__icon" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <p class="blocked-notice__headline">차단된 사용자의 콘텐츠는 표시되지 않아요</p>
+        <p class="blocked-notice__subcopy">차단을 해제하면 다시 볼 수 있어요</p>
+      </section>
+
+    </main>
+
+    <nav class="bottom-nav" aria-label="주 내비게이션">
+      <button class="bottom-nav__item" type="button" data-nav="home" aria-label="홈">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+        홈
+      </button>
+      <button class="bottom-nav__item active" type="button" data-nav="search" aria-current="page" aria-label="검색">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        검색
+      </button>
+      <button class="bottom-nav__item" type="button" data-nav="my" aria-label="MY">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        MY
+      </button>
+    </nav>
+
+    <div class="toast" id="toast" role="status" aria-live="polite">
+      <span class="toast__text" id="toast-text">차단됨 더보기 메뉴 (app-015) 진입</span>
+    </div>
+
+  </section>
+</div>
+
+<script>
+  // === Refs ===
+  const frame = document.getElementById('device-frame');
+  const breadcrumb = document.getElementById('breadcrumb');
+  const stateButtons = document.querySelectorAll('.control-panel__state-btn');
+  const toast = document.getElementById('toast');
+  const toastText = document.getElementById('toast-text');
+
+  let toastTimer = null;
+
+  // === Toast helpers (no alert/confirm/prompt — Pass 6 #8 / verifier-safe) ===
+  function showToast(msg, durationMs = 1600) {
+    if (msg) toastText.textContent = msg;
+    if (toastTimer) {
+      clearTimeout(toastTimer);
+      toastTimer = null;
+    }
+    toast.classList.add('show');
+    if (durationMs > 0) {
+      toastTimer = setTimeout(() => {
+        hideToast();
+        if (frame.dataset.state === 'more-opened') setState('default', { silent: true });
+      }, durationMs);
+    }
+  }
+  function hideToast() {
+    toast.classList.remove('show');
+    if (toastTimer) {
+      clearTimeout(toastTimer);
+      toastTimer = null;
+    }
+  }
+
+  // === State management ===
+  function setState(state, opts = {}) {
+    frame.setAttribute('data-state', state);
+    stateButtons.forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.state === state);
+    });
+    breadcrumb.textContent = 'other-profile-blocked · ' + state;
+    console.log('[state]', state);
+
+    if (state === 'default') {
+      hideToast();
+    } else if (state === 'more-opened') {
+      showToast('차단됨 더보기 메뉴 (app-015) 진입', 1800);
+    }
+  }
+
+  stateButtons.forEach(btn => {
+    btn.addEventListener('click', () => setState(btn.dataset.state));
+  });
+
+  // === Header interactions ===
+  document.getElementById('btn-back').addEventListener('click', () => {
+    console.log('[nav] back');
+    showToast('← 이전 화면으로 돌아갑니다', 1400);
+  });
+
+  document.getElementById('btn-more').addEventListener('click', () => {
+    console.log('[nav] open more menu (app-015)');
+    setState('more-opened');
+  });
+
+  // === Bottom nav ===
+  document.querySelectorAll('.bottom-nav__item').forEach(item => {
+    item.addEventListener('click', () => {
+      const nav = item.dataset.nav;
+      console.log('[nav]', nav);
+      showToast(nav + ' 탭 이동', 1200);
+    });
+  });
+
+  // === Init: default state (blocked, no toast) ===
+  setState('default');
+</script>
+
+</body>
+</html>

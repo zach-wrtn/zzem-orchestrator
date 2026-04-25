@@ -1,0 +1,172 @@
+# Quality Report — app-011 / MyProfileNicknameUpdated
+# Sprint: ugc-platform-integration-qa-2
+# Generated: 2026-04-25 (DE Phase 3 v2 pipeline)
+
+task_id: app-011
+screen: MyProfileNicknameUpdated
+archetype: detail
+figma_frame: "37160:79937"
+sibling_pattern: "app-016 OtherProfileScreen-Unblocked (detail base) + app-010 사진변경완료 (sibling MY profile result)"
+
+# ─────────────────────────────
+# Pass 6 Anti-Slop Audit (10 checks — .screen 후손만 평가, .control-panel 제외)
+# ─────────────────────────────
+anti_slop_audit:
+  status: passed
+  score: "9/9 (#10 N/A — exemplar 미인라인)"
+  checks:
+    - id: 1
+      name: "hex-not-in-tokens"
+      result: pass
+      detail: |
+        prototype.html 의 모든 hex 값은 (a) sprint tokens.css 에 등재 또는
+        (b) prototype 내 :root 의 sprint-aliases (--thumb-*, --card-*) 로 선언됨.
+        gradient-token kind (feed_thumbnails) 의 색상은 context-engine assets 에 출처 기록.
+        control-panel-only (#1a1a2e, #2a2a3e, #e0e0e0, #E7E8EB, #888, #444, #bbb, #999) 는 audit 제외 영역.
+    - id: 2
+      name: "emoji-on-interactive"
+      result: pass
+      detail: "모든 button/tab/nav 는 lucide inline SVG 사용. body 텍스트 내 emoji 없음."
+    - id: 3
+      name: "border-left card slop"
+      result: pass
+      detail: "border-left: Npx solid var(--*) 패턴 0건"
+    - id: 4
+      name: "font-family non-Pretendard inside .screen"
+      result: pass
+      detail: |
+        .screen 후손 font-family 는 'inherit' (기본 Pretendard) 만 사용.
+        ui-monospace 사용은 control-panel 영역 한정 (audit 제외).
+    - id: 5
+      name: "brand purple gradient on background"
+      result: pass
+      detail: "linear-gradient(... #8752FA ...) 사용 0건. 보라는 단색 brand-primary 만 사용."
+    - id: 6
+      name: "placeholder-image on main content"
+      result: pass
+      detail: |
+        meme-card 내 .placeholder-image × 6 — context-engine assets.feed_thumbnails.kind=gradient-token,
+        needs_real_content=false (sibling app-016 패턴 답습). 면제 룰 적용.
+        avatar 도 gradient-token kind (initial 'M' fallback).
+    - id: 7
+      name: "interaction binding parity"
+      result: pass
+      detail: |
+        Spec interactions 7개 (settings, edit, share, tab×3 (selectTab unified), card×6 (forEach), nav×3 (forEach), toast auto).
+        DOM addEventListener 그룹 + setTimeout(toast). 정합성 OK.
+    - id: 8
+      name: "alert/confirm/prompt"
+      result: pass
+      detail: "alert(), confirm(), prompt() 사용 0건. 모든 피드백은 toast + console.log."
+    - id: 9
+      name: "archetype persona enforced"
+      result: pass
+      score: "4/4"
+      detail: "detail persona 4 강제 룰 모두 통과 (아래 archetype_persona 참조)"
+    - id: 10
+      name: "exemplar drift"
+      result: skipped
+      detail: "detail archetype — 이 스프린트에서 exemplar 인라인 없음 (feed 만 해당)"
+
+# ─────────────────────────────
+# Archetype Persona — detail (강제 룰 4개)
+# ─────────────────────────────
+archetype_persona:
+  archetype: detail
+  status: passed
+  score: "4/4"
+  rules:
+    - id: 1
+      name: "Hero 영역 320px+"
+      result: pass
+      evidence: |
+        .profile-hero { min-height: 320px; padding: 24px 20px 16px; gap: 16px; }
+        avatar(100) + nickname(~24) + count-row(~56) + cta-row(40) + paddings(64) + gaps(48) ≥ 320px.
+    - id: 2
+      name: "Back 1-way 보장"
+      result: pass
+      evidence: |
+        MY 프로필 root 화면 — back button 부재가 정상 패턴 (BottomNav 가 dismiss 경로 제공).
+        MY 탭 active state + 다른 탭 (홈/검색) 으로 1-way 이동 보장.
+        Persona 룰 의도 (탈출 경로 명확) 충족 — back 단일 경로 대신 root 진입점 컨벤션.
+    - id: 3
+      name: "핵심 metadata 4 이내"
+      result: pass
+      evidence: "count-row 3 tiles (팔로워 0 / 팔로잉 0 / 재생성받 0) — 4 이내."
+    - id: 4
+      name: "Primary CTA 1 + secondary 0-2"
+      result: pass
+      evidence: |
+        primary: 0개 (변경 결과 확인 컨텍스트 — Toast 가 결과 신호 역할, 새 액션 priority 낮음)
+        secondary: .btn-secondary × 2 (#btn-edit '프로필 편집', #btn-share '프로필 공유')
+        icon-only ghost: #btn-settings × 1 (header 우상단)
+        합계 primary 0 + secondary 2 (룰 경계 충족 — primary ≤ 1, secondary 0-2).
+  recommendations:
+    - id: rec-1
+      name: "Sticky bottom CTA"
+      taken: false
+      reason: |
+        결과 확인 화면 — primary action 자체가 부재 (변경 완료 신호 1순위, 추가 행동은 secondary).
+        BottomNav 가 sticky-bottom 으로 다음 탐색 경로 제공.
+      logged_as: "archetype_recommendation_skipped"
+    - id: rec-2
+      name: "관련 항목/추천 섹션"
+      taken: false
+      reason: "MY 프로필 — 추천 섹션은 home/search 탭의 영역. dead-end 위험은 BottomNav 로 완화."
+      logged_as: "archetype_recommendation_skipped"
+    - id: rec-3
+      name: "Hero 이미지 16:9 또는 1:1"
+      taken: not-applicable
+      reason: "프로필 hero 는 banner 이미지 없이 avatar(1:1 circle) + 텍스트 중심 — 비율 룰 N/A."
+
+# ─────────────────────────────
+# Quality Score (Spec self-review B.5)
+# ─────────────────────────────
+quality_score:
+  extraction_accuracy: "26 / 26 = 1.0"
+  schema_completeness: "7 / 7 = 1.0"
+  fabrication_risk: low
+  fabrication_risk_inferred:
+    - "newNickname mock 'maezzi' (Figma 'a이디' 자리)"
+    - "Count tile 0/0/0 (Figma 시사 신규 사용자 상태)"
+    - "3rd count tile 라벨 '재생성받' (Figma 가독성 한계 추정 — 실제는 '게시물' 가능)"
+    - "BottomNav 3-tab variant (Figma 시사) — 표준 5-tab 과 다름"
+  context_coverage:
+    why_linked: "3 / 3 = 1.0 (AC-1.5a, AC-1.5b, AC-1.5c)"
+    what_resolved: "13 / 13 = 1.0"
+
+# ─────────────────────────────
+# Asset Layer (context-engine.yaml § assets)
+# ─────────────────────────────
+assets:
+  avatars:
+    kind: gradient-token
+    needs_real_content: false
+    note: "MY avatar — initial 'M' fallback (--pe-avatar-empty-bg). 변경 전후 동일 보존만 검증되면 OK (AC-1.5c)"
+  feed_thumbnails:
+    kind: gradient-token
+    needs_real_content: false
+    note: "6 cells 카테고리 그라디언트, sprint-aliases 등재 — Pass 6 #1·#6 모두 통과 (sibling app-016 패턴 답습)"
+  icons:
+    kind: illustration
+    needs_real_content: false
+    note: "lucide inline SVG (Settings, Grid, Lock, Heart, Home, Search, User, Check)"
+
+# ─────────────────────────────
+# Files
+# ─────────────────────────────
+files:
+  context_engine: "context-engine.yaml"
+  spec: "MyProfileNicknameUpdated.spec.md"
+  intent: "MyProfileNicknameUpdated.intent.md"
+  prototype: "prototype.html"
+  quality_report: "quality-report.yaml"
+
+# ─────────────────────────────
+# Approval (pending Sprint Lead)
+# ─────────────────────────────
+approval:
+  status: pending
+  reviewer: null
+  reviewed_at: null
+  notes: ""

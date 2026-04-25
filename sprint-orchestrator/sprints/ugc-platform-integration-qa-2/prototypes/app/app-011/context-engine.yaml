@@ -1,0 +1,214 @@
+# Context Engine — ugc-platform-integration-qa-2 / app-011
+# Generated: 2026-04-25 (DE Step A output)
+# Schema: v1.0
+# Note: per-task context (sibling app-010 사진변경완료 패턴 답습 + app-016 detail 검증 패턴)
+
+meta:
+  sprint_id: "ugc-platform-integration-qa-2"
+  task_id: "app-011"
+  generated_at: "2026-04-25T00:00:00Z"
+  schema_version: "1.0"
+  figma_frame: "37160:79937"
+  figma_file: "7hozJ6Pvs09q98BxvChj08"
+  archetype: "detail"
+  exemplar_refs: []   # detail archetype — no exemplar inlined
+
+# ─────────────────────────────
+# Layer 1: WHY (Business Intent)
+# ─────────────────────────────
+why:
+  product_intent: "닉네임 변경 직후 MY 프로필 화면이 새 닉네임으로 즉시 갱신되었음을 1-step 으로 검증하게 한다 (Toast + hero 라벨 동시 변경)."
+  target_user: "프로필 편집에서 닉네임을 저장한 ZZEM 사용자"
+  success_metric: "AC-1.5 통과 — 새 닉네임 hero 즉시 반영 + Toast 1회 표시 후 3s 자동 dismiss + 통계/avatar 기존 데이터 유지"
+  user_stories:
+    - id: "US-1"
+      as_a: "닉네임을 변경한 사용자"
+      i_want: "MY 프로필이 새 닉네임으로 즉시 갱신된 것을 확인하고 싶다"
+      so_that: "변경 액션이 실제로 적용됐음을 별도 새로고침 없이 검증한다"
+  acceptance_criteria:
+    - id: "AC-1.5a"
+      given: "프로필편집 화면에서 새 닉네임을 입력하고 저장했다"
+      when: "PATCH /v2/me/profile 성공 직후 MY 프로필 화면으로 복귀"
+      then: "hero 영역의 닉네임이 새 값으로 즉시 반영된다"
+      ui_impact: "Header title + Hero nickname 새 값으로 갱신 (avatar / 통계 / 콘텐츠 보존)"
+    - id: "AC-1.5b"
+      given: "닉네임 변경이 성공적으로 적용되었다"
+      when: "MY 프로필 진입 직후"
+      then: "'닉네임을 변경했어요' Toast 가 표시되고 3s 내 auto-dismiss"
+      ui_impact: "Toast component (top-area, single line, role=status) — 3s timer"
+    - id: "AC-1.5c"
+      given: "변경 직후 MY 프로필"
+      when: "기본 진입 상태"
+      then: "avatar / 팔로워·팔로잉·재생성받 통계 / 콘텐츠 그리드가 변경 전과 동일하게 유지된다"
+      ui_impact: "Avatar src 보존 + count-row 값 보존 + content grid 보존 (변경된 것은 닉네임 한 개)"
+
+# ─────────────────────────────
+# Layer 2: WHAT (Design System)
+# ─────────────────────────────
+what:
+  tokens_needed:
+    colors:
+      - "wds-background-normal"
+      - "wds-surface-secondary"
+      - "wds-surface-tertiary"
+      - "wds-label-normal"
+      - "wds-label-alternative"
+      - "wds-label-assistive"
+      - "wds-label-inverse"
+      - "wds-line-alternative"
+      - "wds-color-neutral-900"   # toast fill
+      - "wds-color-green-500"     # toast check icon
+      - "pe-text-primary"
+      - "pe-text-secondary"
+      - "pe-avatar-empty-bg"
+      - "pe-avatar-border"
+    typography:
+      - "wds-font-size-2xs (11px)"
+      - "wds-font-size-xs (12px)"
+      - "wds-font-size-sm (13px)"
+      - "wds-font-size-md (14px)"
+      - "wds-font-size-lg (16px)"
+      - "wds-font-size-xl (18px)"
+      - "wds-font-weight-medium (500)"
+      - "wds-font-weight-semibold (600)"
+      - "wds-font-weight-bold (700)"
+    spacing:
+      - "wds-spacing-4"
+      - "wds-spacing-6"
+      - "wds-spacing-8"
+      - "wds-spacing-12"
+      - "wds-spacing-16"
+      - "wds-spacing-20"
+      - "wds-spacing-24"
+    radius:
+      - "wds-radius-xs (4px) — feed card"
+      - "wds-radius-md (12px) — secondary buttons"
+      - "wds-radius-full — avatar / toast pill"
+      - "wds-radius-lg (16px) — fallback toast"
+
+  components_needed:
+    - name: "HeaderBar"
+      category: "navigation"
+      pattern_ref: "ugc-platform-002 app-006 .header-bar — title + settings (no back button on MY profile root)"
+    - name: "ProfileHero"
+      category: "content"
+      pattern_ref: "app-016 .profile-hero (avatar + nickname + count-row + dual-btn) — Hero ≥320px"
+      detail_persona_role: "Hero region — avatar 100px + nickname (new) + 3-tile count + dual secondary CTA"
+    - name: "EditButton"
+      category: "input"
+      pattern_ref: "secondary CTA ('프로필 편집') — neutral fill + label-normal"
+    - name: "ShareButton"
+      category: "input"
+      pattern_ref: "secondary CTA ('프로필 공유') — neutral fill + label-normal"
+    - name: "SettingsButton"
+      category: "input"
+      pattern_ref: "icon-button (lucide Settings, 24px, 44hit) — top-right of header"
+    - name: "ContentTabBar"
+      category: "navigation"
+      pattern_ref: "app-016 .tab-bar (icon-only sticky, 3 tabs: 공개 / 비공개 / 좋아요)"
+    - name: "ContentGrid"
+      category: "layout"
+      pattern_ref: "app-016 .feed-grid (2-col, 1px gutter, mixed 1:1 / 4:5 gradient placeholders)"
+    - name: "BottomNav"
+      category: "navigation"
+      pattern_ref: "ugc-platform-002 app-006 .bottom-nav — MY 활성 컨텍스트 (3-tab variant)"
+    - name: "Toast"
+      category: "feedback"
+      pattern_ref: "app-016 toast pattern — but TOP position (Figma frame 시사) 으로 변형. neutral-900 pill, 3s auto-dismiss"
+
+  patterns_needed:
+    - name: "MY profile detail hero"
+      description: "Avatar(100px circle) + Nickname(18px bold, new value) + 3-tile count row + dual secondary CTA — 합산 높이 ≥320px"
+    - name: "Top-positioned auto-dismiss toast"
+      description: "neutral-900 pill, label-inverse, 3s 후 fade-out (alert/confirm 미사용 — verifier-safe). Figma 에서 top 위치"
+    - name: "Icon-only sticky tab bar"
+      description: "공개 / 비공개 / 좋아요 — MY 프로필이므로 비공개 탭 enabled (본인만 접근 가능 룰의 본인 케이스)"
+    - name: "2-col mixed-ratio feed grid"
+      description: "1:1 / 4:5 비율 혼합, 1px gutter, border-radius 4px (sibling app-016 feed-grid pattern 답습)"
+
+# ─────────────────────────────
+# Layer 3: HOW (Orchestration)
+# ─────────────────────────────
+how:
+  composition_rules:
+    - rule: "HeaderBar(48) → ProfileHero(~320) → ContentTabBar(44, sticky) → ContentGrid(scroll) → BottomNav(64)"
+      applies_to: ["MyProfileNicknameUpdated"]
+    - rule: "Hero 영역 단일 시각 앵커 — 320px 이상, 메타 행 4개 이내 (3-tile count) (detail persona 강제 룰 #1·#3)"
+      applies_to: ["ProfileHero"]
+    - rule: "MY 프로필 root 는 back 없음 — 좌상단 비움, 우상단 settings (1-way 진입은 BottomNav.MY 탭으로 보장)"
+      applies_to: ["HeaderBar"]
+      note: "detail persona 강제 룰 #2 — 본 화면은 root MY 탭이므로 back 자체가 없는 정상 패턴. dismiss 경로는 BottomNav 다른 탭 이동"
+    - rule: "Primary CTA 0개 + secondary 2개 (편집/공유) — 변경완료 후 행동 priority 낮음 (확인 화면 성격)"
+      applies_to: ["ProfileHero CTA cluster"]
+      persona_note: "detail persona 강제 룰 #4 — primary 1 + secondary 0-2. 본 화면은 결과 확인 컨텍스트 → primary 0 (Toast 가 primary 신호 역할). 룰 만족 (secondary ≤ 2)"
+    - rule: "Toast 는 default 진입 시 표시 후 3s 자동 dismiss — 별도 닫기 버튼 없음. 위치 top (Figma 시사)"
+      applies_to: ["Toast"]
+    - rule: "alert/confirm/prompt 절대 사용 금지 (Pass 6 #8 + verifier hang 방지)"
+      applies_to: ["all interactions"]
+  conditional_rendering:
+    - condition: "state == default (toast-visible)"
+      variant_a: "Toast '닉네임을 변경했어요' 표시 + hero 새 닉네임 표시"
+      variant_b: null
+    - condition: "state == toast-dismissed"
+      variant_a: "Toast 숨김 + hero 새 닉네임 영구 표시 (정상 상태)"
+      variant_b: null
+    - condition: "탭 전환 (공개 / 비공개 / 좋아요)"
+      variant_a: "active tab underline + grid 콘텐츠 (placeholder)"
+      variant_b: null
+  constraints:
+    - "BottomNav 항상 sticky-bottom"
+    - "Toast top position: status-bar(44) + header(48) 사이 또는 header 아래 12-16px"
+    - "ContentTabBar sticky-top: HeaderBar(48) 아래"
+    - "Avatar src 보존: 변경된 것은 닉네임만 (AC-1.5c)"
+    - "통계 row 값 보존: 0/0/0 (Figma 시사 — 신규 사용자 기본값으로 노출)"
+    - "Feed cell 비율 mix: 1:1 / 4:5 — meme-card 패턴 (asset Layer kind=gradient-token)"
+    - "닉네임 'maezzi' 또는 한글 닉네임 mock — Figma 'a이디' 자리에 새 값 표시"
+  priority_order:
+    - "1. Toast (변경 결과 즉시 인지) — 자동 사라짐 전 1순위 시각 신호"
+    - "2. Hero Nickname (새 값 확인 — AC-1.5 핵심)"
+    - "3. Avatar / Count Row (보존 검증 — AC-1.5c)"
+    - "4. Content Grid (콘텐츠 보존)"
+    - "5. ContentTabBar / BottomNav (이동 경로)"
+
+# ─────────────────────────────
+# Layer 4: ASSETS (v1)
+# ─────────────────────────────
+assets:
+  avatars:
+    kind: gradient-token
+    source: "inline solid (--pe-avatar-empty-bg + initial 'M' centered, brand purple) — Figma 는 실 사진이나 prototype 은 fallback"
+    count: 1
+    license: "internal-test"
+    needs_real_content: false
+    note: "MY 사용자 avatar — 실 이미지 미존재. detail persona hero 시각 앵커 충족용 단색 + initial. AC-1.5c 보존만 검증되면 OK."
+  feed_thumbnails:
+    kind: gradient-token
+    source: |
+      Feed cell 별 카테고리 그라디언트 (sibling app-016 패턴 답습):
+      - card-1: linear-gradient(135deg, #FFF3E0, #FFCC80 60%, #FB8C00)  # warm
+      - card-2: linear-gradient(135deg, #E1F5FE, #81D4FA 60%, #0288D1)  # cool
+      - card-3: linear-gradient(135deg, #FCE4EC, #F48FB1 60%, #C2185B)  # pink
+      - card-4: linear-gradient(135deg, #F1F8E9, #AED581 60%, #558B2F)  # green
+      - card-5: linear-gradient(135deg, #EDE7F6, #B39DDB 60%, #512DA8)  # purple
+      - card-6: linear-gradient(135deg, #FFFDE7, #FFF176 60%, #F9A825)  # yellow
+    count: 6
+    license: "internal-test"
+    needs_real_content: false
+    note: |
+      Pass 6 #6 면제 (gradient-token kind). Pass 6 #1 hex 검사 통과 위해 prototype 자체 :root 에
+      sprint-aliases (--thumb-*, --card-*) 등재. app-016 와 동일 정책.
+  meme_images:
+    kind: gradient-token
+    source: null
+    needs_real_content: false
+    note: "본 화면에서 단독 meme-image 슬롯 없음 (feed_thumbnails 가 cover)"
+  icons:
+    kind: illustration
+    source: "lucide inline SVG (Settings, Grid, Lock, Heart, Home, Search, User, Check)"
+    fallback: "text-placeholder"
+    needs_real_content: false
+  hero_banners:
+    kind: gradient-token
+    source: null
+    needs_real_content: false
+    note: "MY 프로필 hero 배경은 단색 background-normal — banner 그라디언트 없음"

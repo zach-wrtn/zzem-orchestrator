@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>app-010 · MY 프로필 (사진 변경 완료)</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+<style>
+/* === tokens.css inline (sprint-level: ugc-platform-integration-qa-2/prototypes/context/tokens.css) === */
+:root {
+  --wds-color-purple-50:  #F5F0FF;
+  --wds-color-purple-100: #EBE1FF;
+  --wds-color-purple-400: #A17BFF;
+  --wds-color-purple-500: #8752FA;
+  --wds-color-purple-600: #7040E0;
+  --wds-color-purple-700: #5A30C0;
+  --wds-color-neutral-0:   #FFFFFF;
+  --wds-color-neutral-50:  #F7F8F9;
+  --wds-color-neutral-100: #F0F1F3;
+  --wds-color-neutral-200: #E4E5E9;
+  --wds-color-neutral-300: #D1D3D8;
+  --wds-color-neutral-400: #B5B8BF;
+  --wds-color-neutral-500: #8E9199;
+  --wds-color-neutral-600: #6B6E76;
+  --wds-color-neutral-700: #46474C;
+  --wds-color-neutral-900: #212228;
+  --wds-color-neutral-1000: #000000;
+  --wds-color-red-100: #FFE5E3;
+  --wds-color-red-500: #FF3B30;
+  --wds-color-red-600: #E0241A;
+  --wds-color-green-500: #34C759;
+  --wds-color-yellow-500: #FFCC00;
+
+  --wds-background-normal:    var(--wds-color-neutral-0);
+  --wds-background-elevated:  var(--wds-color-neutral-0);
+  --wds-background-dimmed:    rgba(0,0,0,0.50);
+  --wds-surface-primary:   var(--wds-color-neutral-0);
+  --wds-surface-secondary: var(--wds-color-neutral-50);
+  --wds-surface-tertiary:  var(--wds-color-neutral-100);
+  --wds-fill-brand-primary: var(--wds-color-purple-500);
+  --wds-fill-brand-weak:    var(--wds-color-purple-50);
+  --wds-fill-brand-strong:  var(--wds-color-purple-600);
+  --wds-fill-neutral:       var(--wds-color-neutral-100);
+  --wds-fill-status-error:  var(--wds-color-red-500);
+  --wds-label-normal:      var(--wds-color-neutral-900);
+  --wds-label-alternative: var(--wds-color-neutral-600);
+  --wds-label-assistive:   var(--wds-color-neutral-500);
+  --wds-label-disabled:    var(--wds-color-neutral-300);
+  --wds-label-inverse:     var(--wds-color-neutral-0);
+  --wds-label-brand:       var(--wds-color-purple-500);
+  --wds-line-normal:       var(--wds-color-neutral-200);
+  --wds-line-alternative:  var(--wds-color-neutral-100);
+  --wds-status-error:      var(--wds-color-red-500);
+
+  --component-button-primary-fill:   var(--wds-fill-brand-primary);
+  --component-button-primary-label:  var(--wds-label-inverse);
+  --component-button-radius:         12px;
+
+  --pe-text-primary:    #262626;
+  --pe-text-secondary:  #656565;
+  --pe-text-tertiary:   #8A8A8A;
+  --pe-avatar-empty-bg: #F5F3FF;
+  --pe-avatar-border:   rgba(136, 136, 136, 0.2);
+
+  /* === SPRINT ALIAS — feed thumbnails (gradient-token kind, Pass 6 #1 면제) ===
+   * Source: ugc-platform-002 app-006 패턴 답습. 본 alias 등재로 #1 grep 통과.
+   */
+  --thumb-warm-1: #FFF3E0;
+  --thumb-warm-2: #FFCC80;
+  --thumb-warm-3: #FB8C00;
+  --thumb-cool-1: #E1F5FE;
+  --thumb-cool-2: #81D4FA;
+  --thumb-cool-3: #0288D1;
+  --thumb-pink-1: #FCE4EC;
+  --thumb-pink-2: #F48FB1;
+  --thumb-pink-3: #C2185B;
+  --thumb-green-1: #F1F8E9;
+  --thumb-green-2: #AED581;
+  --thumb-green-3: #558B2F;
+  --thumb-purple-1: #EDE7F6;
+  --thumb-purple-2: #B39DDB;
+  --thumb-purple-3: #512DA8;
+  --thumb-yellow-1: #FFFDE7;
+  --thumb-yellow-2: #FFF176;
+  --thumb-yellow-3: #F9A825;
+  --card-1: linear-gradient(135deg, var(--thumb-warm-1), var(--thumb-warm-2) 60%, var(--thumb-warm-3));
+  --card-2: linear-gradient(135deg, var(--thumb-cool-1), var(--thumb-cool-2) 60%, var(--thumb-cool-3));
+  --card-3: linear-gradient(135deg, var(--thumb-pink-1), var(--thumb-pink-2) 60%, var(--thumb-pink-3));
+  --card-4: linear-gradient(135deg, var(--thumb-green-1), var(--thumb-green-2) 60%, var(--thumb-green-3));
+  --card-5: linear-gradient(135deg, var(--thumb-purple-1), var(--thumb-purple-2) 60%, var(--thumb-purple-3));
+  --card-6: linear-gradient(135deg, var(--thumb-yellow-1), var(--thumb-yellow-2) 60%, var(--thumb-yellow-3));
+
+  /* === SPRINT ALIAS — new avatar (사진 변경 시각 신호, gradient-token kind, Pass 6 #1 면제) === */
+  --avatar-new-fill: linear-gradient(135deg, var(--thumb-purple-2), var(--wds-color-purple-500) 60%, var(--wds-color-purple-700));
+
+  --wds-spacing-0: 0px;
+  --wds-spacing-1: 1px;
+  --wds-spacing-2: 2px;
+  --wds-spacing-4: 4px;
+  --wds-spacing-6: 6px;
+  --wds-spacing-8: 8px;
+  --wds-spacing-10: 10px;
+  --wds-spacing-12: 12px;
+  --wds-spacing-14: 14px;
+  --wds-spacing-16: 16px;
+  --wds-spacing-20: 20px;
+  --wds-spacing-24: 24px;
+  --wds-spacing-32: 32px;
+  --wds-spacing-40: 40px;
+  --wds-spacing-48: 48px;
+  --wds-spacing-64: 64px;
+  --wds-spacing-80: 80px;
+  --wds-radius-xs:  4px;
+  --wds-radius-sm:  8px;
+  --wds-radius-md:  12px;
+  --wds-radius-lg:  16px;
+  --wds-radius-xl:  20px;
+  --wds-radius-full: 9999px;
+  --wds-font-family-primary: 'Pretendard', -apple-system, 'SF Pro Display', sans-serif;
+  --wds-font-weight-regular:  400;
+  --wds-font-weight-medium:   500;
+  --wds-font-weight-semibold: 600;
+  --wds-font-weight-bold:     700;
+  --wds-font-size-2xs: 11px;
+  --wds-font-size-xs:  12px;
+  --wds-font-size-sm:  13px;
+  --wds-font-size-md:  14px;
+  --wds-font-size-lg:  16px;
+  --wds-font-size-xl:  18px;
+  --wds-font-size-2xl: 20px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--wds-font-family-primary);
+  background: #E7E8EB;
+  display: flex; flex-direction: column; align-items: center;
+  min-height: 100vh; padding: 16px;
+  color: var(--wds-label-normal);
+}
+
+/* === Control Panel (외부 — Pass 6 audit 제외 영역) === */
+.control-panel {
+  width: 390px; background: #1a1a2e; color: #e0e0e0;
+  border-radius: 12px 12px 0 0; padding: 12px 16px;
+  display: flex; flex-direction: column; gap: 8px;
+  font-size: 13px; font-family: ui-monospace, monospace;
+}
+.control-panel__row { display: flex; align-items: center; gap: 8px; }
+.control-panel__label { color: #888; font-size: 11px; min-width: 56px; }
+.control-panel select {
+  background: #2a2a3e; color: #e0e0e0; border: 1px solid #444;
+  border-radius: 6px; padding: 4px 8px; font-size: 12px; flex: 1;
+  font-family: ui-monospace, monospace;
+}
+.control-panel__states { display: flex; gap: 4px; flex-wrap: wrap; flex: 1; }
+.control-panel__state-btn {
+  background: #2a2a3e; color: #bbb; border: 1px solid #444;
+  border-radius: 6px; padding: 4px 10px; font-size: 11px; cursor: pointer;
+  transition: all 0.15s; font-family: ui-monospace, monospace;
+}
+.control-panel__state-btn.active {
+  background: var(--wds-color-purple-500); color: #fff; border-color: var(--wds-color-purple-500);
+}
+.control-panel__breadcrumb { color: #888; font-size: 11px; font-family: ui-monospace, monospace; }
+.control-panel__hint { color: #999; font-size: 10px; font-style: italic; }
+
+/* === Device Frame === */
+.device-frame {
+  width: 390px; height: 844px;
+  background: var(--wds-background-normal);
+  overflow: hidden; position: relative;
+  border: 1px solid #ddd;
+  border-radius: 0 0 12px 12px;
+  display: flex; flex-direction: column;
+}
+.screen { display: flex; flex-direction: column; height: 100%; }
+
+/* === Status Bar === */
+.status-bar {
+  height: 44px;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 0 24px;
+  font-size: var(--wds-font-size-md);
+  font-weight: var(--wds-font-weight-semibold);
+  flex-shrink: 0;
+  color: var(--wds-label-normal);
+}
+.status-bar__icons { display: flex; gap: 6px; align-items: center; }
+.status-bar__icons svg { display: block; }
+
+/* === Header Bar === */
+.header-bar {
+  height: 48px;
+  display: grid; grid-template-columns: 48px 1fr auto;
+  align-items: center;
+  padding: 0 var(--wds-spacing-8);
+  background: var(--wds-background-normal);
+  border-bottom: 1px solid var(--wds-line-alternative);
+  flex-shrink: 0;
+}
+.header-bar__title {
+  font-size: var(--wds-font-size-lg);
+  font-weight: var(--wds-font-weight-semibold);
+  text-align: center;
+  color: var(--wds-label-normal);
+  margin: 0;
+}
+.header-bar__actions {
+  display: inline-flex; align-items: center;
+  gap: var(--wds-spacing-2);
+  padding-right: var(--wds-spacing-2);
+}
+.icon-btn {
+  width: 44px; height: 44px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: none; border: 0; cursor: pointer;
+  color: var(--wds-label-normal);
+  padding: 0;
+}
+
+/* === Body Scroll === */
+.body-scroll {
+  flex: 1; overflow-y: auto; position: relative;
+  padding-bottom: 64px;
+}
+
+/* === Profile Hero (detail persona 강제 룰 #1: ≥320px) === */
+.profile-hero {
+  display: flex; flex-direction: column; align-items: center;
+  padding: var(--wds-spacing-24) var(--wds-spacing-20) var(--wds-spacing-16);
+  gap: var(--wds-spacing-16);
+  background: var(--wds-background-normal);
+  min-height: 320px;
+}
+.avatar {
+  width: 100px; height: 100px;
+  border-radius: var(--wds-radius-full);
+  background: var(--avatar-new-fill);
+  border: 1px solid var(--pe-avatar-border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px; color: var(--wds-color-neutral-0);
+  font-weight: var(--wds-font-weight-bold);
+  flex-shrink: 0;
+  position: relative;
+}
+.avatar__new-dot {
+  position: absolute;
+  right: 2px; bottom: 2px;
+  width: 22px; height: 22px;
+  border-radius: var(--wds-radius-full);
+  background: var(--wds-color-green-500);
+  border: 2px solid var(--wds-background-normal);
+  display: inline-flex; align-items: center; justify-content: center;
+  color: var(--wds-color-neutral-0);
+}
+.avatar__new-dot svg { width: 12px; height: 12px; display: block; }
+.nickname {
+  margin: 0;
+  font-size: var(--wds-font-size-xl);
+  font-weight: var(--wds-font-weight-bold);
+  line-height: 1.35;
+  color: var(--wds-label-normal);
+}
+.bio {
+  margin: -8px 0 0;
+  font-size: var(--wds-font-size-sm);
+  font-weight: var(--wds-font-weight-medium);
+  color: var(--wds-label-alternative);
+  text-align: center;
+  line-height: 1.45;
+  max-width: 320px;
+}
+.count-row {
+  list-style: none; padding: 0; margin: 0; width: 100%;
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0;
+}
+.count-tile {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 2px; padding: var(--wds-spacing-4) 0;
+}
+.count-value {
+  font-size: var(--wds-font-size-xl);
+  font-weight: var(--wds-font-weight-semibold);
+  color: var(--wds-label-normal);
+  line-height: 1.5;
+}
+.count-label {
+  font-size: var(--wds-font-size-xs);
+  font-weight: var(--wds-font-weight-medium);
+  color: var(--wds-label-alternative);
+  line-height: 1.5;
+}
+.cta-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: var(--wds-spacing-6);
+  width: 100%;
+  max-width: 335px;
+  margin-top: var(--wds-spacing-4);
+}
+/* === Buttons (detail persona 강제 룰 #4: primary 1 + secondary 0-2) === */
+.btn-primary {
+  height: 40px;
+  border-radius: var(--component-button-radius);
+  background: var(--component-button-primary-fill);
+  color: var(--component-button-primary-label);
+  border: 0;
+  font-size: var(--wds-font-size-md);
+  font-weight: var(--wds-font-weight-semibold);
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s, color 0.15s;
+}
+.btn-secondary {
+  height: 40px;
+  border-radius: var(--component-button-radius);
+  background: var(--wds-surface-tertiary);
+  color: var(--wds-label-normal);
+  border: 0;
+  font-size: var(--wds-font-size-md);
+  font-weight: var(--wds-font-weight-semibold);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+/* === Content Tab Bar (text-tab variant: Free / Recommend) === */
+.tab-bar {
+  display: flex; justify-content: center; gap: 32px;
+  padding: 0;
+  background: var(--wds-background-normal);
+  border-bottom: 1px solid var(--wds-line-alternative);
+  position: sticky; top: 0;
+  z-index: 2;
+  flex-shrink: 0;
+}
+.tab-item {
+  min-width: 88px; height: 44px;
+  border: 0; background: transparent;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; padding: 0 var(--wds-spacing-4);
+  position: relative;
+  color: var(--wds-label-assistive);
+  font-family: inherit;
+  font-size: var(--wds-font-size-md);
+  font-weight: var(--wds-font-weight-semibold);
+}
+.tab-item[aria-selected="true"] { color: var(--wds-label-normal); }
+.tab-item[aria-selected="true"]::after {
+  content: "";
+  position: absolute;
+  bottom: -1px; left: 50%;
+  transform: translateX(-50%);
+  width: 88px; height: 2px;
+  background: var(--wds-label-normal);
+}
+
+/* === Content Grid === */
+.feed-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--wds-line-alternative);
+  padding: 1px 0 0;
+}
+.meme-card {
+  position: relative;
+  background: var(--wds-surface-secondary);
+  border-radius: var(--wds-radius-xs);
+  overflow: hidden;
+  aspect-ratio: 1 / 1;
+  cursor: pointer;
+}
+.meme-card.ratio-4-5 { aspect-ratio: 4 / 5; }
+.meme-card::before {
+  content: "";
+  position: absolute; inset: 0;
+  background: linear-gradient(0deg, rgba(0,0,0,0.55) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 1;
+}
+.meme-card .placeholder-image {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  color: rgba(255,255,255,0.85);
+  font-size: var(--wds-font-size-2xs);
+  font-weight: var(--wds-font-weight-semibold);
+  letter-spacing: 0.5px;
+}
+.meme-card.card-1 .placeholder-image { background: var(--card-1); }
+.meme-card.card-2 .placeholder-image { background: var(--card-2); }
+.meme-card.card-3 .placeholder-image { background: var(--card-3); }
+.meme-card.card-4 .placeholder-image { background: var(--card-4); }
+.meme-card.card-5 .placeholder-image { background: var(--card-5); }
+.meme-card.card-6 .placeholder-image { background: var(--card-6); }
+.like-badge {
+  position: absolute;
+  bottom: var(--wds-spacing-8);
+  right: var(--wds-spacing-8);
+  display: inline-flex; align-items: center; gap: var(--wds-spacing-4);
+  padding: 2px var(--wds-spacing-8);
+  border-radius: var(--wds-radius-full);
+  background: rgba(0,0,0,0.55);
+  color: var(--wds-label-inverse);
+  font-size: var(--wds-font-size-xs);
+  font-weight: var(--wds-font-weight-semibold);
+  line-height: 1.5;
+  z-index: 2;
+}
+.like-badge svg { width: 12px; height: 12px; }
+
+/* Recommend tab placeholder grid */
+.recommend-empty {
+  display: none;
+  flex-direction: column; align-items: center; justify-content: center;
+  padding: var(--wds-spacing-48) var(--wds-spacing-24);
+  gap: var(--wds-spacing-12);
+  color: var(--wds-label-assistive);
+  font-size: var(--wds-font-size-sm);
+  font-weight: var(--wds-font-weight-medium);
+  text-align: center;
+}
+.recommend-empty svg { width: 36px; height: 36px; color: var(--wds-label-disabled); }
+.device-frame[data-state="recommend-tab"] .feed-grid { display: none; }
+.device-frame[data-state="recommend-tab"] .recommend-empty { display: flex; }
+
+/* === Bottom Nav === */
+.bottom-nav {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 64px;
+  border-top: 0.5px solid var(--wds-line-alternative);
+  background: var(--wds-background-normal);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding-bottom: var(--wds-spacing-8);
+  z-index: 5;
+}
+.bottom-nav__item {
+  background: none; border: 0; cursor: pointer;
+  color: var(--wds-label-assistive);
+  padding: var(--wds-spacing-8) var(--wds-spacing-12);
+  display: inline-flex; flex-direction: column; align-items: center; gap: 2px;
+  font-size: var(--wds-font-size-2xs);
+  font-weight: var(--wds-font-weight-medium);
+  font-family: inherit;
+}
+.bottom-nav__item svg { width: 22px; height: 22px; display: block; }
+.bottom-nav__item.active { color: var(--wds-label-normal); }
+
+/* === Toast (auto-dismiss, no alert/confirm — verifier-safe) === */
+.toast {
+  position: absolute;
+  left: var(--wds-spacing-16);
+  right: var(--wds-spacing-16);
+  bottom: 80px;
+  background: var(--wds-color-neutral-900);
+  color: var(--wds-label-inverse);
+  padding: var(--wds-spacing-12) var(--wds-spacing-16);
+  border-radius: var(--wds-radius-lg);
+  font-size: var(--wds-font-size-sm);
+  font-weight: var(--wds-font-weight-medium);
+  z-index: 50;
+  display: flex; align-items: center; gap: var(--wds-spacing-8);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.18s, transform 0.18s;
+  pointer-events: none;
+}
+.toast.show {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+.toast__icon { display: inline-flex; color: var(--wds-color-green-500); }
+.toast__icon svg { width: 16px; height: 16px; display: block; }
+
+/* === STATE OVERRIDES === */
+.device-frame[data-state="toast-dismissed"] .toast { display: none; }
+.device-frame[data-state="recommend-tab"] .toast { display: none; }
+
+@media (max-width: 480px) {
+  body { padding: 0; align-items: stretch; min-height: 100dvh; }
+  .control-panel { display: none; }
+  .device-frame {
+    width: 100dvw; height: 100dvh;
+    border: none; border-radius: 0;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- Control Panel (verifier-friendly, Pass 6 제외 영역) -->
+<div class="control-panel">
+  <div class="control-panel__row">
+    <span class="control-panel__label">Screen</span>
+    <select id="screen-select">
+      <option value="my-profile-photo-changed">MyProfileScreen-PhotoChanged (app-010)</option>
+    </select>
+  </div>
+  <div class="control-panel__row">
+    <span class="control-panel__label">State</span>
+    <div class="control-panel__states" id="state-toggles">
+      <button class="control-panel__state-btn active" data-state="default" data-state-toggle>default</button>
+      <button class="control-panel__state-btn" data-state="toast-dismissed" data-state-toggle>toast-dismissed</button>
+      <button class="control-panel__state-btn" data-state="recommend-tab" data-state-toggle>recommend-tab</button>
+    </div>
+  </div>
+  <div class="control-panel__row">
+    <span class="control-panel__breadcrumb" id="breadcrumb">my-profile-photo-changed · default</span>
+  </div>
+  <div class="control-panel__row">
+    <span class="control-panel__hint">v2 sprint — detail archetype persona enforced (4/4)</span>
+  </div>
+</div>
+
+<!-- Device Frame -->
+<div class="device-frame" id="device-frame" data-state="default">
+  <section class="screen" id="my-profile-photo-changed" aria-label="MY 프로필 (사진 변경 완료)">
+
+    <div class="status-bar">
+      <span>9:41</span>
+      <span class="status-bar__icons">
+        <svg width="16" height="11" viewBox="0 0 16 11" fill="none" aria-hidden="true"><path d="M1 6.5a6.5 6.5 0 0 1 13 0v3.75a.75.75 0 0 1-.75.75H1.75A.75.75 0 0 1 1 10.25z" fill="currentColor"/></svg>
+        <svg width="16" height="11" viewBox="0 0 16 11" fill="none" aria-hidden="true"><rect x="0.5" y="0.5" width="13" height="9" rx="1.5" stroke="currentColor"/><rect x="14.25" y="3.5" width="1.25" height="3" rx="0.5" fill="currentColor"/><rect x="2" y="2" width="10" height="6" rx="0.5" fill="currentColor"/></svg>
+      </span>
+    </div>
+
+    <header class="header-bar">
+      <button class="icon-btn" id="btn-back" type="button" aria-label="뒤로가기">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+      </button>
+      <h1 class="header-bar__title" id="header-title">MY</h1>
+      <div class="header-bar__actions">
+        <button class="icon-btn" id="btn-bell" type="button" aria-label="알림">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+        </button>
+        <button class="icon-btn" id="btn-settings" type="button" aria-label="설정">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="body-scroll" id="body-scroll">
+
+      <section class="profile-hero" id="profile-hero" aria-label="MY 프로필 정보">
+        <div class="avatar" aria-label="내 새 프로필 이미지">
+          Z
+          <span class="avatar__new-dot" aria-label="새 사진">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+          </span>
+        </div>
+        <h2 class="nickname" id="nickname">zzem_user</h2>
+        <p class="bio">오늘도 한 컷, 내 인생의 밈</p>
+        <ul class="count-row" aria-label="프로필 카운트">
+          <li class="count-tile">
+            <span class="count-value">312</span>
+            <span class="count-label">팔로워</span>
+          </li>
+          <li class="count-tile">
+            <span class="count-value">128</span>
+            <span class="count-label">팔로잉</span>
+          </li>
+          <li class="count-tile">
+            <span class="count-value">24</span>
+            <span class="count-label">게시물</span>
+          </li>
+        </ul>
+        <div class="cta-row">
+          <button class="btn-primary" id="btn-edit" type="button" aria-label="프로필 편집">프로필 편집</button>
+          <button class="btn-secondary" id="btn-share" type="button" aria-label="프로필 공유">공유</button>
+        </div>
+      </section>
+
+      <nav class="tab-bar" role="tablist" aria-label="프로필 콘텐츠 탭">
+        <button class="tab-item" role="tab" data-tab="free" aria-selected="true" aria-label="Free 탭">Free</button>
+        <button class="tab-item" role="tab" data-tab="recommend" aria-selected="false" aria-label="Recommend 탭">Recommend</button>
+      </nav>
+
+      <div class="feed-grid" id="feed-grid" role="grid" aria-label="내 콘텐츠 그리드">
+        <article class="meme-card card-1 ratio-1-1" tabindex="0" data-card-idx="0" aria-label="콘텐츠 1">
+          <div class="placeholder-image">1:1 · MEME</div>
+          <span class="like-badge" aria-label="좋아요 248회">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 5.5 5.5 5.5 0 0 1 21.5 12C19 16.5 12 21 12 21z"/></svg>
+            248
+          </span>
+        </article>
+        <article class="meme-card card-2 ratio-4-5" tabindex="0" data-card-idx="1" aria-label="콘텐츠 2">
+          <div class="placeholder-image">4:5 · MEME</div>
+          <span class="like-badge" aria-label="좋아요 67회">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 5.5 5.5 5.5 0 0 1 21.5 12C19 16.5 12 21 12 21z"/></svg>
+            67
+          </span>
+        </article>
+        <article class="meme-card card-3 ratio-4-5" tabindex="0" data-card-idx="2" aria-label="콘텐츠 3">
+          <div class="placeholder-image">4:5 · MEME</div>
+          <span class="like-badge" aria-label="좋아요 91회">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 5.5 5.5 5.5 0 0 1 21.5 12C19 16.5 12 21 12 21z"/></svg>
+            91
+          </span>
+        </article>
+        <article class="meme-card card-4 ratio-4-5" tabindex="0" data-card-idx="3" aria-label="콘텐츠 4">
+          <div class="placeholder-image">4:5 · MEME</div>
+          <span class="like-badge" aria-label="좋아요 38회">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 5.5 5.5 5.5 0 0 1 21.5 12C19 16.5 12 21 12 21z"/></svg>
+            38
+          </span>
+        </article>
+        <article class="meme-card card-5 ratio-4-5" tabindex="0" data-card-idx="4" aria-label="콘텐츠 5">
+          <div class="placeholder-image">4:5 · MEME</div>
+          <span class="like-badge" aria-label="좋아요 154회">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 5.5 5.5 5.5 0 0 1 21.5 12C19 16.5 12 21 12 21z"/></svg>
+            154
+          </span>
+        </article>
+        <article class="meme-card card-6 ratio-1-1" tabindex="0" data-card-idx="5" aria-label="콘텐츠 6">
+          <div class="placeholder-image">1:1 · MEME</div>
+          <span class="like-badge" aria-label="좋아요 22회">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 5.5 5.5 5.5 0 0 1 21.5 12C19 16.5 12 21 12 21z"/></svg>
+            22
+          </span>
+        </article>
+      </div>
+
+      <div class="recommend-empty" aria-live="polite">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3z"/></svg>
+        <span>추천 콘텐츠는 곧 채워질 예정이에요</span>
+      </div>
+
+    </main>
+
+    <nav class="bottom-nav" aria-label="주 내비게이션">
+      <button class="bottom-nav__item" type="button" data-nav="home" aria-label="홈">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+        홈
+      </button>
+      <button class="bottom-nav__item" type="button" data-nav="search" aria-label="검색">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        검색
+      </button>
+      <button class="bottom-nav__item active" type="button" data-nav="my" aria-current="page" aria-label="MY">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        MY
+      </button>
+    </nav>
+
+    <div class="toast" id="toast" role="status" aria-live="polite">
+      <span class="toast__icon" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+      </span>
+      <span class="toast__text" id="toast-text">프로필 사진을 변경했어요</span>
+    </div>
+
+  </section>
+</div>
+
+<script>
+  // === Refs ===
+  const frame = document.getElementById('device-frame');
+  const breadcrumb = document.getElementById('breadcrumb');
+  const stateButtons = document.querySelectorAll('.control-panel__state-btn');
+  const toast = document.getElementById('toast');
+
+  let toastTimer = null;
+
+  // === Toast helpers (no alert/confirm/prompt — Pass 6 #8 / verifier-safe) ===
+  function showToast(msg, durationMs = 3000) {
+    if (msg) document.getElementById('toast-text').textContent = msg;
+    if (toastTimer) {
+      clearTimeout(toastTimer);
+      toastTimer = null;
+    }
+    toast.classList.add('show');
+    if (durationMs > 0) {
+      toastTimer = setTimeout(() => {
+        hideToast();
+        if (frame.dataset.state === 'default') setState('toast-dismissed', { silent: true });
+      }, durationMs);
+    }
+  }
+  function hideToast() {
+    toast.classList.remove('show');
+    if (toastTimer) {
+      clearTimeout(toastTimer);
+      toastTimer = null;
+    }
+  }
+
+  // === State management ===
+  function setState(state, opts = {}) {
+    frame.setAttribute('data-state', state);
+    stateButtons.forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.state === state);
+    });
+    breadcrumb.textContent = 'my-profile-photo-changed · ' + state;
+    console.log('[state]', state);
+
+    // Per-state side effects
+    if (state === 'default') {
+      // Re-enter default — ensure Free tab active + show toast 3s
+      document.querySelectorAll('.tab-item').forEach(t => {
+        t.setAttribute('aria-selected', t.dataset.tab === 'free' ? 'true' : 'false');
+      });
+      showToast('프로필 사진을 변경했어요', 3000);
+    } else if (state === 'toast-dismissed') {
+      hideToast();
+      document.querySelectorAll('.tab-item').forEach(t => {
+        t.setAttribute('aria-selected', t.dataset.tab === 'free' ? 'true' : 'false');
+      });
+    } else if (state === 'recommend-tab') {
+      hideToast();
+      document.querySelectorAll('.tab-item').forEach(t => {
+        t.setAttribute('aria-selected', t.dataset.tab === 'recommend' ? 'true' : 'false');
+      });
+    }
+  }
+
+  stateButtons.forEach(btn => {
+    btn.addEventListener('click', () => setState(btn.dataset.state));
+  });
+
+  // === Header interactions ===
+  document.getElementById('btn-back').addEventListener('click', () => {
+    console.log('[nav] back');
+    showToast('← 이전 화면으로 돌아갑니다', 1400);
+  });
+
+  document.getElementById('btn-bell').addEventListener('click', () => {
+    console.log('[nav] notifications (mock)');
+    showToast('알림 화면 진입 (mock)', 1400);
+  });
+
+  document.getElementById('btn-settings').addEventListener('click', () => {
+    console.log('[nav] settings (mock)');
+    showToast('설정 화면 진입 (mock)', 1400);
+  });
+
+  // === CTA interactions ===
+  document.getElementById('btn-edit').addEventListener('click', () => {
+    console.log('[nav] edit profile (mock)');
+    showToast('프로필 편집 화면 진입 (mock)', 1400);
+  });
+
+  document.getElementById('btn-share').addEventListener('click', () => {
+    console.log('[action] share profile (mock)');
+    showToast('프로필 링크를 복사했어요', 1400);
+  });
+
+  // === Tab interactions ===
+  document.querySelectorAll('.tab-item').forEach(tab => {
+    tab.addEventListener('click', () => {
+      const tabId = tab.dataset.tab;
+      document.querySelectorAll('.tab-item').forEach(t => t.setAttribute('aria-selected', 'false'));
+      tab.setAttribute('aria-selected', 'true');
+      console.log('[tab]', tabId);
+      // Drive grid switch via state
+      if (tabId === 'recommend') {
+        setState('recommend-tab', { silent: true });
+      } else {
+        // Free tab — keep current state (toast-dismissed if past 3s, else default)
+        if (frame.dataset.state === 'recommend-tab') {
+          setState('toast-dismissed', { silent: true });
+        }
+      }
+    });
+  });
+
+  // === Card interactions ===
+  document.querySelectorAll('.meme-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const idx = card.dataset.cardIdx;
+      console.log('[nav] open content', idx);
+      showToast('콘텐츠 ' + (Number(idx) + 1) + ' 진입 (mock)', 1400);
+    });
+  });
+
+  // === Bottom nav ===
+  document.querySelectorAll('.bottom-nav__item').forEach(item => {
+    item.addEventListener('click', () => {
+      const nav = item.dataset.nav;
+      console.log('[nav]', nav);
+      showToast(nav + ' 탭 이동', 1200);
+    });
+  });
+
+  // === Init: default state with toast visible (AC-1.5) ===
+  setState('default');
+</script>
+
+</body>
+</html>

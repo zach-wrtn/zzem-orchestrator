@@ -1,0 +1,190 @@
+# Context Engine — ugc-platform-integration-qa-2 / app-019
+# Generated: 2026-04-25 (DE Step A output)
+# Schema: v1.0
+
+meta:
+  sprint_id: "ugc-platform-integration-qa-2"
+  task_id: "app-019"
+  generated_at: "2026-04-25T00:00:00Z"
+  schema_version: "1.0"
+  figma_frame: "37290:170246"
+  figma_file: "7hozJ6Pvs09q98BxvChj08"
+  archetype: "feed"
+  archetype_alternative_considered: "detail"
+  exemplar_refs:
+    - id: "v2-dogfood-free-tab-app-001-freetabscreen"
+      dimension_focus:
+        - "archetype_fit"
+        - "interaction_completeness"
+        - "token_compliance"
+
+# ─────────────────────────────
+# Layer 1: WHY (Business Intent)
+# ─────────────────────────────
+why:
+  product_intent: "차단 해제 confirm 통과 직후 차단 관리 리스트로 복귀하는 결과 화면. 해제된 사용자가 리스트에서 사라지고 Toast 가 표시되어 사용자가 해제 액션의 결과를 1-step 에 검증한다."
+  target_user: "차단 관리 리스트에서 1명 이상의 사용자를 막 해제한 ZZEM 사용자"
+  success_metric: "AC-2.5 통과 — row 제거 + Toast 표시 후 3s auto-dismiss + 0건 도달 시 empty + back 복귀"
+  user_stories:
+    - id: "US-1"
+      as_a: "차단을 해제한 사용자"
+      i_want: "해제된 사용자가 리스트에서 즉시 사라지고 toast 로 결과를 확인하고 싶다"
+      so_that: "별도 새로고침 없이 해제 액션이 실제로 적용됐음을 검증한다"
+    - id: "US-2"
+      as_a: "마지막 1명을 해제한 사용자"
+      i_want: "리스트가 0건이 되면 빈 상태 placeholder 가 명확히 노출되고 설정으로 복귀할 경로가 보이고 싶다"
+      so_that: "dead-end 가 되지 않는다"
+  acceptance_criteria:
+    - id: "AC-2.5-row-removed"
+      given: "차단 사용자 N명 리스트에서 1명을 해제했다"
+      when: "app-018 confirm 시트 통과 직후"
+      then: "해제된 row 가 리스트에서 제거되어 N-1 개만 노출"
+      ui_impact: "BlockedList 갱신 (animation 선택), count-summary N-1 반영"
+    - id: "AC-2.5-toast"
+      given: "해제 API 성공"
+      when: "본 화면 진입 직후"
+      then: "'{nickname}님 차단을 해제했어요' Toast 가 표시되고 3s 내 auto-dismiss"
+      ui_impact: "Toast component (sticky bottom, single line, role=status) — 3s timer"
+    - id: "AC-2.5-empty"
+      given: "해제 후 차단 사용자가 0건이 되었다"
+      when: "리스트 갱신 직후"
+      then: "EmptyView placeholder 노출 ('차단한 사용자가 없어요' + 설정 복귀 CTA)"
+      ui_impact: "BlockedList 숨김 + EmptyView 표시"
+    - id: "AC-2.5-back"
+      given: "본 화면 표시 중"
+      when: "back button tap"
+      then: "설정 화면으로 복귀"
+      ui_impact: "navigation slide-right"
+
+# ─────────────────────────────
+# Layer 2: WHAT (Design System)
+# ─────────────────────────────
+what:
+  tokens_needed:
+    colors:
+      - "wds-background-normal"
+      - "wds-surface-tertiary"
+      - "wds-label-normal"
+      - "wds-label-alternative"
+      - "wds-label-assistive"
+      - "wds-label-inverse"
+      - "wds-label-brand"
+      - "wds-fill-brand-primary"
+      - "wds-fill-brand-weak"
+      - "wds-fill-neutral"
+      - "wds-line-alternative"
+      - "wds-line-normal"
+      - "wds-color-neutral-100"
+      - "wds-color-neutral-200"
+      - "wds-color-neutral-900"
+      - "wds-color-green-500 (toast success icon)"
+      - "component-avatar-fill"
+      - "component-avatar-ring"
+      - "component-button-radius"
+    typography:
+      - "wds-font-size-2xs (11px)"
+      - "wds-font-size-xs (12px)"
+      - "wds-font-size-sm (13px) — toast body, count summary"
+      - "wds-font-size-md (14px)"
+      - "wds-font-size-lg (16px) — nickname, empty title"
+      - "wds-font-size-xl (18px) — header title"
+      - "wds-font-weight-medium (500)"
+      - "wds-font-weight-semibold (600)"
+      - "wds-font-family-primary (Pretendard)"
+    spacing:
+      - "wds-spacing-2 / 4 / 6 / 8 / 10 / 12 / 14 / 16 / 20 / 24 / 28 / 32 / 80"
+    radius:
+      - "wds-radius-sm (8) — skeleton block"
+      - "wds-radius-md (12) — toast, empty CTA"
+      - "wds-radius-full — avatar, refresh icon hit area"
+      - "component-button-radius (12) — unblock CTA"
+
+  components_needed:
+    - "AppHeader (back + title + refresh)"
+    - "BlockedUserRow (avatar + meta 2-line + unblock CTA)"
+    - "BlockedSkeleton (6 shimmer rows)"
+    - "EmptyView (Lucide shield-check icon + title + desc + CTA)"
+    - "Toast (bottom, success check icon + label, auto-dismiss)"
+    - "EndIndicator"
+
+# ─────────────────────────────
+# Layer 3: HOW (Composition Rules)
+# ─────────────────────────────
+how:
+  composition_rules:
+    - "list-row 패턴 (compact 72px) 유지 — 카드 grid 금지 (exemplar drift 방지)"
+    - "Toast 진입 시점 auto-show + 3000ms setTimeout dismiss (alert/confirm 절대 미사용)"
+    - "skeleton 6행으로 default state 의 6 rows 와 시각 일관성"
+    - "empty state 는 Lucide shield-check (32px) + 단일 primary CTA (설정 복귀)"
+    - "count summary 에 delta 표시 ('방금 1명 해제됨') — 변화 시각화, label-brand 토큰"
+    - "전체 색상은 var(--wds-*) 또는 var(--component-*) 토큰만 (raw hex 금지, control-panel 제외)"
+    - "Lucide-style inline SVG (PR #31 패턴) — back chevron, refresh-ccw, shield-check, check"
+
+  state_machine:
+    initial: "default"
+    states:
+      default:
+        on_enter: "showToast(unblocked-message, 3000ms)"
+        visible: ["count-summary", "blocked-list (6 rows)", "end-indicator"]
+      loading:
+        on_enter: "skeleton 6 rows shimmer"
+        visible: ["blocked-skeleton"]
+      empty:
+        on_enter: "showToast(unblocked-message, 3000ms)"
+        visible: ["empty-view"]
+        scenario: "마지막 1명 해제로 0건 도달"
+      error:
+        on_enter: "showToast(error-message, 3000ms)"
+        visible: ["empty-view (재사용)"]
+
+# ─────────────────────────────
+# Layer 4: ASSETS
+# ─────────────────────────────
+assets:
+  user_avatars:
+    kind: "initial-fallback"
+    source: "이니셜 1글자 + var(--component-avatar-fill)"
+    needs_real_content: false
+    rationale: "Pass 6 #6 의 '주 콘텐츠' 슬롯 아님 (닉네임/액션이 주 콘텐츠). 행 list 의 보조 정보."
+    slot_count: 6
+
+  empty_icon:
+    kind: "lucide-inline-svg"
+    name: "shield-check"
+    source: "Lucide pack — task hint 'PR #31 Lucide 패턴'"
+    needs_real_content: false
+
+  toast_success_icon:
+    kind: "lucide-inline-svg"
+    name: "check"
+    color_token: "var(--wds-color-green-500)"
+    source: "Lucide pack"
+    needs_real_content: false
+
+  header_icons:
+    kind: "lucide-inline-svg"
+    names: ["chevron-left (back)", "refresh-ccw"]
+    source: "Lucide pack"
+    needs_real_content: false
+
+# ─────────────────────────────
+# Reference Inheritance
+# ─────────────────────────────
+reference_inheritance:
+  source_screen: "app-017 (BlockManagementListScreen)"
+  inherited:
+    - "tokens.css inline block (149 lines)"
+    - "device-frame + control-panel scaffold"
+    - "blocked-row CSS"
+    - "skeleton shimmer animation"
+    - "empty-view + Lucide shield-check"
+    - "pull-to-refresh + refresh-button"
+    - "toast component (위치/스타일)"
+  diffs:
+    - "list_items: 7 → 6 (u-001 '달리는토끼' 제외, 다른 6명 동일)"
+    - "Toast: setState('default') 진입 시 auto-show (3000ms)"
+    - "Toast: success check icon (Lucide check, --wds-color-green-500) 추가"
+    - "count-summary: delta '방금 1명 해제됨' (--wds-label-brand) 추가"
+    - "blocked-row: row-settle keyframe 0.32s 진입 애니메이션"
+    - "control-panel: empty 라벨 '(last-one)' suffix"
+    - "screen id: block-mgmt-unblocked, breadcrumb 변경"

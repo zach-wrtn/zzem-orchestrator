@@ -1,0 +1,198 @@
+# Context Engine — ugc-platform-integration-qa-2 / app-014
+# Generated: 2026-04-25 (DE Step A output)
+# Schema: v1.0
+# Note: per-task context (sibling of app-016 — 차단됨 state, content hidden)
+
+meta:
+  sprint_id: "ugc-platform-integration-qa-2"
+  task_id: "app-014"
+  generated_at: "2026-04-25T00:00:00Z"
+  schema_version: "1.0"
+  figma_frame: "37211:162150"
+  figma_file: "7hozJ6Pvs09q98BxvChj08"
+  archetype: "detail"
+  exemplar_refs:
+    - id: "app-016"
+      dimension_focus: "sibling pattern (반전) — 동일 ProfileScreen detail archetype 의 unblocked 상태. 본 화면은 blocked 상태로 콘텐츠 영역만 차단됨 안내로 교체."
+
+# ─────────────────────────────
+# Layer 1: WHY (Business Intent)
+# ─────────────────────────────
+why:
+  product_intent: "차단된 사용자의 프로필 진입 시 콘텐츠 노출을 차단하고 차단 상태를 명확히 시각화하여 의도적 재차단 경험을 보호한다."
+  target_user: "타유저를 차단한 후 우연히 그 프로필에 진입한 ZZEM 사용자"
+  success_metric: "AC-2.2 통과 — 콘텐츠 그리드 미노출 + '차단됨' 상태 indicator 가시 + 차단 해제 진입점(더보기 → app-015) 제공"
+  user_stories:
+    - id: "US-1"
+      as_a: "사용자를 차단한 ZZEM 사용자"
+      i_want: "차단된 사용자의 프로필에 진입했을 때 그 사용자의 콘텐츠를 다시 보지 않도록 보호받고 싶다"
+      so_that: "차단 액션이 실제 시각적으로 적용되고, 의도치 않은 콘텐츠 노출을 방지한다"
+  acceptance_criteria:
+    - id: "AC-2.2-a"
+      given: "타유저를 차단한 상태에서"
+      when: "해당 타유저 프로필에 재진입한다"
+      then: "콘텐츠 영역이 모두 숨겨지고 '차단됨' 상태 indicator + 안내 메시지가 표시된다"
+      ui_impact: "ContentGrid 제거 + Hero 영역의 차단됨 badge + BlockedNotice card (lock/ban icon + '차단된 사용자의 콘텐츠는 표시되지 않아요')"
+    - id: "AC-2.2-b"
+      given: "차단된 프로필 화면을 보고 있다"
+      when: "헤더 우상단 더보기(•••) tap"
+      then: "차단됨 더보기 sheet (app-015) 가 진입되어 '차단 해제' 옵션이 노출된다"
+      ui_impact: "MoreButton → app-015 navigation 진입점"
+    - id: "AC-2.2-c"
+      given: "차단된 프로필 화면이 default state 다"
+      when: "back tap 또는 통계 row 등 인터랙션을 시도"
+      then: "콘텐츠가 노출되지 않고 안전하게 이전 화면으로 복귀하거나 카운트는 비활성/숨김 처리된다"
+      ui_impact: "BackButton 정상 동작 + CountRow 숨김(또는 dim 처리) + Follow/Message CTA 미노출"
+
+# ─────────────────────────────
+# Layer 2: WHAT (Design System)
+# ─────────────────────────────
+what:
+  tokens_needed:
+    colors:
+      - "wds-background-normal"
+      - "wds-surface-secondary"
+      - "wds-surface-tertiary"
+      - "wds-label-normal"
+      - "wds-label-alternative"
+      - "wds-label-assistive"
+      - "wds-label-disabled"
+      - "wds-label-inverse"
+      - "wds-fill-neutral"
+      - "wds-line-alternative"
+      - "wds-line-normal"
+      - "wds-color-neutral-500"
+      - "pe-text-primary"
+      - "pe-text-secondary"
+      - "pe-avatar-empty-bg"
+      - "pe-avatar-border"
+    typography:
+      - "wds-font-size-2xs (11px)"
+      - "wds-font-size-xs (12px) — badge label"
+      - "wds-font-size-sm (13px) — notice body"
+      - "wds-font-size-md (14px)"
+      - "wds-font-size-lg (16px) — header title"
+      - "wds-font-size-xl (18px) — nickname"
+      - "wds-font-weight-semibold (600)"
+      - "wds-font-weight-bold (700)"
+      - "wds-font-weight-medium (500)"
+    spacing:
+      - "wds-spacing-4"
+      - "wds-spacing-6"
+      - "wds-spacing-8"
+      - "wds-spacing-12"
+      - "wds-spacing-16"
+      - "wds-spacing-20"
+      - "wds-spacing-24"
+      - "wds-spacing-32"
+      - "wds-spacing-48"
+    radius:
+      - "wds-radius-sm (8px) — badge pill"
+      - "wds-radius-md (12px)"
+      - "wds-radius-lg (16px) — notice card"
+      - "wds-radius-full — avatar / status badge"
+
+  components_needed:
+    - name: "HeaderBar"
+      category: "navigation"
+      pattern_ref: "ugc-platform-integration-qa-2 app-016 .header-bar (동일 패턴 반전)"
+    - name: "ProfileHero"
+      category: "content"
+      pattern_ref: "ugc-platform-integration-qa-2 app-016 .profile-hero — 본 화면은 CountRow/CTA 미노출 + BlockedBadge 추가"
+      detail_persona_role: "Hero region (height ≥320px requirement) — 차단 상태에서 표시 가능한 정보(아바타+닉네임+badge+notice)로 충족"
+    - name: "BlockedBadge"
+      category: "feedback"
+      pattern_ref: "(new) inline pill badge — fill: surface-tertiary, label: alternative, lucide Ban icon + '차단됨' 텍스트"
+    - name: "BlockedNotice"
+      category: "feedback"
+      pattern_ref: "(new) empty-state-style notice card — lucide Lock icon (40px) + '차단된 사용자의 콘텐츠는 표시되지 않아요' + sub-copy"
+    - name: "MoreButton"
+      category: "input"
+      pattern_ref: "icon-button (lucide MoreVertical, 24px, 44hit) — app-015 진입점"
+    - name: "BackButton"
+      category: "input"
+      pattern_ref: "icon-button (lucide ArrowLeft, 24px, 44hit)"
+    - name: "BottomNav"
+      category: "navigation"
+      pattern_ref: "ugc-platform-integration-qa-2 app-016 .bottom-nav (동일)"
+
+  patterns_needed:
+    - name: "Blocked detail hero"
+      description: "Avatar(100px circle, dim) + Nickname(18px bold, label-alternative) + BlockedBadge(pill) — CTA / count 미노출, hero 합산 ≥320px"
+    - name: "Empty-state blocked notice card"
+      description: "콘텐츠 영역 자리에 lock icon + 안내 메시지 + 보조 설명 — 회색 톤, 클릭 미연결"
+    - name: "Header more entry to block-management sheet"
+      description: "우상단 ⋮ → app-015 차단됨 더보기 메뉴 (차단 해제 옵션)"
+
+# ─────────────────────────────
+# Layer 3: HOW (Orchestration)
+# ─────────────────────────────
+how:
+  composition_rules:
+    - rule: "HeaderBar(48) → ProfileHero(~320, dim variant) → BlockedNotice(card) → BottomNav(64). ContentTabBar/ContentGrid 미렌더 (DOM 부재)"
+      applies_to: ["OtherProfileScreen-Blocked"]
+    - rule: "Hero 영역 단일 시각 앵커 — 320px 이상, 표시 가능한 메타 4개 이내(아바타·닉네임·badge·notice 헤드라인) (detail persona 강제 룰 #1·#3)"
+      applies_to: ["ProfileHero"]
+    - rule: "Primary CTA 0개 (차단 상태이므로 actionable 없음) — secondary는 헤더 ⋮ 만 노출. detail persona 강제 룰 #4 의 'primary 1' 은 본 차단 상태에서 면제 (변형 경우 — quality_report 에 명기)"
+      applies_to: ["ProfileHero CTA cluster (omitted)"]
+    - rule: "back 1-way: 좌상단 ← 만 노출 (detail persona 강제 룰 #2)"
+      applies_to: ["HeaderBar"]
+    - rule: "BlockedNotice 는 placeholder/skeleton 이 아닌 의도된 empty-state — Pass 6 #6 면제 (kind: illustration)"
+      applies_to: ["BlockedNotice"]
+    - rule: "alert/confirm/prompt 절대 사용 금지 (Pass 6 #8 + verifier hang 방지)"
+      applies_to: ["all interactions"]
+  conditional_rendering:
+    - condition: "state == default (blocked)"
+      variant_a: "Hero(dim) + BlockedBadge + BlockedNotice + BottomNav (콘텐츠 그리드 미렌더)"
+      variant_b: null
+    - condition: "사용자가 ⋮ tap → app-015 진입"
+      variant_a: "현 화면 유지 + 차단됨 더보기 sheet 오버레이 (mock toast)"
+      variant_b: null
+  constraints:
+    - "BottomNav 항상 sticky-bottom"
+    - "ContentTabBar 미노출 (콘텐츠가 없으므로 탭도 무의미)"
+    - "CountRow 미노출 (PRD: 카운트 숨김 가능)"
+    - "Follow / Message CTA 미렌더 (차단 상태)"
+    - "Avatar 는 약간 dim (opacity 0.55) 처리 — 차단 상태 시각 표현"
+    - "BlockedNotice 카드: surface-secondary 배경, lock icon 40px, 헤드라인 + sub-copy 2줄"
+    - "BlockedBadge: surface-tertiary fill, label-alternative 색, ban icon 14px + '차단됨'"
+  priority_order:
+    - "1. BlockedBadge (차단 상태 즉시 인지)"
+    - "2. BlockedNotice (콘텐츠 미노출 사유 설명)"
+    - "3. MoreButton (차단 해제 경로)"
+    - "4. ProfileHero avatar+nickname (대상 식별)"
+    - "5. BottomNav (이동 경로)"
+
+# ─────────────────────────────
+# Layer 4: ASSETS (v1)
+# ─────────────────────────────
+assets:
+  avatars:
+    kind: gradient-token
+    source: "inline solid (--pe-avatar-empty-bg + initial 'M' centered, label-assistive — dim) — 차단 상태이므로 opacity 0.55"
+    count: 1
+    license: "internal-test"
+    needs_real_content: false
+    note: "타유저 아바타 — 차단 상태이므로 dim 처리 + initial fallback. detail persona hero 시각 앵커 충족용."
+  feed_thumbnails:
+    kind: illustration
+    source: null
+    count: 0
+    license: "n/a"
+    needs_real_content: false
+    note: "본 화면은 차단 상태 — content grid 가 DOM 에 부재. feed_thumbnails 슬롯 미사용."
+  meme_images:
+    kind: illustration
+    source: null
+    needs_real_content: false
+    note: "차단 상태 — meme-image 슬롯 부재."
+  icons:
+    kind: illustration
+    source: "lucide inline SVG (ArrowLeft, MoreVertical, Ban, Lock, Home, Search, User)"
+    fallback: "text-placeholder"
+    needs_real_content: false
+  hero_banners:
+    kind: gradient-token
+    source: null
+    needs_real_content: false
+    note: "프로필 hero 배경은 단색 background-normal — 별도 banner 그라디언트 없음"

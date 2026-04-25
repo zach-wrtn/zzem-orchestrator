@@ -1,0 +1,124 @@
+task_id: "app-015"
+sprint_id: "ugc-platform-integration-qa-2"
+generated_at: "2026-04-25"
+archetype: "modal"
+references:
+  - "app-012 MoreActionsSheet (sibling — 차단 안됨 mirror, picker exception base)"
+  - "app-013 BlockConfirmSheet (modal persona + loading state 패턴)"
+  - "app-014 차단됨 프로필 (parent surface 시각 컨텍스트)"
+  - "app-005 사진선택 (picker exception 인용)"
+
+screen: "BlockedMoreActionsSheet"
+
+modal_persona_audit:
+  rule_1_backdrop_opacity:
+    status: passed
+    note: "rgba(0,0,0,0.50) ≥ 0.4 (token wds.background.dimmed)"
+  rule_2_two_way_close:
+    status: passed
+    channels:
+      - "(a) backdrop tap"
+      - "(b) ESC key (a11y nicety, redundancy)"
+      - "(implicit picker) 모든 옵션 tap → dismiss after action"
+    note: "Cancel row 없음 — picker exception (app-005/app-012 동일). backdrop+ESC 2-way 충족. loading state 중에는 의도적으로 무력화 (race condition 방지)."
+  rule_3_cta_hierarchy:
+    status: exception_picker
+    applied_alternative: "picker exception (app-005/app-012 동일 패턴)"
+    rationale: |
+      Action sheet picker — N개 옵션 중 1개 선택. confirm modal 의 single-decision
+      (primary/secondary) 패턴과 다르다. spec BlockedMoreActionsSheet.spec.md 의
+      ## Picker Exception Documentation + context-engine.yaml constraints 에 문서화.
+      시각 위계는 color (unblock=neutral / report=destructive). AC-2.3 명시:
+      "차단 해제 row 가 강조 (semantic.label.normal, 위험 강조 X — 해제는 안전 액션)" —
+      neutral 강조 적용.
+  rule_4_title_or_context:
+    status: passed
+    note: |
+      Modal title 의도적 생략 (sibling app-012 동일 — iOS HIG action sheet 표준).
+      대신 부모 surface 의 헤더 더보기 (•••) + "차단됨" badge 가 시각 컨텍스트 제공
+      (지금 어떤 사용자의 더보기 메뉴인지 인지 가능). drag handle 이 sheet 임을 시각적으로 알림.
+
+pass_6_anti_slop_audit:
+  status: passed (9/9 — #10 N/A)
+  results:
+    - check: 1
+      name: "hex-not-in-tokens"
+      result: pass
+      note: |
+        .screen 후손의 모든 hex 는 tokens.css 정의값 (toast 배경 #212228 = wds-color-neutral-900,
+        badge fill #FFE5E3 = wds-color-red-100, badge text #FF3B30 = wds-color-red-500).
+        #1a1a2e/#2a2a3e/#e0e0e0/#f0f0f0 은 .control-panel + body 배경 한정 (audit 제외 영역).
+    - check: 2
+      name: "unicode-emoji-in-interactive"
+      result: pass
+      note: "모든 아이콘 inline SVG (Lucide unlock/flag + arrow-left + dots + ban (badge) + eye-off (empty) + status-bar). interactive 요소에 emoji 없음."
+    - check: 3
+      name: "border-left-card-stripe"
+      result: pass
+      note: "card-stripe 패턴 0건"
+    - check: 4
+      name: "font-family-non-pretendard"
+      result: pass
+      note: ".screen 후손 모두 inherit (var(--wds-font-family-primary) = Pretendard). monospace 는 .control-panel 한정."
+    - check: 5
+      name: "brand-purple-gradient"
+      result: pass
+      note: "보라 그라디언트 0건. 그라디언트는 .parent-avatar (neutral-300→neutral-400) 만 사용 — neutral 토큰 한정. 보라 토큰 미사용."
+    - check: 6
+      name: "placeholder-image-as-content"
+      result: pass
+      note: ".placeholder-image 클래스 0건. parent-surface 는 decorative aria-hidden (시각 컨텍스트만 — 본 화면 콘텐츠는 modal overlay)."
+    - check: 7
+      name: "spec-interaction-event-mismatch"
+      result: pass
+      note: "Spec interactions 4건 (backdrop / unblock / report / ESC). HTML addEventListener 4건 매칭."
+    - check: 8
+      name: "alert-confirm-prompt-blocking"
+      result: pass
+      note: "alert/confirm/prompt 0건. 모든 피드백은 toast + setState."
+    - check: 9
+      name: "archetype-persona-strict-rules"
+      result: passed (4/4 — #3 picker exception 명시 회피)
+    - check: 10
+      name: "exemplar-drift-warning"
+      result: not_applicable
+      note: "exemplar 미참조 (sibling app-012 mirror 는 reference 이지 exemplar 가 아님)"
+
+fabrication_risk:
+  level: low
+  inferred_fields:
+    - "옵션 구성 '차단 해제 / 신고' 2개 (task spec 은 '차단 해제 / 취소' 만 명시. Figma 37211:162152 직접 접근 불가 — sibling app-012 의 'URL 복사 / 차단 / 신고' 구조 mirror 채택. URL 복사는 차단됨 상태에서 의미 약하여 보수적 제외, 취소는 backdrop+ESC 로 대체.)"
+    - "차단 해제 success 토스트 카피 '차단을 해제했어요' (AC 'Toast' 만 명시. app-016 의 nickname 인터폴레이션 카피를 시트 내 단순화)"
+    - "loading state spinner 패턴 + 다른 row disabled (app-013 BlockConfirmSheet 패턴 mirror — race 방지)"
+  source_of_truth_resolution:
+    note: |
+      task spec 'AC-2.3 차단 해제' canonical. Figma 37211:162152 frame 직접 검증 불가
+      (mcp__plugin_figma_figma__get_design_context permission denied). sibling app-012
+      mirror + AC-2.3 명시 ("위험 강조 X — 안전 액션") 정확 반영.
+      gate questions 4건 — Sprint Lead 확인 후 adjust 가능 (≤2 loop).
+
+intent_md_status:
+  generated: true
+  path: "BlockedMoreActionsSheet.intent.md"
+  trigger:
+    - "fabrication_risk: low"
+    - "task spec ↔ Figma 직접 검증 불가 (mcp denied) — sibling mirror 채택 확인 필요"
+  gate_questions: 4
+
+tokens_used:
+  inline_in_html: true
+  source: "sprint-orchestrator/sprints/ugc-platform-integration-qa-2/prototypes/context/tokens.css"
+  variables_referenced: 30
+
+deliverables:
+  - "BlockedMoreActionsSheet.spec.md (machine-readable spec, picker exception 문서화 포함)"
+  - "BlockedMoreActionsSheet.intent.md (Sprint Lead gate — 4 questions)"
+  - "context-engine.yaml (WHY 1 story / 3 AC + WHAT 8 components + HOW 5 constraints + assets 2)"
+  - "prototype.html (self-contained, tokens.css inlined, 5 states, control panel preserved)"
+  - "quality-report.yaml (this file)"
+
+next_steps:
+  - "Sprint Lead intent.md gate — proceed/adjust/stop"
+  - "Adjust 시 prototype.html 재생성 (≤2 loop 상한)"
+  - "Figma 37211:162152 직접 확인 가능해지면 옵션 구성 검증 (URL 복사 row 추가 여부, 취소 row 명시 여부)"
+  - "screenshots/ 캡처는 Sprint Lead 승인 후"

@@ -1,0 +1,218 @@
+# Quality Report: app-019 / 차단관리_해제완료
+# Sprint: ugc-platform-integration-qa-2
+# Generated: 2026-04-25
+
+task_id: "app-019"
+screen_name: "BlockManagementUnblockedScreen"
+archetype: "feed"
+archetype_alternative_considered: "detail"
+archetype_decision_rationale: |
+  Figma frame title 은 "차단관리_해제완료" 이지만 실제 UI 는 app-017 의 N-1 갱신 list + Toast.
+  detail persona 강제 룰 (hero 320px+, primary CTA 1개) 은 list-row 구조와 충돌.
+  task spec 권장 ("feed 차단관리 리스트 archetype 유지 + toast 만 추가") 을 따랐다.
+figma_frame: "37290:170246"
+
+# ─────────────────────────────
+# Pass 6 Anti-Slop Audit (10 checks — #10 = exemplar drift)
+# ─────────────────────────────
+pass_6_audit:
+  status: "passed"
+  score: "10 / 10"
+  checks:
+    - id: 1
+      name: "raw hex outside tokens.css"
+      status: "passed"
+      detail: |
+        proto unique hex (.screen 후손 영역): 0건 — 전부 var(--wds-*) 또는 var(--component-*) 토큰.
+        .control-panel 셀렉터 내부 hex (#1a1a2e #2a2a3e #e0e0e0 #444 #666 #888 #999) 는
+        design-engineer.md C.2.1 검사 범위 규칙에 의해 audit 제외 영역.
+        green check icon 색은 var(--wds-color-green-500) 토큰 사용.
+
+    - id: 2
+      name: "unicode emoji on interactive elements"
+      status: "passed"
+      detail: |
+        모든 button 아이콘은 inline Lucide SVG (back chevron / refresh-ccw / shield-check / check).
+        Toast 의 success check 도 Lucide inline SVG (line 605). 이모지 0건.
+
+    - id: 3
+      name: "border-left Material slop on cards"
+      status: "passed"
+      detail: ".card 클래스 미사용 (list-row + toast). border-left 0건."
+
+    - id: 4
+      name: "font-family outside Pretendard within .screen"
+      status: "passed"
+      detail: |
+        .screen 후손 font-family: 두 곳 (line 368, 472) 모두 `inherit` → Pretendard 상속.
+        ui-monospace/JetBrains Mono 는 .control-panel 셀렉터 (line 174, 186, 192-193) 만 — audit 제외.
+
+    - id: 5
+      name: "purple gradient on full background"
+      status: "passed"
+      detail: |
+        skeleton shimmer: linear-gradient(90deg, --neutral-100, --neutral-200, --neutral-100) — 토큰 only.
+        empty-view__icon: 단색 fill (--brand-weak) + color (--brand-primary). 그라디언트 미사용.
+        body/screen 배경: var(--wds-background-normal). 보라 그라디언트 0건.
+
+    - id: 6
+      name: "placeholder-image on main content slot"
+      status: "passed"
+      detail: |
+        .placeholder-image 클래스 미사용. avatar = 이니셜 텍스트 fallback (1글자, neutral fill).
+        주 콘텐츠 = 닉네임 + 차단일 + CTA + Toast 메시지. avatar 는 보조 정보.
+        intent.md placeholders[0].needs_real_content = false (Sprint Lead 사전 합의 불요 — 표준 패턴).
+
+    - id: 7
+      name: "interactions count = bound elements count"
+      status: "passed"
+      detail: |
+        spec interactions: 6건 (back, refresh, swipe-down, unblock×6, empty-action, auto-mount toast).
+        DOM bindings 검수:
+          - back-button onclick → onAction('go-back')
+          - refresh-button onclick → triggerRefresh()
+          - body-scroll touchstart/move/end → triggerRefresh on swipe-down
+          - 6 unblock-btn onclick → onAction('unblock', uid, nick)
+          - empty-action onclick → onAction('go-back')
+          - auto-mount: setState('default') → showToast(unblock msg, 3000ms) — line 700
+        본 화면 interactive bindings: 1+1+1+6+1+1 = 11. control-panel 4 state-toggle 별도 (out of scope).
+        매칭 OK.
+
+    - id: 8
+      name: "alert/confirm/prompt in onclick"
+      status: "passed"
+      detail: "grep -E 'alert\\(|confirm\\(|prompt\\(' → 0건. showToast() + console.log() 만 사용 (verifier 안전)."
+
+    - id: 9
+      name: "feed archetype persona 강제 룰 (4/4)"
+      status: "passed"
+      detail: |
+        #1 loading + skeleton 6 행: states.loading + #blocked-skeleton (6 SkeletonRow).
+        #2 empty 상태: states.empty + #empty-view ("차단한 사용자가 없어요" + CTA + Lucide shield-check).
+        #3 첫 viewport 6+ items: 6 BlockedUserRow × 72px = 432px (헤더56 + count약44 + status44 = 144 사용,
+            본문 가용 ~700px 내 6행 fit).
+        #4 새로고침: AppHeader RefreshButton (명시) + body-scroll pull-to-refresh (보조) — 2개.
+
+    - id: 10
+      name: "exemplar drift (vs v2-dogfood-free-tab-app-001-freetabscreen)"
+      status: "passed"
+      drift_warning: false
+      detail: |
+        본 화면은 list-row 구조 (수직 1열, 72px 행, divider) + Toast 오버레이.
+        Exemplar 는 2열 grid 카드 (4:5 aspect, gradient thumb, NEW badge).
+        시각 비교: 핵심 레이아웃 일치도 < 30% (카드 grid CSS 일체 미재사용).
+        패턴 차원 (header + body-scroll + skeleton + empty + refresh + toast 골격) 은 feed archetype 표준.
+        → drift_warning: false. 80% 임계 미달.
+
+# ─────────────────────────────
+# Feed Persona Rules
+# ─────────────────────────────
+persona:
+  archetype: "feed"
+  forced_rules: "4 / 4 passed"
+  forced_rule_details:
+    - rule: 1
+      name: "loading state with skeleton"
+      passed: true
+      evidence: "states.loading + #blocked-skeleton 6개 SkeletonRow"
+    - rule: 2
+      name: "empty state defined"
+      passed: true
+      evidence: "states.empty + #empty-view + EmptyAction CTA (AC: 0건 도달 시)"
+    - rule: 3
+      name: "first viewport 6+ homogeneous items"
+      passed: true
+      evidence: "6 BlockedUserRow × 72px = 432px ≤ 본문 가용 약 700px"
+    - rule: 4
+      name: "refresh interaction"
+      passed: true
+      evidence: "AppHeader #refresh-button (명시) + #body-scroll pull-to-refresh (보조)"
+  recommended_rules:
+    - rule: 1
+      name: "end indicator (마지막 카드 직후)"
+      adopted: true
+      evidence: "#end-indicator '마지막 차단 사용자입니다'"
+    - rule: 2
+      name: "card spacing 1단계 토큰 (12px / 16px)"
+      adopted: true
+      evidence: "blocked-row padding: 12px 20px, divider 1px"
+    - rule: 3
+      name: "필터/정렬 sticky"
+      adopted: false
+      reason: "본 화면은 필터/정렬 컨트롤 부재 (PRD AC-2.5 미요구). 거절."
+
+# ─────────────────────────────
+# Detail vs Feed Decision Log
+# ─────────────────────────────
+archetype_decision:
+  considered: ["detail", "feed"]
+  chosen: "feed"
+  reasoning:
+    - "Figma frame name '차단관리_해제완료' 은 detail 처럼 보이지만, 실제 UI 는 list 갱신 + Toast."
+    - "detail 강제 룰 #1 (hero 320px+) 충족하려면 'X명 해제 완료' 큰 confirmation 카드 추가 필요 — Figma 의도와 결이 다름."
+    - "task 본문 '권장: feed (차단관리 리스트 archetype 유지) — toast 만 추가' 명시."
+    - "app-017 의 list 구조 그대로 + N-1 + Toast auto-show → 일관성 유지 + persona 4룰 그대로 충족."
+  detail_persona_compatibility:
+    rule_1_hero_320px: "fail — list-row 구조에 hero 없음"
+    rule_2_back_or_dismiss: "pass — back-button 존재"
+    rule_3_meta_4: "n/a — list, hero 메타 행 없음"
+    rule_4_primary_cta: "ambiguous — 각 행마다 '해제' CTA 6개 (primary 1개 룰 위배)"
+
+# ─────────────────────────────
+# Exemplar Reference (B.6)
+# ─────────────────────────────
+exemplar_inline:
+  inlined: true
+  exemplar_id: "v2-dogfood-free-tab-app-001-freetabscreen"
+  source_path: "sprint-orchestrator/dogfood/v2-exercise/free-tab-app-001"
+  dimension_focus:
+    - "archetype_fit"
+    - "interaction_completeness"
+    - "token_compliance"
+  read_artifacts:
+    - "_index.json (exemplar metadata)"
+    - "screen-spec.yaml (구조 참조 — 콘텐츠 미복사)"
+  borrowing_strategy: |
+    Patterns reused: device-frame + control-panel + state-data attribute toggle scaffold +
+    skeleton shimmer + toast + refresh handler + verifier-safe onAction(). 모두 archetype 표준.
+    Patterns NOT reused: 카드 grid CSS, banner sections, bottom-nav, 카테고리 라벨, CreatorAvatar.
+  reference_screen_inheritance:
+    from: "app-017 (BlockManagementListScreen)"
+    inherited: "전체 CSS scaffold + tokens.css inline + skeleton/empty/toast 패턴"
+    diff: "list_items 7→6 (u-001 제외), Toast auto-show on mount, count delta '방금 1명 해제됨', toast success icon (Lucide check) 추가"
+
+# ─────────────────────────────
+# Quality Score (Step B.5)
+# ─────────────────────────────
+quality_score:
+  extraction_accuracy: "24 / 24 = 1.0"
+  schema_completeness: "7 / 7 = 1.0"
+  fabrication_risk: "low"
+  fabrication_risk_rationale: |
+    AC-2.5 직접 도출: row 제거, Toast auto-dismiss 3s, 0건 empty, back 복귀 — 모두 매핑.
+    추가 추론: Toast auto-show on mount (의도 구체화), count delta '방금 1명 해제됨' (변화 시각화),
+    list_items 6명 (app-017 일관성 위해 1건만 제외). 모두 PRD 의도 합리 추정.
+    archetype 결정 (feed) 도 task 권장 일치.
+    비즈니스 로직 추측 없음.
+  context_coverage:
+    why_linked: "1 / 1 = 1.0"   # AC-2.5 → component/state 연결
+    what_resolved: "12 / 12 = 1.0"
+
+# ─────────────────────────────
+# Files Generated
+# ─────────────────────────────
+files:
+  - "screen-spec.yaml"
+  - "BlockManagementUnblockedScreen.intent.md"
+  - "prototype.html"
+  - "quality-report.yaml"
+  - "screenshots/" (Phase 4 capture-screenshots.ts 단계에서 PNG 생성)
+
+# ─────────────────────────────
+# Next Steps
+# ─────────────────────────────
+next:
+  - "Sprint Lead: intent.md gate review → archetype decision (feed) 승인 여부 판단"
+  - "Sprint Lead: capture-screenshots.ts 실행하여 default/loading/empty/error 4 state PNG 생성"
+  - "Sprint Lead: verify-prototype.ts 실행 (DOM 인터랙션 + Toast auto-show 타이밍 검증)"
+  - "exemplar drift warning: 없음 (구조적 차별화 + app-017 reference 일관성 OK)"

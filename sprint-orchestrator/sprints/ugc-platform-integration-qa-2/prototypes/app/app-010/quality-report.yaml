@@ -1,0 +1,173 @@
+# Quality Report — app-010 / MyProfileScreen-PhotoChanged
+# Sprint: ugc-platform-integration-qa-2
+# Generated: 2026-04-25 (DE Phase 3 v2 pipeline)
+
+task_id: app-010
+screen: MyProfileScreen-PhotoChanged
+archetype: detail
+figma_frame: "37160:80228"
+
+# ─────────────────────────────
+# Pass 6 Anti-Slop Audit (10 checks — .screen 후손만 평가, .control-panel 제외)
+# ─────────────────────────────
+anti_slop_audit:
+  status: passed
+  score: "9/9 (#10 N/A — exemplar 미인라인)"
+  checks:
+    - id: 1
+      name: "hex-not-in-tokens"
+      result: pass
+      detail: |
+        prototype.html 의 모든 hex 값은 (a) sprint tokens.css 에 등재 또는
+        (b) prototype 내 :root 의 sprint-aliases (--thumb-*, --card-*, --avatar-new-fill) 로 선언됨.
+        gradient-token kind (feed_thumbnails, new avatar) 의 색상은 context-engine assets 에 출처 기록.
+        control-panel-only (#1a1a2e, #2a2a3e, #e0e0e0, #E7E8EB, #888, #444, #bbb, #999) 는 audit 제외 영역.
+    - id: 2
+      name: "emoji-on-interactive"
+      result: pass
+      detail: "모든 button/tab/nav 는 lucide inline SVG 사용. body 텍스트 내 emoji 없음."
+    - id: 3
+      name: "border-left card slop"
+      result: pass
+      detail: "border-left: Npx solid var(--*) 패턴 0건"
+    - id: 4
+      name: "font-family non-Pretendard inside .screen"
+      result: pass
+      detail: |
+        .screen 후손 font-family 는 'inherit' (기본 Pretendard) 만 사용.
+        ui-monospace 사용은 control-panel 영역 한정 (audit 제외).
+    - id: 5
+      name: "brand purple gradient on background"
+      result: pass
+      detail: |
+        Avatar 의 --avatar-new-fill 은 detail persona hero 의 단일 시각 앵커 100x100px circle 위 적용.
+        background body/section gradient 사용 0건 — 본 alias 는 avatar 슬롯 한정 gradient-token kind.
+    - id: 6
+      name: "placeholder-image on main content"
+      result: pass
+      detail: |
+        meme-card 내 .placeholder-image × 6 — context-engine assets.feed_thumbnails.kind=gradient-token,
+        needs_real_content=false (ugc-platform-002 app-006 패턴 답습).
+        avatar.kind=gradient-token, needs_real_content=false (사진 변경 시각 신호용 NEW gradient).
+        면제 룰 적용.
+    - id: 7
+      name: "interaction binding parity"
+      result: pass
+      detail: |
+        Spec interactions 9개 (back, bell, settings, edit, share, tab×n, card×n, nav×n, toast auto).
+        DOM 9 addEventListener 그룹 + setTimeout(toast). 정합성 OK.
+    - id: 8
+      name: "alert/confirm/prompt"
+      result: pass
+      detail: "alert(), confirm(), prompt() 사용 0건. 모든 피드백은 toast + console.log."
+    - id: 9
+      name: "archetype persona enforced"
+      result: pass
+      score: "4/4"
+      detail: "detail persona 4 강제 룰 모두 통과 (아래 archetype_persona 참조)"
+    - id: 10
+      name: "exemplar drift"
+      result: skipped
+      detail: "detail archetype — 이 스프린트에서 exemplar 인라인 없음 (feed 만 해당)"
+
+# ─────────────────────────────
+# Archetype Persona — detail (강제 룰 4개)
+# ─────────────────────────────
+archetype_persona:
+  archetype: detail
+  status: passed
+  score: "4/4"
+  rules:
+    - id: 1
+      name: "Hero 영역 320px+"
+      result: pass
+      evidence: |
+        .profile-hero { min-height: 320px; padding: 24px 20px 16px; gap: 16px; }
+        avatar(100) + nickname(~24) + bio(~20) + count-row(~48) + cta-row(40) + paddings ≥ 320px.
+    - id: 2
+      name: "Back 1-way 보장"
+      result: pass
+      evidence: "#btn-back (좌상단 ←) 만 노출. swipe-down/close 미 추가 — Back 단일 경로."
+    - id: 3
+      name: "핵심 metadata 4 이내"
+      result: pass
+      evidence: "count-row 3 tiles (팔로워 312 / 팔로잉 128 / 게시물 24) — 4 이내."
+    - id: 4
+      name: "Primary CTA 1 + secondary 0-2"
+      result: pass
+      evidence: |
+        primary: .btn-primary#btn-edit × 1 (프로필 편집 — brand fill)
+        secondary: .btn-secondary#btn-share × 1 (공유 — neutral fill)
+        icon-only ghost: #btn-bell, #btn-settings × 2 (header 우상단 — Task 직접 명시)
+        합계 primary 1 + secondary 1 + icon-ghost 2 (경계 충족).
+  recommendations:
+    - id: rec-1
+      name: "Sticky bottom CTA"
+      taken: false
+      reason: "프로필 hero 가 즉시 가시 + 콘텐츠 그리드 진입 후 편집 액션 빈도 낮음. dual-btn-row 가 hero 직하 고정 노출되어 권장 룰 충족 효과 유사."
+      logged_as: "archetype_recommendation_skipped"
+    - id: rec-2
+      name: "관련 항목/추천 섹션"
+      taken: partial
+      reason: "Recommend 탭 자체가 추천 콘텐츠 진입점 — placeholder 화면으로 수용. 본문 끝 별도 추천 섹션은 미추가 (PRD scope 외)."
+      logged_as: "archetype_recommendation_partial"
+    - id: rec-3
+      name: "Hero 이미지 16:9 또는 1:1"
+      taken: not-applicable
+      reason: "프로필 hero 는 banner 이미지 없이 avatar(1:1 circle) + 텍스트 중심 — 비율 룰 N/A."
+
+# ─────────────────────────────
+# Quality Score (Spec self-review B.5)
+# ─────────────────────────────
+quality_score:
+  extraction_accuracy: "28 / 28 = 1.0"
+  schema_completeness: "7 / 7 = 1.0"
+  fabrication_risk: low
+  fabrication_risk_inferred:
+    - "Bio 한 줄 콘텐츠 (Hero ≥320px 충족용 표준 detail hero 패턴)"
+    - "Count tile mock 값 (312 / 128 / 24)"
+    - "Nickname 'zzem_user' (Mock placeholder)"
+    - "Edit / Share dual CTA 조합 (PRD 미명시, detail persona 강제 룰 #4 충족)"
+    - "Bottom nav active=MY (MY 프로필 진입 컨텍스트)"
+    - "헤더 우상단 dual icon Bell+Settings (Task 직접 명시)"
+    - "새 avatar NEW gradient (--avatar-new-fill — 사진 변경 시각 신호)"
+  context_coverage:
+    why_linked: "1 / 1 = 1.0 (AC-1.5)"
+    what_resolved: "14 / 14 = 1.0"
+
+# ─────────────────────────────
+# Asset Layer (context-engine.yaml § assets)
+# ─────────────────────────────
+assets:
+  avatars:
+    kind: gradient-token
+    needs_real_content: false
+    note: "MY avatar (변경 직후) — NEW gradient(--avatar-new-fill) + initial 'Z' fallback + green check dot (변경 시각 신호)"
+  feed_thumbnails:
+    kind: gradient-token
+    needs_real_content: false
+    note: "6 cells 카테고리 그라디언트, sprint-aliases 등재 — Pass 6 #1·#6 모두 통과"
+  icons:
+    kind: illustration
+    needs_real_content: false
+    note: "lucide inline SVG (ArrowLeft, Bell, Settings, Heart, Home, Search, User, Check, Sparkles)"
+
+# ─────────────────────────────
+# Files
+# ─────────────────────────────
+files:
+  context_engine: "context-engine.yaml"
+  spec: "MyProfileScreen-PhotoChanged.spec.md"
+  intent: "MyProfileScreen-PhotoChanged.intent.md"
+  prototype_alpha: "prototype-alpha.html"
+  prototype: "prototype.html"
+  quality_report: "quality-report.yaml"
+
+# ─────────────────────────────
+# Approval (pending Sprint Lead)
+# ─────────────────────────────
+approval:
+  status: pending
+  reviewer: null
+  reviewed_at: null
+  notes: ""

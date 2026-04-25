@@ -1,0 +1,243 @@
+# Context Engine — ugc-platform-integration-qa-2 / app-023 (SettingsMainScreen)
+# Step A output of Design Engineer protocol v2.
+# Source PRD: docs/prds/ugc-platform-integration-qa-2.md (Group 004 nav glue)
+# Source task: sprint-orchestrator/sprints/ugc-platform-integration-qa-2/tasks/app/app-023.md
+# Figma frames: 37174:21780 (entry) + 37289:169467 / 37289:169801 (메인메뉴 변형)
+#               file 7hozJ6Pvs09q98BxvChj08
+
+meta:
+  sprint_id: "ugc-platform-integration-qa-2"
+  task_id: "app-023"
+  generated_at: "2026-04-25T00:00:00Z"
+  schema_version: "1.1"
+  archetype_dogfood: true   # form persona 강제 룰 #1/#2/#3/#4 모두 즉시 nav 패턴과 충돌
+  archetype_misfit_note: |
+    "settings main menu" 는 form 의 '입력 누적 + submit' 모델과 본질적으로 다르다.
+    각 row 가 즉시 navigation trigger 인 nav-list 패턴이며, 6 archetype enum
+    (form / detail / feed / modal / onboarding / empty_state) 어디에도 fit 하지
+    않는다. 본 task 는 form 으로 분류되어 있으나, 실질은 navigation list.
+    Sprint Lead 후속: archetype enum 에 'nav_list' 또는 'settings_list' 신규 분류
+    검토 필요 (app-022 dogfood 의 strict superset).
+
+# ─────────────────────────────
+# Layer 1: WHY (Business Intent)
+# ─────────────────────────────
+why:
+  product_intent: |
+    설정 메인 메뉴는 ZZEM 의 모든 사용자 설정 화면(계정 / 알림 / 차단 관리 / 개인정보
+    / 도움말 / 로그아웃)의 단일 entry point. 사용자가 한 번 진입한 후 원하는 설정
+    카테고리로 빠르게 분기할 수 있도록 한다. 본 화면은 nav glue — 상태나 입력 없이
+    오직 routing 책임만 진다.
+  target_user: "ZZEM 사용자 (모든 contexts) — 설정 변경/확인 의도"
+  success_metric: "설정 진입 후 차단 관리 / 알림 설정 1-tap reach 율 (PRD § Group 004 nav glue)"
+  user_stories:
+    - id: "US-4.1"
+      as_a: "차단 관리를 원하는 사용자"
+      i_want: "설정에서 차단 관리 entry 를 한 번에 찾을 수 있다"
+      so_that: "여러 화면을 거치지 않고 차단을 관리한다"
+    - id: "US-4.2"
+      as_a: "알림 수신 설정을 변경하려는 사용자"
+      i_want: "설정에서 알림 설정 entry 를 한 번에 찾을 수 있다"
+      so_that: "푸시 / 좋아요 / 소식 등 카테고리별 토글을 빠르게 조정한다"
+    - id: "US-4.3"
+      as_a: "기타 설정 (계정 / 도움말 / 로그아웃) 을 원하는 사용자"
+      i_want: "동일 화면에서 모든 설정 카테고리를 일관된 형태로 본다"
+      so_that: "탐색 비용을 최소화한다"
+  acceptance_criteria:
+    - id: "AC-4.1"
+      given: "사용자가 설정 메인 진입"
+      when: "화면 렌더"
+      then: "메뉴 row 모두 표시 (Figma 카피 그대로 — 계정 / 알림 / 차단 / 개인정보 / 도움말 / 로그아웃)"
+      ui_impact: "MenuRow × N 표시 (icon + label + 우측 chevron)"
+    - id: "AC-4.2"
+      given: "사용자가 '차단 관리' row tap"
+      when: "tap"
+      then: "app-017 (BlockedAccountsScreen) 으로 진입"
+      ui_impact: "MenuRow#block tap → navigation, slide-left transition"
+    - id: "AC-4.3"
+      given: "사용자가 '알림 설정' row tap"
+      when: "tap"
+      then: "app-022 (NotificationSettingsScreen) 으로 진입"
+      ui_impact: "MenuRow#notification tap → navigation, slide-left transition"
+    - id: "AC-4.4"
+      given: "각 row"
+      when: "정적 렌더"
+      then: "chevron / divider / 아이콘이 시각적으로 일관"
+      ui_impact: "모든 MenuRow 가 동일 height (~56px) / 동일 chevron 위치 / 1px divider"
+
+# ─────────────────────────────
+# Layer 2: WHAT (Design System)
+# ─────────────────────────────
+what:
+  tokens_needed:
+    colors:
+      - "wds.color.purple.500"     # brand accent (옵션 — icon tint 일관 시 사용)
+      - "wds.color.neutral.0"      # bg
+      - "wds.color.neutral.50"     # surface secondary (section gap bg)
+      - "wds.color.neutral.100"    # divider weak
+      - "wds.color.neutral.200"    # divider normal
+      - "wds.color.neutral.500"    # icon stroke (assistive)
+      - "wds.color.neutral.600"    # label alternative
+      - "wds.color.neutral.900"    # label normal
+      - "wds.color.red.500"        # destructive (로그아웃)
+    typography:
+      - "wds.font.size.md"
+      - "wds.font.size.lg"  # row label
+      - "wds.font.size.xl"  # header title
+      - "wds.font.weight.regular"
+      - "wds.font.weight.medium"
+      - "wds.font.weight.semibold"
+    spacing:
+      - "wds.spacing.8"
+      - "wds.spacing.12"
+      - "wds.spacing.16"
+      - "wds.spacing.20"
+      - "wds.spacing.24"
+    radius:
+      - "wds.radius.sm"
+      - "wds.radius.md"
+
+  components_needed:
+    - name: "AppHeaderBack"
+      category: "navigation"
+      pattern_ref: "back chevron + center title (settings)"
+    - name: "MenuRow"
+      category: "navigation"
+      note: "icon + label + 우측 chevron — settings list nav 표준 (next-screen entry)"
+    - name: "SectionDivider"
+      category: "layout"
+    - name: "SectionGap"
+      category: "layout"
+      note: "그룹 사이 surface_secondary 8px gap — 시각적 카테고리 분리"
+
+  patterns_needed:
+    - name: "Settings list with nav rows"
+      description: "icon + label + chevron 의 row 반복. tap 즉시 nav (별 submit 없음, 별 toggle 없음)."
+    - name: "Destructive row at bottom"
+      description: "로그아웃 등 destructive action 은 list 최하단에 분리, label color = error"
+
+# ─────────────────────────────
+# Layer 3: HOW (Orchestration)
+# ─────────────────────────────
+how:
+  composition_rules:
+    - rule: "AppHeaderBack(고정 56px) → MenuRow × N (수직, gap 0, divider 1px) → SectionGap → 로그아웃 row 단독"
+      applies_to: ["SettingsMainScreen"]
+    - rule: "각 MenuRow 내부: 좌측 icon (24x24) + label (Pretendard 16/600) + 우측 chevron-right (20x20)"
+      applies_to: ["MenuRow"]
+    - rule: "row tap → 즉시 navigation (nav glue) — 어떤 input/toggle 도 없음"
+      applies_to: ["MenuRow"]
+    - rule: "별도 'Save / Submit / Primary CTA' 부재 (nav-list 패턴) — form 강제 룰 #1/#2/#3/#4 모두 충돌"
+      applies_to: ["SettingsMainScreen"]
+  conditional_rendering:
+    - condition: "row.kind == 'normal'"
+      variant_a: "label color = label-normal, icon stroke = label-alternative"
+      variant_b: null
+    - condition: "row.kind == 'destructive'"
+      variant_a: "label color = label-error, icon stroke = label-error, chevron 생략"
+      variant_b: null
+  constraints:
+    - "어떤 인터랙티브 요소도 alert/confirm/prompt 사용 금지 (Pass 6 #8)"
+    - "icon 은 lucide-style inline SVG (PR #31 패턴) — emoji 금지 (Pass 6 #2)"
+    - "기본 디자인 텍스트는 Pretendard, 사이즈는 wds 토큰만 사용"
+    - "control-panel 은 device frame 외부 — Pass 6 검사 제외 영역"
+    - "보라 gradient 사용 금지 — solid token only (Pass 6 #5)"
+  priority_order:
+    - "1. MenuRow#notification + MenuRow#block (nav glue 검증 핵심 — AC-4.2 / AC-4.3)"
+    - "2. AppHeaderBack (이전 화면 복귀)"
+    - "3. 기타 MenuRow (계정 / 개인정보 / 도움말 / 로그아웃)"
+
+# ─────────────────────────────
+# Layer 4: ASSETS (v1)
+# ─────────────────────────────
+assets:
+  avatars:
+    kind: gradient-token
+    source: null
+    needs_real_content: false
+    note: "이 화면에 avatar 슬롯 없음"
+  feed_thumbnails:
+    kind: gradient-token
+    source: null
+    needs_real_content: false
+    note: "이 화면에 thumbnail 슬롯 없음"
+  meme_images:
+    kind: gradient-token
+    source: null
+    needs_real_content: false
+    note: "이 화면에 meme image 슬롯 없음"
+  icons:
+    kind: illustration
+    source: |
+      lucide-style inline SVG:
+        - chevron-left (back)
+        - user (계정)
+        - bell (알림 설정)
+        - shield (차단 관리)
+        - lock (개인정보)
+        - help-circle (도움말)
+        - log-out (로그아웃, destructive)
+        - chevron-right (각 row 우측)
+    fallback: "text-placeholder ('›')"
+    needs_real_content: false
+  hero_banners:
+    kind: gradient-token
+    source: null
+    needs_real_content: false
+
+# ─────────────────────────────
+# Archetype Persona Conflict Note (form #1/#2/#3/#4 — 전 강제 룰 misfit)
+# ─────────────────────────────
+archetype_conflict:
+  archetype: "form"
+  archetype_misfit: true
+  conflicting_rules:
+    - id: 1
+      rule: "모든 input 에 inline validation 정의"
+      conflict_with: "본 화면에 input 자체가 부재 (nav-list)"
+      decision: "archetype_recommendation_skipped (n/a)"
+      rationale: "MenuRow 는 navigation trigger — input 이 아니므로 validation 개념 부적용."
+    - id: 2
+      rule: "Submit 버튼 disabled until valid"
+      conflict_with: "Submit 자체가 부재 (각 row 가 즉시 nav)"
+      decision: "archetype_recommendation_skipped"
+      rationale: |
+        본 화면은 nav glue — 'submit' 행위가 부재.
+        각 row tap 이 자체로 navigation trigger.
+        app-022 (toggle 즉시 저장) 와 동일 misfit 의 superset.
+    - id: 3
+      rule: "Error message 가 해당 입력 직하 (alert 박스 금지)"
+      conflict_with: "input 자체 부재 → validation error 부재"
+      decision: "archetype_recommendation_skipped (n/a)"
+      rationale: "nav-list 는 error state 가 부재 (navigation 자체는 무조건 성공으로 가정)."
+    - id: 4
+      rule: "Primary action 1개만 (Submit / Save / 다음 등)"
+      conflict_with: "각 MenuRow 가 동등 nav target — '1개 primary' 개념 부적용"
+      decision: "archetype_recommendation_skipped"
+      rationale: |
+        Settings main 은 routing 화면 — 각 row 가 평등한 navigation entry.
+        '1 primary action' 모델을 강제하면 어떤 row 에도 강조를 줄 수 없거나
+        임의로 1개만 강조해야 하는 부자연스러운 결과 발생.
+        로그아웃은 destructive 라 시각적 분리하지만 그것이 'primary' 는 아님.
+  satisfied_rules: []
+
+  sprint_lead_followup:
+    needs_review: true
+    proposed_change: |
+      .claude/teammates/design-engineer-archetypes/ 에 nav_list (또는 settings_list)
+      신규 archetype 추가 검토:
+        - 강제 룰 후보:
+          #1 모든 row 가 동일 height + chevron-right 일관
+          #2 row tap 직후 navigation 또는 즉시 저장 (별도 submit 부재)
+          #3 destructive row 는 list 최하단에 분리 + error color label
+          #4 list grouping (section-gap) 으로 카테고리 시각 구분
+        - 권장 룰 후보:
+          #1 row 좌측 icon 일관 (lucide-style)
+          #2 8개 미만 일 시 단일 list, 이상 시 section header 도입
+    rationale: |
+      app-022 (toggle 즉시 저장) 와 본 task (nav glue) 가 form 분류 하에 있으나
+      모두 'submit 부재 + 각 row 가 trigger' 라는 공통 패턴.
+      별도 archetype 으로 분리하면 dogfood 강제 룰 거절 사유를 매번 작성할 필요 없음.
+    impact: |
+      현재 form 으로 분류된 settings 류 화면 (app-017, app-022, app-023, 향후 app-024+)
+      에 일관 적용 가능. PR 1개로 6→7 archetype 확장.

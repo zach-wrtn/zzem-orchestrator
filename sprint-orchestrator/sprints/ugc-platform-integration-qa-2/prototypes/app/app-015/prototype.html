@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>app-015 · 타유저 차단됨 더보기 메뉴 (modal · v2)</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+<style>
+  /* === tokens.css inline (Step A output — sprint-level) === */
+  :root {
+    --wds-color-purple-50:  #F5F0FF;
+    --wds-color-purple-100: #EBE1FF;
+    --wds-color-purple-400: #A17BFF;
+    --wds-color-purple-500: #8752FA;
+    --wds-color-purple-600: #7040E0;
+    --wds-color-purple-700: #5A30C0;
+
+    --wds-color-neutral-0:   #FFFFFF;
+    --wds-color-neutral-50:  #F7F8F9;
+    --wds-color-neutral-100: #F0F1F3;
+    --wds-color-neutral-200: #E4E5E9;
+    --wds-color-neutral-300: #D1D3D8;
+    --wds-color-neutral-400: #B5B8BF;
+    --wds-color-neutral-500: #8E9199;
+    --wds-color-neutral-600: #6B6E76;
+    --wds-color-neutral-700: #46474C;
+    --wds-color-neutral-900: #212228;
+    --wds-color-neutral-1000: #000000;
+
+    --wds-color-red-100: #FFE5E3;
+    --wds-color-red-500: #FF3B30;
+    --wds-color-red-600: #E0241A;
+    --wds-color-green-500: #34C759;
+
+    --wds-background-normal:    var(--wds-color-neutral-0);
+    --wds-background-elevated:  var(--wds-color-neutral-0);
+    --wds-background-dimmed:    rgba(0, 0, 0, 0.50);
+
+    --wds-surface-primary:   var(--wds-color-neutral-0);
+    --wds-surface-secondary: var(--wds-color-neutral-50);
+    --wds-surface-tertiary:  var(--wds-color-neutral-100);
+
+    --wds-fill-brand-primary: var(--wds-color-purple-500);
+    --wds-fill-brand-weak:    var(--wds-color-purple-50);
+    --wds-fill-brand-strong:  var(--wds-color-purple-600);
+    --wds-fill-neutral:       var(--wds-color-neutral-100);
+    --wds-fill-status-error:        var(--wds-color-red-500);
+    --wds-fill-status-error-strong: var(--wds-color-red-600);
+    --wds-fill-status-error-weak:   var(--wds-color-red-100);
+
+    --wds-label-normal:       var(--wds-color-neutral-900);
+    --wds-label-alternative:  var(--wds-color-neutral-600);
+    --wds-label-assistive:    var(--wds-color-neutral-500);
+    --wds-label-disabled:     var(--wds-color-neutral-300);
+    --wds-label-inverse:      var(--wds-color-neutral-0);
+    --wds-label-brand:        var(--wds-color-purple-500);
+    --wds-label-error:        var(--wds-color-red-500);
+
+    --wds-line-normal:       var(--wds-color-neutral-200);
+    --wds-line-alternative:  var(--wds-color-neutral-100);
+    --wds-status-error:      var(--wds-color-red-500);
+
+    --component-bottom-sheet-fill:    var(--wds-background-elevated);
+    --component-bottom-sheet-radius:  20px;
+    --component-bottom-sheet-handle:  var(--wds-color-neutral-300);
+
+    --component-avatar-fill: var(--wds-color-neutral-300);
+    --component-avatar-ring: var(--wds-line-normal);
+
+    --wds-spacing-0:  0px;
+    --wds-spacing-1:  1px;
+    --wds-spacing-2:  2px;
+    --wds-spacing-4:  4px;
+    --wds-spacing-6:  6px;
+    --wds-spacing-8:  8px;
+    --wds-spacing-10: 10px;
+    --wds-spacing-12: 12px;
+    --wds-spacing-14: 14px;
+    --wds-spacing-16: 16px;
+    --wds-spacing-20: 20px;
+    --wds-spacing-24: 24px;
+    --wds-spacing-28: 28px;
+    --wds-spacing-32: 32px;
+    --wds-spacing-40: 40px;
+    --wds-spacing-48: 48px;
+    --wds-spacing-56: 56px;
+    --wds-spacing-64: 64px;
+    --wds-spacing-80: 80px;
+
+    --wds-radius-none: 0px;
+    --wds-radius-xs:   4px;
+    --wds-radius-sm:   8px;
+    --wds-radius-md:   12px;
+    --wds-radius-lg:   16px;
+    --wds-radius-xl:   20px;
+    --wds-radius-2xl:  24px;
+    --wds-radius-full: 9999px;
+
+    --wds-font-family-primary: 'Pretendard', -apple-system, 'SF Pro Display', sans-serif;
+    --wds-font-weight-regular:  400;
+    --wds-font-weight-medium:   500;
+    --wds-font-weight-semibold: 600;
+    --wds-font-weight-bold:     700;
+    --wds-font-size-2xs: 11px;
+    --wds-font-size-xs:  12px;
+    --wds-font-size-sm:  13px;
+    --wds-font-size-md:  14px;
+    --wds-font-size-lg:  16px;
+    --wds-font-size-xl:  18px;
+    --wds-font-size-2xl: 20px;
+    --wds-font-size-3xl: 24px;
+
+    --color-brand-primary:   var(--wds-color-purple-500);
+    --color-bg-normal:       var(--wds-color-neutral-0);
+    --color-fill-neutral:    var(--wds-color-neutral-100);
+    --color-label-normal:    var(--wds-color-neutral-900);
+    --color-label-assistive: var(--wds-color-neutral-500);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--wds-font-family-primary);
+    background: #f0f0f0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: var(--wds-spacing-16);
+    color: var(--wds-label-normal);
+  }
+
+  /* === Control Panel (Pass 6 audit 제외 영역) === */
+  .control-panel {
+    width: 390px;
+    background: #1a1a2e;
+    color: #e0e0e0;
+    border-radius: 12px 12px 0 0;
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 13px;
+    font-family: ui-monospace, monospace;
+  }
+  .control-panel__row { display: flex; align-items: center; gap: 8px; }
+  .control-panel__label { color: #888; font-size: 11px; min-width: 56px; }
+  .control-panel select {
+    background: #2a2a3e; color: #e0e0e0; border: 1px solid #444;
+    border-radius: 6px; padding: 4px 8px; font-size: 12px; flex: 1;
+    font-family: ui-monospace, monospace;
+  }
+  .control-panel__states { display: flex; gap: 4px; flex-wrap: wrap; flex: 1; }
+  .control-panel__state-btn {
+    background: #2a2a3e; color: #bbb; border: 1px solid #444;
+    border-radius: 6px; padding: 4px 10px; font-size: 11px; cursor: pointer;
+    transition: all 0.15s;
+    font-family: ui-monospace, monospace;
+  }
+  .control-panel__state-btn.active {
+    background: var(--color-brand-primary); color: #fff; border-color: var(--color-brand-primary);
+  }
+  .control-panel__breadcrumb { color: #666; font-size: 11px; font-family: ui-monospace, monospace; }
+  .control-panel__hint { color: #999; font-size: 10px; font-style: italic; }
+
+  /* === Device Frame === */
+  .device-frame {
+    width: 390px;
+    height: 844px;
+    background: var(--wds-background-normal);
+    overflow: hidden;
+    position: relative;
+    border: 1px solid #ddd;
+    border-radius: 0 0 12px 12px;
+  }
+
+  .screen { display: flex; flex-direction: column; height: 100%; position: relative; }
+
+  /* === Parent surface (시각 컨텍스트 — 차단된 타유저 프로필 = app-014) === */
+  .parent-surface {
+    position: absolute;
+    inset: 0;
+    background: var(--wds-background-normal);
+    display: flex;
+    flex-direction: column;
+  }
+  .parent-status-bar {
+    height: 44px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 var(--wds-spacing-24);
+    font-size: var(--wds-font-size-md);
+    font-weight: var(--wds-font-weight-semibold);
+    color: var(--wds-label-normal);
+    flex-shrink: 0;
+  }
+  .parent-status-bar__icons { display: flex; gap: 6px; align-items: center; }
+  .parent-header {
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 var(--wds-spacing-16);
+    border-bottom: 1px solid var(--wds-line-alternative);
+    flex-shrink: 0;
+  }
+  .parent-header__back, .parent-header__more {
+    background: none; border: none; cursor: pointer;
+    color: var(--wds-label-normal); padding: var(--wds-spacing-4);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-family: inherit;
+  }
+  .parent-header__title-wrap {
+    display: flex; align-items: center; gap: var(--wds-spacing-4);
+  }
+  .parent-header__title {
+    font-size: var(--wds-font-size-lg);
+    font-weight: var(--wds-font-weight-semibold);
+    color: var(--wds-label-normal);
+  }
+  .parent-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--wds-spacing-24) var(--wds-spacing-16) var(--wds-spacing-16);
+    overflow: hidden;
+  }
+  .parent-avatar-wrap {
+    position: relative;
+    margin-bottom: var(--wds-spacing-12);
+  }
+  .parent-avatar {
+    width: 88px; height: 88px;
+    border-radius: var(--wds-radius-full);
+    background: var(--component-avatar-fill);
+    border: 2px solid var(--component-avatar-ring);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--wds-label-inverse);
+    font-size: var(--wds-font-size-2xl);
+    font-weight: var(--wds-font-weight-bold);
+    background-image: linear-gradient(135deg, var(--wds-color-neutral-300), var(--wds-color-neutral-400));
+    filter: grayscale(0.6) opacity(0.85);
+  }
+  .parent-nickname-row {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--wds-spacing-6);
+    margin-bottom: var(--wds-spacing-8);
+  }
+  .parent-nickname {
+    font-size: var(--wds-font-size-lg);
+    font-weight: var(--wds-font-weight-semibold);
+    color: var(--wds-label-normal);
+  }
+  .parent-blocked-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--wds-spacing-4);
+    background: var(--wds-fill-status-error-weak);
+    color: var(--wds-label-error);
+    padding: var(--wds-spacing-2) var(--wds-spacing-8);
+    border-radius: var(--wds-radius-full);
+    font-size: var(--wds-font-size-xs);
+    font-weight: var(--wds-font-weight-semibold);
+    line-height: 1.3;
+  }
+  .parent-stats {
+    display: flex;
+    gap: var(--wds-spacing-32);
+    margin-bottom: var(--wds-spacing-16);
+    margin-top: var(--wds-spacing-4);
+    opacity: 0.55;
+  }
+  .parent-stat {
+    display: flex; flex-direction: column; align-items: center;
+    gap: var(--wds-spacing-2);
+  }
+  .parent-stat__num {
+    font-size: var(--wds-font-size-lg);
+    font-weight: var(--wds-font-weight-bold);
+    color: var(--wds-label-normal);
+  }
+  .parent-stat__label {
+    font-size: var(--wds-font-size-xs);
+    color: var(--wds-label-assistive);
+  }
+  .parent-cta {
+    background: var(--wds-color-neutral-100);
+    color: var(--wds-label-alternative);
+    border: 1px solid var(--wds-line-normal);
+    border-radius: var(--wds-radius-md);
+    padding: var(--wds-spacing-12) var(--wds-spacing-32);
+    font-size: var(--wds-font-size-md);
+    font-weight: var(--wds-font-weight-semibold);
+    font-family: inherit;
+    width: 100%;
+    margin-bottom: var(--wds-spacing-20);
+  }
+  .parent-empty {
+    width: 100%;
+    flex: 1;
+    border-top: 1px solid var(--wds-line-alternative);
+    margin-top: var(--wds-spacing-4);
+    padding: var(--wds-spacing-32) var(--wds-spacing-16);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: var(--wds-spacing-12);
+  }
+  .parent-empty__icon {
+    width: 56px;
+    height: 56px;
+    border-radius: var(--wds-radius-full);
+    background: var(--wds-surface-secondary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--wds-label-alternative);
+    margin-top: var(--wds-spacing-24);
+  }
+  .parent-empty__msg {
+    font-size: var(--wds-font-size-md);
+    color: var(--wds-label-alternative);
+    text-align: center;
+    line-height: 1.4;
+    max-width: 240px;
+  }
+
+  /* === Modal Overlay === */
+  .modal-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    pointer-events: none;
+  }
+
+  .backdrop {
+    position: absolute;
+    inset: 0;
+    background: var(--wds-background-dimmed);
+    opacity: 0;
+    transition: opacity 0.24s ease-out;
+    cursor: pointer;
+    pointer-events: none;
+  }
+
+  .bottom-sheet {
+    position: relative;
+    background: var(--component-bottom-sheet-fill);
+    border-top-left-radius: var(--component-bottom-sheet-radius);
+    border-top-right-radius: var(--component-bottom-sheet-radius);
+    padding: var(--wds-spacing-12) 0 var(--wds-spacing-24) 0;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    transform: translateY(110%);
+    transition: transform 0.28s cubic-bezier(0.32, 0.72, 0, 1);
+    box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.08);
+    pointer-events: auto;
+    width: 100%;
+    max-height: 60%;
+  }
+
+  /* States: open (default) */
+  .modal-overlay[data-state="open"] { pointer-events: auto; }
+  .modal-overlay[data-state="open"] .backdrop { opacity: 1; pointer-events: auto; }
+  .modal-overlay[data-state="open"] .bottom-sheet { transform: translateY(0); }
+
+  /* States: loading */
+  .modal-overlay[data-state="loading"] { pointer-events: auto; }
+  .modal-overlay[data-state="loading"] .backdrop { opacity: 1; pointer-events: none; cursor: default; }
+  .modal-overlay[data-state="loading"] .bottom-sheet { transform: translateY(0); }
+
+  /* States: unblocked (transient — sheet stays open w/ toast) */
+  .modal-overlay[data-state="unblocked"] { pointer-events: auto; }
+  .modal-overlay[data-state="unblocked"] .backdrop { opacity: 1; pointer-events: auto; }
+  .modal-overlay[data-state="unblocked"] .bottom-sheet { transform: translateY(0); }
+
+  /* States: report-oos (transient — sheet stays open w/ toast) */
+  .modal-overlay[data-state="report-oos"] { pointer-events: auto; }
+  .modal-overlay[data-state="report-oos"] .backdrop { opacity: 1; pointer-events: auto; }
+  .modal-overlay[data-state="report-oos"] .bottom-sheet { transform: translateY(0); }
+
+  /* States: dismissed */
+  .modal-overlay[data-state="dismissed"] { pointer-events: none; }
+  .modal-overlay[data-state="dismissed"] .backdrop { opacity: 0; pointer-events: none; }
+  .modal-overlay[data-state="dismissed"] .bottom-sheet { transform: translateY(110%); }
+
+  /* === Sheet inner === */
+  .drag-handle {
+    width: 36px;
+    height: 4px;
+    border-radius: var(--wds-radius-full);
+    background: var(--component-bottom-sheet-handle);
+    margin: 0 auto var(--wds-spacing-4) auto;
+    flex-shrink: 0;
+  }
+
+  .action-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    padding-top: var(--wds-spacing-8);
+  }
+
+  .action-row {
+    display: flex;
+    align-items: center;
+    gap: var(--wds-spacing-12);
+    padding: var(--wds-spacing-16) var(--wds-spacing-20);
+    height: 56px;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    width: 100%;
+    text-align: left;
+    font-family: inherit;
+    transition: background-color 0.12s ease, opacity 0.15s ease;
+  }
+  .action-row:hover, .action-row:focus-visible { background: var(--wds-surface-secondary); outline: none; }
+  .action-row:active { background: var(--wds-surface-tertiary); }
+  .action-row[disabled] { cursor: not-allowed; opacity: 0.4; }
+
+  .action-row__icon {
+    width: 22px;
+    height: 22px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .action-row__label {
+    font-size: var(--wds-font-size-lg);
+    font-weight: var(--wds-font-weight-medium);
+    line-height: 1.4;
+    letter-spacing: -0.2px;
+  }
+
+  /* Unblock = neutral (AC-2.3 — 위험 강조 X) */
+  .action-row--neutral .action-row__icon,
+  .action-row--neutral .action-row__label {
+    color: var(--wds-label-normal);
+  }
+  /* Report = destructive (sibling app-012 mirror) */
+  .action-row--destructive .action-row__icon,
+  .action-row--destructive .action-row__label {
+    color: var(--wds-label-error);
+  }
+
+  /* Loading row spinner — replace icon */
+  .action-row__spinner {
+    width: 22px;
+    height: 22px;
+    display: none;
+    border: 2px solid var(--wds-line-normal);
+    border-top-color: var(--wds-label-normal);
+    border-radius: var(--wds-radius-full);
+    animation: spin 0.7s linear infinite;
+    flex-shrink: 0;
+  }
+  .action-row[data-loading="true"] .action-row__icon { display: none; }
+  .action-row[data-loading="true"] .action-row__spinner { display: inline-block; }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .row-divider {
+    border: none;
+    height: 1px;
+    background: var(--wds-line-alternative);
+    margin: 0 var(--wds-spacing-20);
+  }
+
+  /* === Toast === */
+  .toast {
+    position: absolute;
+    left: var(--wds-spacing-16);
+    right: var(--wds-spacing-16);
+    bottom: 96px;
+    background: var(--wds-color-neutral-900);
+    color: var(--wds-label-inverse);
+    padding: var(--wds-spacing-12) var(--wds-spacing-16);
+    border-radius: var(--wds-radius-md);
+    font-size: var(--wds-font-size-sm);
+    font-weight: var(--wds-font-weight-medium);
+    text-align: center;
+    z-index: 200;
+    opacity: 0;
+    transform: translateY(8px);
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (max-width: 480px) {
+    body { padding: 0; align-items: stretch; min-height: 100dvh; }
+    .control-panel { display: none; }
+    .device-frame {
+      width: 100dvw;
+      height: 100dvh;
+      border: none;
+      border-radius: 0;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- Control Panel (verifier-friendly, audit 제외) -->
+<div class="control-panel">
+  <div class="control-panel__row">
+    <span class="control-panel__label">Screen</span>
+    <select id="screen-select">
+      <option value="blocked-more-actions">BlockedMoreActionsSheet</option>
+    </select>
+  </div>
+  <div class="control-panel__row">
+    <span class="control-panel__label">State</span>
+    <div class="control-panel__states" id="state-toggles">
+      <button class="control-panel__state-btn active" data-state="open" data-state-toggle>open</button>
+      <button class="control-panel__state-btn" data-state="loading" data-state-toggle>loading</button>
+      <button class="control-panel__state-btn" data-state="unblocked" data-state-toggle>unblocked</button>
+      <button class="control-panel__state-btn" data-state="report-oos" data-state-toggle>report-oos</button>
+      <button class="control-panel__state-btn" data-state="dismissed" data-state-toggle>dismissed</button>
+    </div>
+  </div>
+  <div class="control-panel__row">
+    <span class="control-panel__breadcrumb" id="breadcrumb">blocked-more-actions · open</span>
+  </div>
+  <div class="control-panel__row">
+    <span class="control-panel__hint">v2 dogfood — modal persona 4/4 · picker exception (app-005/app-012)</span>
+  </div>
+</div>
+
+<!-- Device Frame -->
+<div class="device-frame" id="device-frame">
+  <section class="screen" id="blocked-more-actions">
+
+    <!-- Parent surface (시각 컨텍스트 — 차단된 타유저 프로필 = app-014) -->
+    <div class="parent-surface" aria-hidden="true">
+      <div class="parent-status-bar">
+        <span>9:41</span>
+        <span class="parent-status-bar__icons">
+          <svg width="16" height="11" viewBox="0 0 16 11" fill="none"><path d="M1 6.5a6.5 6.5 0 0 1 13 0v3.75a.75.75 0 0 1-.75.75H1.75A.75.75 0 0 1 1 10.25z" fill="currentColor"/></svg>
+          <svg width="16" height="11" viewBox="0 0 16 11" fill="none"><rect x="0.5" y="0.5" width="13" height="9" rx="1.5" stroke="currentColor"/><rect x="14.25" y="3.5" width="1.25" height="3" rx="0.5" fill="currentColor"/><rect x="2" y="2" width="10" height="6" rx="0.5" fill="currentColor"/></svg>
+        </span>
+      </div>
+      <header class="parent-header">
+        <button class="parent-header__back" type="button" aria-label="뒤로">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <div class="parent-header__title-wrap">
+          <span class="parent-header__title">아이디</span>
+        </div>
+        <button class="parent-header__more" type="button" aria-label="더보기">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+        </button>
+      </header>
+      <div class="parent-body">
+        <div class="parent-avatar-wrap">
+          <div class="parent-avatar"></div>
+        </div>
+        <div class="parent-nickname-row">
+          <span class="parent-nickname">ZZEM유저123</span>
+          <span class="parent-blocked-badge">
+            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></svg>
+            차단됨
+          </span>
+        </div>
+        <div class="parent-stats">
+          <div class="parent-stat"><span class="parent-stat__num">—</span><span class="parent-stat__label">팔로워</span></div>
+          <div class="parent-stat"><span class="parent-stat__num">—</span><span class="parent-stat__label">팔로잉</span></div>
+          <div class="parent-stat"><span class="parent-stat__num">—</span><span class="parent-stat__label">재생성된</span></div>
+        </div>
+        <button class="parent-cta" type="button">차단됨</button>
+        <div class="parent-empty">
+          <span class="parent-empty__icon" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" y1="2" x2="22" y2="22"/></svg>
+          </span>
+          <span class="parent-empty__msg">차단된 사용자의 콘텐츠는<br/>표시되지 않아요</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal overlay -->
+    <div class="modal-overlay" id="modal-overlay" data-state="open" role="dialog" aria-modal="true" aria-label="더보기 메뉴 (차단된 사용자)">
+
+      <div class="backdrop" id="backdrop" data-action="close" role="presentation" aria-label="더보기 메뉴 외부 영역. 탭하면 닫힙니다."></div>
+
+      <div class="bottom-sheet" id="blocked-more-actions-sheet">
+        <div class="drag-handle" aria-hidden="true"></div>
+
+        <ul class="action-list" id="action-list">
+          <li>
+            <button class="action-row action-row--neutral" id="action-unblock" type="button" data-action="unblock" aria-label="차단 해제">
+              <span class="action-row__icon" aria-hidden="true">
+                <!-- Lucide unlock -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>
+              </span>
+              <span class="action-row__spinner" aria-hidden="true"></span>
+              <span class="action-row__label" id="action-unblock-label">차단 해제</span>
+            </button>
+          </li>
+          <li><hr class="row-divider" aria-hidden="true"></li>
+          <li>
+            <button class="action-row action-row--destructive" id="action-report" type="button" data-action="report" aria-label="신고하기">
+              <span class="action-row__icon" aria-hidden="true">
+                <!-- Lucide flag -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+              </span>
+              <span class="action-row__label">신고하기</span>
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  </section>
+</div>
+
+<script>
+  // === State management ===
+  const overlay = document.getElementById('modal-overlay');
+  const breadcrumb = document.getElementById('breadcrumb');
+  const stateButtons = document.querySelectorAll('.control-panel__state-btn');
+  const toast = document.getElementById('toast');
+  const unblockBtn = document.getElementById('action-unblock');
+  const unblockLabel = document.getElementById('action-unblock-label');
+  const reportBtn = document.getElementById('action-report');
+  let toastTimer = null;
+  let restoreTimer = null;
+
+  function setState(state) {
+    overlay.setAttribute('data-state', state);
+    stateButtons.forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.state === state);
+    });
+    breadcrumb.textContent = 'blocked-more-actions · ' + state;
+    applyRowStates(state);
+    console.log('[state]', state);
+  }
+
+  function applyRowStates(state) {
+    if (state === 'loading') {
+      unblockBtn.setAttribute('data-loading', 'true');
+      unblockBtn.setAttribute('disabled', 'true');
+      unblockLabel.textContent = '차단 해제 중…';
+      reportBtn.setAttribute('disabled', 'true');
+    } else {
+      unblockBtn.removeAttribute('data-loading');
+      unblockBtn.removeAttribute('disabled');
+      unblockLabel.textContent = '차단 해제';
+      reportBtn.removeAttribute('disabled');
+    }
+  }
+
+  stateButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (restoreTimer) { clearTimeout(restoreTimer); restoreTimer = null; }
+      setState(btn.dataset.state);
+    });
+  });
+
+  // === Toast helper (no alert/confirm/prompt — verifier safe, Pass 6 #8) ===
+  function showToast(msg, duration = 1800) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), duration);
+  }
+
+  // === Action handlers ===
+  function closeSheet(source) {
+    if (overlay.getAttribute('data-state') === 'loading') return; // race 방지
+    setState('dismissed');
+    console.log('[close]', source);
+    // Demo: 1.4s 후 다시 open 으로 복원 (verifier flow 지속)
+    restoreTimer = setTimeout(() => setState('open'), 1400);
+  }
+
+  function handleUnblock() {
+    if (overlay.getAttribute('data-state') !== 'open') return;
+    setState('loading');
+    // Mock DELETE /v2/users/{userId}/block — 1.0s
+    restoreTimer = setTimeout(() => {
+      setState('unblocked');
+      showToast('차단을 해제했어요');
+      restoreTimer = setTimeout(() => {
+        setState('dismissed');
+        // 실 구현은 app-016 navigate. 데모는 1.4s 후 open 복원.
+        restoreTimer = setTimeout(() => setState('open'), 1400);
+      }, 900);
+    }, 1000);
+  }
+
+  function handleReport() {
+    if (overlay.getAttribute('data-state') !== 'open') return;
+    setState('report-oos');
+    showToast('신고 기능은 곧 제공돼요');
+    restoreTimer = setTimeout(() => {
+      setState('dismissed');
+      restoreTimer = setTimeout(() => setState('open'), 1400);
+    }, 900);
+  }
+
+  // === Event bindings (Screen Spec interactions) ===
+  document.getElementById('backdrop').addEventListener('click', () => closeSheet('backdrop'));
+  document.getElementById('action-unblock').addEventListener('click', () => handleUnblock());
+  document.getElementById('action-report').addEventListener('click', () => handleReport());
+
+  // Stop propagation on sheet — backdrop click only fires from outside
+  document.getElementById('blocked-more-actions-sheet').addEventListener('click', (e) => e.stopPropagation());
+
+  // ESC key — additional close (a11y nicety + close 2-way redundancy)
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeSheet('escape-key');
+  });
+
+  // === Init ===
+  setState('open');
+</script>
+
+</body>
+</html>

@@ -1,0 +1,142 @@
+# Context Engine — app-015 / 타유저_차단됨_더보기메뉴 (BlockedMoreActionsSheet)
+# v2 pipeline (Pass 6 anti-slop + modal archetype persona)
+
+meta:
+  task_id: "app-015"
+  sprint_id: "ugc-platform-integration-qa-2"
+  generated_at: "2026-04-25"
+  archetype: "modal"
+  persona_inlined: ".claude/teammates/design-engineer-archetypes/modal.md"
+  figma_frame: "37211:162152"
+  figma_file: "7hozJ6Pvs09q98BxvChj08"
+  references:
+    - id: "app-012"
+      dimension_focus: "modal persona (4 강제 룰) + action sheet picker exception (sibling — 차단 안된 상태)"
+    - id: "app-013"
+      dimension_focus: "modal persona (4 강제 룰) + 부모 surface mock (차단확인 시트)"
+    - id: "app-005"
+      dimension_focus: "picker exception (action sheet ≠ confirm modal — N row picker)"
+    - id: "app-014"
+      dimension_focus: "차단됨 프로필 부모 surface (badge / 콘텐츠 placeholder) — 본 시트의 시각 컨텍스트"
+  source_of_truth_resolution:
+    note: |
+      task spec 'AC-2.3 차단 대신 차단 해제 가 표시' 가 canonical.
+      Figma 37211:162152 frame 직접 접근 불가 (mcp permission denied) —
+      app-012 (sibling, 차단 안됨) 패턴을 mirror 하되 destructive '차단하기' →
+      neutral '차단 해제' 로 치환. AC-2.3 명시: '해제는 안전 액션 (위험 강조 X)'.
+
+why:
+  product_intent: "차단된 사용자의 프로필에서 차단 해제 진입점을 명확히 제공한다."
+  target_user: "차단된 타유저 프로필 (app-014) 진입 사용자 — 해제 의도"
+  success_metric: "AC-2.3 통과 — '차단' 대신 '차단 해제' 옵션이 시트에 노출"
+  user_stories:
+    - id: "US-2.3"
+      as_a: "차단한 사용자의 프로필을 다시 보던 사용자"
+      i_want: "더보기(•••)를 탭하여 액션 시트를 띄우면 '차단 해제' 옵션을 본다"
+      so_that: "다시 보고 싶은 사용자를 빠르게 해제할 수 있다"
+  acceptance_criteria:
+    - id: "AC-2.3"
+      given: "차단된 타유저 프로필 (app-014) 에 진입"
+      when: "우상단 더보기 (•••) 탭"
+      then: "Bottom sheet menu 표시 — '차단' 대신 '차단 해제' 가 노출"
+      ui_impact: "modal overlay — backdrop dim + sheet slide-up. 차단 해제 row 는 강조 (semantic.label.normal, 위험 강조 X — 해제는 안전 액션)"
+    - id: "AC-2.3.a"
+      given: "차단됨 더보기 시트 open"
+      when: "'차단 해제' row 탭"
+      then: "DELETE /v2/users/{userId}/block 호출 → loading → app-016 (차단해제 후 프로필) 진입"
+      ui_impact: "row tap → loading 표시 (행 spinner 또는 sheet inert) → success 시 sheet dismiss + navigate"
+    - id: "AC-2.3.b"
+      given: "차단됨 더보기 시트 open"
+      when: "backdrop / ESC 탭"
+      then: "시트 닫힘 (해제 없이 dismiss)"
+      ui_impact: "modal slide-down + backdrop fade-out"
+
+what:
+  tokens_needed:
+    colors:
+      - "wds.background.dimmed (#000 alpha 0.50)"
+      - "component.bottom-sheet.fill (#FFFFFF)"
+      - "component.bottom-sheet.handle (#D1D3D8)"
+      - "wds.label.normal (#212228) — 차단 해제 row (안전 액션 — neutral 강조)"
+      - "wds.label.error (#FF3B30) — 신고 row (destructive)"
+      - "wds.surface.secondary (#F7F8F9) — pressed/hover"
+      - "wds.line.alternative (#F0F1F3) — divider"
+      - "wds.label.inverse (#FFFFFF) — toast"
+      - "wds.color.neutral-900 (#212228) — toast 배경"
+    typography:
+      - "wds.font-size.lg 16px (row label)"
+      - "wds.font-weight.medium 500 (row label)"
+    spacing: ["8", "12", "16", "20", "24"]
+    radius: ["full", "xl", "md"]
+  components_needed:
+    - name: "Backdrop"
+      category: "feedback"
+    - name: "BottomSheet"
+      category: "layout"
+    - name: "DragHandle"
+      category: "feedback"
+    - name: "ActionList"
+      category: "navigation"
+    - name: "ActionRow (Unblock)"
+      category: "navigation"
+    - name: "ActionRow (Report)"
+      category: "navigation"
+    - name: "RowDivider"
+      category: "layout"
+    - name: "Toast"
+      category: "feedback"
+  patterns_needed:
+    - name: "Action sheet (picker exception)"
+      description: "N개 옵션 중 하나를 picker 처럼 선택. 시각 위계는 color (destructive vs neutral). app-005/app-012 동일 패턴."
+    - name: "Backdrop dim 0.50"
+      description: "modal persona 강제 룰 #1 — 부모 화면 시각 분리"
+
+how:
+  composition_rules:
+    - rule: "Action row 는 full-bleed (좌우 padding 20, 위아래 padding 16, height 56) — app-012 동일"
+      applies_to: ["BlockedMoreActionsSheet"]
+    - rule: "차단 해제 row (Unblock) 는 neutral label (semantic.label.normal #212228) — AC-2.3 '위험 강조 X' 명시. 차단 해제는 destructive 가 아닌 안전 액션"
+      applies_to: ["BlockedMoreActionsSheet"]
+    - rule: "신고 row (Report) 는 destructive label (semantic.label.error #FF3B30) — app-012 패턴 mirror"
+      applies_to: ["BlockedMoreActionsSheet"]
+    - rule: "Row 간 1px divider with margin 0 20 (full-bleed 면 여백)"
+      applies_to: ["BlockedMoreActionsSheet"]
+    - rule: "loading state — 시트 자체는 가시 유지, 차단 해제 row 만 spinner + label '차단 해제 중…' + 모든 close 비활성 (race condition 방지)"
+      applies_to: ["BlockedMoreActionsSheet"]
+  conditional_rendering:
+    - condition: "row tap == unblock"
+      variant_a: "DELETE /v2/users/{userId}/block 호출 → loading row spinner → success 시 sheet dismiss + 토스트 '차단을 해제했어요' + (실 구현) app-016 navigate"
+      variant_b: null
+    - condition: "row tap == report"
+      variant_a: "OOS 토스트 '신고 기능은 곧 제공돼요' + dismiss (app-012 동일)"
+      variant_b: null
+    - condition: "backdrop tap or ESC"
+      variant_a: "sheet slide-down + backdrop fade-out (해제 없이)"
+      variant_b: null
+  constraints:
+    - "Backdrop opacity ≥ 0.4 (modal 강제 룰 #1) — 0.50 사용 (app-012/app-013 일관)"
+    - "Close 2-way: backdrop tap + ESC key (Cancel row 없는 picker — 모바일 표준)"
+    - "Picker exception: primary/secondary 분류 회피 (app-005/app-012 동일)"
+    - "Title 생략 (action sheet picker — 헤더 더보기 ••• 컨텍스트 활용)"
+    - "차단 해제 row 위험 강조 금지 (AC-2.3) — neutral color 사용"
+    - "loading 중 backdrop tap / ESC 무력화 (race condition 방지)"
+    - "Pretendard 외 font 금지 (Pass 6 #4)"
+    - "raw hex 금지 — tokens.css 정의된 var(--*) 만 사용 (Pass 6 #1)"
+    - "interactive 요소에 unicode emoji 금지 — Lucide-style inline SVG (Pass 6 #2)"
+    - "blocking dialog (alert/confirm/prompt) 금지 (Pass 6 #8)"
+  priority_order:
+    - "차단 해제 (AC-2.3 핵심 — 본 시트의 raison d'être)"
+    - "신고 (스프린트 OOS — 시각 노출만, app-012 mirror)"
+    - "Backdrop (escape route 가시성)"
+
+assets:
+  icons:
+    kind: "illustration"
+    needs_real_content: false
+    source: "Lucide inline SVG (unlock + flag + arrow-left + dots + status-bar SVG)"
+    notes: "PR #31 패턴 — 모든 아이콘 inline SVG, 외부 fetch 0. unlock = 차단 해제 (기존 ban 의 반대 시각 의미)."
+  parent_surface:
+    kind: "real-image"
+    needs_real_content: false
+    source: "app-014 (차단됨 프로필) mock surface 재사용 — '차단됨' badge + 콘텐츠 placeholder 영역. decorative aria-hidden."
+    notes: "본 화면의 콘텐츠는 modal overlay. parent 는 시각 컨텍스트만."

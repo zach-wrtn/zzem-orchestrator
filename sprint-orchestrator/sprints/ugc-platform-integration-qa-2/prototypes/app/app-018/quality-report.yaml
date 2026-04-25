@@ -1,0 +1,206 @@
+# Quality Report — app-018 UnblockConfirmSheet
+# Pass 6 anti-slop audit + modal archetype persona
+# Generated: 2026-04-25
+
+sprint_id: "ugc-platform-integration-qa-2"
+task_id: "app-018"
+screen: "UnblockConfirmSheet"
+archetype: "modal"
+figma_frame: "37290:170093"
+sibling: "app-013 BlockConfirmSheet (inverse pattern)"
+
+# ─────────────────────────────
+# Pass 6 Anti-Slop Audit (10 checks)
+# ─────────────────────────────
+pass_6_anti_slop:
+  status: "passed"
+  score: "9/9 (10번 exemplar n/a)"
+  checks:
+    - id: 1
+      name: "hex-not-in-tokens (.screen 후손)"
+      status: "pass"
+      detail: |
+        prototype.html 의 hex 25개 추출. tokens.css 정의 외 4개 (#1a1a2e, #2a2a3e,
+        #e0e0e0, #f0f0f0) 는 모두 .control-panel / body / device-frame border —
+        .screen 외부. .screen 후손 hex 는 모두 토큰 정의됨 (purple/neutral/red 시리즈).
+        그 외 미정의 short hex (#888 #bbb #666 #999 #444 #fff #ddd) 도 모두 control-panel.
+    - id: 2
+      name: "emoji on interactive elements"
+      status: "pass"
+      detail: |
+        모든 button (close, cancel, unblock, parent-back, parent-refresh,
+        parent-list__action × 4) 는 lucide inline SVG 또는 한국어 텍스트만.
+        info row icons (unlock, eye) 도 lucide. 이모지 0건.
+    - id: 3
+      name: "card border-left slop"
+      status: "pass"
+      detail: "border-left 사용 0건. info-rows 는 surface fill + radius. parent-list 는 border-bottom 만 (구분선 — 의도된 사용)."
+    - id: 4
+      name: "font-family Pretendard 외 (.screen 후손)"
+      status: "pass"
+      detail: |
+        font-family 선언: Pretendard (var --wds-font-family-primary, body),
+        ui-monospace (.control-panel 만), inherit (.screen 내 button + parent-cta).
+        .screen 후손에 Pretendard 외 명시 0건.
+    - id: 5
+      name: "브랜드 보라 그라디언트 전면 사용"
+      status: "pass"
+      detail: |
+        linear-gradient 사용 0건. unblock primary 는 단색 brand fill
+        (--component-button-primary-fill → #8752FA). info-icon 도 단색 brand-weak fill.
+    - id: 6
+      name: "placeholder-image 주 콘텐츠 점유"
+      status: "pass"
+      detail: |
+        ProfileImage 100x100 + parent-list__avatar 48x48 × 4 — 모두
+        context-engine.yaml assets.avatars.kind: gradient-token (needs_real_content: false).
+        단색 fill + 닉네임 initial 로 표시. Pass 6 #6 면제 (의도된 fallback).
+    - id: 7
+      name: "DOM 이벤트 바인딩 ↔ Spec interactions 정합"
+      status: "pass"
+      detail: |
+        Spec interactions: 5개 (backdrop tap, close-btn tap, cancel-btn tap,
+        unblock-btn tap, api-success navigate).
+        prototype.html bindings: backdrop click + close-btn click + cancel-btn click +
+        unblock-btn click + ESC keydown + state buttons (control-panel) + sheet click stop.
+        Spec 의 5개 user-facing interaction 모두 바인딩됨. api-success 는 setTimeout
+        으로 시뮬레이션. ESC 는 강제 룰 #2 close 보조 channel.
+    - id: 8
+      name: "alert/confirm/prompt 사용"
+      status: "pass"
+      detail: "0건. 모든 피드백은 toast + setState. closeSheet/confirmUnblock 모두 named handler."
+    - id: 9
+      name: "modal archetype persona 강제 룰 4/4"
+      status: "pass"
+      detail: "modal_persona 섹션 참조 — 4/4 모두 통과."
+    - id: 10
+      name: "exemplar drift"
+      status: "n/a"
+      detail: "modal archetype 은 exemplar 인라인 대상 아님. 단, sibling app-013 와 의도적 inverse — drift 가 아니라 paired pattern."
+
+# ─────────────────────────────
+# Modal Archetype Persona (강제 룰 4/4)
+# ─────────────────────────────
+modal_persona:
+  status: "passed"
+  rules:
+    - id: 1
+      name: "Backdrop opacity ≥ 0.4"
+      status: "pass"
+      detail: |
+        --wds-background-dimmed: rgba(0, 0, 0, 0.50). 0.50 ≥ 0.4. 부모 차단관리
+        리스트 (parent-surface) 명확히 dim 처리 + 시트 콘텐츠 가독성 확보.
+    - id: 2
+      name: "닫기 2-way 보장 (X + 외부 backdrop tap)"
+      status: "pass"
+      detail: |
+        Close trigger 3개:
+        (a) #close-btn (X 버튼) — 우상단 absolute, lucide x SVG
+        (a) #cancel-btn (취소 버튼) — secondary ghost
+        (b) #backdrop tap — 외부 영역 click 핸들러
+        + bonus: ESC keydown
+        screen-spec interactions 에 close-overlay 트리거 4개 명시.
+        강제 룰 #2 충족 (2개 이상).
+    - id: 3
+      name: "Primary CTA 1개 + secondary 0-1개"
+      status: "pass"
+      detail: |
+        Primary: #unblock-btn '차단 해제하기' (brand purple #8752FA) — 1개.
+        Secondary: #cancel-btn '취소' (ghost outline) — 1개.
+        총 1+1 정확히 충족. Primary 색상은 사용자 prompt 지침 ("destructive 보다
+        neutral/brand") 에 따라 brand 채택. Sibling app-013 의 destructive 빨강과
+        의도적 대비 — 해제 = 회복 액션.
+    - id: 4
+      name: "Title / 명확한 콘텍스트"
+      status: "pass"
+      detail: |
+        sheet-title h1: "@zzem_user_123님 차단을 해제하시겠어요?" — handle + 액션 명시.
+        modal 만 떠있을 때도 사용자가 '누구의 / 무엇을 / 왜' 즉시 인지 가능.
+        + ProfileImage 100x100 으로 시각 식별 보강.
+
+  recommended_rules:
+    - id: 1
+      name: "Bottom sheet 형태 (모바일 표준)"
+      status: "applied"
+      detail: "화면 하단 anchor + slide-up transition (transform 0.28s cubic-bezier)."
+    - id: 2
+      name: "Drag handle 가시"
+      status: "applied"
+      detail: "36x4 pill, neutral-300 색, 시트 상단 center."
+    - id: 3
+      name: "첫 input/option 자동 focus"
+      status: "skipped"
+      reason: |
+        confirm modal 에는 input 필드가 없음 (CTA 만). primary 를 autofocus 하면
+        사용자가 ENTER 로 의도치 않게 해제 실행할 위험 — destructive 만큼 심각하진
+        않으나 race condition 방지 위해 skip. archetype_recommendation_skipped 로 로깅.
+
+# ─────────────────────────────
+# Quality Score (from spec)
+# ─────────────────────────────
+quality_score:
+  extraction_accuracy: "1.0 (20/20)"
+  schema_completeness: "1.0+ (9/7 — required + visual_rules + quality_score)"
+  fabrication_risk: "low"
+  context_coverage:
+    why_linked: "3/3 (AC-2.4, AC-2.5, AC-2.5b 모두 ui_impact 매핑됨)"
+    what_resolved: "10/10 컴포넌트 모두 토큰 매핑 완료"
+
+# ─────────────────────────────
+# Inferred Fields (intent.md 게이트 후 확정 필요)
+# ─────────────────────────────
+inferred_fields:
+  - field: "Primary 버튼 색상 (brand vs neutral)"
+    detail: "사용자 prompt 의 '신모 destructive 아님 — neutral 또는 brand' 중 brand 채택. Figma 대조 필요."
+  - field: "Info row 개수 (2 rows)"
+    detail: "PRD '안내 1-2 row' → sibling app-013 의 3 rows 에서 알림 row 제외. Figma 가 1 row 또는 다른 구성일 수 있음."
+  - field: "Info row 카피 (sibling 반전)"
+    detail: "PRD 미명시. app-013 카피 ('보이지 않아요' / '숨겨져요') 를 ('다시 보여요' / '다시 보여요') 로 반전. Figma 텍스트 노드 대조 필요."
+  - field: "Title 표기 ('@handle' vs '{nickname}')"
+    detail: "사용자 prompt 의 '@아이디' 채택. PRD/Figma 대조 필요."
+
+# ─────────────────────────────
+# Tokens 신규 등록
+# ─────────────────────────────
+tokens_added: []  # 0개 — 기존 sprint tokens.css 재사용
+tokens_reused:
+  - "--wds-fill-brand-primary (#8752FA) — unblock primary fill"
+  - "--wds-fill-brand-strong (#7040E0) — unblock pressed"
+  - "--wds-fill-brand-weak (#EBE1FF) — info-icon fill (회복 톤)"
+  - "--component-button-primary-fill / -label / -fill-pressed"
+  - "--component-button-secondary-ghost-fill / -label"
+  - "--component-bottom-sheet-fill / -radius / -handle"
+  - "--component-avatar-fill / -ring"
+  - "--wds-background-dimmed (rgba(0,0,0,0.50))"
+tokens_added_local:
+  # prototype.html 내부 별칭만 — sprint tokens.css 변경 없음
+  - "--component-button-primary-fill-pressed (var --wds-fill-brand-strong)"
+  - "--component-info-icon-brand-fill (var --wds-fill-brand-weak)"
+  - "--component-info-icon-brand-color (var --wds-fill-brand-primary)"
+
+# ─────────────────────────────
+# Logging
+# ─────────────────────────────
+activity_log:
+  - phase: "started"
+    message: "app-018 modal v2 prototype 태스크 수령 (sibling: app-013 inverse)"
+  - phase: "context_engine"
+    message: "WHY 3 ACs / WHAT 10 components / HOW 6 rules / Assets 6 slots 조립"
+  - phase: "tokens_generated"
+    message: "신규 sprint-level 토큰 0건. 기존 brand 시리즈 + bottom-sheet 시리즈 재사용."
+  - phase: "spec_complete"
+    message: "UnblockConfirmSheet.spec.md 작성 — accuracy 1.0, fabrication low"
+  - phase: "preview_generated"
+    message: "UnblockConfirmSheet.intent.md 생성 (fabrication low 트리거), gate_questions 5개"
+  - phase: "html_alpha"
+    message: "prototype-alpha 생략 — single-screen modal, structure + content 단일 Write 통합 (sibling 패턴 활용)"
+  - phase: "html_final"
+    message: "prototype.html 생성 (open / loading / dismissed 3 states + 부모 차단관리 list 시각 컨텍스트)"
+  - phase: "anti_slop_audit"
+    message: "Pass 6 anti-slop audit 9/9 (10번 exemplar n/a) 통과"
+  - phase: "archetype_persona_passed"
+    message: "modal persona 강제 룰 4/4 통과"
+  - phase: "archetype_recommendation_skipped"
+    message: "modal 권장 룰 #3 (첫 input autofocus) 거절: confirm modal 은 input 없음 + race condition 방지"
+  - phase: "completed"
+    message: "Pass 6 9/9 + persona 4/4 + fabrication low + intent.md gate 대기"
