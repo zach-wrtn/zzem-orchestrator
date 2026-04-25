@@ -1,5 +1,26 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-04-25T00:00:00Z",
-  "exemplars": []
+  "generated_at": "2026-04-25T05:37:31.653Z",
+  "exemplars": [
+    {
+      "id": "v2-dogfood-free-tab-app-001-freetabscreen",
+      "sprint_id": "v2-dogfood",
+      "task_id": "free-tab-app-001",
+      "screen_name": "FreeTabScreen",
+      "archetype": "feed",
+      "why_curated": "v2 dogfood validation 2026-04-25. Pass 6 9/9 + feed persona 4/4 (skeleton/empty/refresh/6+ items). verify 22 clicks. Demonstrates full tokenization (no raw hex), gradient asset slots, control-panel preserved.",
+      "prototype_path": "sprint-orchestrator/dogfood/v2-exercise/free-tab-app-001/prototype.html",
+      "screenshot_path": "sprint-orchestrator/dogfood/v2-exercise/free-tab-app-001/screenshots/default.png",
+      "design_dimensions": [
+        "token_compliance",
+        "archetype_fit",
+        "interaction_completeness"
+      ],
+      "added_by": "zach@wrtn.io",
+      "added_at": "2026-04-25T05:37:31.653Z",
+      "last_validated_at": "2026-04-25T05:37:31.653Z",
+      "validation_status": "valid",
+      "notes": "Bootstrap from PR #29-#35 dogfood. See sprint-orchestrator/dogfood/v2-exercise/free-tab-app-001/comparison-report.md for v2-vs-existing analysis."
+    }
+  ]
 }
