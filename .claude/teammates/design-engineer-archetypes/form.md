@@ -9,9 +9,9 @@
 | # | 룰 | 검증 방법 |
 |---|----|---------|
 | 1 | 모든 input 에 inline validation 정의 — `screen-spec.yaml > states` 에 `error.{field-id}` 또는 `validation_rules` 블록 | `grep -E "error\|validation" screen-spec.yaml` |
-| 2 | Submit 버튼 disabled 상태 정의됨 — 모든 required 필드 valid 까지 비활성 | `screen-spec.yaml > states` 에 `submit_disabled` + `submit_enabled` 둘 다 |
+| 2 | Submit 버튼 disabled 상태 정의됨 — 모든 required 필드 valid 까지 비활성. **면제**: `screen-spec.yaml > Meta.instant_save: true` 명시 시 미적용 (Submit 버튼 자체가 없는 즉시 저장 패턴). | `screen-spec.yaml > states` 에 `submit_disabled` + `submit_enabled` 둘 다, **또는** `Meta.instant_save: true` |
 | 3 | Error message 가 해당 입력 직하 (위·우측 alert 박스 금지) — 모바일 UX 표준 | 시각 검토 또는 `grep -B2 "error_message" screen-spec.yaml` |
-| 4 | Primary action 1개만 (Submit / Save / 다음 등) — 동급 강조 버튼 금지 | 버튼 분류: primary 1, 다른 버튼은 ghost/text |
+| 4 | Primary action 1개만 (Submit / Save / 다음 등) — 동급 강조 버튼 금지. **면제**: `Meta.instant_save: true` 시 primary action 0개 허용 (각 input/toggle 이 자체 commit). | 버튼 분류: primary 1, 다른 버튼은 ghost/text. instant_save 시 primary 0 허용. |
 
 ## 권장 룰 (트레이드오프 — 거절 시 로그)
 
@@ -26,6 +26,31 @@
 - **로그인**: 이메일 input + 비밀번호 input (눈 토글) → "로그인" primary (disabled until both filled + valid) → 비밀번호 찾기 text link.
 - **신고 form**: 사유 라디오 (5개) → 추가 설명 textarea (선택) → "신고" primary. 사유 선택 시 enabled.
 - **프로필 편집**: 아바타 변경 → 이름 input → bio textarea → 링크 input → "저장" sticky bottom primary. 변경 발생 시 enabled.
+
+## 면제 조건 (Instant Save)
+
+토글/체크박스/라디오 변경 즉시 서버 PATCH 가 발사되는 화면 (예: 알림 설정, 계정 보안 옵션, 다크모드 토글) 은 본질적으로 Submit 버튼이 없다. 이 경우 강제 룰 #2 (submit disabled) 와 #4 (primary action 1개) 가 적용 불가.
+
+**활성 조건**:
+
+- `screen-spec.yaml > Meta.instant_save: true` 명시
+- 추가로 `screen-spec.yaml > states` 에 `saving.{field-id}` (저장 중 spinner) + `saved.{field-id}` (성공 체크) + `error.{field-id}` (롤백) 정의 필수
+
+**면제 시에도 유지되는 룰**:
+
+- 강제 룰 #1 (inline validation) — 잘못된 값 즉시 표시 + 서버 거부 시 토글 원위치
+- 강제 룰 #3 (error message 위치) — 에러 발생 필드 직하
+
+**Anti-Pattern (면제 남용 금지)**:
+
+- 일반 form 인데 `instant_save: true` 로 회피 — Sprint Lead 가 PRD 와 대조 검증.
+- toggle 조합이 강한 의존성 (A 켜야 B 가능) 인데 즉시 저장 — 부분 적용 상태 위험. 이 경우 일반 form 으로 회귀.
+
+**Good Pattern Examples** (면제 적용):
+
+- **알림 설정**: 카테고리별 toggle 8개, 각각 변경 즉시 PATCH `/notifications/preferences`. 우상단 spinner + saved 체크 800ms.
+- **계정 보안**: "2단계 인증" 토글 → 즉시 modal 진입 → 완료 후 자동 토글 on.
+- **다크모드 토글**: 즉시 테마 전환 + 서버 동기화 백그라운드.
 
 ## Anti-Patterns
 

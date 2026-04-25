@@ -15,6 +15,7 @@ platform: "iOS / Android (React Native)"
 language: "ko"
 frame: "390x844"
 theme: "light"
+instant_save: false  # form archetype 한정 — toggle/체크박스 즉시 저장 패턴 시 true (form persona #2/#4 면제)
 ```
 
 **`screen_archetype` 선택 가이드** (한 화면 1개만 선택, 가장 우세한 패턴 기준):
@@ -27,6 +28,8 @@ theme: "light"
 | **form** | 입력 필드 + validation + submit | 로그인, 신고, 프로필 편집 |
 | **modal** | 부분 화면 + backdrop + dismiss | confirm, share sheet, filter 시트 |
 | **empty_state** | 컨텐츠 0건 안내 + 1 primary CTA | 빈 피드, 검색결과 없음, 첫 사용자 |
+
+**`instant_save` 플래그**: form archetype 에 한해 의미. `true` 시 form persona #2 (submit disabled) / #4 (primary 1개) 면제. 자세한 면제 조건은 `.claude/teammates/design-engineer-archetypes/form.md > 면제 조건 (Instant Save)` 참조.
 
 복합 화면 (예: detail + 하단 form) 인 경우 가장 시각 면적 큰 영역 기준. 분류 모호 시 Sprint Lead 에 질의.
 
