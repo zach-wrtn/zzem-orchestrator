@@ -306,13 +306,11 @@ qa-fix/
 └── retro.md                    ✓ 항상
 ```
 
-## 14. Open Questions
+## 14. Open Questions — Resolved 2026-04-26
 
-설계 단계에서 의도적으로 미결로 남긴 항목 — 구현 계획 단계에서 결정.
-
-- `--type=qa-fix` sprint의 디렉토리 초기화 로직: 기존 `--phase=init`을 재사용할지, qa-fix 전용 init을 둘지
-- KB 후보 자동 변환 시 zzem-kb 스킬 호출 인터페이스 (`zzem-kb:write` 입력 스키마 확인 필요)
-- Maestro flow 자동 생성 가능 범위 (현재 e2e_maestro 인프라 capability 검증 필요)
+- **`--type=qa-fix` sprint init:** Extend existing `phase-init.md` with a conditional branch on `sprint-config.yaml.type`. No separate phase file.
+- **`zzem-kb:write-pattern` interface:** Category enum is `correctness | completeness | integration | edge_case | code_quality | design_proto | design_spec`. KB candidate template (`qa-fix-kb-candidate-template.yaml`) uses this exact enum.
+- **Maestro flow auto-generation:** Best-effort. FE Engineer adds a flow file when feasible; otherwise Stage 5 evidence cites N/A with explicit reason. No infrastructure change.
 
 ---
 
