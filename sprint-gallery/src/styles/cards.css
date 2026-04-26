@@ -1,0 +1,107 @@
+/* Shared exemplar-card styles. Used on /explore and /clusters/[id]. */
+
+.exp-grid {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+}
+
+.exp-card-cell { position: relative; }
+
+.exp-save {
+  position: absolute; top: 8px; right: 8px;
+  z-index: 2;
+  width: 28px; height: 28px;
+  display: grid; place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--bg) 78%, transparent);
+  color: var(--text);
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+  font-size: 14px; line-height: 1;
+  opacity: 0;
+  transition: opacity var(--dur-ui) var(--ease-out-quart),
+              color var(--dur-ui) var(--ease-out-quart),
+              border-color var(--dur-ui) var(--ease-out-quart);
+}
+.exp-card-cell:hover .exp-save,
+.exp-save.on,
+.exp-save:focus-visible { opacity: 1; }
+.exp-save:hover { border-color: var(--accent); color: var(--accent); }
+.exp-save.on { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 32%, transparent); }
+
+.exp-card {
+  display: flex; flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--border); border-radius: var(--radius-card);
+  overflow: hidden;
+  transition: transform var(--dur-spring-soft) var(--spring-soft),
+              border-color var(--dur-spring-soft) var(--spring-soft),
+              box-shadow var(--dur-spring-soft) var(--spring-soft);
+}
+.exp-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--accent);
+  box-shadow: 0 14px 32px rgba(255, 122, 99, 0.18);
+}
+
+.exp-thumb {
+  aspect-ratio: 4/5; background: var(--accent-grad);
+  position: relative;
+}
+.exp-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.exp-placeholder {
+  width: 100%; height: 100%; display: grid; place-items: center;
+  color: rgba(255,255,255,0.9); padding: 12px; text-align: center;
+  font-size: var(--fs-small); font-weight: 500; text-wrap: balance;
+}
+
+.exp-archetype {
+  position: absolute; top: 8px; left: 8px;
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 3px 8px 3px 6px; border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--bg) 78%, transparent);
+  color: var(--text);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+}
+.exp-archetype-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--archetype-color, var(--text-dim));
+  flex-shrink: 0;
+}
+.exp-archetype[data-archetype="feed"]        { --archetype-color: var(--archetype-feed); }
+.exp-archetype[data-archetype="detail"]      { --archetype-color: var(--archetype-detail); }
+.exp-archetype[data-archetype="onboarding"]  { --archetype-color: var(--archetype-onboarding); }
+.exp-archetype[data-archetype="form"]        { --archetype-color: var(--archetype-form); }
+.exp-archetype[data-archetype="modal"]       { --archetype-color: var(--archetype-modal); }
+.exp-archetype[data-archetype="empty_state"] { --archetype-color: var(--archetype-empty_state); }
+.exp-archetype[data-archetype="nav_list"]    { --archetype-color: var(--archetype-nav_list); }
+
+.exp-meta {
+  padding: 10px 12px;
+  display: flex; flex-direction: column; gap: 2px;
+}
+.exp-title {
+  font-size: var(--fs-small); font-weight: 500; color: var(--text);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.exp-sprint {
+  font-family: var(--font-mono); font-size: 11px;
+  color: var(--text-faint);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .exp-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .exp-card { transition: border-color var(--dur-fast) linear; }
+  .exp-card:hover { transform: none; box-shadow: none; }
+}

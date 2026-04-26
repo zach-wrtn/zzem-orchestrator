@@ -1,0 +1,229 @@
+---
+import Layout from '@/components/Layout.astro';
+import ClusterApp from '@/components/clusters/ClusterApp';
+import type { ExemplarItem } from '@/components/explore/ExemplarExplore';
+import { loadExemplars } from '@/lib/exemplars/load';
+import { basename } from 'node:path';
+
+const exemplars = await loadExemplars();
+const base = import.meta.env.BASE_URL;
+const join = (a: string, b: string) => `${a}/${b}`.replace(/\/+/g, '/');
+
+const items: ExemplarItem[] = exemplars.map((ex) => ({
+  id: ex.id,
+  title: ex.screen_name,
+  archetype: ex.archetype,
+  sprintSlug: ex.sprint_id,
+  sprintTitle: ex.sprint_id,
+  designDimensions: ex.design_dimensions,
+  thumbnail: join(base, `exemplars/${ex.id}/screenshots/${basename(ex.screenshot_path)}`),
+  href: join(base, `exemplars/${ex.id}/`),
+  vtName: `exemplar-${ex.id}`,
+  whyCurated: ex.why_curated,
+  lastValidatedAt: ex.last_validated_at,
+}));
+---
+<Layout title="Clusters — ZZEM Sprints">
+  <header class="cl-head">
+    <p class="cl-eyebrow">Personal collections</p>
+    <h1 class="cl-h1">Clusters</h1>
+    <p class="cl-lede">Save exemplars into named collections. Stored in your browser; nothing syncs.</p>
+  </header>
+  <ClusterApp client:load exemplars={items} base={base} />
+</Layout>
+
+<style>
+  .cl-head { padding: 24px 0 32px; max-width: 60ch; }
+  .cl-eyebrow {
+    font-family: var(--font-mono); font-size: var(--fs-label);
+    letter-spacing: var(--ls-label); color: var(--text-dim);
+    text-transform: uppercase; margin: 0 0 8px;
+  }
+  .cl-h1 {
+    font-size: var(--fs-h1); line-height: var(--lh-h1); letter-spacing: var(--ls-h1);
+    font-weight: 600; margin: 0 0 12px;
+  }
+  .cl-lede {
+    font-size: var(--fs-lead); line-height: var(--lh-lead);
+    color: var(--text-dim); margin: 0;
+  }
+</style>
+
+<style is:global>
+  .cluster-app { display: flex; flex-direction: column; gap: 24px; }
+  .cluster-loading { color: var(--text-dim); }
+
+  .cluster-toolbar {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    flex-wrap: wrap;
+  }
+  .cluster-count {
+    font-family: var(--font-mono); font-size: var(--fs-label);
+    letter-spacing: var(--ls-label); text-transform: uppercase;
+    color: var(--text-dim); margin: 0;
+  }
+  .cluster-new {
+    background: transparent; color: var(--text-dim);
+    border: 1px solid var(--border); border-radius: var(--radius-chip);
+    padding: 8px 12px;
+    font-family: var(--font-mono); font-size: var(--fs-label);
+    letter-spacing: var(--ls-label); text-transform: uppercase;
+    cursor: pointer;
+    transition: color var(--dur-ui) var(--ease-out-quart),
+                border-color var(--dur-ui) var(--ease-out-quart);
+  }
+  .cluster-new:hover { color: var(--accent); border-color: var(--accent); }
+
+  .cluster-create { display: flex; gap: 6px; align-items: stretch; flex-wrap: wrap; }
+  .cluster-create input {
+    flex: 1 1 200px; min-width: 200px;
+    padding: 8px 12px;
+    background: var(--surface); color: var(--text);
+    border: 1px solid var(--border); border-radius: var(--radius-chip);
+    outline: none; font-size: var(--fs-small);
+  }
+  .cluster-create input:focus { border-color: var(--accent); }
+  .cluster-create button {
+    background: transparent; color: var(--text);
+    border: 1px solid var(--border); border-radius: var(--radius-chip);
+    padding: 8px 14px;
+    font-family: var(--font-mono); font-size: var(--fs-label);
+    letter-spacing: var(--ls-label); text-transform: uppercase;
+    cursor: pointer;
+    transition: color var(--dur-ui) var(--ease-out-quart),
+                border-color var(--dur-ui) var(--ease-out-quart);
+  }
+  .cluster-create button:disabled { opacity: 0.4; cursor: not-allowed; }
+  .cluster-create button:not(:disabled):hover { color: var(--accent); border-color: var(--accent); }
+  .cluster-create-cancel { color: var(--text-dim); }
+
+  .cluster-empty-state {
+    padding: 64px 24px; text-align: center;
+    border: 1px dashed var(--border); border-radius: var(--radius-card);
+    color: var(--text-dim);
+  }
+  .cluster-empty-title {
+    font-size: var(--fs-h2); color: var(--text); margin: 0 0 8px; font-weight: 600;
+  }
+  .cluster-empty-body { margin: 0; line-height: 1.6; }
+  .cluster-empty-body a { color: var(--accent-text); text-decoration: underline; }
+
+  .cluster-grid {
+    list-style: none; margin: 0; padding: 0;
+    display: grid; gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  }
+  .cluster-card {
+    width: 100%;
+    display: flex; flex-direction: column;
+    background: var(--surface);
+    border: 1px solid var(--border); border-radius: var(--radius-card);
+    overflow: hidden; cursor: pointer;
+    text-align: left;
+    padding: 0;
+    transition: transform var(--dur-spring-soft) var(--spring-soft),
+                border-color var(--dur-spring-soft) var(--spring-soft),
+                box-shadow var(--dur-spring-soft) var(--spring-soft);
+  }
+  .cluster-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--accent);
+    box-shadow: 0 14px 32px rgba(255, 122, 99, 0.18);
+  }
+  .cluster-mosaic {
+    position: relative;
+    width: 100%;
+    padding-bottom: 62.5%; /* 16:10 aspect via padding hack — robust w/ grid + imgs */
+    background: var(--border);
+    overflow: hidden;
+  }
+  .cluster-mosaic > * {
+    position: absolute;
+    background: var(--accent-grad);
+    overflow: hidden;
+  }
+  /* Quadrants: TL, TR, BL, BR — children render in this order from JSX. */
+  .cluster-mosaic > *:nth-child(1) { top: 0;     left: 0;    width: calc(50% - 0.5px); height: calc(50% - 0.5px); }
+  .cluster-mosaic > *:nth-child(2) { top: 0;     right: 0;   width: calc(50% - 0.5px); height: calc(50% - 0.5px); }
+  .cluster-mosaic > *:nth-child(3) { bottom: 0;  left: 0;    width: calc(50% - 0.5px); height: calc(50% - 0.5px); }
+  .cluster-mosaic > *:nth-child(4) { bottom: 0;  right: 0;   width: calc(50% - 0.5px); height: calc(50% - 0.5px); }
+  .cluster-mosaic img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .cluster-mosaic-empty {
+    position: absolute; inset: 0;
+    display: grid; place-items: center;
+    color: rgba(255,255,255,0.85);
+    font-family: var(--font-mono); font-size: var(--fs-label);
+    text-transform: uppercase; letter-spacing: var(--ls-label);
+    background: var(--accent-grad);
+  }
+  .cluster-mosaic-placeholder { background: var(--accent-grad); opacity: 0.6; }
+  .cluster-card-meta {
+    padding: 10px 14px;
+    display: flex; flex-direction: column; gap: 2px;
+  }
+  .cluster-card-name {
+    font-size: var(--fs-small); font-weight: 600; color: var(--text);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .cluster-card-count {
+    font-family: var(--font-mono); font-size: 11px; color: var(--text-faint);
+  }
+
+  .cluster-detail-head {
+    display: flex; flex-direction: column; gap: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .cluster-back {
+    align-self: flex-start;
+    background: transparent; color: var(--text-dim); border: 0;
+    padding: 4px 0; cursor: pointer;
+    font-family: var(--font-mono); font-size: var(--fs-label);
+    letter-spacing: var(--ls-label); text-transform: uppercase;
+    transition: color var(--dur-ui) var(--ease-out-quart);
+  }
+  .cluster-back:hover { color: var(--accent); }
+  .cluster-detail-title-row {
+    display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap;
+  }
+  .cluster-detail-title {
+    font-size: var(--fs-h1); line-height: var(--lh-h1); letter-spacing: var(--ls-h1);
+    font-weight: 600; margin: 0; color: var(--text);
+    cursor: text; padding: 2px 4px; margin-left: -4px;
+    border-radius: 4px;
+    transition: background var(--dur-ui) var(--ease-out-quart);
+  }
+  .cluster-detail-title:hover { background: var(--surface); }
+  .cluster-detail-title-input {
+    font-size: var(--fs-h1); line-height: var(--lh-h1); letter-spacing: var(--ls-h1);
+    font-weight: 600; margin: 0; color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--accent); border-radius: 4px;
+    padding: 2px 4px; margin-left: -5px;
+    outline: none;
+    font-family: var(--font-sans);
+  }
+  .cluster-detail-count {
+    font-family: var(--font-mono); font-size: var(--fs-label);
+    letter-spacing: var(--ls-label); text-transform: uppercase;
+    color: var(--text-dim);
+  }
+  .cluster-delete {
+    align-self: flex-start;
+    background: transparent;
+    color: var(--text-faint);
+    border: 1px solid var(--border); border-radius: var(--radius-chip);
+    padding: 6px 10px; cursor: pointer;
+    font-family: var(--font-mono); font-size: var(--fs-label);
+    letter-spacing: var(--ls-label); text-transform: uppercase;
+    transition: color var(--dur-ui) var(--ease-out-quart),
+                border-color var(--dur-ui) var(--ease-out-quart);
+  }
+  .cluster-delete:hover { color: var(--danger); border-color: var(--danger); }
+
+  @media (max-width: 720px) {
+    .cluster-detail-head { gap: 8px; }
+    .cluster-detail-title { font-size: var(--fs-h2); }
+    .cluster-detail-title-input { font-size: var(--fs-h2); }
+  }
+</style>

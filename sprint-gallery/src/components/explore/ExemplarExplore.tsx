@@ -1,4 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import ClusterMenu from '@/components/clusters/ClusterMenu';
+import { clustersContaining, subscribeToClusters } from '@/lib/clusters';
 
 export type ExemplarItem = {
   id: string;
@@ -64,6 +66,10 @@ export default function ExemplarExplore({ items }: Props) {
   const [selectedDimensions, setSelectedDimensions] = useState<Set<string>>(() => new Set());
   const [sortMode, setSortMode] = useState<SortMode>('archetype');
   const [hydrated, setHydrated] = useState(false);
+  const [menuFor, setMenuFor] = useState<{ id: string; rect: DOMRect } | null>(null);
+  const [membershipTick, setMembershipTick] = useState(0);
+
+  useEffect(() => subscribeToClusters(() => setMembershipTick((n) => n + 1)), []);
 
   useEffect(() => {
     setSelectedArchetypes(readParam('archetype'));
@@ -290,8 +296,27 @@ export default function ExemplarExplore({ items }: Props) {
           <p className="exp-empty">No exemplars match these filters.</p>
         ) : (
           <ul className="exp-grid">
-            {filtered.map((it) => (
-              <li key={it.id}>
+            {filtered.map((it) => {
+              const memberCount = membershipTick >= 0 ? clustersContaining(it.id).length : 0;
+              return (
+              <li key={it.id} className="exp-card-cell">
+                <button
+                  type="button"
+                  className={`exp-save ${memberCount > 0 ? 'on' : ''}`}
+                  aria-label={
+                    memberCount > 0
+                      ? `Save ${it.title} (in ${memberCount} cluster${memberCount === 1 ? '' : 's'})`
+                      : `Save ${it.title} to cluster`
+                  }
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                    setMenuFor((cur) => (cur?.id === it.id ? null : { id: it.id, rect }));
+                  }}
+                >
+                  <span aria-hidden>{memberCount > 0 ? '★' : '☆'}</span>
+                </button>
                 <a
                   className="exp-card"
                   href={it.href}
@@ -315,10 +340,19 @@ export default function ExemplarExplore({ items }: Props) {
                   </div>
                 </a>
               </li>
-            ))}
+              );
+            })}
           </ul>
         )}
       </section>
+
+      {menuFor && (
+        <ClusterMenu
+          exemplarId={menuFor.id}
+          anchorRect={menuFor.rect}
+          onClose={() => setMenuFor(null)}
+        />
+      )}
     </div>
   );
 }
