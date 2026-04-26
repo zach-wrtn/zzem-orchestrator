@@ -26,11 +26,3 @@ expected_scope:
     - "<path glob>"
   backend:
     - "<path glob>"
-
-# Maestro feasibility check.
-# Stage 2 leaves this as "<set in Stage 5>" placeholder. Stage 5 fills with actual values
-# when collecting evidence per ticket. Used to surface regression-test gaps in Retro.
-regression_test_feasibility:
-  app: "<set in Stage 5>"      # feasible | infeasible | n/a
-  backend: "<set in Stage 5>"  # feasible | infeasible | n/a
-  notes: "<set in Stage 5; e.g. 'covered by existing flow X'>"

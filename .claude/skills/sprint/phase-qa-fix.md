@@ -62,6 +62,8 @@ sprints/<sprint-id>/qa-fix/
 
    **Ticket `type` enum mapping:** The snapshot's `type` field uses a normalized enum (`Bug | UX | Perf | Copy | Other`) — not the raw Jira `issuetype.name`. Map as follows: Bug → `Bug`; Story/Task containing UI/visual concerns → `UX`; performance/load issues → `Perf`; copy/text/typo → `Copy`; everything else → `Other`. The triage and group templates use this same normalized enum.
 
+   **Ticket `priority` enum mapping:** The snapshot's `priority` field uses a normalized enum (`P0 | P1 | P2 | P3`) — not Jira's raw `priority.name`. Map as follows: Highest → `P0`; High → `P1`; Medium → `P2`; Low/Lowest → `P3`. If the project's Jira workflow uses different priority names, document the mapping in `sprint-config.yaml` 주석으로 (no separate config field). All triage/KB-candidate logic downstream uses these P-values.
+
 4. **Auto-classification** — 각 티켓을 4개 버킷으로 분류:
    - **in-scope**: priority ∈ {P0, P1, P2}, status open-like, summary 명확, 동일 sprint scope 관련
    - **deferred**: priority = P3 OR scope outside this round
@@ -72,25 +74,27 @@ sprints/<sprint-id>/qa-fix/
 
 5. `qa-fix/triage.md` 작성 (템플릿: `sprint-orchestrator/templates/qa-fix-triage-template.md`).
 
-6. **needs-info 티켓 처리** (dry-run이 아닐 때):
+6. **사용자 승인 게이트** (모든 destructive Jira write 이전): triage.md를 사용자에게 제시. `[x] **Approved by user** — proceed to Stage 2 (Grouping)` 마커 + 타임스탬프가 채워질 때까지 대기. 사용자가 in-scope 리스트를 수정 가능 (promote/demote/needs-info→in-scope/duplicate→in-scope 등).
+
+   **Approval marker semantics:** Sprint Lead detects approval by grep-ing for `[x] **Approved by user**` in `triage.md`. Once detected, the Sprint Lead fills `Approved at:` with current ISO 8601 timestamp before proceeding. If the user edits the lists, **그 최종 분류**가 다음 단계의 Jira write 대상이 된다.
+
+7. **needs-info 티켓 처리** (승인 후, dry-run이 아닐 때):
    ```
-   For each needs-info ticket:
+   For each needs-info ticket in approved triage.md:
      mcp__wrtn-mcp__jira_add_comment:
        issue_key: <key>
        body: "QA Triage — additional info needed: <specific question>"
    ```
    triage.md의 "Question Posted" 컬럼에 실제 게시한 텍스트 기록.
 
-7. **duplicate 티켓 처리** (dry-run이 아닐 때):
+8. **duplicate 티켓 처리** (승인 후, dry-run이 아닐 때):
    ```
-   For each duplicate ticket:
+   For each duplicate ticket in approved triage.md:
      mcp__wrtn-mcp__jira_add_comment: "Duplicate of <master-key>"
      mcp__wrtn-mcp__jira_transition_issue: <to "Closed" with resolution=Duplicate>
    ```
 
-8. **사용자 승인 게이트**: triage.md를 사용자에게 제시. `[x] **Approved by user** — proceed to Stage 2 (Grouping)` 마커 + 타임스탬프가 채워질 때까지 대기. 사용자가 in-scope 리스트를 수정 가능 (promote/demote).
-
-   **Approval marker semantics:** Sprint Lead detects approval by grep-ing for `[x] **Approved by user**` in `triage.md`. Once detected, the Sprint Lead fills `Approved at:` with current ISO 8601 timestamp before proceeding to Stage 2 (the user marks the checkbox; the Sprint Lead stamps the time). If the user wants to promote/demote tickets, they edit the lists directly in `triage.md` before checking the box.
+   **순서 강제 이유 (steps 6→7,8):** 사용자가 triage 승인 단계에서 needs-info/duplicate 분류를 수정할 수 있으므로, Jira write는 승인된 최종 분류에만 적용한다. 승인 전에 먼저 코멘트/transition을 보내면 사용자가 promote한 티켓에 잘못된 코멘트가 남는다.
 
 ### Stage 2: Grouping
 
@@ -168,9 +172,13 @@ PASS된 각 티켓에 대해 **순서대로**:
 
 5. **Jira transition** (코멘트 게시 성공 시에만):
    ```
+   target_name = sprint-config.qa_fix.ready_for_qa_transition  # 기본값 "Ready for QA"
    transitions = mcp__wrtn-mcp__jira_get_transitions(issue_key)
-   ready_for_qa = transitions.find(name="Ready for QA")
-   mcp__wrtn-mcp__jira_transition_issue(issue_key, transition_id=ready_for_qa.id)
+   target = transitions.find(name=target_name)
+   if target is None:
+       # transition name 미스매치 — failure mode 적용 (아래 표 참조)
+       fail_with("transition_name_not_found", available=transitions.map(t => t.name))
+   mcp__wrtn-mcp__jira_transition_issue(issue_key, transition_id=target.id)
    ```
 
 6. **Posted marker**:
@@ -189,6 +197,7 @@ PASS된 각 티켓에 대해 **순서대로**:
 | JQL 결과 0건 | 즉시 종료, "처리할 이슈 없음" 리포트. retro.md 생성 안 함. |
 | Jira 코멘트 게시 실패 | 2회 재시도 → 그래도 실패 시 사용자 보고, transition 차단, marker 미생성. |
 | Jira transition 실패 (코멘트는 성공) | `<TICKET-ID>.md` 보존, marker 미생성. 사용자 보고 + 다음 실행 시 자동 재시도. |
+| transition_name_not_found (`ready_for_qa_transition` 이 Jira 워크플로우에 없음) | marker 미생성. 사용자에게 사용 가능한 transition 이름 목록 제시 → `sprint-config.qa_fix.ready_for_qa_transition` 수정 후 재실행 안내. |
 
 ## Budget Pressure
 
