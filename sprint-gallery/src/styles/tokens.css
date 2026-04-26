@@ -7,6 +7,16 @@
   --warn: #E5A458;
   --danger: #E57373;
 
+  /* Archetype indicator colors — used as small dots/accents only,
+     never as text or large surfaces (no contrast guarantee). */
+  --archetype-feed: #5B8DEF;
+  --archetype-detail: #9B6BFF;
+  --archetype-onboarding: #F2A23C;
+  --archetype-form: #5BB987;
+  --archetype-modal: #E5759C;
+  --archetype-empty_state: #94A3B8;
+  --archetype-nav_list: #4FB7BD;
+
   --radius-chip: 8px;
   --radius-card: 12px;
   --radius-device: 22px;

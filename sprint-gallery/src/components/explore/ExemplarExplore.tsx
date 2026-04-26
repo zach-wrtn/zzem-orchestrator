@@ -11,7 +11,10 @@ export type ExemplarItem = {
   href: string;
   vtName: string;
   whyCurated: string;
+  lastValidatedAt: string;
 };
+
+type SortMode = 'archetype' | 'recent';
 
 interface Props {
   items: ExemplarItem[];
@@ -27,10 +30,17 @@ function readParam(name: string): Set<string> {
   return new Set(raw.split(',').filter(Boolean));
 }
 
+function readSortParam(): SortMode {
+  if (typeof window === 'undefined') return 'archetype';
+  const raw = new URLSearchParams(window.location.search).get('sort');
+  return raw === 'recent' ? 'recent' : 'archetype';
+}
+
 function writeParams(params: {
   archetype: Set<string>;
   sprint: Set<string>;
   dimension: Set<string>;
+  sort: SortMode;
 }) {
   if (typeof window === 'undefined') return;
   const url = new URL(window.location.href);
@@ -41,6 +51,8 @@ function writeParams(params: {
   setOrDelete('archetype', params.archetype);
   setOrDelete('sprint', params.sprint);
   setOrDelete('dimension', params.dimension);
+  if (params.sort === 'archetype') url.searchParams.delete('sort');
+  else url.searchParams.set('sort', params.sort);
   window.history.replaceState({}, '', url);
 }
 
@@ -50,12 +62,14 @@ export default function ExemplarExplore({ items }: Props) {
   const [selectedArchetypes, setSelectedArchetypes] = useState<Set<string>>(() => new Set());
   const [selectedSprints, setSelectedSprints] = useState<Set<string>>(() => new Set());
   const [selectedDimensions, setSelectedDimensions] = useState<Set<string>>(() => new Set());
+  const [sortMode, setSortMode] = useState<SortMode>('archetype');
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
     setSelectedArchetypes(readParam('archetype'));
     setSelectedSprints(readParam('sprint'));
     setSelectedDimensions(readParam('dimension'));
+    setSortMode(readSortParam());
     setHydrated(true);
   }, []);
 
@@ -65,8 +79,9 @@ export default function ExemplarExplore({ items }: Props) {
       archetype: selectedArchetypes,
       sprint: selectedSprints,
       dimension: selectedDimensions,
+      sort: sortMode,
     });
-  }, [selectedArchetypes, selectedSprints, selectedDimensions, hydrated]);
+  }, [selectedArchetypes, selectedSprints, selectedDimensions, sortMode, hydrated]);
 
   const archetypeCounts = useMemo(() => {
     const counts = new Map<string, number>();
@@ -93,7 +108,7 @@ export default function ExemplarExplore({ items }: Props) {
   }, [items]);
 
   const filtered = useMemo(() => {
-    return items.filter((it) => {
+    const matched = items.filter((it) => {
       if (selectedArchetypes.size > 0 && !selectedArchetypes.has(it.archetype)) return false;
       if (selectedSprints.size > 0 && !selectedSprints.has(it.sprintSlug)) return false;
       if (
@@ -103,7 +118,17 @@ export default function ExemplarExplore({ items }: Props) {
         return false;
       return true;
     });
-  }, [items, selectedArchetypes, selectedSprints, selectedDimensions]);
+    const sorted = [...matched];
+    if (sortMode === 'recent') {
+      sorted.sort((a, b) => (a.lastValidatedAt < b.lastValidatedAt ? 1 : -1));
+    } else {
+      sorted.sort(
+        (a, b) =>
+          a.archetype.localeCompare(b.archetype) || a.title.localeCompare(b.title),
+      );
+    }
+    return sorted;
+  }, [items, selectedArchetypes, selectedSprints, selectedDimensions, sortMode]);
 
   const toggle = (set: Set<string>, val: string, setter: (s: Set<string>) => void) => {
     const next = new Set(set);
@@ -131,12 +156,13 @@ export default function ExemplarExplore({ items }: Props) {
               const checked = selectedArchetypes.has(a);
               return (
                 <li key={a}>
-                  <label className={`exp-facet ${checked ? 'on' : ''}`}>
+                  <label className={`exp-facet exp-facet-archetype ${checked ? 'on' : ''}`} data-archetype={a}>
                     <input
                       type="checkbox"
                       checked={checked}
                       onChange={() => toggle(selectedArchetypes, a, setSelectedArchetypes)}
                     />
+                    <span className="exp-facet-dot" aria-hidden="true" />
                     <span className="exp-facet-label">{a.replace('_', ' ')}</span>
                     <span className="exp-facet-count">{count}</span>
                   </label>
@@ -203,9 +229,21 @@ export default function ExemplarExplore({ items }: Props) {
 
       <section className="exp-results">
         <header className="exp-results-head">
-          <p className="exp-count">
-            {filtered.length} of {items.length} exemplar{items.length === 1 ? '' : 's'}
-          </p>
+          <div className="exp-results-row">
+            <p className="exp-count">
+              {filtered.length} of {items.length} exemplar{items.length === 1 ? '' : 's'}
+            </p>
+            <label className="exp-sort">
+              <span className="exp-sort-label">Sort</span>
+              <select
+                value={sortMode}
+                onChange={(e) => setSortMode(e.target.value as SortMode)}
+              >
+                <option value="archetype">Archetype</option>
+                <option value="recent">Recent</option>
+              </select>
+            </label>
+          </div>
           {totalSelected > 0 && (
             <div className="exp-applied">
               {[...selectedArchetypes].map((a) => (
@@ -266,7 +304,10 @@ export default function ExemplarExplore({ items }: Props) {
                     ) : (
                       <div className="exp-placeholder">{it.title}</div>
                     )}
-                    <span className="exp-archetype">{it.archetype.replace('_', ' ')}</span>
+                    <span className="exp-archetype" data-archetype={it.archetype}>
+                      <span className="exp-archetype-dot" aria-hidden="true" />
+                      {it.archetype.replace('_', ' ')}
+                    </span>
                   </div>
                   <div className="exp-meta">
                     <span className="exp-title">{it.title}</span>
