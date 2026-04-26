@@ -2,6 +2,8 @@
 import Layout from '@/components/Layout.astro';
 import { getCollection } from 'astro:content';
 import RelatedList from '@/components/system/RelatedList.astro';
+import ExemplarPreviewList from '@/components/system/ExemplarPreviewList.astro';
+import { exemplarsForPattern, archetypeForPattern } from '@/lib/system-bridge';
 
 export async function getStaticPaths() {
   const entries = await getCollection('patterns');
@@ -14,6 +16,8 @@ export async function getStaticPaths() {
 const { entry } = Astro.props;
 const { Content } = await entry.render();
 const base = import.meta.env.BASE_URL;
+const exemplars = await exemplarsForPattern(entry.data.key);
+const archetype = archetypeForPattern(entry.data.key);
 ---
 <Layout title={`${entry.data.name} · Patterns · System`}>
   <nav class="crumb">
@@ -32,6 +36,13 @@ const base = import.meta.env.BASE_URL;
   </header>
   <article class="prose"><Content /></article>
   {entry.data.usesComponents.length > 0 && <RelatedList keys={entry.data.usesComponents} />}
+  {archetype && (
+    <ExemplarPreviewList
+      items={exemplars}
+      title={`Demonstrated in ${archetype.replace('_', ' ')} exemplars`}
+      emptyText={`No ${archetype.replace('_', ' ')} exemplars curated yet.`}
+    />
+  )}
 </Layout>
 
 <style>

@@ -8,6 +8,9 @@ import VariantTable from '@/components/system/VariantTable.astro';
 import StatesList from '@/components/system/StatesList.astro';
 import TokensList from '@/components/system/TokensList.astro';
 import RelatedList from '@/components/system/RelatedList.astro';
+import PatternList from '@/components/system/PatternList.astro';
+import ExemplarPreviewList from '@/components/system/ExemplarPreviewList.astro';
+import { patternsUsingComponent, exemplarsForComponent } from '@/lib/system-bridge';
 
 export async function getStaticPaths() {
   const entries = await getCollection('components');
@@ -20,6 +23,8 @@ export async function getStaticPaths() {
 const { entry } = Astro.props;
 const { Content } = await entry.render();
 const base = import.meta.env.BASE_URL;
+const usedInPatterns = await patternsUsingComponent(entry.data.key);
+const transitiveExemplars = await exemplarsForComponent(entry.data.key);
 
 // Resolve MDX file path for ComponentDemo to read sibling .demo.html.
 // entry.id is the Astro-internal filename relative to the collection root
@@ -58,6 +63,14 @@ const mdxFile = resolve(projectRoot, 'src/content/components', entry.id);
   {entry.data.states.length > 0 && <StatesList states={entry.data.states} />}
   {entry.data.tokens.length > 0 && <TokensList refs={entry.data.tokens} />}
   {entry.data.relatedComponents.length > 0 && <RelatedList keys={entry.data.relatedComponents} />}
+  <PatternList patterns={usedInPatterns} />
+  {transitiveExemplars.length > 0 && (
+    <ExemplarPreviewList
+      items={transitiveExemplars}
+      title="Demonstrated in"
+      emptyText="No exemplars yet."
+    />
+  )}
 </Layout>
 
 <style>
