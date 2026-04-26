@@ -10,7 +10,7 @@ ticket: "ZZEM-123"
 priority: "P0"  # P0 | P1 (P2/P3은 후보 추출 스킵)
 
 candidate_type: "pattern_gap"  # pattern_gap | pattern_violation | new_pattern
-related_existing_pattern: "correctness-001"  # KB pattern id, or "none"
+related_existing_pattern: "<existing-kb-id-or-none>"  # e.g. "correctness-001" or "none"
 
 # zzem-kb:write-pattern 직접 매핑 필드:
 proposed_pattern:

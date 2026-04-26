@@ -8,7 +8,7 @@ created_at: "YYYY-MM-DDTHH:MM:SS+09:00"
 # Why these tickets are grouped together. Choose one primary axis; secondary optional.
 grouping_basis:
   primary: "shared_module"  # shared_module | shared_endpoint | shared_root_cause
-  secondary: null
+  secondary: null           # optional — same enum as primary; leave null if not applicable
   rationale: |
     <one paragraph explaining why these tickets share a fix unit>
 
@@ -27,8 +27,10 @@ expected_scope:
   backend:
     - "<path glob>"
 
-# Maestro feasibility check — set in Stage 5 evidence.
+# Maestro feasibility check.
+# Stage 2 leaves this as "<set in Stage 5>" placeholder. Stage 5 fills with actual values
+# when collecting evidence per ticket. Used to surface regression-test gaps in Retro.
 regression_test_feasibility:
-  app: "feasible"   # feasible | infeasible | n/a
-  backend: "n/a"
-  notes: "<one-line; e.g. 'covered by existing flow X'>"
+  app: "<set in Stage 5>"      # feasible | infeasible | n/a
+  backend: "<set in Stage 5>"  # feasible | infeasible | n/a
+  notes: "<set in Stage 5; e.g. 'covered by existing flow X'>"
