@@ -44,6 +44,13 @@ const patterns = defineCollection({
     key: z.string().regex(/^[a-z0-9-]+$/),
     purpose: z.string(),
     usesComponents: z.array(z.string()).default([]),
+    // Screen archetype this pattern composes — drives /system ↔ /explore
+    // cross-links via system-bridge. Omit (or null) for composition-only
+    // fragments without a one-screen analogue (e.g. profile-header).
+    archetype: z
+      .enum(['feed', 'detail', 'onboarding', 'form', 'modal', 'empty_state', 'nav_list'])
+      .nullable()
+      .optional(),
     figmaFrame: z.string().url().optional(),
   }),
 });
