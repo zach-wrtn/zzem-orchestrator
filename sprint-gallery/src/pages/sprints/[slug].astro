@@ -1,8 +1,12 @@
 ---
 import Layout from '@/components/Layout.astro';
 import PrototypeCard from '@/components/PrototypeCard.astro';
+import ExemplarPreviewList from '@/components/system/ExemplarPreviewList.astro';
+import PatternList from '@/components/system/PatternList.astro';
 import { collectSprints } from '@/lib/collect-sprints';
+import { coverageForSprint } from '@/lib/system-bridge';
 import { SPRINTS_DIR } from '@/lib/paths';
+import { getCollection } from 'astro:content';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { marked, Renderer } from 'marked';
@@ -40,6 +44,12 @@ const hero = sprint.prototypes.find((p) => p.hero) ?? sprint.prototypes[0];
 const heroThumb = hero?.thumbnail ? `${base}/${hero.thumbnail}`.replace(/\/+/g, '/') : null;
 const heroHref = hero ? `${base}/prototypes/${sprint.slug}/${hero.id}/`.replace(/\/+/g, '/') : base;
 const heroVt = hero ? `proto-${sprint.slug}-${hero.id}` : undefined;
+
+const coverage = await coverageForSprint(sprint.slug);
+const allComponents = await getCollection('components');
+const coveredComponents = coverage.componentKeys
+  .map((key) => allComponents.find((c) => c.data.key === key))
+  .filter((c): c is NonNullable<typeof c> => Boolean(c));
 ---
 <Layout title={`${sprint.title} · ZZEM Sprints`}>
   <a href={base} class="back">← Timeline</a>
@@ -67,6 +77,35 @@ const heroVt = hero ? `proto-${sprint.slug}-${hero.id}` : undefined;
       <div class="grid">
         {sprint.prototypes.map((p) => <PrototypeCard sprintSlug={sprint.slug} proto={p} />)}
       </div>
+    </section>
+  )}
+
+  {coverage.exemplars.length > 0 && (
+    <section class="coverage">
+      <header class="coverage-head">
+        <h2>Design system coverage</h2>
+        <p class="coverage-sub">
+          Curated exemplars from this sprint, plus the patterns and components they exercise (transitive).
+        </p>
+      </header>
+      <ExemplarPreviewList items={coverage.exemplars} title="Exemplars curated from this sprint" />
+      {coverage.patterns.length > 0 && <PatternList patterns={coverage.patterns} title="Patterns covered" />}
+      {coveredComponents.length > 0 && (
+        <section class="cov-components">
+          <header class="cov-head">
+            <h3>Components touched</h3>
+            <span class="cov-count">{coveredComponents.length}</span>
+          </header>
+          <div class="cov-list">
+            {coveredComponents.map((c) => (
+              <a href={`${base}/system/components/${c.data.key}/`.replace(/\/+/g, '/')}>
+                <span class="cov-name">{c.data.name}</span>
+                <span class="cov-cat">{c.data.category}</span>
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
     </section>
   )}
 
@@ -112,6 +151,36 @@ const heroVt = hero ? `proto-${sprint.slug}-${hero.id}` : undefined;
   section { margin: 40px 0; }
   h2 { font-size: var(--fs-h2); line-height: var(--lh-h2); letter-spacing: var(--ls-h2); margin: 0 0 16px; }
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+
+  .coverage { padding: 24px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); }
+  .coverage-head { margin-bottom: 8px; }
+  .coverage-head h2 { margin: 0 0 6px; }
+  .coverage-sub { margin: 0; color: var(--text-dim); font-size: var(--fs-small); max-width: 60ch; line-height: 1.5; }
+  .cov-components { margin: 32px 0 0; padding-top: 24px; border-top: 1px solid var(--border); }
+  .cov-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 16px; }
+  .cov-head h3 { font-size: var(--fs-h3); margin: 0; color: var(--text); }
+  .cov-count {
+    font-family: var(--font-mono); font-size: var(--fs-label);
+    letter-spacing: var(--ls-label); text-transform: uppercase;
+    color: var(--text-faint); font-variant-numeric: tabular-nums;
+  }
+  .cov-list { display: flex; flex-wrap: wrap; gap: 8px; }
+  .cov-list a {
+    display: inline-flex; align-items: baseline; gap: 8px;
+    padding: 6px 10px;
+    background: var(--bg);
+    border: 1px solid var(--border); border-radius: var(--radius-chip);
+    font-size: var(--fs-small);
+    color: var(--text);
+    transition: border-color var(--dur-ui) var(--ease-out-quart),
+                color var(--dur-ui) var(--ease-out-quart);
+  }
+  .cov-list a:hover { border-color: var(--accent); color: var(--accent); }
+  .cov-name { font-weight: 500; }
+  .cov-cat {
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em;
+    color: var(--text-faint); text-transform: uppercase;
+  }
 
   .doc {
     background: var(--surface); border: 1px solid var(--border);

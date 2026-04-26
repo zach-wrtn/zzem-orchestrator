@@ -3,7 +3,7 @@ import Layout from '@/components/Layout.astro';
 import { getCollection } from 'astro:content';
 import RelatedList from '@/components/system/RelatedList.astro';
 import ExemplarPreviewList from '@/components/system/ExemplarPreviewList.astro';
-import { exemplarsForPattern, archetypeForPattern } from '@/lib/system-bridge';
+import { exemplarsForPattern } from '@/lib/system-bridge';
 
 export async function getStaticPaths() {
   const entries = await getCollection('patterns');
@@ -17,7 +17,7 @@ const { entry } = Astro.props;
 const { Content } = await entry.render();
 const base = import.meta.env.BASE_URL;
 const exemplars = await exemplarsForPattern(entry.data.key);
-const archetype = archetypeForPattern(entry.data.key);
+const archetype = entry.data.archetype ?? null;
 ---
 <Layout title={`${entry.data.name} · Patterns · System`}>
   <nav class="crumb">

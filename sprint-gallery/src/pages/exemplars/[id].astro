@@ -4,7 +4,6 @@ import PreviewShell from '@/components/PreviewShell.astro';
 import RationalePanel from '@/components/exemplars/RationalePanel';
 import { loadExemplars } from '@/lib/exemplars/load';
 import { basename } from 'node:path';
-import { getCollection } from 'astro:content';
 import { patternsForArchetype } from '@/lib/system-bridge';
 import type { ScreenArchetype } from '@/lib/exemplars/schema';
 import type { Prototype } from '@/lib/types';
@@ -36,16 +35,12 @@ const join = (a: string, b: string) => `${a}/${b}`.replace(/\/+/g, '/');
 
 // Resolve pattern back-links via the shared archetype mapping. A given exemplar
 // may match multiple patterns (e.g. archetype=feed → feed-grid + home-screen).
-const matchingPatternKeys = patternsForArchetype(exemplar.archetype as ScreenArchetype);
-const allPatterns = await getCollection('patterns');
-const patternLinks = matchingPatternKeys
-  .map((key) => allPatterns.find((p) => p.data.key === key))
-  .filter((p): p is NonNullable<typeof p> => Boolean(p))
-  .map((p) => ({
-    key: p.data.key,
-    name: p.data.name,
-    href: join(base, `system/patterns/${p.data.key}/`),
-  }));
+const matchingPatterns = await patternsForArchetype(exemplar.archetype as ScreenArchetype);
+const patternLinks = matchingPatterns.map((p) => ({
+  key: p.data.key,
+  name: p.data.name,
+  href: join(base, `system/patterns/${p.data.key}/`),
+}));
 ---
 <Layout title={`${exemplar.screen_name} · Exemplar · ZZEM Sprints`}>
   <PreviewShell
