@@ -1,0 +1,123 @@
+---
+import { basename } from 'node:path';
+import type { ExemplarMeta } from '@/lib/exemplars/schema';
+
+interface Props {
+  items: ExemplarMeta[];
+  title?: string;
+  emptyText?: string;
+}
+const { items, title = 'Live exemplars', emptyText = 'No exemplars yet.' } = Astro.props as Props;
+const base = import.meta.env.BASE_URL;
+const join = (a: string, b: string) => `${a}/${b}`.replace(/\/+/g, '/');
+---
+<section class="xpl">
+  <header class="xpl-head">
+    <h2>{title}</h2>
+    <span class="xpl-count">{items.length}</span>
+  </header>
+  {items.length === 0 ? (
+    <p class="xpl-empty">{emptyText}</p>
+  ) : (
+    <ul class="xpl-grid">
+      {items.map((ex) => {
+        const thumb = join(base, `exemplars/${ex.id}/screenshots/${basename(ex.screenshot_path)}`);
+        const href = join(base, `exemplars/${ex.id}/`);
+        return (
+          <li>
+            <a class="xpl-card" href={href}>
+              <div class="xpl-thumb">
+                <img src={thumb} alt={ex.screen_name} loading="lazy" />
+                <span class="xpl-archetype" data-archetype={ex.archetype}>
+                  <span class="xpl-archetype-dot" aria-hidden="true"></span>
+                  {ex.archetype.replace('_', ' ')}
+                </span>
+              </div>
+              <div class="xpl-meta">
+                <span class="xpl-name">{ex.screen_name}</span>
+                <span class="xpl-sprint">{ex.sprint_id}</span>
+              </div>
+            </a>
+          </li>
+        );
+      })}
+    </ul>
+  )}
+</section>
+
+<style>
+  .xpl { margin: 32px 0; padding-top: 24px; border-top: 1px solid var(--border); }
+  .xpl-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 16px; }
+  .xpl-head h2 {
+    font-size: var(--fs-h2); line-height: var(--lh-h2);
+    margin: 0; color: var(--text);
+  }
+  .xpl-count {
+    font-family: var(--font-mono); font-size: var(--fs-label);
+    letter-spacing: var(--ls-label); text-transform: uppercase;
+    color: var(--text-faint); font-variant-numeric: tabular-nums;
+  }
+  .xpl-empty {
+    color: var(--text-faint); font-size: var(--fs-small); margin: 0;
+    padding: 16px; border: 1px dashed var(--border); border-radius: var(--radius-card);
+    text-align: center;
+  }
+
+  .xpl-grid {
+    list-style: none; margin: 0; padding: 0;
+    display: grid; gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  }
+  .xpl-card {
+    display: flex; flex-direction: column;
+    background: var(--surface);
+    border: 1px solid var(--border); border-radius: var(--radius-card);
+    overflow: hidden;
+    transition: transform var(--dur-spring-soft) var(--spring-soft),
+                border-color var(--dur-spring-soft) var(--spring-soft),
+                box-shadow var(--dur-spring-soft) var(--spring-soft);
+  }
+  .xpl-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--accent);
+    box-shadow: 0 14px 32px rgba(255, 122, 99, 0.18);
+  }
+  .xpl-thumb {
+    aspect-ratio: 4/5; background: var(--accent-grad); position: relative;
+  }
+  .xpl-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .xpl-archetype {
+    position: absolute; top: 8px; left: 8px;
+    display: inline-flex; align-items: center; gap: 5px;
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 3px 8px 3px 6px; border-radius: var(--radius-pill);
+    background: color-mix(in srgb, var(--bg) 78%, transparent);
+    color: var(--text);
+    border: 1px solid var(--border);
+    backdrop-filter: blur(6px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+  }
+  .xpl-archetype-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--archetype-color, var(--text-dim));
+    flex-shrink: 0;
+  }
+  .xpl-archetype[data-archetype="feed"]        { --archetype-color: var(--archetype-feed); }
+  .xpl-archetype[data-archetype="detail"]      { --archetype-color: var(--archetype-detail); }
+  .xpl-archetype[data-archetype="onboarding"]  { --archetype-color: var(--archetype-onboarding); }
+  .xpl-archetype[data-archetype="form"]        { --archetype-color: var(--archetype-form); }
+  .xpl-archetype[data-archetype="modal"]       { --archetype-color: var(--archetype-modal); }
+  .xpl-archetype[data-archetype="empty_state"] { --archetype-color: var(--archetype-empty_state); }
+  .xpl-archetype[data-archetype="nav_list"]    { --archetype-color: var(--archetype-nav_list); }
+  .xpl-meta { padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; }
+  .xpl-name {
+    font-size: var(--fs-small); font-weight: 500; color: var(--text);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .xpl-sprint {
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--text-faint);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+</style>

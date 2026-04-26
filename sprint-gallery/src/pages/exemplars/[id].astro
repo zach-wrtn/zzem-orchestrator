@@ -4,6 +4,9 @@ import PreviewShell from '@/components/PreviewShell.astro';
 import RationalePanel from '@/components/exemplars/RationalePanel';
 import { loadExemplars } from '@/lib/exemplars/load';
 import { basename } from 'node:path';
+import { getCollection } from 'astro:content';
+import { patternsForArchetype } from '@/lib/system-bridge';
+import type { ScreenArchetype } from '@/lib/exemplars/schema';
 import type { Prototype } from '@/lib/types';
 
 export async function getStaticPaths() {
@@ -29,6 +32,20 @@ const proto: Prototype = {
 
 const base = import.meta.env.BASE_URL;
 const exploreHref = `${base}/explore/`.replace(/\/+/g, '/');
+const join = (a: string, b: string) => `${a}/${b}`.replace(/\/+/g, '/');
+
+// Resolve pattern back-links via the shared archetype mapping. A given exemplar
+// may match multiple patterns (e.g. archetype=feed → feed-grid + home-screen).
+const matchingPatternKeys = patternsForArchetype(exemplar.archetype as ScreenArchetype);
+const allPatterns = await getCollection('patterns');
+const patternLinks = matchingPatternKeys
+  .map((key) => allPatterns.find((p) => p.data.key === key))
+  .filter((p): p is NonNullable<typeof p> => Boolean(p))
+  .map((p) => ({
+    key: p.data.key,
+    name: p.data.name,
+    href: join(base, `system/patterns/${p.data.key}/`),
+  }));
 ---
 <Layout title={`${exemplar.screen_name} · Exemplar · ZZEM Sprints`}>
   <PreviewShell
@@ -47,6 +64,7 @@ const exploreHref = `${base}/explore/`.replace(/\/+/g, '/');
       whyCurated={exemplar.why_curated}
       sprintId={exemplar.sprint_id}
       lastValidatedAt={exemplar.last_validated_at}
+      patterns={patternLinks}
     />
   </PreviewShell>
 </Layout>
@@ -124,4 +142,25 @@ const exploreHref = `${base}/explore/`.replace(/\/+/g, '/');
   }
   .rationale-save:hover { color: var(--accent); border-color: var(--accent); }
   .rationale-save.on { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 32%, transparent); }
+
+  .rationale-patterns {
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+  .rationale-patterns-label {
+    font-family: var(--font-mono); font-size: var(--fs-label);
+    letter-spacing: var(--ls-label); text-transform: uppercase;
+    color: var(--text-faint);
+    margin: 0 0 6px;
+  }
+  .rationale-patterns ul {
+    list-style: none; padding: 0; margin: 0;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .rationale-patterns a {
+    color: var(--text);
+    font-size: var(--fs-small);
+    transition: color var(--dur-ui) var(--ease-out-quart);
+  }
+  .rationale-patterns a:hover { color: var(--accent); }
 </style>

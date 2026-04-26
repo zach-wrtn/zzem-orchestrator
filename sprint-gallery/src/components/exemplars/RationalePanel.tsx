@@ -2,6 +2,12 @@ import { useEffect, useRef, useState } from 'react';
 import ClusterMenu from '@/components/clusters/ClusterMenu';
 import { clustersContaining, subscribeToClusters } from '@/lib/clusters';
 
+interface PatternLink {
+  key: string;
+  name: string;
+  href: string;
+}
+
 interface Props {
   exemplarId: string;
   archetype: string;
@@ -9,6 +15,7 @@ interface Props {
   whyCurated: string;
   sprintId: string;
   lastValidatedAt: string;
+  patterns?: PatternLink[];
 }
 
 function formatDate(iso: string): string {
@@ -24,6 +31,7 @@ export default function RationalePanel({
   whyCurated,
   sprintId,
   lastValidatedAt,
+  patterns = [],
 }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [memberCount, setMemberCount] = useState(0);
@@ -67,6 +75,19 @@ export default function RationalePanel({
             <dd>{formatDate(lastValidatedAt)}</dd>
           </div>
         </dl>
+
+        {patterns.length > 0 && (
+          <div className="rationale-patterns">
+            <p className="rationale-patterns-label">Pattern</p>
+            <ul>
+              {patterns.map((p) => (
+                <li key={p.key}>
+                  <a href={p.href}>{p.name} →</a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         <button
           ref={btnRef}
