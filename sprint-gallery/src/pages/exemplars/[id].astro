@@ -1,6 +1,7 @@
 ---
 import Layout from '@/components/Layout.astro';
 import PreviewShell from '@/components/PreviewShell.astro';
+import RationalePanel from '@/components/exemplars/RationalePanel';
 import { loadExemplars } from '@/lib/exemplars/load';
 import { basename } from 'node:path';
 import type { Prototype } from '@/lib/types';
@@ -36,5 +37,91 @@ const exploreHref = `${base}/explore/`.replace(/\/+/g, '/');
     backHref={exploreHref}
     backLabel="Explore"
     vtName={`exemplar-${exemplar.id}`}
-  />
+  >
+    <RationalePanel
+      slot="context"
+      client:load
+      exemplarId={exemplar.id}
+      archetype={exemplar.archetype}
+      designDimensions={exemplar.design_dimensions}
+      whyCurated={exemplar.why_curated}
+      sprintId={exemplar.sprint_id}
+      lastValidatedAt={exemplar.last_validated_at}
+    />
+  </PreviewShell>
 </Layout>
+
+<style is:global>
+  .rationale-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .rationale-archetype {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 3px 8px 3px 6px; border-radius: var(--radius-pill);
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .rationale-archetype-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--archetype-color, var(--text-dim));
+    flex-shrink: 0;
+  }
+  .rationale-archetype[data-archetype="feed"]        { --archetype-color: var(--archetype-feed); }
+  .rationale-archetype[data-archetype="detail"]      { --archetype-color: var(--archetype-detail); }
+  .rationale-archetype[data-archetype="onboarding"]  { --archetype-color: var(--archetype-onboarding); }
+  .rationale-archetype[data-archetype="form"]        { --archetype-color: var(--archetype-form); }
+  .rationale-archetype[data-archetype="modal"]       { --archetype-color: var(--archetype-modal); }
+  .rationale-archetype[data-archetype="empty_state"] { --archetype-color: var(--archetype-empty_state); }
+  .rationale-archetype[data-archetype="nav_list"]    { --archetype-color: var(--archetype-nav_list); }
+  .rationale-dim {
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 3px 8px; border-radius: var(--radius-pill);
+    background: var(--bg);
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+  }
+
+  .rationale-why {
+    margin: 0;
+    color: var(--text);
+    font-size: var(--fs-small); line-height: 1.7;
+    word-break: keep-all;
+  }
+
+  .rationale-meta {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+    margin: 0;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+  .rationale-meta dt {
+    font-family: var(--font-mono); font-size: var(--fs-label);
+    letter-spacing: var(--ls-label); text-transform: uppercase;
+    color: var(--text-faint);
+    margin: 0 0 4px;
+  }
+  .rationale-meta dd {
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--text);
+    margin: 0;
+    word-break: break-all;
+  }
+
+  .rationale-save {
+    display: inline-flex; align-items: center; gap: 8px;
+    align-self: flex-start;
+    background: transparent;
+    color: var(--text-dim);
+    border: 1px solid var(--border); border-radius: var(--radius-chip);
+    padding: 8px 14px;
+    font-family: var(--font-mono); font-size: var(--fs-label);
+    letter-spacing: var(--ls-label); text-transform: uppercase;
+    cursor: pointer;
+    transition: color var(--dur-ui) var(--ease-out-quart),
+                border-color var(--dur-ui) var(--ease-out-quart);
+  }
+  .rationale-save:hover { color: var(--accent); border-color: var(--accent); }
+  .rationale-save.on { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 32%, transparent); }
+</style>
