@@ -20,7 +20,13 @@ const overflow = sprint.prototypes.length - 1 - sideProtos.length;
 ---
 <section class="panel" id={sprint.slug} data-sprint-slug={sprint.slug} data-sprint-index={index}>
   <div class="left">
-    <p class="label">{sprint.startDate} → {sprint.endDate} · {sprint.status}</p>
+    <div class="meta-row">
+      <p class="label">{sprint.startDate} → {sprint.endDate}</p>
+      <span class="status-pill" data-status={sprint.status}>
+        <span class="status-dot" aria-hidden="true"></span>
+        {sprint.status.replace('-', ' ')}
+      </span>
+    </div>
     <h2 class="title"><a href={detailHref}>{sprint.title}</a></h2>
     {summaryHtml && <p class="summary" set:html={summaryHtml} />}
     {sprint.tags.length > 0 && (
@@ -30,10 +36,12 @@ const overflow = sprint.prototypes.length - 1 - sideProtos.length;
     )}
     <div class="side-grid">
       {sideProtos.map((p) => <PrototypeCard sprintSlug={sprint.slug} proto={p} compact />)}
-      {overflow > 0 && (
-        <a class="more" href={detailHref}>+{overflow} more →</a>
-      )}
     </div>
+    {sprint.prototypes.length > 0 && (
+      <a class="view-all" href={detailHref}>
+        View all {sprint.prototypes.length} prototype{sprint.prototypes.length === 1 ? '' : 's'} →
+      </a>
+    )}
     <MobileStoryStack sprintSlug={sprint.slug} prototypes={sprint.prototypes} />
   </div>
 
@@ -61,12 +69,31 @@ const overflow = sprint.prototypes.length - 1 - sideProtos.length;
   .panel:last-of-type { border-bottom: none; }
 
   .left { min-width: 0; display: flex; flex-direction: column; gap: 16px; }
+
+  .meta-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
   .label {
     font-family: var(--font-mono);
     font-size: var(--fs-label); letter-spacing: var(--ls-label);
     color: var(--text-dim); text-transform: uppercase;
     margin: 0;
   }
+  .status-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 3px 8px 3px 7px; border-radius: var(--radius-pill);
+    background: var(--surface);
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+  }
+  .status-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--status-color, var(--text-faint));
+    flex-shrink: 0;
+  }
+  .status-pill[data-status="completed"]   { --status-color: var(--ok); color: var(--ok-text); border-color: color-mix(in srgb, var(--ok) 32%, transparent); }
+  .status-pill[data-status="in-progress"] { --status-color: var(--accent); color: var(--accent-text); border-color: color-mix(in srgb, var(--accent) 32%, transparent); }
+  .status-pill[data-status="archived"]    { --status-color: var(--text-faint); }
   .title {
     font-size: var(--fs-h1); line-height: var(--lh-h1); letter-spacing: var(--ls-h1);
     font-weight: 600; margin: 0;
@@ -86,20 +113,27 @@ const overflow = sprint.prototypes.length - 1 - sideProtos.length;
     color: var(--text-dim); background: var(--surface);
     border: 1px solid var(--border); border-radius: var(--radius-chip);
     padding: 2px 8px;
+    transition: color var(--dur-ui) var(--ease-out-quart),
+                border-color var(--dur-ui) var(--ease-out-quart);
   }
+  .tag:hover { color: var(--accent-text); border-color: color-mix(in srgb, var(--accent) 32%, transparent); }
 
   .side-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
     gap: 12px; margin-top: 8px;
   }
-  .more {
-    align-self: center; font-family: var(--font-mono); font-size: var(--fs-small);
-    color: var(--text-dim); padding: 12px; border: 1px dashed var(--border);
-    border-radius: var(--radius-card); text-align: center;
-    transition: color var(--dur-ui) var(--ease-out-quart), border-color var(--dur-ui) var(--ease-out-quart);
+  .view-all {
+    align-self: flex-start;
+    font-family: var(--font-mono); font-size: var(--fs-label);
+    letter-spacing: var(--ls-label); text-transform: uppercase;
+    color: var(--text-dim);
+    padding: 8px 0;
+    border-bottom: 1px solid transparent;
+    transition: color var(--dur-ui) var(--ease-out-quart),
+                border-color var(--dur-ui) var(--ease-out-quart);
   }
-  .more:hover { color: var(--accent); border-color: var(--accent); }
+  .view-all:hover { color: var(--accent); border-bottom-color: var(--accent); }
 
   .hero {
     display: block; border-radius: var(--radius-card);

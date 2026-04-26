@@ -1,17 +1,24 @@
 ---
 import type { Prototype } from '@/lib/types';
-interface Props { sprintSlug: string; proto: Prototype; }
-const { sprintSlug, proto } = Astro.props;
+interface Props {
+  sprintSlug: string;
+  proto: Prototype;
+  backHref?: string;
+  backLabel?: string;
+  vtName?: string;
+}
+const { sprintSlug, proto, backHref, backLabel, vtName: vtNameProp } = Astro.props;
 const base = import.meta.env.BASE_URL;
 const iframeSrc = `${base}/${proto.entry}`.replace(/\/+/g, '/');
 const homeHref = `${base}/`.replace(/\/+/g, '/');
-const detailHref = `${base}/sprints/${sprintSlug}/`.replace(/\/+/g, '/');
-const vtName = `proto-${sprintSlug}-${proto.id}`;
+const resolvedBackHref = backHref ?? `${base}/sprints/${sprintSlug}/`.replace(/\/+/g, '/');
+const resolvedBackLabel = backLabel ?? sprintSlug;
+const vtName = vtNameProp ?? `proto-${sprintSlug}-${proto.id}`;
 ---
 <div class="backdrop"></div>
 <main class="shell" role="dialog" aria-modal="true" aria-label={`${proto.title} preview`}>
   <header class="bar">
-    <a class="back" href={detailHref} aria-label="Back to sprint detail">← {sprintSlug}</a>
+    <a class="back" href={resolvedBackHref} aria-label={`Back to ${resolvedBackLabel}`}>← {resolvedBackLabel}</a>
     <span class="title">{proto.title}</span>
     <a class="close" href={homeHref} aria-label="Close preview" data-close>ESC</a>
   </header>

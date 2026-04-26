@@ -4,6 +4,7 @@ import ThemeToggle from './ThemeToggle.tsx';
 <header class="topbar">
   <a href={import.meta.env.BASE_URL} class="brand">ZZEM Sprints</a>
   <div class="spacer"></div>
+  <a href={`${import.meta.env.BASE_URL}/explore/`.replace(/\/+/g, '/')} class="sys-link">Explore</a>
   <a href={`${import.meta.env.BASE_URL}/system/`.replace(/\/+/g, '/')} class="sys-link">System</a>
   <button id="open-search" class="search-btn" aria-label="Search">
     <span>Search</span>

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 
-interface SearchItem { slug: string; title: string; tags: string[]; prototypes: string[]; type?: 'sprint' | 'component' | 'foundation'; href?: string; }
+interface SearchItem { slug: string; title: string; tags: string[]; prototypes: string[]; type?: 'sprint' | 'component' | 'foundation' | 'exemplar'; href?: string; }
 interface Props { data: SearchItem[]; }
 
 export default function SearchPalette({ data }: Props) {
@@ -55,7 +55,7 @@ export default function SearchPalette({ data }: Props) {
         background: 'var(--surface)', border: '1px solid var(--border)',
         borderRadius: 'var(--radius-card)', overflow: 'hidden',
       }}>
-        <input autoFocus placeholder="Search sprints, tags, prototypes…"
+        <input autoFocus placeholder="Search sprints, exemplars, tags…"
                value={q} onChange={(e) => setQ(e.target.value)}
                style={{
                  width: '100%', padding: '14px 16px',
