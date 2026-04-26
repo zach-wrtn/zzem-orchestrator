@@ -1,0 +1,78 @@
+sprint_id: preview-feature
+generated_at: 2026-04-26
+mode: simple   # 간략 — Assumption Preview Gate / variants / revise loop skipped
+review_status: pending   # user hasn't reviewed yet (Phase 3 stopped per user request)
+
+tasks:
+  app-001:
+    FilterPreviewFooter:
+      status: pending
+      prototype: "app/app-001/prototype.html"
+      spec: "app/app-001/FilterPreviewFooter.spec.md"
+      states_captured: [dual-cta, single-cta, loading]
+      revision_count: 0
+      last_revision: null
+      quality_score: 8.5
+      fabrication_risk: low
+      reviewed_at: null
+      notes: "Hero is intentionally low-fi placeholder — footer is the focus."
+
+  app-002:
+    PreviewBottomSheet:
+      status: pending
+      prototype: "app/app-002/prototype.html"
+      spec: "app/app-002/PreviewBottomSheet.spec.md"
+      states_captured: [ImageEmpty, ImageSelected, InFlight]
+      revision_count: 0
+      last_revision: null
+      quality_score: 8.5
+      fabrication_risk: low
+      reviewed_at: null
+      notes: "Selected thumbnail is tokenized gradient (no asset slot). Parent FilterPreview is a generic mock — not pixel-matched to APP-001."
+
+  app-003:
+    PreviewLoadingScreen:
+      status: pending
+      prototype: "app/app-003/prototype.html"
+      spec: "app/app-003/PreviewLoadingScreen.spec.md"
+      states_captured: [default, cancel-dialog-open]
+      revision_count: 0
+      last_revision: null
+      quality_score: 8.5
+      fabrication_risk: low
+      reviewed_at: null
+      notes: "Added warmth caption '잠시만 기다려 주세요' beneath primary label — minor inferred copy, removable."
+
+  app-004:
+    PreviewResultScreen:
+      status: pending
+      prototype: "app/app-004/prototype.html"
+      spec: "app/app-004/PreviewResultScreen.spec.md"
+      states_captured: [default, cancel-dialog-open]
+      revision_count: 0
+      last_revision: null
+      quality_score: 8.5
+      fabrication_risk: low
+      reviewed_at: null
+      notes: "Image is a neutral gradient placeholder — no watermark layer (BR-6 verified). Primary CTA uses neutral.900 #262626 per button.mdx convention (not brand purple)."
+
+  app-005:
+    ErrorSheets:
+      status: pending
+      prototype: "app/app-005/prototype.html"
+      spec: "app/app-005/ErrorSheets.spec.md"
+      states_captured: [credit-insufficient, harmful-image]
+      revision_count: 0
+      last_revision: null
+      quality_score: 8.5
+      fabrication_risk: low
+      reviewed_at: null
+      notes: "CreditInsufficient copy partly inferred — actual existing component should be reused. Warning iconography uses yellow triangle (not destructive red)."
+
+aggregate:
+  total: 5
+  approved: 0
+  pending: 5
+  rejected: 0
+  avg_quality_score: 8.5
+  fabrication_risk_distribution: { low: 5, medium: 0, high: 0 }

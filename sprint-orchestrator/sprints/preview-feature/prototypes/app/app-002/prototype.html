@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>app-002 · PreviewBottomSheet — 결과물 미리보기 (preview-feature sprint)</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+<style>
+  /* ========== tokens.css inline (Step A output) ========== */
+  :root {
+    /* PRIMITIVE — Color */
+    --wds-color-purple-500: #8752FA;
+    --wds-color-neutral-0:    #FFFFFF;
+    --wds-color-neutral-50:   #F7F8F9;
+    --wds-color-neutral-100:  #F0F1F3;
+    --wds-color-neutral-150:  #E8E8E8;
+    --wds-color-neutral-200:  #E4E5E9;
+    --wds-color-neutral-250:  #E2E2E2;
+    --wds-color-neutral-300:  #D1D3D8;
+    --wds-color-neutral-350:  #A7A7A7;
+    --wds-color-neutral-400:  #B5B8BF;
+    --wds-color-neutral-500:  #8E9199;
+    --wds-color-neutral-600:  #6B6E76;
+    --wds-color-neutral-700:  #46474C;
+    --wds-color-neutral-800:  #262626;
+    --wds-color-neutral-900:  #212228;
+    --wds-color-neutral-1000: #000000;
+    --wds-color-coin-gold:    #F2B90C;
+
+    /* SEMANTIC */
+    --wds-background-normal:               var(--wds-color-neutral-0);
+    --wds-background-elevated-alternative: var(--wds-color-neutral-0);
+    --wds-background-dimmed:               rgba(0, 0, 0, 0.50);
+    --wds-surface-primary:                 var(--wds-color-neutral-0);
+    --wds-surface-secondary:               var(--wds-color-neutral-50);
+    --wds-surface-tertiary:                var(--wds-color-neutral-100);
+    --wds-fill-brand-primary:              var(--wds-color-purple-500);
+    --wds-fill-neutral:                    var(--wds-color-neutral-100);
+    --wds-label-normal:                    var(--wds-color-neutral-900);
+    --wds-label-alternative:               var(--wds-color-neutral-600);
+    --wds-label-assistive:                 var(--wds-color-neutral-500);
+    --wds-label-disabled:                  var(--wds-color-neutral-400);
+    --wds-label-inverse:                   var(--wds-color-neutral-0);
+    --wds-line-normal:                     var(--wds-color-neutral-200);
+    --wds-line-alternative:                var(--wds-color-neutral-100);
+    --wds-line-strong:                     var(--wds-color-neutral-350);
+
+    /* COMPONENT */
+    --component-button-primary-fill:           var(--wds-color-neutral-800);
+    --component-button-primary-label:          var(--wds-label-inverse);
+    --component-button-primary-disabled-fill:  var(--wds-color-neutral-100);
+    --component-button-primary-disabled-label: var(--wds-color-neutral-400);
+    --component-button-radius:                 16px;
+    --component-bottom-sheet-fill:             var(--wds-background-elevated-alternative);
+    --component-bottom-sheet-radius:           28px;
+    --component-bottom-sheet-handle:           var(--wds-color-neutral-350);
+    --component-image-zone-fill:               var(--wds-surface-secondary);
+    --component-image-zone-border:             var(--wds-line-strong);
+    --component-image-zone-radius:             16px;
+
+    /* TYPOGRAPHY */
+    --font-family-default: 'Pretendard Variable', 'Pretendard', -apple-system, 'SF Pro', sans-serif;
+
+    /* SPACING / RADIUS */
+    --wds-spacing-4:  4px;
+    --wds-spacing-6:  6px;
+    --wds-spacing-8:  8px;
+    --wds-spacing-12: 12px;
+    --wds-spacing-14: 14px;
+    --wds-spacing-16: 16px;
+    --wds-spacing-20: 20px;
+    --wds-spacing-24: 24px;
+    --wds-spacing-28: 28px;
+    --wds-radius-sm:   8px;
+    --wds-radius-md:   12px;
+    --wds-radius-lg:   16px;
+    --wds-radius-xl:   20px;
+    --wds-radius-2xl:  22px;
+    --wds-radius-3xl:  28px;
+    --wds-radius-full: 9999px;
+  }
+
+  /* ========== Reset ========== */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font-family-default);
+    background: #f0f0f0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 16px;
+    color: var(--wds-label-normal);
+  }
+
+  /* ========== Control Panel (외부 — design system 무관) ========== */
+  .control-panel {
+    width: 390px;
+    background: #1a1a2e;
+    color: #e0e0e0;
+    border-radius: 12px 12px 0 0;
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 13px;
+    font-family: var(--font-family-default);
+  }
+  .control-panel__row { display: flex; align-items: center; gap: 8px; }
+  .control-panel__label { color: #888; font-size: 11px; min-width: 56px; }
+  .control-panel__states { display: flex; gap: 4px; flex-wrap: wrap; }
+  .control-panel__state-btn {
+    background: #2a2a3e;
+    color: #c8c8d0;
+    border: 1px solid #444;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 11px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s;
+  }
+  .control-panel__state-btn:hover { background: #353550; color: #fff; }
+  .control-panel__state-btn.active {
+    background: var(--wds-color-purple-500);
+    color: #fff;
+    border-color: var(--wds-color-purple-500);
+  }
+  .control-panel__breadcrumb {
+    color: #6b6b80;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+  }
+
+  /* ========== Device Frame ========== */
+  .device-frame {
+    width: 390px;
+    height: 844px;
+    background: var(--wds-background-normal);
+    overflow: hidden;
+    position: relative;
+    border: 1px solid #ddd;
+    border-radius: 0 0 12px 12px;
+  }
+
+  .screen {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    inset: 0;
+  }
+  .screen.active { display: flex; }
+
+  /* ========== Parent context (FilterPreview mock) ========== */
+  .parent-stage {
+    position: absolute;
+    inset: 0;
+    background: var(--wds-color-neutral-0);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .parent-statusbar {
+    height: 44px;
+    flex: 0 0 44px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    color: var(--wds-label-normal);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+  }
+  .parent-statusbar__icons { display: flex; align-items: center; gap: 6px; font-size: 12px; }
+
+  .parent-topbar {
+    height: 52px;
+    flex: 0 0 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+  }
+  .parent-topbar__back {
+    width: 32px; height: 32px;
+    display: inline-flex; align-items: center; justify-content: center;
+    color: var(--wds-label-normal);
+    font-size: 22px;
+    background: transparent; border: none; cursor: pointer;
+    font-family: var(--font-family-default);
+  }
+  .parent-topbar__title {
+    font-size: 17px; font-weight: 600; color: var(--wds-label-normal);
+  }
+  .parent-topbar__action {
+    width: 32px; height: 32px; display: inline-flex; align-items: center;
+    justify-content: center; color: var(--wds-label-alternative); font-size: 18px;
+    background: transparent; border: none;
+    font-family: var(--font-family-default);
+  }
+
+  .parent-hero {
+    margin: 8px 16px 16px;
+    border-radius: 22px;
+    background:
+      radial-gradient(120% 80% at 80% 10%, var(--wds-color-neutral-150) 0%, transparent 60%),
+      radial-gradient(100% 80% at 20% 90%, var(--wds-color-neutral-200) 0%, transparent 55%),
+      var(--wds-color-neutral-100);
+    height: 380px;
+    position: relative;
+    overflow: hidden;
+    flex: 0 0 380px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-start;
+    padding: 20px;
+  }
+  .parent-hero__silhouette {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 200px;
+    line-height: 1;
+    opacity: 0.55;
+    color: var(--wds-color-neutral-300);
+    user-select: none;
+  }
+  .parent-hero__chip {
+    position: relative;
+    z-index: 2;
+    background: rgba(38, 38, 38, 0.72);
+    color: var(--wds-color-neutral-0);
+    padding: 8px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  .parent-meta {
+    padding: 8px 20px 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .parent-meta__title {
+    font-size: 20px; font-weight: 700; color: var(--wds-label-normal);
+    letter-spacing: -0.2px;
+  }
+  .parent-meta__sub {
+    font-size: 13px; color: var(--wds-label-alternative);
+  }
+
+  .parent-cta {
+    margin: 16px 16px 28px;
+    height: 56px;
+    border-radius: 16px;
+    background: var(--component-button-primary-fill);
+    color: var(--component-button-primary-label);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 600;
+  }
+  .parent-cta__coin { color: var(--wds-color-coin-gold); margin-left: 6px; }
+
+  /* ========== Backdrop ========== */
+  .overlay-backdrop {
+    position: absolute;
+    inset: 0;
+    background: var(--wds-background-dimmed);
+    z-index: 100;
+    opacity: 1;
+    transition: opacity 0.2s ease-out;
+  }
+
+  /* ========== Bottom Sheet ========== */
+  .sheet {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    z-index: 101;
+    background: var(--component-bottom-sheet-fill);
+    border-radius: var(--component-bottom-sheet-radius) var(--component-bottom-sheet-radius) 0 0;
+    padding: 12px 20px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    animation: sheet-rise 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  @keyframes sheet-rise {
+    from { transform: translateY(100%); }
+    to   { transform: translateY(0); }
+  }
+
+  .sheet__handle {
+    width: 40px; height: 4px;
+    background: var(--component-bottom-sheet-handle);
+    border-radius: var(--wds-radius-full);
+    margin: 0 auto 14px;
+  }
+
+  .sheet__header { padding: 0 0 20px; }
+  .sheet__title {
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.35;
+    color: var(--wds-label-normal);
+    letter-spacing: -0.2px;
+    margin-bottom: 6px;
+  }
+  .sheet__description {
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--wds-label-alternative);
+    word-break: keep-all;
+    overflow-wrap: break-word;
+  }
+
+  /* ========== Image Attach Zone ========== */
+  .image-zone {
+    width: 100%;
+    height: 160px;
+    margin-bottom: 20px;
+    position: relative;
+  }
+
+  .image-zone__empty {
+    width: 100%;
+    height: 100%;
+    background: var(--component-image-zone-fill);
+    border: 1.5px dashed var(--component-image-zone-border);
+    border-radius: var(--component-image-zone-radius);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    color: var(--wds-label-assistive);
+    font-family: var(--font-family-default);
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+  }
+  .image-zone__empty:hover {
+    background: var(--wds-color-neutral-100);
+    border-color: var(--wds-color-neutral-500);
+  }
+  .image-zone__plus {
+    width: 36px; height: 36px;
+    border-radius: 999px;
+    background: var(--wds-color-neutral-0);
+    border: 1px solid var(--wds-line-normal);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    color: var(--wds-label-alternative);
+    line-height: 1;
+  }
+  .image-zone__label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--wds-label-assistive);
+  }
+  .image-zone__hint {
+    font-size: 12px;
+    color: var(--wds-label-disabled);
+  }
+
+  .image-zone__selected {
+    width: 100%;
+    height: 100%;
+    border-radius: var(--component-image-zone-radius);
+    overflow: hidden;
+    position: relative;
+    background:
+      radial-gradient(120% 90% at 30% 20%, var(--wds-color-neutral-150) 0%, transparent 60%),
+      radial-gradient(110% 80% at 80% 90%, var(--wds-color-neutral-200) 0%, transparent 55%),
+      var(--wds-color-neutral-100);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .image-zone__silhouette {
+    font-size: 96px;
+    line-height: 1;
+    opacity: 0.6;
+    color: var(--wds-color-neutral-400);
+    user-select: none;
+  }
+  .image-zone__remove {
+    position: absolute;
+    top: 8px; right: 8px;
+    width: 28px; height: 28px;
+    border-radius: 999px;
+    background: rgba(33, 34, 40, 0.85);
+    color: var(--wds-label-inverse);
+    border: none;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-family: var(--font-family-default);
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1;
+  }
+  .image-zone__remove:hover { background: rgba(33, 34, 40, 1); }
+
+  /* ========== CTA ========== */
+  .cta {
+    width: 100%;
+    height: 56px;
+    border-radius: var(--component-button-radius);
+    border: none;
+    font-family: var(--font-family-default);
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.2px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: background-color 0.15s ease, color 0.15s ease, transform 0.05s ease;
+    background: var(--component-button-primary-disabled-fill);
+    color: var(--component-button-primary-disabled-label);
+  }
+  .cta[data-enabled="true"] {
+    background: var(--component-button-primary-fill);
+    color: var(--component-button-primary-label);
+  }
+  .cta[data-enabled="true"]:active { transform: scale(0.99); }
+  .cta[data-enabled="false"] { cursor: not-allowed; }
+  .cta[data-busy="true"] {
+    background: var(--component-button-primary-fill);
+    color: var(--component-button-primary-label);
+    cursor: wait;
+  }
+  .cta__coin {
+    color: var(--wds-color-coin-gold);
+    font-weight: 600;
+  }
+  .cta[data-enabled="false"] .cta__coin {
+    color: var(--component-button-primary-disabled-label);
+  }
+
+  .cta__spinner {
+    display: none;
+    width: 18px; height: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    border-top-color: var(--wds-label-inverse);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  .cta[data-busy="true"] .cta__spinner { display: inline-block; }
+  .cta[data-busy="true"] .cta__label,
+  .cta[data-busy="true"] .cta__coin { display: none; }
+  .cta[data-busy="true"] .cta__busy-label { display: inline; }
+  .cta__busy-label { display: none; }
+
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+
+  /* ========== State visibility (image zone variants) ========== */
+  .image-zone[data-state="ImageEmpty"]    .image-zone__empty    { display: flex; }
+  .image-zone[data-state="ImageEmpty"]    .image-zone__selected { display: none; }
+  .image-zone[data-state="ImageSelected"] .image-zone__empty    { display: none; }
+  .image-zone[data-state="ImageSelected"] .image-zone__selected { display: flex; }
+  .image-zone[data-state="InFlight"]      .image-zone__empty    { display: none; }
+  .image-zone[data-state="InFlight"]      .image-zone__selected { display: flex; }
+  .image-zone[data-state="InFlight"]      .image-zone__remove   { opacity: 0.4; pointer-events: none; }
+
+  /* Mobile fullscreen */
+  @media (max-width: 480px) {
+    body { padding: 0; align-items: stretch; min-height: 100dvh; }
+    .control-panel { display: none; }
+    .device-frame { width: 100dvw; height: 100dvh; border: none; border-radius: 0; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- Control Panel -->
+  <div class="control-panel">
+    <div class="control-panel__row">
+      <span class="control-panel__label">Screen</span>
+      <span class="control-panel__breadcrumb">app-002 · PreviewBottomSheet</span>
+    </div>
+    <div class="control-panel__row">
+      <span class="control-panel__label">State</span>
+      <div class="control-panel__states" id="state-toggles">
+        <button class="control-panel__state-btn active" data-state="ImageEmpty"    onclick="setState('ImageEmpty')">ImageEmpty</button>
+        <button class="control-panel__state-btn"        data-state="ImageSelected" onclick="setState('ImageSelected')">ImageSelected</button>
+        <button class="control-panel__state-btn"        data-state="InFlight"      onclick="setState('InFlight')">InFlight</button>
+      </div>
+    </div>
+    <div class="control-panel__row">
+      <span class="control-panel__breadcrumb" id="breadcrumb">FilterPreview → PreviewBottomSheet · ImageEmpty</span>
+    </div>
+  </div>
+
+  <!-- Device Frame -->
+  <div class="device-frame" id="device-frame">
+
+    <section class="screen active" id="PreviewBottomSheet">
+
+      <!-- Dimmed parent context (FilterPreview mock) -->
+      <div class="parent-stage" aria-hidden="true">
+        <div class="parent-statusbar">
+          <span>9:41</span>
+          <span class="parent-statusbar__icons">●●● ◆ ▮▮</span>
+        </div>
+        <div class="parent-topbar">
+          <button class="parent-topbar__back" type="button" aria-label="뒤로">←</button>
+          <span class="parent-topbar__title">필터 미리보기</span>
+          <button class="parent-topbar__action" type="button" aria-label="더보기">⋯</button>
+        </div>
+        <div class="parent-hero">
+          <span class="parent-hero__silhouette" aria-hidden="true">◐</span>
+          <span class="parent-hero__chip">샘플 결과</span>
+        </div>
+        <div class="parent-meta">
+          <span class="parent-meta__title">시네마틱 무드</span>
+          <span class="parent-meta__sub">필터 · 인물 · 따뜻한 톤</span>
+        </div>
+        <div class="parent-cta" aria-hidden="true">
+          <span>미리보기</span>
+          <span class="parent-cta__coin">🪙 100</span>
+        </div>
+      </div>
+
+      <!-- Backdrop -->
+      <div class="overlay-backdrop" id="backdrop" onclick="closeSheet()" role="presentation" aria-label="닫기"></div>
+
+      <!-- Bottom sheet -->
+      <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+        <div class="sheet__handle" aria-hidden="true"></div>
+
+        <header class="sheet__header">
+          <h2 class="sheet__title" id="sheet-title">결과물 미리보기</h2>
+          <p class="sheet__description">결과물을 미리 확인한 뒤 비디오를 만들 수 있어요</p>
+        </header>
+
+        <div class="image-zone" id="image-attach-zone" data-state="ImageEmpty">
+          <!-- Empty variant -->
+          <button
+            type="button"
+            class="image-zone__empty"
+            id="image-zone-empty"
+            onclick="selectImage()"
+            aria-label="사진 첨부"
+          >
+            <span class="image-zone__plus" aria-hidden="true">+</span>
+            <span class="image-zone__label">사진 첨부</span>
+            <span class="image-zone__hint">정면 얼굴이 잘 보이는 사진</span>
+          </button>
+
+          <!-- Selected variant -->
+          <div class="image-zone__selected" id="image-zone-selected" role="img" aria-label="선택된 사진 미리보기">
+            <span class="image-zone__silhouette" aria-hidden="true">☺</span>
+            <button
+              type="button"
+              class="image-zone__remove"
+              id="image-remove-button"
+              onclick="removeImage()"
+              aria-label="이미지 제거"
+            >×</button>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          class="cta"
+          id="preview-cta"
+          data-enabled="false"
+          data-busy="false"
+          onclick="tapPreview()"
+          aria-disabled="true"
+        >
+          <span class="cta__spinner" aria-hidden="true"></span>
+          <span class="cta__busy-label">미리보기 중…</span>
+          <span class="cta__label">미리보기</span>
+          <span class="cta__coin">🪙 100</span>
+        </button>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    // === State machine ===
+    let currentState = 'ImageEmpty';
+    let inFlightTimer = null;
+
+    function setState(stateName) {
+      // cancel any pending in-flight transitions
+      if (inFlightTimer) { clearTimeout(inFlightTimer); inFlightTimer = null; }
+
+      currentState = stateName;
+
+      // image zone variant
+      const zone = document.getElementById('image-attach-zone');
+      zone.dataset.state = stateName;
+
+      // CTA state
+      const cta = document.getElementById('preview-cta');
+      if (stateName === 'ImageEmpty') {
+        cta.dataset.enabled = 'false';
+        cta.dataset.busy = 'false';
+        cta.setAttribute('aria-disabled', 'true');
+        cta.removeAttribute('aria-busy');
+      } else if (stateName === 'ImageSelected') {
+        cta.dataset.enabled = 'true';
+        cta.dataset.busy = 'false';
+        cta.setAttribute('aria-disabled', 'false');
+        cta.removeAttribute('aria-busy');
+      } else if (stateName === 'InFlight') {
+        cta.dataset.enabled = 'true';
+        cta.dataset.busy = 'true';
+        cta.setAttribute('aria-busy', 'true');
+        cta.setAttribute('aria-disabled', 'true');
+      }
+
+      // control panel toggle
+      document.querySelectorAll('.control-panel__state-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.state === stateName);
+      });
+
+      // breadcrumb
+      const bc = document.getElementById('breadcrumb');
+      if (bc) bc.textContent = 'FilterPreview → PreviewBottomSheet · ' + stateName;
+    }
+
+    // === Interactions ===
+    function selectImage() {
+      // mock: picker → 사진 1장 선택
+      setState('ImageSelected');
+    }
+
+    function removeImage() {
+      if (currentState === 'InFlight') return; // 비활성
+      setState('ImageEmpty');
+    }
+
+    function tapPreview() {
+      if (currentState !== 'ImageSelected') return; // disabled / busy
+      setState('InFlight');
+      // In real app: POST /filters/:id/preview → on 200 navigate to PreviewLoading.
+      // Prototype: 1.4s 뒤 자동 reset 으로 상태 시연 (실제 sheet close 는 mock 생략).
+      inFlightTimer = setTimeout(() => {
+        // 데모 편의: ImageSelected 로 돌려놓아 InFlight 토글 재실행 가능
+        setState('ImageSelected');
+      }, 1400);
+    }
+
+    function closeSheet() {
+      // Prototype: 외부 backdrop 탭 → 데모상 ImageEmpty 로 reset
+      // (실제 앱은 sheet 자체를 dismiss 하지만 단일-스크린 프로토타입이라 reset 으로 표현)
+      if (currentState === 'InFlight') return;
+      setState('ImageEmpty');
+    }
+
+    // Init
+    document.addEventListener('DOMContentLoaded', () => {
+      setState('ImageEmpty');
+    });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>app-004 PreviewResultScreen Prototype</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+  <style>
+    /* === Design Tokens === */
+    :root {
+      /* Color — Neutral */
+      --color-neutral-0: #FFFFFF;
+      --color-neutral-100: #F1F1F1;
+      --color-neutral-200: #E5E5E5;
+      --color-neutral-500: #8E9199;
+      --color-neutral-700: #5A544C;
+      --color-neutral-900: #262626;
+      --color-neutral-1000: #000000;
+
+      /* Color — Semantic */
+      --color-bg-normal: #FFFFFF;
+      --color-bg-screen: #000000;
+      --color-label-normal: #1A1613;
+      --color-label-alternative: #5A544C;
+      --color-label-assistive: #867F75;
+      --color-line-normal: #E0D7C8;
+
+      /* Color — Component */
+      --component-button-primary-fill: #262626;
+      --component-button-primary-label: #FFFFFF;
+      --component-button-secondary-fill: #F1F1F1;
+      --component-button-secondary-label: #262626;
+
+      /* Overlays (rgba — non-hex, allowed) */
+      --overlay-dim: rgba(0,0,0,0.5);
+      --overlay-icon-fill: rgba(0,0,0,0.4);
+      --overlay-cta-gradient: linear-gradient(to top, rgba(0,0,0,0.55), rgba(0,0,0,0));
+
+      /* Placeholder gradient stops (preview composition — intentional `gradient-token` kind, not real-image) */
+      --placeholder-grad-top: #2A2329;
+      --placeholder-grad-mid: #1A1418;
+      --placeholder-grad-bottom: #221A1F;
+      --component-button-secondary-hover: #E8E8E8;
+
+      /* Radius */
+      --radius-xs: 4px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-device: 22px;
+      --radius-full: 999px;
+
+      /* Spacing (4 base) */
+      --spacing-1: 4px;
+      --spacing-2: 8px;
+      --spacing-3: 12px;
+      --spacing-4: 16px;
+      --spacing-5: 20px;
+      --spacing-6: 24px;
+      --spacing-8: 32px;
+
+      /* Typography */
+      --font-family-default: 'Pretendard Variable', 'Pretendard', -apple-system, 'SF Pro', sans-serif;
+      --fs-title3: 18px;
+      --fs-subtitle: 16px;
+      --fs-body: 15px;
+      --fs-label: 13px;
+      --lh-title3: 1.4;
+      --lh-body: 1.55;
+      --fw-bold: 700;
+      --fw-semibold: 600;
+      --fw-medium: 500;
+      --fw-regular: 400;
+
+      /* Safe area fallbacks */
+      --sa-top: 44px;
+      --sa-bottom: 34px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-family-default);
+      background: #f0f0f0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 16px;
+      word-break: keep-all;
+      overflow-wrap: break-word;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* === Control Panel === */
+    .control-panel {
+      width: 390px;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      border-radius: 12px 12px 0 0;
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 13px;
+      font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+    }
+    .control-panel__row { display: flex; align-items: center; gap: 8px; }
+    .control-panel__label { color: #888; font-size: 11px; min-width: 56px; }
+    .control-panel select {
+      background: #2a2a3e; color: #e0e0e0; border: 1px solid #444;
+      border-radius: 6px; padding: 4px 8px; font-size: 12px; flex: 1;
+    }
+    .control-panel__states { display: flex; gap: 4px; flex-wrap: wrap; }
+    .control-panel__state-btn {
+      background: #2a2a3e; color: #aaa; border: 1px solid #444;
+      border-radius: 6px; padding: 4px 10px; font-size: 11px; cursor: pointer;
+      transition: all 0.15s;
+      font-family: inherit;
+    }
+    .control-panel__state-btn.active {
+      background: #FF7A63; color: #fff; border-color: #FF7A63;
+    }
+    .control-panel__breadcrumb { color: #666; font-size: 11px; }
+
+    /* === Device Frame === */
+    .device-frame {
+      width: 390px;
+      height: 844px;
+      background: var(--color-bg-screen);
+      overflow: hidden;
+      position: relative;
+      border: 1px solid #ddd;
+      border-radius: 0 0 12px 12px;
+    }
+
+    /* === Screen === */
+    .screen {
+      display: none;
+      flex-direction: column;
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0; left: 0;
+    }
+    .screen.active { display: flex; }
+
+    [data-state] { display: none; }
+    [data-state].state-active { display: flex; }
+
+    /* === PreviewResultScreen specifics === */
+
+    .preview-frame {
+      position: absolute;
+      inset: 0;
+      background: var(--color-bg-screen);
+    }
+
+    /* Full-bleed 9:16 placeholder image — neutral gradient + subtle radial composition */
+    .result-image {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background:
+        radial-gradient(ellipse 60% 45% at 50% 38%, rgba(255, 230, 210, 0.55) 0%, rgba(255, 230, 210, 0.0) 65%),
+        radial-gradient(ellipse 70% 50% at 50% 75%, rgba(80, 60, 90, 0.55) 0%, rgba(20, 14, 18, 0.0) 70%),
+        linear-gradient(180deg, var(--placeholder-grad-top) 0%, var(--placeholder-grad-mid) 45%, var(--placeholder-grad-bottom) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Subtle "결과 이미지 영역" graphic — non-text, geometric */
+    .result-image::before {
+      content: "";
+      position: absolute;
+      width: 220px;
+      height: 220px;
+      top: 28%;
+      left: 50%;
+      transform: translateX(-50%);
+      border-radius: var(--radius-full);
+      background: radial-gradient(circle at 40% 40%, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0.04) 45%, rgba(255,255,255,0) 70%);
+      filter: blur(6px);
+    }
+    .result-image::after {
+      content: "";
+      position: absolute;
+      bottom: 22%;
+      left: 50%;
+      width: 160px;
+      height: 60px;
+      transform: translateX(-50%);
+      border-radius: var(--radius-full);
+      background: radial-gradient(ellipse at center, rgba(0,0,0,0.35), rgba(0,0,0,0));
+      filter: blur(4px);
+    }
+
+    /* Close button (overlay top-left) */
+    .close-button {
+      position: absolute;
+      top: calc(env(safe-area-inset-top, var(--sa-top)) + 12px);
+      left: var(--spacing-4);
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-full);
+      background: var(--overlay-icon-fill);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      color: var(--color-neutral-0);
+      cursor: pointer;
+      z-index: 10;
+      transition: background 0.15s;
+    }
+    .close-button:hover, .close-button:active {
+      background: rgba(0,0,0,0.55);
+    }
+    .close-button svg { width: 20px; height: 20px; }
+
+    /* Bottom sticky CTA region */
+    .bottom-action {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding:
+        var(--spacing-4)
+        var(--spacing-5)
+        calc(env(safe-area-inset-bottom, var(--sa-bottom)) + var(--spacing-3))
+        var(--spacing-5);
+      background: var(--overlay-cta-gradient);
+      z-index: 10;
+    }
+
+    .btn-primary {
+      width: 100%;
+      min-height: 56px;
+      padding: var(--spacing-4) var(--spacing-5);
+      background: var(--component-button-primary-fill);
+      color: var(--component-button-primary-label);
+      border: none;
+      border-radius: var(--radius-lg);
+      font-family: var(--font-family-default);
+      font-size: var(--fs-subtitle);
+      font-weight: var(--fw-semibold);
+      letter-spacing: -0.01em;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--spacing-2);
+      transition: opacity 0.15s, transform 0.05s;
+    }
+    .btn-primary:hover { opacity: 0.95; }
+    .btn-primary:active { transform: scale(0.99); }
+
+    .btn-secondary {
+      width: 100%;
+      min-height: 48px;
+      padding: var(--spacing-3) var(--spacing-4);
+      background: var(--component-button-secondary-fill);
+      color: var(--component-button-secondary-label);
+      border: none;
+      border-radius: var(--radius-md);
+      font-family: var(--font-family-default);
+      font-size: var(--fs-body);
+      font-weight: var(--fw-semibold);
+      cursor: pointer;
+    }
+    .btn-secondary:hover { background: var(--component-button-secondary-hover); }
+
+    .btn-cta-coin {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--spacing-1);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* === CancelDialog === */
+    .dialog-backdrop {
+      position: absolute;
+      inset: 0;
+      background: var(--overlay-dim);
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.18s ease-out;
+    }
+    .dialog-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .dialog-card {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 320px;
+      transform: translate(-50%, -50%) scale(0.96);
+      background: var(--color-neutral-0);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-6) var(--spacing-5) var(--spacing-4) var(--spacing-5);
+      z-index: 101;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.18s ease-out, transform 0.2s cubic-bezier(0.34, 1.35, 0.64, 1);
+      box-shadow: 0 14px 32px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .dialog-card.open {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    .dialog-title {
+      font-size: var(--fs-title3);
+      font-weight: var(--fw-bold);
+      color: var(--color-label-normal);
+      line-height: var(--lh-title3);
+      letter-spacing: -0.01em;
+      text-align: center;
+      text-wrap: balance;
+      margin-bottom: var(--spacing-5);
+    }
+
+    .dialog-actions {
+      display: flex;
+      gap: var(--spacing-2);
+    }
+    .dialog-actions .btn-primary,
+    .dialog-actions .btn-secondary {
+      flex: 1;
+      min-height: 48px;
+      font-size: var(--fs-body);
+    }
+
+    /* Mobile fullscreen */
+    @media (max-width: 480px) {
+      body { padding: 0; align-items: stretch; min-height: 100dvh; }
+      .control-panel { display: none; }
+      .device-frame {
+        width: 100dvw;
+        height: 100dvh;
+        border: none;
+        border-radius: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Control Panel -->
+  <div class="control-panel">
+    <div class="control-panel__row">
+      <span class="control-panel__label">Screen</span>
+      <select id="screen-select">
+        <option value="PreviewResultScreen">PreviewResultScreen</option>
+      </select>
+    </div>
+    <div class="control-panel__row">
+      <span class="control-panel__label">State</span>
+      <div class="control-panel__states" id="state-toggles">
+        <button class="control-panel__state-btn active" data-state="default" onclick="toggleState('default')">default</button>
+        <button class="control-panel__state-btn" data-state="cancel-dialog-open" onclick="toggleState('cancel-dialog-open')">cancel-dialog-open</button>
+      </div>
+    </div>
+    <div class="control-panel__row">
+      <span class="control-panel__breadcrumb" id="breadcrumb">PreviewResultScreen</span>
+    </div>
+  </div>
+
+  <!-- Device Frame -->
+  <div class="device-frame" id="device-frame">
+
+    <section class="screen active" id="PreviewResultScreen">
+      <div class="preview-frame">
+
+        <!-- Full-bleed 9:16 result image (placeholder gradient — no text/logos) -->
+        <div class="result-image" id="result-image" role="img" aria-label="AI 생성 이미지 결과"></div>
+
+        <!-- Top-left close button (overlay) -->
+        <button class="close-button" id="close-button" type="button" aria-label="닫기">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+          </svg>
+        </button>
+
+        <!-- Bottom sticky CTA -->
+        <div class="bottom-action" id="bottom-action">
+          <button class="btn-primary" id="proceed-cta" type="button" aria-label="이 이미지로 만들기, 3,860 크레딧">
+            <span>이 이미지로 만들기</span>
+            <span class="btn-cta-coin" aria-hidden="true">
+              <span aria-hidden="true">🪙</span>
+              <span>3,860</span>
+            </span>
+          </button>
+        </div>
+
+        <!-- Cancel Dialog -->
+        <div class="dialog-backdrop" id="cancel-dialog-backdrop" aria-hidden="true"></div>
+        <div class="dialog-card" id="cancel-dialog" role="dialog" aria-modal="true" aria-labelledby="cancel-dialog-title">
+          <h2 class="dialog-title" id="cancel-dialog-title">지금 나가면 이 결과를<br>다시 볼 수 없어요</h2>
+          <div class="dialog-actions">
+            <button class="btn-secondary" id="cancel-dialog-cancel" type="button">취소</button>
+            <button class="btn-primary" id="cancel-dialog-confirm" type="button">나가기</button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    // === State management ===
+    let currentState = 'default';
+
+    function applyState(stateName) {
+      currentState = stateName;
+      const backdrop = document.getElementById('cancel-dialog-backdrop');
+      const dialog = document.getElementById('cancel-dialog');
+      if (stateName === 'cancel-dialog-open') {
+        backdrop.classList.add('open');
+        dialog.classList.add('open');
+      } else {
+        backdrop.classList.remove('open');
+        dialog.classList.remove('open');
+      }
+      updateStateButtons();
+    }
+
+    function toggleState(stateName) {
+      applyState(stateName);
+    }
+
+    function updateStateButtons() {
+      document.querySelectorAll('.control-panel__state-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.state === currentState);
+      });
+    }
+
+    // === Event bindings ===
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('close-button').addEventListener('click', () => {
+        toggleState('cancel-dialog-open');
+      });
+      document.getElementById('cancel-dialog-cancel').addEventListener('click', () => {
+        toggleState('default');
+      });
+      document.getElementById('cancel-dialog-confirm').addEventListener('click', () => {
+        // Demo: side effect would POST /preview-contents/{id}/cancel + navigate.replace(FilterPreview)
+        console.log('[demo] cancel confirmed → POST /cancel + navigate FilterPreview');
+        toggleState('default');
+      });
+      document.getElementById('cancel-dialog-backdrop').addEventListener('click', () => {
+        toggleState('default');
+      });
+      document.getElementById('proceed-cta').addEventListener('click', () => {
+        console.log('[demo] proceed → POST /preview-contents/{id}/proceed (APP-006)');
+      });
+    });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,123 @@
+/* === Sprint-level tokens (preview-feature) — Step A output === */
+/* Source: docs/designs/foundations/* + components/* (extracted by Design Engineer) */
+
+:root {
+  /* === PRIMITIVE — Color === */
+  /* Purple (Brand) */
+  --wds-color-purple-50:  #F5F0FF;
+  --wds-color-purple-100: #EBE1FF;
+  --wds-color-purple-400: #A17BFF;
+  --wds-color-purple-500: #8752FA;
+  --wds-color-purple-600: #7040E0;
+  --wds-color-purple-700: #5A30C0;
+
+  /* Neutral */
+  --wds-color-neutral-0:    #FFFFFF;
+  --wds-color-neutral-50:   #F7F8F9;
+  --wds-color-neutral-100:  #F0F1F3;
+  --wds-color-neutral-150:  #E8E8E8;
+  --wds-color-neutral-200:  #E4E5E9;
+  --wds-color-neutral-250:  #E2E2E2;
+  --wds-color-neutral-300:  #D1D3D8;
+  --wds-color-neutral-350:  #A7A7A7;
+  --wds-color-neutral-400:  #B5B8BF;
+  --wds-color-neutral-500:  #8E9199;
+  --wds-color-neutral-600:  #6B6E76;
+  --wds-color-neutral-700:  #46474C;
+  --wds-color-neutral-800:  #262626;
+  --wds-color-neutral-900:  #212228;
+  --wds-color-neutral-1000: #000000;
+
+  /* Status */
+  --wds-color-red-100:    #FFE5E3;
+  --wds-color-red-500:    #FF3B30;
+  --wds-color-red-600:    #E0241A;
+  --wds-color-red-700:    #D92800;
+  --wds-color-yellow-500: #FFB800;
+  --wds-color-coin-gold:  #F2B90C;
+
+  /* === SEMANTIC — Background === */
+  --wds-background-normal:               var(--wds-color-neutral-0);
+  --wds-background-elevated-alternative: var(--wds-color-neutral-0);
+  --wds-background-dimmed:               rgba(0, 0, 0, 0.50);
+
+  /* === SEMANTIC — Surface === */
+  --wds-surface-primary:   var(--wds-color-neutral-0);
+  --wds-surface-secondary: var(--wds-color-neutral-50);
+  --wds-surface-tertiary:  var(--wds-color-neutral-100);
+
+  /* === SEMANTIC — Fill === */
+  --wds-fill-brand-primary: var(--wds-color-purple-500);
+  --wds-fill-neutral:       var(--wds-color-neutral-100);
+
+  /* === SEMANTIC — Label === */
+  --wds-label-normal:      var(--wds-color-neutral-900);
+  --wds-label-alternative: var(--wds-color-neutral-600);
+  --wds-label-assistive:   var(--wds-color-neutral-500);
+  --wds-label-disabled:    var(--wds-color-neutral-400);
+  --wds-label-inverse:     var(--wds-color-neutral-0);
+
+  /* === SEMANTIC — Line === */
+  --wds-line-normal:      var(--wds-color-neutral-200);
+  --wds-line-alternative: var(--wds-color-neutral-100);
+  --wds-line-strong:      var(--wds-color-neutral-350);
+
+  /* === COMPONENT — Button === */
+  /* primary (DESIGN: #262626 fill + white label per button.mdx) */
+  --component-button-primary-fill:     var(--wds-color-neutral-800);
+  --component-button-primary-label:    var(--wds-label-inverse);
+  --component-button-primary-disabled-fill:  var(--wds-color-neutral-100);
+  --component-button-primary-disabled-label: var(--wds-color-neutral-400);
+  --component-button-radius:           16px;
+
+  /* === COMPONENT — Bottom Sheet === */
+  --component-bottom-sheet-fill:    var(--wds-background-elevated-alternative);
+  --component-bottom-sheet-radius:  28px;
+  --component-bottom-sheet-handle:  var(--wds-color-neutral-350);
+
+  /* === COMPONENT — Image Attach Zone === */
+  --component-image-zone-fill:   var(--wds-surface-secondary);
+  --component-image-zone-border: var(--wds-line-strong);
+  --component-image-zone-radius: 16px;
+
+  /* === TYPOGRAPHY === */
+  --font-family-default: 'Pretendard Variable', 'Pretendard', -apple-system, 'SF Pro', sans-serif;
+  --font-size-title3:    18px;
+  --font-size-body1:     16px;
+  --font-size-body2:     15px;
+  --font-size-body3:     14px;
+  --font-size-label:     13px;
+  --font-size-caption:   12px;
+  --font-weight-bold:    700;
+  --font-weight-semibold:600;
+  --font-weight-medium:  500;
+  --font-weight-regular: 400;
+  --line-height-tight:   1.30;
+  --line-height-normal:  1.45;
+  --line-height-relaxed: 1.55;
+
+  /* === SPACING (4 base) === */
+  --wds-spacing-2:  2px;
+  --wds-spacing-4:  4px;
+  --wds-spacing-6:  6px;
+  --wds-spacing-8:  8px;
+  --wds-spacing-12: 12px;
+  --wds-spacing-14: 14px;
+  --wds-spacing-16: 16px;
+  --wds-spacing-20: 20px;
+  --wds-spacing-24: 24px;
+  --wds-spacing-28: 28px;
+  --wds-spacing-32: 32px;
+  --wds-spacing-40: 40px;
+  --wds-spacing-48: 48px;
+
+  /* === RADIUS === */
+  --wds-radius-xs:   4px;
+  --wds-radius-sm:   8px;
+  --wds-radius-md:   12px;
+  --wds-radius-lg:   16px;
+  --wds-radius-xl:   20px;
+  --wds-radius-2xl:  22px;
+  --wds-radius-3xl:  28px;
+  --wds-radius-full: 9999px;
+}

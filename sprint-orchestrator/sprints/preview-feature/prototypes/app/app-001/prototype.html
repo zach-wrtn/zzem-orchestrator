@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>app-001 · FilterPreview Footer Dual-CTA (preview-feature)</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+  <style>
+    /* ============================================================
+       Design Tokens (sprint-level — preview-feature)
+       ============================================================ */
+    :root {
+      /* PRIMITIVE — Color Purple */
+      --wds-color-purple-50:  #F5F0FF;
+      --wds-color-purple-100: #EBE1FF;
+      --wds-color-purple-400: #A17BFF;
+      --wds-color-purple-500: #8752FA;
+      --wds-color-purple-600: #7040E0;
+
+      /* PRIMITIVE — Color Neutral */
+      --wds-color-neutral-0:    #FFFFFF;
+      --wds-color-neutral-50:   #F7F8F9;
+      --wds-color-neutral-100:  #F0F1F3;
+      --wds-color-neutral-200:  #E4E5E9;
+      --wds-color-neutral-300:  #D1D3D8;
+      --wds-color-neutral-400:  #B5B8BF;
+      --wds-color-neutral-500:  #8E9199;
+      --wds-color-neutral-600:  #6B6E76;
+      --wds-color-neutral-700:  #46474C;
+      --wds-color-neutral-900:  #212228;
+
+      /* PRIMITIVE — Status */
+      --wds-color-yellow-500: #F5B800;
+
+      /* SEMANTIC */
+      --wds-background-normal:    var(--wds-color-neutral-0);
+      --wds-surface-secondary:    var(--wds-color-neutral-50);
+      --wds-surface-tertiary:     var(--wds-color-neutral-100);
+      --wds-fill-brand-primary:   var(--wds-color-purple-500);
+      --wds-fill-neutral:         var(--wds-color-neutral-100);
+      --wds-label-normal:         var(--wds-color-neutral-900);
+      --wds-label-alternative:    var(--wds-color-neutral-600);
+      --wds-label-assistive:      var(--wds-color-neutral-500);
+      --wds-label-disabled:       var(--wds-color-neutral-400);
+      --wds-label-inverse:        var(--wds-color-neutral-0);
+      --wds-line-normal:          var(--wds-color-neutral-200);
+      --wds-line-alternative:     var(--wds-color-neutral-100);
+
+      /* COMPONENT — Button */
+      --wds-button-primary-fill:        var(--wds-fill-brand-primary);
+      --wds-button-primary-label:       var(--wds-label-inverse);
+      --wds-button-secondary-fill:      var(--wds-fill-neutral);
+      --wds-button-secondary-label:     var(--wds-label-normal);
+      --wds-button-disabled-fill:       var(--wds-color-neutral-100);
+      --wds-button-disabled-label:      var(--wds-color-neutral-400);
+
+      /* SPACING */
+      --wds-spacing-2:  2px;
+      --wds-spacing-4:  4px;
+      --wds-spacing-6:  6px;
+      --wds-spacing-8:  8px;
+      --wds-spacing-12: 12px;
+      --wds-spacing-16: 16px;
+      --wds-spacing-20: 20px;
+      --wds-spacing-24: 24px;
+      --wds-spacing-32: 32px;
+      --wds-spacing-34: 34px;
+
+      /* RADIUS */
+      --wds-radius-xs:   4px;
+      --wds-radius-sm:   8px;
+      --wds-radius-md:   12px;
+      --wds-radius-lg:   16px;
+      --wds-radius-xl:   20px;
+      --wds-radius-full: 9999px;
+
+      /* TYPOGRAPHY */
+      --wds-font-family-primary: 'Pretendard', -apple-system, 'SF Pro Display', sans-serif;
+      --wds-font-weight-regular:  400;
+      --wds-font-weight-medium:   500;
+      --wds-font-weight-semibold: 600;
+      --wds-font-weight-bold:     700;
+      --wds-font-size-xs:  12px;
+      --wds-font-size-sm:  13px;
+      --wds-font-size-md:  14px;
+      --wds-font-size-lg:  16px;
+      --wds-font-size-xl:  18px;
+      --wds-font-size-2xl: 20px;
+
+      /* Convenience aliases (Pass 6 #1 hex check) */
+      --color-brand-primary:     var(--wds-color-purple-500);
+      --color-bg-normal:         var(--wds-color-neutral-0);
+      --color-fill-neutral:      var(--wds-color-neutral-100);
+      --color-label-normal:      var(--wds-color-neutral-900);
+      --color-label-alternative: var(--wds-color-neutral-600);
+      --color-label-assistive:   var(--wds-color-neutral-500);
+      --color-line-normal:       var(--wds-color-neutral-200);
+    }
+
+    /* ============================================================
+       Reset
+       ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--wds-font-family-primary);
+      background: #f0f0f0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 16px;
+      color: var(--wds-label-normal);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button {
+      font-family: inherit;
+      cursor: pointer;
+      border: none;
+      background: none;
+      color: inherit;
+    }
+
+    /* ============================================================
+       Control Panel (reviewer only — outside device frame)
+       ============================================================ */
+    .control-panel {
+      width: 390px;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      border-radius: 12px 12px 0 0;
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 13px;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+    }
+    .control-panel__row {
+      display: flex; align-items: center; gap: 8px;
+    }
+    .control-panel__label {
+      color: #888; font-size: 11px; min-width: 56px;
+    }
+    .control-panel__states {
+      display: flex; gap: 4px; flex-wrap: wrap;
+    }
+    .control-panel__state-btn {
+      background: #2a2a3e;
+      color: #c8c8d4;
+      border: 1px solid #444;
+      border-radius: 6px;
+      padding: 5px 10px;
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: inherit;
+    }
+    .control-panel__state-btn.active {
+      background: var(--color-brand-primary);
+      color: #fff;
+      border-color: var(--color-brand-primary);
+    }
+    .control-panel__breadcrumb {
+      color: #888; font-size: 11px;
+    }
+    .control-panel__caption {
+      color: #888; font-size: 10px; line-height: 1.5;
+    }
+    .control-panel__caption code {
+      color: #e0d4ff; background: #2a2a3e; padding: 1px 4px; border-radius: 3px;
+    }
+
+    /* ============================================================
+       Device Frame
+       ============================================================ */
+    .device-frame {
+      width: 390px;
+      height: 844px;
+      background: var(--color-bg-normal);
+      overflow: hidden;
+      position: relative;
+      border: 1px solid #ddd;
+      border-radius: 0 0 12px 12px;
+    }
+
+    .screen {
+      display: none;
+      flex-direction: column;
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0; left: 0;
+    }
+    .screen.active { display: flex; }
+
+    /* ============================================================
+       Status Bar
+       ============================================================ */
+    .status-bar {
+      height: 44px;
+      flex: 0 0 44px;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 14px;
+      font-weight: var(--wds-font-weight-semibold);
+      color: var(--wds-label-normal);
+    }
+    .status-bar__time { font-variant-numeric: tabular-nums; }
+    .status-bar__indicators {
+      display: flex; gap: 6px; align-items: center;
+      font-size: 11px; color: var(--wds-label-normal);
+      letter-spacing: 1px;
+    }
+
+    /* ============================================================
+       Header
+       ============================================================ */
+    .header {
+      height: 56px;
+      flex: 0 0 56px;
+      padding: 0 8px 0 4px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--wds-background-normal);
+    }
+    .header__icon-btn {
+      width: 44px; height: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      color: var(--wds-label-normal);
+      border-radius: var(--wds-radius-full);
+    }
+    .header__icon-btn:active { background: var(--wds-surface-tertiary); }
+    .header__title {
+      font-size: var(--wds-font-size-lg);
+      font-weight: var(--wds-font-weight-semibold);
+      color: var(--wds-label-normal);
+    }
+
+    /* ============================================================
+       Hero (placeholder — focus is footer)
+       ============================================================ */
+    .hero {
+      flex: 0 0 360px;
+      position: relative;
+      background: var(--wds-surface-secondary);
+      overflow: hidden;
+    }
+    .hero__media {
+      width: 100%;
+      height: 100%;
+      background:
+        radial-gradient(circle at 30% 30%, rgba(135, 82, 250, 0.08), transparent 55%),
+        radial-gradient(circle at 70% 70%, rgba(245, 184, 0, 0.10), transparent 50%),
+        var(--wds-surface-tertiary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 8px;
+      color: var(--wds-label-assistive);
+      font-size: var(--wds-font-size-xs);
+      letter-spacing: 0.04em;
+    }
+    .hero__media-label {
+      font-size: var(--wds-font-size-sm);
+      font-weight: var(--wds-font-weight-medium);
+      color: var(--wds-label-alternative);
+    }
+    .hero__media-sublabel {
+      font-size: var(--wds-font-size-xs);
+      color: var(--wds-label-assistive);
+    }
+    .hero__chip {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-radius: var(--wds-radius-full);
+      padding: 6px 12px;
+      font-size: var(--wds-font-size-xs);
+      font-weight: var(--wds-font-weight-semibold);
+      color: var(--wds-label-normal);
+      display: inline-flex; align-items: center; gap: 4px;
+    }
+    .hero__chip-dot {
+      width: 6px; height: 6px;
+      background: var(--wds-fill-brand-primary);
+      border-radius: var(--wds-radius-full);
+    }
+
+    /* ============================================================
+       Body
+       ============================================================ */
+    .body {
+      flex: 1 1 auto;
+      overflow-y: auto;
+      padding: 20px 20px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      background: var(--wds-background-normal);
+    }
+    .filter-meta { display: flex; flex-direction: column; gap: 4px; }
+    .filter-meta__name {
+      font-size: var(--wds-font-size-xl);
+      font-weight: var(--wds-font-weight-bold);
+      color: var(--wds-label-normal);
+      letter-spacing: -0.01em;
+    }
+    .filter-meta__author {
+      font-size: var(--wds-font-size-sm);
+      font-weight: var(--wds-font-weight-medium);
+      color: var(--wds-fill-brand-primary);
+    }
+    .filter-meta__stats {
+      font-size: var(--wds-font-size-xs);
+      color: var(--wds-label-assistive);
+      font-variant-numeric: tabular-nums;
+      margin-top: 2px;
+    }
+    .filter-description {
+      font-size: var(--wds-font-size-md);
+      line-height: 1.55;
+      color: var(--wds-label-alternative);
+      word-break: keep-all;
+      overflow-wrap: break-word;
+    }
+
+    /* ============================================================
+       Footer (sticky bottom — APP-001 focus)
+       ============================================================ */
+    .footer {
+      flex: 0 0 auto;
+      background: var(--wds-background-normal);
+      border-top: 1px solid var(--wds-line-normal);
+      padding: 16px 16px 34px;
+      display: flex;
+      gap: 8px;
+      align-items: stretch;
+    }
+
+    .btn {
+      flex: 1 1 0;
+      min-height: 56px;
+      border-radius: var(--wds-radius-lg);
+      font-size: var(--wds-font-size-lg);
+      font-weight: var(--wds-font-weight-semibold);
+      letter-spacing: -0.01em;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: transform 0.08s ease, background 0.15s ease;
+      font-variant-numeric: tabular-nums;
+    }
+    .btn:active { transform: scale(0.985); }
+
+    .btn--primary {
+      background: var(--wds-button-primary-fill);
+      color: var(--wds-button-primary-label);
+    }
+    .btn--primary:active { background: var(--wds-color-purple-600); }
+
+    .btn--secondary {
+      background: var(--wds-button-secondary-fill);
+      color: var(--wds-button-secondary-label);
+    }
+    .btn--secondary:active { background: var(--wds-color-neutral-200); }
+
+    .btn--disabled,
+    .btn[aria-disabled="true"] {
+      background: var(--wds-button-disabled-fill);
+      color: var(--wds-button-disabled-label);
+      pointer-events: none;
+    }
+
+    .btn__cost {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      font-weight: var(--wds-font-weight-bold);
+      letter-spacing: 0;
+    }
+    .btn__coin {
+      font-size: 16px;
+      line-height: 1;
+    }
+
+    /* Spinner (loading state on primary) */
+    .btn__spinner {
+      width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,0.35);
+      border-top-color: #fff;
+      border-radius: var(--wds-radius-full);
+      animation: btn-spin 0.7s linear infinite;
+    }
+    @keyframes btn-spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ============================================================
+       State containers — toggle via [data-state]
+       ============================================================ */
+    [data-state] { display: none; }
+    [data-state].state-active { display: flex; }
+
+    /* dual-cta: row of [secondary, primary]; single-cta: primary full-width */
+    .footer[data-state="dual-cta"].state-active,
+    .footer[data-state="single-cta"].state-active,
+    .footer[data-state="loading"].state-active {
+      display: flex;
+    }
+
+    /* Inline spec card under hero — reviewer hint */
+    .spec-banner {
+      margin: 12px 16px 0;
+      padding: 10px 12px;
+      background: var(--wds-color-purple-50);
+      border-radius: var(--wds-radius-md);
+      font-size: var(--wds-font-size-xs);
+      color: var(--wds-color-purple-600);
+      line-height: 1.45;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .spec-banner__pill {
+      flex: 0 0 auto;
+      background: var(--wds-color-purple-500);
+      color: var(--wds-label-inverse);
+      font-weight: var(--wds-font-weight-bold);
+      font-size: 10px;
+      letter-spacing: 0.05em;
+      padding: 2px 6px;
+      border-radius: var(--wds-radius-xs);
+      text-transform: uppercase;
+    }
+
+    /* ============================================================
+       Mobile fullscreen
+       ============================================================ */
+    @media (max-width: 480px) {
+      body { padding: 0; align-items: stretch; min-height: 100dvh; }
+      .control-panel { display: none; }
+      .device-frame {
+        width: 100dvw;
+        height: 100dvh;
+        border: none;
+        border-radius: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ====================================================================
+       Reviewer Control Panel (outside device frame)
+       ==================================================================== -->
+  <div class="control-panel">
+    <div class="control-panel__row">
+      <span class="control-panel__label">Screen</span>
+      <span class="control-panel__breadcrumb">FilterPreview · footer (APP-001)</span>
+    </div>
+    <div class="control-panel__row">
+      <span class="control-panel__label">State</span>
+      <div class="control-panel__states" id="state-toggles">
+        <button type="button" class="control-panel__state-btn active" data-state-key="dual-cta">dual-cta</button>
+        <button type="button" class="control-panel__state-btn" data-state-key="single-cta">single-cta</button>
+        <button type="button" class="control-panel__state-btn" data-state-key="loading">loading</button>
+      </div>
+    </div>
+    <div class="control-panel__row">
+      <span class="control-panel__caption">
+        <code>dual-cta</code> = <code>hasDecompPreview: true</code> &nbsp;·&nbsp;
+        <code>single-cta</code> = false / undefined (regression baseline) &nbsp;·&nbsp;
+        <code>loading</code> = [만들기] tap 후
+      </span>
+    </div>
+  </div>
+
+  <!-- ====================================================================
+       Device Frame
+       ==================================================================== -->
+  <div class="device-frame" id="device-frame">
+
+    <section class="screen active" id="FilterPreview">
+
+      <!-- Status Bar -->
+      <div class="status-bar" id="status-bar">
+        <span class="status-bar__time">9:41</span>
+        <span class="status-bar__indicators">●●● ▮</span>
+      </div>
+
+      <!-- Header -->
+      <header class="header" id="header">
+        <button type="button" class="header__icon-btn" id="header-back" aria-label="뒤로가기">←</button>
+        <h1 class="header__title" id="header-title">필터 미리보기</h1>
+        <button type="button" class="header__icon-btn" id="header-share" aria-label="공유">⌃</button>
+      </header>
+
+      <!-- Hero (placeholder — focus is footer) -->
+      <section class="hero" id="hero">
+        <div class="hero__chip" aria-hidden="true">
+          <span class="hero__chip-dot"></span>
+          <span>분해 미리보기 지원</span>
+        </div>
+        <div class="hero__media" id="preview-media" role="img" aria-label="필터 적용 결과 미리보기">
+          <div class="hero__media-label">PREVIEW MEDIA</div>
+          <div class="hero__media-sublabel">16:9 placeholder · 결과 이미지 영역</div>
+        </div>
+      </section>
+
+      <div class="spec-banner" aria-hidden="true">
+        <span class="spec-banner__pill">spec</span>
+        <span>APP-001 변경 영역은 <strong>화면 하단 Footer</strong> 1곳. Hero · Header · Body 는 placeholder (회귀 0).</span>
+      </div>
+
+      <!-- Body -->
+      <main class="body" id="body">
+        <section class="filter-meta" id="filter-meta">
+          <div class="filter-meta__name" id="filter-name">스튜디오 지브리 풍</div>
+          <div class="filter-meta__author" id="filter-author">@studio_zzem</div>
+          <div class="filter-meta__stats" id="filter-stats">사용 12,438 · 좋아요 2,910</div>
+        </section>
+        <p class="filter-description" id="filter-description">
+          따뜻한 색감과 부드러운 빛으로 스튜디오풍 무드를 재현해요. 인물 사진에 특히 잘 어울려요.
+        </p>
+      </main>
+
+      <!-- Footer — DUAL-CTA (hasDecompPreview === true) -->
+      <div class="footer state-active" data-state="dual-cta" id="footer-dual">
+        <button
+          type="button"
+          class="btn btn--secondary"
+          id="footer-preview-btn"
+          data-testid="meme.filterPreview.previewButton"
+          aria-label="미리보기"
+        >
+          미리보기
+        </button>
+        <button
+          type="button"
+          class="btn btn--primary"
+          id="footer-create-btn-dual"
+          data-testid="meme.filterPreview.createButton"
+          aria-label="만들기, 비용 3,960 크레딧"
+        >
+          <span>만들기</span>
+          <span class="btn__cost">
+            <span class="btn__coin" aria-hidden="true">🪙</span>
+            <span>3,960</span>
+          </span>
+        </button>
+      </div>
+
+      <!-- Footer — SINGLE-CTA (hasDecompPreview !== true) -->
+      <div class="footer" data-state="single-cta" id="footer-single">
+        <button
+          type="button"
+          class="btn btn--primary"
+          id="footer-create-btn-single"
+          data-testid="meme.filterPreview.createButton"
+          aria-label="만들기, 비용 3,960 크레딧"
+        >
+          <span>만들기</span>
+          <span class="btn__cost">
+            <span class="btn__coin" aria-hidden="true">🪙</span>
+            <span>3,960</span>
+          </span>
+        </button>
+      </div>
+
+      <!-- Footer — LOADING (post-tap on 만들기) -->
+      <div class="footer" data-state="loading" id="footer-loading">
+        <button
+          type="button"
+          class="btn btn--primary"
+          id="footer-create-btn-loading"
+          aria-busy="true"
+          aria-label="만들기 진행 중"
+        >
+          <span class="btn__spinner" aria-hidden="true"></span>
+        </button>
+      </div>
+
+    </section>
+
+  </div>
+
+  <script>
+    // === State toggle (dual-cta | single-cta | loading) ===
+    const SCREEN_ID = 'FilterPreview';
+    let currentState = 'dual-cta';
+
+    function applyState(stateName) {
+      const screen = document.getElementById(SCREEN_ID);
+      if (!screen) return;
+      screen.querySelectorAll('[data-state]').forEach(el => {
+        el.classList.toggle('state-active', el.dataset.state === stateName);
+      });
+      currentState = stateName;
+      document.querySelectorAll('.control-panel__state-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.stateKey === stateName);
+      });
+    }
+
+    function logTap(target, payload) {
+      // visual feedback only — no blocking dialogs (Pass 6 #8)
+      console.log('[APP-001 tap]', target, payload || {});
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // State toggle bindings
+      document.querySelectorAll('.control-panel__state-btn').forEach(btn => {
+        btn.addEventListener('click', () => applyState(btn.dataset.stateKey));
+      });
+
+      // Footer interactions
+      const previewBtn = document.getElementById('footer-preview-btn');
+      if (previewBtn) {
+        previewBtn.addEventListener('click', () => {
+          logTap('previewButton', { action: 'open-overlay → PreviewBottomSheet' });
+          // Visual confirm — pulse the button briefly
+          previewBtn.animate(
+            [{ transform: 'scale(1)' }, { transform: 'scale(0.97)' }, { transform: 'scale(1)' }],
+            { duration: 220, easing: 'ease-out' }
+          );
+        });
+      }
+
+      const createBtns = [
+        document.getElementById('footer-create-btn-dual'),
+        document.getElementById('footer-create-btn-single'),
+      ].filter(Boolean);
+      createBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          logTap('createButton', { action: 'navigate → /gen' });
+          // Demo: flip to loading state, then back after 1.2s
+          applyState('loading');
+          setTimeout(() => {
+            // Return to whichever non-loading state was last viewed
+            const fallback = currentState === 'loading' ? 'dual-cta' : currentState;
+            applyState(fallback);
+          }, 1200);
+        });
+      });
+
+      // Header back
+      const back = document.getElementById('header-back');
+      if (back) back.addEventListener('click', () => logTap('headerBack', { action: 'go-back' }));
+      const share = document.getElementById('header-share');
+      if (share) share.addEventListener('click', () => logTap('headerShare', { action: 'share' }));
+
+      // Init default state
+      applyState('dual-cta');
+    });
+  </script>
+
+</body>
+</html>

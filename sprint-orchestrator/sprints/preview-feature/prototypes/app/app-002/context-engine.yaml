@@ -1,0 +1,106 @@
+meta:
+  task_id: app-002
+  sprint_id: preview-feature
+  archetype: modal
+  modal_subtype: sheet
+  mode: simple
+
+why:
+  product_intent: |
+    필터 결과물을 비디오로 만들기 전, 사용자가 자기 사진 1장으로
+    미리보기를 받아볼 수 있도록 한다. 비디오 생성 코인을 본격적으로
+    소비하기 전 결과 품질에 대한 신뢰를 형성하는 단계.
+  target_user: "필터를 선택했지만 결과물 품질이 불확실해 망설이는 유저"
+  user_stories:
+    - id: US-1
+      as_a: "필터를 선택한 유저"
+      i_want: "내 사진으로 결과를 미리 확인하고"
+      so_that: "비디오 생성을 결정할 수 있다"
+  acceptance_criteria:
+    - id: AC-2.1.2
+      given: "사용자가 필터 상세에서 [미리보기]를 탭"
+      when: "preview bottom sheet 가 열린다"
+      then: "'결과물 미리보기' title + 이미지 첨부 zone + [미리보기 🪙100] disabled CTA 가 노출된다"
+      ui_impact: "Title/Description/ImageZone/CTA 4-블록 구조의 sheet 렌더링"
+    - id: AC-2.1.3
+      given: "이미지 미선택 상태"
+      when: "이미지 첨부 zone [+] 탭 → picker → 1장 선택"
+      then: "썸네일 표시 + 우상단 X 로 제거 가능. ImageGuidance 시트 미노출."
+      ui_impact: "ImageEmpty ↔ ImageSelected 토글; X 노출"
+    - id: AC-2.1.4
+      given: "sheet open"
+      when: "이미지 미선택 / 선택"
+      then: "CTA disabled / enabled 상호 토글"
+      ui_impact: "CTA 두 가지 시각 상태 (disabled fill #F0F1F3 / enabled fill #262626)"
+
+what:
+  tokens_needed:
+    colors:
+      - wds-background-elevated-alternative
+      - wds-background-dimmed
+      - wds-label-normal
+      - wds-label-alternative
+      - wds-label-assistive
+      - wds-label-inverse
+      - wds-surface-secondary
+      - wds-line-strong
+      - component-button-primary-fill
+      - component-button-primary-disabled-fill
+      - component-button-primary-disabled-label
+      - component-bottom-sheet-handle
+    typography:
+      - title3 (18px / bold)
+      - body2 (15px / regular)
+      - body1 (16px / semibold) for CTA
+      - label (13px / medium) for zone label
+    spacing: ["6","8","12","14","16","20","28"]
+    radius: ["full","lg(16)","3xl(28)"]
+  components_needed:
+    - { name: BottomSheet,        category: surface }
+    - { name: DragHandle,         category: surface }
+    - { name: ImageAttachZone,    category: input  }
+    - { name: ImageRemoveBadge,   category: control}
+    - { name: PreviewCTAButton,   category: control}
+  patterns_needed:
+    - { name: "Modal · sheet", description: "Bottom sheet (rounded-28 top) over dimmed parent — 1 primary CTA pinned bottom" }
+
+how:
+  composition_rules:
+    - rule: "Sheet anchored to bottom, hugs content, rounded only top corners (28px)"
+      applies_to: [PreviewBottomSheet]
+    - rule: "Backdrop covers full parent at rgba(0,0,0,0.50) — modal #1 강제룰 통과"
+      applies_to: [PreviewBottomSheet]
+    - rule: "이미지 첨부 zone 은 단일 영역 — empty/selected variant 만 토글, layout 동일"
+      applies_to: [ImageAttachZone]
+    - rule: "CTA 항상 sheet 의 마지막 child — disabled/enabled/loading 3-state 동일 위치"
+      applies_to: [PreviewCTAButton]
+  conditional_rendering:
+    - condition: "state == ImageEmpty"
+      variant_a: "ZoneEmpty 가시 + CTA disabled"
+      variant_b: "ZoneSelected hidden"
+    - condition: "state == ImageSelected"
+      variant_a: "ZoneSelected 가시 (썸네일 + X) + CTA enabled (#262626)"
+      variant_b: "ZoneEmpty hidden"
+    - condition: "state == InFlight"
+      variant_a: "CTA spinner + label hidden, aria-busy"
+      variant_b: "X / backdrop tap 무시"
+  constraints:
+    - "Sheet 최대 높이 80% viewport — 콘텐츠는 hug 이므로 자동 충족"
+    - "CTA 는 항상 safe area 위 (시각적으로는 28px bottom padding 으로 표현)"
+    - "Pretendard 외 font-family 금지 (.screen 후손)"
+    - "브랜드 보라 그라디언트 배경 금지 — 단색 토큰만"
+    - "alert/confirm/prompt 핸들러 금지 — toggleState 로 표현"
+  priority_order:
+    - "Sheet 콘텐츠 hierarchy: Title → Description → Image zone → CTA"
+    - "상태 변화 가시성: CTA enabled/disabled 색차 (high contrast)"
+
+assets:
+  feed_thumbnails:
+    kind: gradient-token
+    needs_real_content: false
+    note: "Selected 상태의 thumbnail 은 인물 사진 mock — gradient + 이모지 silhouette 로 표현 (placeholder 허용 — picker 미실행 mock)"
+  icons:
+    kind: glyph
+    needs_real_content: false
+    glyphs: ["+", "×", "🪙"]
+    note: "+ / × 는 inline text glyph. 🪙 는 body 텍스트 내 이모지 (Pass 6 #2 예외 — 인터랙티브 요소의 아이콘이 아니라 라벨 텍스트 내 일부)"

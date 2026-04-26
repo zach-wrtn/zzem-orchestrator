@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>app-005 Error Sheets — CreditInsufficient + HarmfulImage</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+  <style>
+    /* === Design Tokens (inlined) === */
+    :root {
+      /* Brand */
+      --color-brand-primary: #8752FA;
+      --color-brand-primary-tint: #F3EEFF;
+
+      /* Neutral */
+      --color-neutral-0: #FFFFFF;
+      --color-neutral-100: #F1F1F1;
+      --color-neutral-200: #E2E2E2;
+      --color-neutral-300: #A7A7A7;
+      --color-neutral-500: #6B6E76;
+      --color-neutral-700: #424242;
+      --color-neutral-900: #262626;
+
+      /* Semantic */
+      --color-bg-normal: #FFFFFF;
+      --color-bg-elevated: #FFFFFF;
+      --color-label-normal: #262626;
+      --color-label-alternative: #6B6E76;
+      --color-label-assistive: #8E9199;
+      --color-line-normal: #E4E5E9;
+      --color-fill-neutral: #F1F1F1;
+
+      /* Function — Warning (yellow) */
+      --color-yellow-50: #FFF7E0;
+      --color-yellow-200: #FFD98A;
+      --color-yellow-500: #F5A300;
+      --color-yellow-600: #E08800;
+      --color-yellow-900: #7A4A00;
+
+      /* Illustration — coin (yellow family + amber) */
+      --color-coin-fill: #FFD66B;
+      --color-coin-stroke: #E0A93B;
+      --color-coin-engrave: #7A5800;
+
+      /* Illustration — preview gradient parent (purple family tints) */
+      --color-purple-50: #F3EEFF;
+      --color-purple-100: #EDE3FF;
+      --color-purple-200: #D9C8F7;
+
+      /* Component — Button */
+      --component-button-primary-fill: #262626;
+      --component-button-primary-label: #FFFFFF;
+      --component-button-secondary-fill: #F1F1F1;
+      --component-button-secondary-label: #262626;
+
+      /* Backdrop */
+      --color-backdrop: rgba(0, 0, 0, 0.4);
+
+      /* Typography */
+      --font-family-default: 'Pretendard', -apple-system, 'SF Pro', sans-serif;
+      --font-size-h2: 20px;
+      --font-size-title3: 18px;
+      --font-size-body: 15px;
+      --font-size-button: 16px;
+      --font-weight-bold: 700;
+      --font-weight-semibold: 600;
+      --font-weight-medium: 500;
+      --font-weight-regular: 400;
+
+      /* Spacing */
+      --spacing-1: 4px;
+      --spacing-2: 8px;
+      --spacing-3: 12px;
+      --spacing-4: 16px;
+      --spacing-5: 20px;
+      --spacing-6: 24px;
+
+      /* Radius */
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-cta: 16px;
+      --radius-frame: 22px;
+      --radius-sheet-top: 28px;
+      --radius-full: 999px;
+    }
+
+    /* === Reset === */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-family-default);
+      background: #f0f0f0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 16px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* === Control Panel (리뷰어용) === */
+    .control-panel {
+      width: 390px;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      border-radius: 12px 12px 0 0;
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 13px;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+    }
+
+    .control-panel__row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .control-panel__label {
+      color: #888;
+      font-size: 11px;
+      min-width: 56px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .control-panel__states {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .control-panel__state-btn {
+      background: #2a2a3e;
+      color: #ccc;
+      border: 1px solid #444;
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: inherit;
+    }
+
+    .control-panel__state-btn:hover { background: #34344a; color: #fff; }
+
+    .control-panel__state-btn.active {
+      background: var(--color-brand-primary);
+      color: #fff;
+      border-color: var(--color-brand-primary);
+    }
+
+    .control-panel__breadcrumb {
+      color: #777;
+      font-size: 11px;
+    }
+
+    /* === Device Frame === */
+    .device-frame {
+      width: 390px;
+      height: 844px;
+      background: var(--color-bg-normal);
+      overflow: hidden;
+      position: relative;
+      border: 1px solid #ddd;
+      border-radius: 0 0 12px 12px;
+    }
+
+    .screen {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    /* === Parent (dimmed reference) === */
+    .parent-stage {
+      position: absolute;
+      inset: 0;
+      background: var(--color-bg-normal);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .parent-status-bar {
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      font-size: 14px;
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-label-normal);
+    }
+
+    .parent-status-icons {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+      color: var(--color-label-normal);
+    }
+
+    .parent-header {
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+    }
+
+    .parent-back {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-full);
+      display: grid;
+      place-items: center;
+      color: var(--color-label-normal);
+      font-size: 20px;
+    }
+
+    .parent-title {
+      font-size: var(--font-size-title3);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-label-normal);
+    }
+
+    .parent-spacer { width: 40px; }
+
+    .parent-body {
+      flex: 1;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .preview-card {
+      flex: 1;
+      border-radius: var(--radius-cta);
+      background: linear-gradient(180deg, #EDE3FF 0%, #D9C8F7 100%);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .preview-card-label {
+      color: var(--color-neutral-700);
+      font-size: var(--font-size-body);
+      font-weight: var(--font-weight-medium);
+      letter-spacing: -0.01em;
+    }
+
+    .preview-footer {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .filter-chip {
+      flex: 0 0 auto;
+      padding: 10px 14px;
+      border-radius: var(--radius-full);
+      background: var(--color-neutral-100);
+      color: var(--color-label-normal);
+      font-size: 14px;
+      font-weight: var(--font-weight-medium);
+    }
+
+    .filter-chip.active {
+      background: var(--color-neutral-900);
+      color: var(--color-neutral-0);
+    }
+
+    .preview-cta {
+      flex: 1;
+      height: 48px;
+      border-radius: var(--radius-cta);
+      background: var(--color-neutral-900);
+      color: var(--color-neutral-0);
+      font-size: var(--font-size-button);
+      font-weight: var(--font-weight-semibold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      border: none;
+      font-family: inherit;
+    }
+
+    .coin-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 13px;
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-neutral-0);
+      opacity: 0.9;
+    }
+
+    /* === Overlay backdrop === */
+    .overlay-backdrop {
+      position: absolute;
+      inset: 0;
+      background: var(--color-backdrop);
+      z-index: 100;
+      animation: fadeIn 0.18s ease-out;
+    }
+
+    /* === Sheet === */
+    .sheet {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--color-bg-elevated);
+      border-radius: var(--radius-sheet-top) var(--radius-sheet-top) 0 0;
+      padding: 12px 20px 32px 20px;
+      z-index: 101;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      animation: slideUp 0.28s cubic-bezier(.2,.7,.2,1);
+      box-shadow: 0 -8px 32px rgba(0,0,0,0.08);
+    }
+
+    .sheet[hidden] { display: none; }
+
+    .drag-handle {
+      width: 40px;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--color-neutral-300);
+      margin: 2px auto 14px;
+    }
+
+    .icon-badge {
+      width: 64px;
+      height: 64px;
+      border-radius: var(--radius-full);
+      display: grid;
+      place-items: center;
+      margin: 8px 0 16px;
+    }
+
+    .icon-badge--credit {
+      background: var(--color-brand-primary-tint);
+    }
+
+    .icon-badge--harmful {
+      background: var(--color-yellow-50);
+    }
+
+    .sheet-title {
+      font-size: var(--font-size-h2);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-label-normal);
+      letter-spacing: -0.02em;
+      text-align: center;
+      word-break: keep-all;
+      overflow-wrap: break-word;
+      text-wrap: balance;
+      margin-bottom: 6px;
+    }
+
+    .sheet-description {
+      font-size: var(--font-size-body);
+      font-weight: var(--font-weight-regular);
+      color: var(--color-label-alternative);
+      line-height: 1.5;
+      letter-spacing: -0.01em;
+      text-align: center;
+      word-break: keep-all;
+      overflow-wrap: break-word;
+      margin-bottom: 24px;
+      max-width: 280px;
+    }
+
+    .cta-row {
+      display: flex;
+      gap: 8px;
+      width: 100%;
+    }
+
+    .btn {
+      flex: 1;
+      height: 56px;
+      border-radius: var(--radius-cta);
+      font-size: var(--font-size-button);
+      font-weight: var(--font-weight-semibold);
+      letter-spacing: -0.01em;
+      border: none;
+      font-family: inherit;
+      cursor: pointer;
+      transition: opacity 0.12s ease;
+    }
+
+    .btn:active { opacity: 0.85; }
+
+    .btn-primary {
+      background: var(--component-button-primary-fill);
+      color: var(--component-button-primary-label);
+    }
+
+    .btn-secondary {
+      background: var(--component-button-secondary-fill);
+      color: var(--component-button-secondary-label);
+    }
+
+    .btn-full { width: 100%; }
+
+    /* === Animations === */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(100%); opacity: 0.9; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* === Mobile fullscreen === */
+    @media (max-width: 480px) {
+      body { padding: 0; align-items: stretch; min-height: 100dvh; }
+      .control-panel { display: none; }
+      .device-frame {
+        width: 100dvw;
+        height: 100dvh;
+        border: none;
+        border-radius: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Control Panel -->
+  <div class="control-panel">
+    <div class="control-panel__row">
+      <span class="control-panel__label">task</span>
+      <span class="control-panel__breadcrumb">app-005 · ErrorSheets · modal/sheet · 390x844 · light</span>
+    </div>
+    <div class="control-panel__row">
+      <span class="control-panel__label">state</span>
+      <div class="control-panel__states" id="state-toggles">
+        <button class="control-panel__state-btn active" data-state="credit" onclick="showState('credit')">credit (402)</button>
+        <button class="control-panel__state-btn" data-state="harmful" onclick="showState('harmful')">harmful (422)</button>
+      </div>
+    </div>
+    <div class="control-panel__row">
+      <span class="control-panel__breadcrumb" id="breadcrumb">FilterPreview → PreviewBottomSheet → CreditInsufficientSheet</span>
+    </div>
+  </div>
+
+  <!-- Device Frame -->
+  <div class="device-frame">
+    <section class="screen" id="ErrorSheets">
+
+      <!-- Dimmed parent reference (FilterPreview / PreviewBottomSheet) -->
+      <div class="parent-stage" id="parent-stage">
+        <div class="parent-status-bar">
+          <span>9:41</span>
+          <span class="parent-status-icons">
+            <svg width="18" height="12" viewBox="0 0 18 12" fill="none"><path d="M1 6.5C1 4.84 2.34 3.5 4 3.5h10c1.66 0 3 1.34 3 3v0c0 1.66-1.34 3-3 3H4c-1.66 0-3-1.34-3-3v0z" stroke="currentColor" stroke-width="1"/><rect x="2.5" y="5" width="11" height="3" rx="1" fill="currentColor"/></svg>
+          </span>
+        </div>
+        <div class="parent-header">
+          <div class="parent-back">‹</div>
+          <div class="parent-title">미리보기</div>
+          <div class="parent-spacer"></div>
+        </div>
+        <div class="parent-body">
+          <div class="preview-card">
+            <span class="preview-card-label">필터 적용된 이미지 미리보기</span>
+          </div>
+          <div class="preview-footer">
+            <div class="filter-chip">원본</div>
+            <div class="filter-chip active">필름톤</div>
+            <button class="preview-cta" type="button" disabled>
+              미리보기
+              <span class="coin-pill">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" fill="#FFD66B" stroke="#E0A93B" stroke-width="1"/><text x="7" y="9.5" text-anchor="middle" font-size="7" font-weight="700" fill="#7A5800" font-family="Pretendard, sans-serif">₩</text></svg>
+                100
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Overlay backdrop -->
+      <div class="overlay-backdrop" id="overlay-backdrop"></div>
+
+      <!-- CreditInsufficientSheet -->
+      <div class="sheet" id="credit-insufficient-sheet" role="dialog" aria-labelledby="ci-title" aria-describedby="ci-description">
+        <div class="drag-handle"></div>
+
+        <div class="icon-badge icon-badge--credit" id="ci-icon" aria-hidden="true">
+          <!-- Coin icon — friendly, brand-tinted -->
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+            <circle cx="16" cy="16" r="11" fill="#FFD66B" stroke="#E0A93B" stroke-width="1.5"/>
+            <circle cx="16" cy="16" r="7.5" fill="none" stroke="#E0A93B" stroke-width="1" stroke-dasharray="1.5 1.2" opacity="0.7"/>
+            <path d="M16 11v10M13 13.5c0-1 1-2 3-2s3 1 3 2-1 1.5-3 1.5-3 .5-3 1.5 1 2 3 2 3-1 3-2" stroke="#7A5800" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          </svg>
+        </div>
+
+        <h2 class="sheet-title" id="ci-title">크레딧이 다 떨어졌어요</h2>
+        <p class="sheet-description" id="ci-description">충전하고 미리보기를 계속 만들어보세요</p>
+
+        <div class="cta-row">
+          <button class="btn btn-secondary" id="ci-dismiss" type="button" onclick="onDismiss()">다음에</button>
+          <button class="btn btn-primary" id="ci-recharge" type="button" onclick="onRecharge()">충전하기</button>
+        </div>
+      </div>
+
+      <!-- HarmfulImageSheet -->
+      <div class="sheet" id="harmful-image-sheet" role="dialog" aria-labelledby="hi-title" aria-describedby="hi-description" hidden data-testid="meme.harmfulImageSheet.sheet">
+        <div class="drag-handle"></div>
+
+        <div class="icon-badge icon-badge--harmful" id="hi-icon" aria-hidden="true">
+          <!-- Warning triangle — informational, not destructive -->
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+            <path d="M16 5.5L28 25.5H4L16 5.5Z" fill="#FFD98A" stroke="#E08800" stroke-width="2" stroke-linejoin="round"/>
+            <rect x="14.7" y="12.5" width="2.6" height="7.5" rx="1.3" fill="#7A4A00"/>
+            <circle cx="16" cy="22.5" r="1.4" fill="#7A4A00"/>
+          </svg>
+        </div>
+
+        <h2 class="sheet-title" id="hi-title" data-testid="meme.harmfulImageSheet.title">적절하지 않은 이미지를 감지했어요</h2>
+        <p class="sheet-description" id="hi-description" data-testid="meme.harmfulImageSheet.description">다른 이미지를 선택해주세요</p>
+
+        <button class="btn btn-primary btn-full" id="hi-retry" type="button" onclick="onRetry()" data-testid="meme.harmfulImageSheet.retryCta">다른 사진 선택하기</button>
+      </div>
+
+    </section>
+  </div>
+
+  <script>
+    // === State toggle between the two sheets ===
+    const sheets = {
+      credit: document.getElementById('credit-insufficient-sheet'),
+      harmful: document.getElementById('harmful-image-sheet'),
+    };
+
+    const breadcrumbs = {
+      credit: 'FilterPreview → PreviewBottomSheet → CreditInsufficientSheet',
+      harmful: 'FilterPreview → PreviewBottomSheet → HarmfulImageSheet',
+    };
+
+    function showState(state) {
+      // Toggle sheet visibility
+      Object.entries(sheets).forEach(([key, el]) => {
+        if (key === state) {
+          el.removeAttribute('hidden');
+          // re-trigger slide-up animation
+          el.style.animation = 'none';
+          // eslint-disable-next-line no-unused-expressions
+          el.offsetHeight;
+          el.style.animation = '';
+        } else {
+          el.setAttribute('hidden', '');
+        }
+      });
+
+      // Toggle control panel button active
+      document.querySelectorAll('.control-panel__state-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.state === state);
+      });
+
+      // Update breadcrumb
+      const crumb = document.getElementById('breadcrumb');
+      if (crumb) crumb.textContent = breadcrumbs[state];
+    }
+
+    // === Interaction handlers (visual demo only — no alert/confirm) ===
+    function onDismiss() {
+      // Close sheet (visual)
+      flashAction('CreditInsufficientSheet → close (다음에)');
+    }
+
+    function onRecharge() {
+      flashAction('CreditInsufficientSheet → navigate to WalletScreen (충전하기)');
+    }
+
+    function onRetry() {
+      // AC 2.1.7 — close + reopen PreviewBottomSheet (image empty)
+      flashAction('HarmfulImageSheet → close + reopen PreviewBottomSheet (image empty)');
+    }
+
+    function flashAction(msg) {
+      const crumb = document.getElementById('breadcrumb');
+      if (!crumb) return;
+      const prev = crumb.textContent;
+      crumb.textContent = '▸ ' + msg;
+      crumb.style.color = '#A17BFF';
+      setTimeout(() => {
+        crumb.textContent = prev;
+        crumb.style.color = '';
+      }, 1600);
+    }
+
+    // === Backdrop tap → dismiss (modal force rule #2) ===
+    document.getElementById('overlay-backdrop').addEventListener('click', () => {
+      flashAction('Backdrop tap → close sheet (modal dismiss)');
+    });
+  </script>
+
+</body>
+</html>

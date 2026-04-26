@@ -1,0 +1,244 @@
+openapi: 3.0.3
+info:
+  title: preview-feature API Contract
+  version: 0.1.0
+  description: |
+    Workflow filter i2i preview → user-decided i2v conversion.
+    Three new preview-only endpoints (parent filter ID-based) + callback branching
+    + content-list filtering. Existing `POST /filters/:filterId/gen` (atomic
+    workflow) remains unchanged.
+
+servers:
+  - url: https://meme.api.example/v1
+    description: Production
+  - url: http://localhost:3000/v1
+    description: Local
+
+components:
+  schemas:
+    PreviewStartRequest:
+      type: object
+      required: [imageUrl]
+      properties:
+        imageUrl:
+          type: string
+          format: uri
+          description: |
+            S3-uploaded source image URL. Caller (app) uploads via existing
+            image-upload endpoint, then passes the resulting URL.
+
+    PreviewStartResponse:
+      type: object
+      required: [contentId, falJobId]
+      properties:
+        contentId:
+          type: string
+          description: i2i preview Content (`isHidden: true`, `decompRole: 'i2i'`).
+        falJobId:
+          type: string
+          description: fal.ai job id for client-side correlation (callback dispatch).
+
+    PreviewProceedResponse:
+      type: object
+      required: [contentId, falJobId]
+      properties:
+        contentId:
+          type: string
+          description: |
+            New i2v Content (`isHidden: false`, `decompRole: 'i2v'`, references
+            preview content via `parentFilterId`).
+        falJobId:
+          type: string
+
+    PreviewCancelResponse:
+      type: object
+      required: [ok]
+      properties:
+        ok:
+          type: boolean
+        slotReleased:
+          type: boolean
+          description: True if a slot was released (i.e. job was still running).
+
+    ErrorEnvelope:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          enum:
+            - INSUFFICIENT_CREDIT
+            - HARMFUL_IMAGE
+            - SLOT_EXHAUSTED
+            - PREVIEW_NOT_FOUND
+            - PREVIEW_NOT_READY
+            - PREVIEW_ALREADY_PROCEEDED
+            - INVALID_FILTER
+        message:
+          type: string
+
+  securitySchemes:
+    UserBearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+paths:
+  /filters/{filterId}/preview:
+    post:
+      summary: Start i2i preview for a workflow filter
+      description: |
+        AC 2.1.5 — validation order MUST be: ①credit balance → ②Rekognition →
+        ③credit deduct (previewCredit=100) → ④fal.ai i2i call. No deduction
+        unless all checks pass.
+      security: [{ UserBearer: [] }]
+      parameters:
+        - in: path
+          name: filterId
+          required: true
+          schema: { type: string }
+          description: Parent (workflow) filter id. MUST have `hasDecompPreview: true`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PreviewStartRequest' }
+      responses:
+        '200':
+          description: Preview job accepted; deduction complete.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PreviewStartResponse' }
+        '400':
+          description: Invalid filter (no `hasDecompPreview`) or 2-image filter.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorEnvelope' }
+        '402':
+          description: Insufficient credit (less than previewCredit).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorEnvelope' }
+        '422':
+          description: Harmful image detected by Rekognition.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorEnvelope' }
+        '429':
+          description: Concurrent generation slot exhausted.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorEnvelope' }
+
+  /preview-contents/{contentId}/proceed:
+    post:
+      summary: Proceed from preview to i2v video generation
+      description: |
+        AC 2.2.1 — deducts (parent.requiredCredit - previewCredit), creates
+        a new i2v Content with parentFilterId, calls fal.ai i2v. Returns
+        immediately (fire-and-forget); client navigates to MemeCollection
+        and existing active-generations polling takes over.
+      security: [{ UserBearer: [] }]
+      parameters:
+        - in: path
+          name: contentId
+          required: true
+          schema: { type: string }
+          description: i2i preview Content id (decompRole='i2i', status=DONE).
+      responses:
+        '200':
+          description: i2v job accepted.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PreviewProceedResponse' }
+        '402':
+          description: Insufficient credit for i2v portion.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorEnvelope' }
+        '404':
+          description: Preview content not found / not owned.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorEnvelope' }
+        '409':
+          description: Preview not in DONE status, or already proceeded.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorEnvelope' }
+        '429':
+          description: Slot exhausted.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorEnvelope' }
+
+  /preview-contents/{contentId}/cancel:
+    post:
+      summary: Cancel/abandon preview during loading or after view
+      description: |
+        AC 2.1.9 / 2.1.11 — releases slot if the i2i job is still running.
+        Server-side fal.ai job continues but its callback drops the result.
+        No credit refund (user paid for the preview service).
+      security: [{ UserBearer: [] }]
+      parameters:
+        - in: path
+          name: contentId
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Cancelled.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PreviewCancelResponse' }
+        '404':
+          description: Preview content not found / not owned.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorEnvelope' }
+
+  /filters/callback/fal-ai:
+    post:
+      summary: fal.ai callback (existing endpoint — extended dispatch)
+      description: |
+        Existing endpoint. Behavior change (BR-11, AC 2.3.3): when the
+        receiving Content has `decompRole === 'i2i'`, skip S3 copy / thumbnail
+        generation / watermark application and persist the fal.ai CDN URL
+        directly. Other content types unchanged.
+      parameters:
+        - in: query
+          name: contentId
+          required: true
+          schema: { type: string }
+        - in: query
+          name: platform
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Callback acknowledged.
+
+  /filters/contents:
+    get:
+      summary: MemeCollection content list (existing endpoint — added filter)
+      description: |
+        Existing list endpoint. Behavior change (BR-9, AC 2.3.1): apply
+        `isHidden: { $ne: true }` to the underlying query so i2i preview
+        contents are excluded. App requires no change.
+      security: [{ UserBearer: [] }]
+      responses:
+        '200':
+          description: Content list (excluding hidden previews).
+
+# --- Schema-level changes referenced by backend tasks ---
+# Filter entity (NEW fields):
+#   - hasDecompPreview: boolean (default false)
+#   - requiredCredit: number (per BR-1; total cost = parent.requiredCredit)
+#   - parentFilterId: string | null (child filters only, decompRole='i2i'/'i2v')
+#   - decompRole: 'i2i' | 'i2v' | null (child filters only)
+#
+# Content entity (NEW fields):
+#   - isHidden: boolean (default false; true for i2i preview content)
+#   - decompRole: 'i2i' | 'i2v' | null
+#   - parentFilterId: string | null  (= source workflow filter id)
+#   - sourcePreviewContentId: string | null (i2v's link back to its i2i preview)
