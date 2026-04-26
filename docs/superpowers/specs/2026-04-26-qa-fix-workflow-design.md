@@ -183,6 +183,7 @@ QA 재검증 신뢰성은 코멘트 품질이 좌우한다. 매 fix마다 동일
 ### KB 후보 형식 (`kb-candidates/<TICKET-ID>.yaml`)
 
 ```yaml
+# 필드는 zzem-kb:write-pattern 입력 인터페이스에 직접 매핑된다 (재변환 없음).
 ticket: ZZEM-123
 priority: P0
 candidate_type: pattern_gap | pattern_violation | new_pattern
@@ -190,14 +191,21 @@ related_existing_pattern: <KB ID 또는 "none">
 hypothesis: |
   이 버그는 어떤 패턴의 부재/위반인가? 한 단락.
 proposed_pattern:
-  category: <foundation | component | pattern>
-  title: <후보 제목>
-  rule: <한 문장 — 무엇을 항상/절대 해야 하는가>
-  rationale: <왜 — 이 버그 + 다른 가능 케이스>
-  source_evidence:
-    - sprint: <sprint-id>
-    - ticket: ZZEM-123
-    - fix_pr: <url>
+  category: <correctness | completeness | integration | edge_case | code_quality | design_proto | design_spec>
+  severity: <critical | major | minor>
+  title: <≤120 chars — 무엇을 항상/절대 해야 하는가>
+  source_sprint: <sprint-id>
+  source_group: group-<N>
+  description: <≥10 chars — 패턴이 무엇인지>
+  detection: <≥10 chars — 위반을 어떻게 감지하는가>
+  prevention: <≥10 chars — 향후 위반을 어떻게 예방하는가>
+  contract_clause: <≥10 chars — Sprint Contract Done Criteria에 주입할 라인>
+  example:
+    bad: |
+      <코드 스니펫 — 버그 패턴>
+    good: |
+      <코드 스니펫 — fix된 패턴>
+fix_pr: <url>
 status: pending  # pending | approved | rejected | duplicate
 ```
 
