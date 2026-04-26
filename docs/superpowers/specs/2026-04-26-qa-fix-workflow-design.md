@@ -183,7 +183,9 @@ QA 재검증 신뢰성은 코멘트 품질이 좌우한다. 매 fix마다 동일
 ### KB 후보 형식 (`kb-candidates/<TICKET-ID>.yaml`)
 
 ```yaml
-# 필드는 zzem-kb:write-pattern 입력 인터페이스에 직접 매핑된다 (재변환 없음).
+# proposed_pattern.* 의 필드명·enum 은 zzem-kb:write-pattern 인터페이스와 1:1 동일.
+# Retro 머지 시 proposed_pattern.* 만 평탄화하여 호출하고, 나머지 필드(ticket/priority/
+# candidate_type/related_existing_pattern/hypothesis/fix_pr/status)는 후보 파일 메타데이터로만 사용.
 ticket: ZZEM-123
 priority: P0
 candidate_type: pattern_gap | pattern_violation | new_pattern
