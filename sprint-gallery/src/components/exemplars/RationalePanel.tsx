@@ -8,6 +8,12 @@ interface PatternLink {
   href: string;
 }
 
+interface FoundationLink {
+  key: string;
+  name: string;
+  href: string;
+}
+
 interface Props {
   exemplarId: string;
   archetype: string;
@@ -16,6 +22,7 @@ interface Props {
   sprintId: string;
   lastValidatedAt: string;
   patterns?: PatternLink[];
+  foundations?: FoundationLink[];
 }
 
 function formatDate(iso: string): string {
@@ -32,6 +39,7 @@ export default function RationalePanel({
   sprintId,
   lastValidatedAt,
   patterns = [],
+  foundations = [],
 }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [memberCount, setMemberCount] = useState(0);
@@ -86,6 +94,19 @@ export default function RationalePanel({
                 </li>
               ))}
             </ul>
+          </div>
+        )}
+
+        {foundations.length > 0 && (
+          <div className="rationale-foundations">
+            <p className="rationale-foundations-label">Foundations exercised</p>
+            <div className="rationale-foundations-row">
+              {foundations.map((f) => (
+                <a key={f.key} className="rationale-foundation-chip" href={f.href}>
+                  {f.name}
+                </a>
+              ))}
+            </div>
           </div>
         )}
 
