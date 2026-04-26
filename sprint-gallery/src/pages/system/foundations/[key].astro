@@ -8,6 +8,8 @@ import RadiusScale from '@/components/system/RadiusScale.astro';
 import MotionPlayer from '@/components/system/MotionPlayer.astro';
 import ElevationStack from '@/components/system/ElevationStack.astro';
 import IconInventory from '@/components/system/IconInventory.astro';
+import ExemplarPreviewList from '@/components/system/ExemplarPreviewList.astro';
+import { exemplarsForFoundation } from '@/lib/system-bridge';
 
 export async function getStaticPaths() {
   const entries = await getCollection('foundations');
@@ -32,6 +34,7 @@ const renderers = {
 const Renderer = renderers[entry.data.key];
 const base = import.meta.env.BASE_URL;
 const backHref = `${base}/system/foundations/`.replace(/\/+/g, '/');
+const usingExemplars = await exemplarsForFoundation(entry.data.key);
 ---
 <Layout title={`${entry.data.name} · System`}>
   <nav class="crumb">
@@ -47,6 +50,13 @@ const backHref = `${base}/system/foundations/`.replace(/\/+/g, '/');
   </header>
   <article class="prose"><Content /></article>
   <Renderer tokenSource={entry.data.tokenSource} />
+  {usingExemplars.length > 0 && (
+    <ExemplarPreviewList
+      items={usingExemplars}
+      title={`Exemplars referencing ${entry.data.name.toLowerCase()}`}
+      emptyText={`No exemplars exercise ${entry.data.name.toLowerCase()} tokens yet.`}
+    />
+  )}
 </Layout>
 
 <style>

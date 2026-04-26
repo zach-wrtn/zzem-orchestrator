@@ -4,7 +4,8 @@ import PreviewShell from '@/components/PreviewShell.astro';
 import RationalePanel from '@/components/exemplars/RationalePanel';
 import { loadExemplars } from '@/lib/exemplars/load';
 import { basename } from 'node:path';
-import { patternsForArchetype } from '@/lib/system-bridge';
+import { patternsForArchetype, foundationsInExemplar } from '@/lib/system-bridge';
+import { getCollection } from 'astro:content';
 import type { ScreenArchetype } from '@/lib/exemplars/schema';
 import type { Prototype } from '@/lib/types';
 
@@ -41,6 +42,18 @@ const patternLinks = matchingPatterns.map((p) => ({
   name: p.data.name,
   href: join(base, `system/patterns/${p.data.key}/`),
 }));
+
+const usedFoundationKeys = await foundationsInExemplar(exemplar.prototype_path);
+const allFoundations = await getCollection('foundations');
+const foundationLinks = [...usedFoundationKeys]
+  .map((key) => allFoundations.find((f) => f.data.key === key))
+  .filter((f): f is NonNullable<typeof f> => Boolean(f))
+  .sort((a, b) => a.data.order - b.data.order)
+  .map((f) => ({
+    key: f.data.key,
+    name: f.data.name,
+    href: join(base, `system/foundations/${f.data.key}/`),
+  }));
 ---
 <Layout title={`${exemplar.screen_name} · Exemplar · ZZEM Sprints`}>
   <PreviewShell
@@ -60,6 +73,7 @@ const patternLinks = matchingPatterns.map((p) => ({
       sprintId={exemplar.sprint_id}
       lastValidatedAt={exemplar.last_validated_at}
       patterns={patternLinks}
+      foundations={foundationLinks}
     />
   </PreviewShell>
 </Layout>
@@ -158,4 +172,30 @@ const patternLinks = matchingPatterns.map((p) => ({
     transition: color var(--dur-ui) var(--ease-out-quart);
   }
   .rationale-patterns a:hover { color: var(--accent); }
+
+  .rationale-foundations {
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+  .rationale-foundations-label {
+    font-family: var(--font-mono); font-size: var(--fs-label);
+    letter-spacing: var(--ls-label); text-transform: uppercase;
+    color: var(--text-faint);
+    margin: 0 0 6px;
+  }
+  .rationale-foundations-row { display: flex; flex-wrap: wrap; gap: 4px; }
+  .rationale-foundation-chip {
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 3px 8px; border-radius: var(--radius-pill);
+    background: var(--bg);
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+    transition: color var(--dur-ui) var(--ease-out-quart),
+                border-color var(--dur-ui) var(--ease-out-quart);
+  }
+  .rationale-foundation-chip:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
 </style>
