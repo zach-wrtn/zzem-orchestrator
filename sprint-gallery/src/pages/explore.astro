@@ -1,0 +1,198 @@
+---
+import Layout from '@/components/Layout.astro';
+import ExemplarExplore, { type ExemplarItem } from '@/components/explore/ExemplarExplore';
+import { collectSprints } from '@/lib/collect-sprints';
+import { SPRINTS_DIR } from '@/lib/paths';
+
+const sprints = await collectSprints(SPRINTS_DIR);
+const base = import.meta.env.BASE_URL;
+const join = (a: string, b: string) => `${a}/${b}`.replace(/\/+/g, '/');
+
+const items: ExemplarItem[] = [];
+for (const sprint of sprints) {
+  for (const proto of sprint.prototypes) {
+    if (!proto.archetype) continue;
+    items.push({
+      id: `${sprint.slug}-${proto.id}`,
+      title: proto.title,
+      archetype: proto.archetype,
+      sprintSlug: sprint.slug,
+      sprintTitle: sprint.title,
+      thumbnail: proto.thumbnail ? join(base, proto.thumbnail) : null,
+      href: join(base, `prototypes/${sprint.slug}/${proto.id}/`),
+      vtName: `proto-${sprint.slug}-${proto.id}`,
+      whyCurated: '',
+    });
+  }
+}
+
+items.sort((a, b) => a.archetype.localeCompare(b.archetype) || a.title.localeCompare(b.title));
+---
+<Layout title="Explore — ZZEM Sprints">
+  <header class="exp-head">
+    <p class="exp-eyebrow">Pattern library</p>
+    <h1 class="exp-h1">Explore exemplars</h1>
+    <p class="exp-lede">Curated screens from passing sprint output, indexed by archetype. Filter to find the pattern you need.</p>
+  </header>
+
+  <ExemplarExplore client:load items={items} base={base} />
+</Layout>
+
+<style>
+  .exp-head { padding: 24px 0 32px; max-width: 60ch; }
+  .exp-eyebrow {
+    font-family: var(--font-mono); font-size: var(--fs-label);
+    letter-spacing: var(--ls-label); color: var(--text-dim);
+    text-transform: uppercase; margin: 0 0 8px;
+  }
+  .exp-h1 {
+    font-size: var(--fs-h1); line-height: var(--lh-h1); letter-spacing: var(--ls-h1);
+    font-weight: 600; margin: 0 0 12px;
+  }
+  .exp-lede {
+    font-size: var(--fs-lead); line-height: var(--lh-lead);
+    color: var(--text-dim); margin: 0;
+  }
+</style>
+
+<style is:global>
+  .exp-layout {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 40px;
+    align-items: start;
+  }
+
+  .exp-rail {
+    position: sticky; top: 80px;
+    display: flex; flex-direction: column; gap: 24px;
+    padding: 16px 0;
+  }
+  .exp-rail-section { display: flex; flex-direction: column; gap: 8px; }
+  .exp-rail-title {
+    font-family: var(--font-mono);
+    font-size: var(--fs-label); letter-spacing: var(--ls-label);
+    text-transform: uppercase; color: var(--text-dim);
+    margin: 0;
+  }
+  .exp-facet-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+  .exp-facet {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 8px; border-radius: var(--radius-chip);
+    cursor: pointer;
+    font-size: var(--fs-small);
+    color: var(--text-dim);
+    transition: background var(--dur-ui) var(--ease-out-quart),
+                color var(--dur-ui) var(--ease-out-quart);
+  }
+  .exp-facet:hover { background: var(--surface); color: var(--text); }
+  .exp-facet.on { background: var(--accent-soft); color: var(--accent-text); }
+  .exp-facet input { accent-color: var(--accent); margin: 0; }
+  .exp-facet-label { flex: 1; text-transform: capitalize; }
+  .exp-facet-count {
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--text-faint); font-variant-numeric: tabular-nums;
+  }
+  .exp-facet.on .exp-facet-count { color: var(--accent-text); }
+
+  .exp-reset {
+    margin-top: 4px;
+    font-family: var(--font-mono); font-size: var(--fs-label);
+    letter-spacing: var(--ls-label); text-transform: uppercase;
+    background: transparent; color: var(--text-dim);
+    border: 1px solid var(--border); border-radius: var(--radius-chip);
+    padding: 8px 10px; cursor: pointer;
+    transition: color var(--dur-ui) var(--ease-out-quart),
+                border-color var(--dur-ui) var(--ease-out-quart);
+  }
+  .exp-reset:hover { color: var(--accent); border-color: var(--accent); }
+
+  .exp-results { min-width: 0; display: flex; flex-direction: column; gap: 16px; }
+  .exp-results-head { display: flex; flex-direction: column; gap: 12px; }
+  .exp-count {
+    font-family: var(--font-mono); font-size: var(--fs-label);
+    letter-spacing: var(--ls-label); text-transform: uppercase;
+    color: var(--text-dim); margin: 0;
+  }
+  .exp-applied { display: flex; flex-wrap: wrap; gap: 6px; }
+  .exp-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--accent-soft); color: var(--accent-text);
+    border: 1px solid color-mix(in srgb, var(--accent) 32%, transparent);
+    border-radius: var(--radius-pill);
+    padding: 4px 10px; font-size: 12px; cursor: pointer;
+    text-transform: capitalize;
+    transition: background var(--dur-ui) var(--ease-out-quart);
+  }
+  .exp-chip:hover { background: color-mix(in srgb, var(--accent) 22%, transparent); }
+
+  .exp-empty {
+    color: var(--text-dim); padding: 48px 0; text-align: center;
+    border: 1px dashed var(--border); border-radius: var(--radius-card);
+  }
+
+  .exp-grid {
+    list-style: none; margin: 0; padding: 0;
+    display: grid; gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  }
+  .exp-card {
+    display: flex; flex-direction: column;
+    background: var(--surface);
+    border: 1px solid var(--border); border-radius: var(--radius-card);
+    overflow: hidden;
+    transition: transform var(--dur-spring-soft) var(--spring-soft),
+                border-color var(--dur-spring-soft) var(--spring-soft),
+                box-shadow var(--dur-spring-soft) var(--spring-soft);
+  }
+  .exp-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--accent);
+    box-shadow: 0 14px 32px rgba(255, 122, 99, 0.18);
+  }
+  .exp-thumb {
+    aspect-ratio: 4/5; background: var(--accent-grad);
+    position: relative;
+  }
+  .exp-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .exp-placeholder {
+    width: 100%; height: 100%; display: grid; place-items: center;
+    color: rgba(255,255,255,0.9); padding: 12px; text-align: center;
+    font-size: var(--fs-small); font-weight: 500; text-wrap: balance;
+  }
+  .exp-archetype {
+    position: absolute; top: 8px; left: 8px;
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 3px 8px; border-radius: var(--radius-pill);
+    background: color-mix(in srgb, var(--bg) 78%, transparent);
+    color: var(--text);
+    border: 1px solid var(--border);
+    backdrop-filter: blur(6px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+  }
+  .exp-meta {
+    padding: 10px 12px;
+    display: flex; flex-direction: column; gap: 2px;
+  }
+  .exp-title {
+    font-size: var(--fs-small); font-weight: 500; color: var(--text);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .exp-sprint {
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--text-faint);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+
+  @media (max-width: 720px) {
+    .exp-layout { grid-template-columns: 1fr; gap: 16px; }
+    .exp-rail { position: static; flex-direction: column; padding: 0; }
+    .exp-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .exp-card { transition: border-color var(--dur-fast) linear; }
+    .exp-card:hover { transform: none; box-shadow: none; }
+  }
+</style>

@@ -3,6 +3,9 @@ import { existsSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import YAML from 'yaml';
 import type { Sprint, Prototype, SprintStatus } from './types.js';
+import { loadArchetypeLookup } from './exemplars/load.js';
+import { REPO_ROOT } from './paths.js';
+import type { ExemplarMeta } from './exemplars/schema.js';
 
 interface DisplayYaml {
   title?: string;
@@ -46,6 +49,7 @@ async function collectPrototypes(
   sprintDir: string,
   slug: string,
   display: DisplayYaml | undefined,
+  archetypeLookup: Map<string, ExemplarMeta>,
 ): Promise<Prototype[]> {
   const appDir = join(sprintDir, 'prototypes', 'app');
   if (!existsSync(appDir)) return [];
@@ -85,6 +89,9 @@ async function collectPrototypes(
       }
     }
 
+    const repoRelEntry = relative(REPO_ROOT, entryFile);
+    const exemplar = archetypeLookup.get(repoRelEntry);
+
     result.push({
       id,
       title: override?.title ?? extractTitleFromHtml(html) ?? humanize(id),
@@ -92,6 +99,7 @@ async function collectPrototypes(
       thumbnail,
       hero: override?.hero ?? (!anyHero && result.length === 0),
       screens,
+      archetype: exemplar?.archetype,
     });
   }
   return result;
@@ -101,6 +109,7 @@ export async function collectSprints(sprintsDir: string): Promise<Sprint[]> {
   if (!existsSync(sprintsDir)) return [];
   const entries = await readdir(sprintsDir, { withFileTypes: true });
   const sprintFolders = entries.filter((e) => e.isDirectory()).map((e) => e.name);
+  const archetypeLookup = await loadArchetypeLookup();
 
   const sprints: Sprint[] = [];
   for (const slug of sprintFolders) {
@@ -120,7 +129,7 @@ export async function collectSprints(sprintsDir: string): Promise<Sprint[]> {
 
     const statMtime = (await stat(dir)).mtime.toISOString().slice(0, 10);
 
-    const prototypes = await collectPrototypes(dir, slug, display);
+    const prototypes = await collectPrototypes(dir, slug, display, archetypeLookup);
 
     const reportPath = join(dir, 'REPORT.md');
     const retroDir = join(dir, 'retrospective');

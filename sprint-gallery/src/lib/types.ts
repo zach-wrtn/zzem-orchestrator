@@ -1,3 +1,5 @@
+import type { ScreenArchetype } from './exemplars/schema.js';
+
 export type SprintStatus = 'in-progress' | 'completed' | 'archived';
 
 export interface Prototype {
@@ -7,6 +9,7 @@ export interface Prototype {
   thumbnail: string | null; // public-relative path to PNG, or null if none
   hero: boolean;            // exactly one per sprint
   screens: string[];        // additional screenshot PNGs (public-relative)
+  archetype?: ScreenArchetype; // present iff registered as exemplar in _index.json
 }
 
 export interface Sprint {
