@@ -6,6 +6,7 @@ export type ExemplarItem = {
   archetype: string;
   sprintSlug: string;
   sprintTitle: string;
+  designDimensions: string[];
   thumbnail: string | null;
   href: string;
   vtName: string;
@@ -26,7 +27,11 @@ function readParam(name: string): Set<string> {
   return new Set(raw.split(',').filter(Boolean));
 }
 
-function writeParams(params: { archetype: Set<string>; sprint: Set<string> }) {
+function writeParams(params: {
+  archetype: Set<string>;
+  sprint: Set<string>;
+  dimension: Set<string>;
+}) {
   if (typeof window === 'undefined') return;
   const url = new URL(window.location.href);
   const setOrDelete = (key: string, val: Set<string>) => {
@@ -35,6 +40,7 @@ function writeParams(params: { archetype: Set<string>; sprint: Set<string> }) {
   };
   setOrDelete('archetype', params.archetype);
   setOrDelete('sprint', params.sprint);
+  setOrDelete('dimension', params.dimension);
   window.history.replaceState({}, '', url);
 }
 
@@ -43,18 +49,24 @@ export default function ExemplarExplore({ items }: Props) {
   // after mount to avoid React hydration mismatch warnings.
   const [selectedArchetypes, setSelectedArchetypes] = useState<Set<string>>(() => new Set());
   const [selectedSprints, setSelectedSprints] = useState<Set<string>>(() => new Set());
+  const [selectedDimensions, setSelectedDimensions] = useState<Set<string>>(() => new Set());
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
     setSelectedArchetypes(readParam('archetype'));
     setSelectedSprints(readParam('sprint'));
+    setSelectedDimensions(readParam('dimension'));
     setHydrated(true);
   }, []);
 
   useEffect(() => {
     if (!hydrated) return;
-    writeParams({ archetype: selectedArchetypes, sprint: selectedSprints });
-  }, [selectedArchetypes, selectedSprints, hydrated]);
+    writeParams({
+      archetype: selectedArchetypes,
+      sprint: selectedSprints,
+      dimension: selectedDimensions,
+    });
+  }, [selectedArchetypes, selectedSprints, selectedDimensions, hydrated]);
 
   const archetypeCounts = useMemo(() => {
     const counts = new Map<string, number>();
@@ -72,13 +84,26 @@ export default function ExemplarExplore({ items }: Props) {
     return [...map.entries()].sort((a, b) => a[1].title.localeCompare(b[1].title));
   }, [items]);
 
+  const dimensionCounts = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const it of items) {
+      for (const d of it.designDimensions) counts.set(d, (counts.get(d) ?? 0) + 1);
+    }
+    return [...counts.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+  }, [items]);
+
   const filtered = useMemo(() => {
     return items.filter((it) => {
       if (selectedArchetypes.size > 0 && !selectedArchetypes.has(it.archetype)) return false;
       if (selectedSprints.size > 0 && !selectedSprints.has(it.sprintSlug)) return false;
+      if (
+        selectedDimensions.size > 0 &&
+        ![...selectedDimensions].every((d) => it.designDimensions.includes(d))
+      )
+        return false;
       return true;
     });
-  }, [items, selectedArchetypes, selectedSprints]);
+  }, [items, selectedArchetypes, selectedSprints, selectedDimensions]);
 
   const toggle = (set: Set<string>, val: string, setter: (s: Set<string>) => void) => {
     const next = new Set(set);
@@ -87,11 +112,12 @@ export default function ExemplarExplore({ items }: Props) {
     setter(next);
   };
 
-  const totalSelected = selectedArchetypes.size + selectedSprints.size;
+  const totalSelected = selectedArchetypes.size + selectedSprints.size + selectedDimensions.size;
 
   const reset = () => {
     setSelectedArchetypes(new Set());
     setSelectedSprints(new Set());
+    setSelectedDimensions(new Set());
   };
 
   return (
@@ -144,6 +170,30 @@ export default function ExemplarExplore({ items }: Props) {
           </div>
         )}
 
+        {dimensionCounts.length > 0 && (
+          <div className="exp-rail-section">
+            <h3 className="exp-rail-title">Dimension</h3>
+            <ul className="exp-facet-list">
+              {dimensionCounts.map(([d, count]) => {
+                const checked = selectedDimensions.has(d);
+                return (
+                  <li key={d}>
+                    <label className={`exp-facet ${checked ? 'on' : ''}`}>
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={() => toggle(selectedDimensions, d, setSelectedDimensions)}
+                      />
+                      <span className="exp-facet-label">{d.replace(/_/g, ' ')}</span>
+                      <span className="exp-facet-count">{count}</span>
+                    </label>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        )}
+
         {totalSelected > 0 && (
           <button type="button" className="exp-reset" onClick={reset}>
             Reset filters
@@ -183,6 +233,17 @@ export default function ExemplarExplore({ items }: Props) {
                   </button>
                 );
               })}
+              {[...selectedDimensions].map((d) => (
+                <button
+                  key={`d-${d}`}
+                  type="button"
+                  className="exp-chip"
+                  onClick={() => toggle(selectedDimensions, d, setSelectedDimensions)}
+                  aria-label={`Remove dimension filter ${d}`}
+                >
+                  {d.replace(/_/g, ' ')} <span aria-hidden>✕</span>
+                </button>
+              ))}
             </div>
           )}
         </header>

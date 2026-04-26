@@ -1,32 +1,29 @@
 ---
 import Layout from '@/components/Layout.astro';
 import ExemplarExplore, { type ExemplarItem } from '@/components/explore/ExemplarExplore';
-import { collectSprints } from '@/lib/collect-sprints';
-import { SPRINTS_DIR } from '@/lib/paths';
+import { loadExemplars } from '@/lib/exemplars/load';
+import { basename } from 'node:path';
 
-const sprints = await collectSprints(SPRINTS_DIR);
+const exemplars = await loadExemplars();
 const base = import.meta.env.BASE_URL;
 const join = (a: string, b: string) => `${a}/${b}`.replace(/\/+/g, '/');
 
-const items: ExemplarItem[] = [];
-for (const sprint of sprints) {
-  for (const proto of sprint.prototypes) {
-    if (!proto.archetype) continue;
-    items.push({
-      id: `${sprint.slug}-${proto.id}`,
-      title: proto.title,
-      archetype: proto.archetype,
-      sprintSlug: sprint.slug,
-      sprintTitle: sprint.title,
-      thumbnail: proto.thumbnail ? join(base, proto.thumbnail) : null,
-      href: join(base, `prototypes/${sprint.slug}/${proto.id}/`),
-      vtName: `proto-${sprint.slug}-${proto.id}`,
-      whyCurated: '',
-    });
-  }
-}
+const items: ExemplarItem[] = exemplars.map((ex) => ({
+  id: ex.id,
+  title: ex.screen_name,
+  archetype: ex.archetype,
+  sprintSlug: ex.sprint_id,
+  sprintTitle: ex.sprint_id,
+  designDimensions: ex.design_dimensions,
+  thumbnail: join(base, `exemplars/${ex.id}/screenshots/${basename(ex.screenshot_path)}`),
+  href: join(base, `exemplars/${ex.id}/`),
+  vtName: `exemplar-${ex.id}`,
+  whyCurated: ex.why_curated,
+}));
 
-items.sort((a, b) => a.archetype.localeCompare(b.archetype) || a.title.localeCompare(b.title));
+items.sort(
+  (a, b) => a.archetype.localeCompare(b.archetype) || a.title.localeCompare(b.title),
+);
 ---
 <Layout title="Explore — ZZEM Sprints">
   <header class="exp-head">

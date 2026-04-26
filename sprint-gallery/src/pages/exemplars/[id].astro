@@ -1,0 +1,40 @@
+---
+import Layout from '@/components/Layout.astro';
+import PreviewShell from '@/components/PreviewShell.astro';
+import { loadExemplars } from '@/lib/exemplars/load';
+import { basename } from 'node:path';
+import type { Prototype } from '@/lib/types';
+
+export async function getStaticPaths() {
+  const exemplars = await loadExemplars();
+  return exemplars.map((ex) => ({
+    params: { id: ex.id },
+    props: { exemplar: ex },
+  }));
+}
+
+const { exemplar } = Astro.props as { exemplar: Awaited<ReturnType<typeof loadExemplars>>[number] };
+
+const screenshotName = basename(exemplar.screenshot_path);
+const proto: Prototype = {
+  id: exemplar.id,
+  title: exemplar.screen_name,
+  entry: `exemplars/${exemplar.id}/prototype.html`,
+  thumbnail: `exemplars/${exemplar.id}/screenshots/${screenshotName}`,
+  hero: false,
+  screens: [],
+  archetype: exemplar.archetype,
+};
+
+const base = import.meta.env.BASE_URL;
+const exploreHref = `${base}/explore/`.replace(/\/+/g, '/');
+---
+<Layout title={`${exemplar.screen_name} · Exemplar · ZZEM Sprints`}>
+  <PreviewShell
+    sprintSlug={exemplar.sprint_id}
+    proto={proto}
+    backHref={exploreHref}
+    backLabel="Explore"
+    vtName={`exemplar-${exemplar.id}`}
+  />
+</Layout>
