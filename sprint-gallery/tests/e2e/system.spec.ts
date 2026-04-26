@@ -68,7 +68,7 @@ test.describe('system components', () => {
 test.describe('system nav + home', () => {
   test('TopBar System link navigates to /system/', async ({ page }) => {
     await page.goto('');
-    await page.locator('a.sys-link').click();
+    await page.getByRole('link', { name: 'System', exact: true }).click();
     await expect(page).toHaveURL(/\/system\/?$/);
   });
 
