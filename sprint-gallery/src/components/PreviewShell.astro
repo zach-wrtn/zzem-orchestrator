@@ -22,13 +22,16 @@ const vtName = vtNameProp ?? `proto-${sprintSlug}-${proto.id}`;
     <span class="title">{proto.title}</span>
     <a class="close" href={homeHref} aria-label="Close preview" data-close>ESC</a>
   </header>
-  <div class="device" style={`view-transition-name: ${vtName};`}>
-    <iframe
-      src={iframeSrc}
-      title={`${proto.title} prototype`}
-      loading="eager"
-      referrerpolicy="no-referrer"
-    ></iframe>
+  <div class="stage">
+    <div class="device" style={`view-transition-name: ${vtName};`}>
+      <iframe
+        src={iframeSrc}
+        title={`${proto.title} prototype`}
+        loading="eager"
+        referrerpolicy="no-referrer"
+      ></iframe>
+    </div>
+    <aside class="context"><slot name="context" /></aside>
   </div>
   <footer class="hint">ESC · 뒤로가기 · 배경 탭 모두 같은 복귀 동작</footer>
 </main>
@@ -116,8 +119,26 @@ const vtName = vtNameProp ?? `proto-${sprintSlug}-${proto.id}`;
   }
   .bar a:hover { color: var(--text); border-color: var(--accent); }
 
+  .stage {
+    display: flex; align-items: center; justify-content: center;
+    gap: 48px;
+    flex-wrap: wrap;
+    padding: 8px 0;
+  }
+  .context { display: contents; }
+  .context:empty { display: none; }
+  .context :global(.rationale) {
+    display: flex; flex-direction: column; gap: 16px;
+    width: min(360px, 92vw);
+    max-width: 360px;
+    padding: 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+  }
+
   .device {
-    justify-self: center; align-self: center;
+    flex-shrink: 0;
     width: min(430px, 92vw);
     aspect-ratio: 9 / 19.5;
     border-radius: var(--radius-device);
@@ -143,6 +164,8 @@ const vtName = vtNameProp ?? `proto-${sprintSlug}-${proto.id}`;
   }
 
   @media (max-width: 720px) {
+    .stage { gap: 16px; }
+    .context :global(.rationale) { width: 100%; max-width: none; }
     .device { width: 100vw; max-width: none; border-radius: 0; border: none; }
     .shell { padding: 12px 0 16px; }
     .bar { padding: 8px 14px 14px; }
