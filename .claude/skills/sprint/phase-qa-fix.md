@@ -27,10 +27,23 @@ sprints/<sprint-id>/qa-fix/
 ├── jira-comments/
 │   ├── <TICKET-ID>.md          # Stage 5 (local SSOT)
 │   └── <TICKET-ID>.posted      # Stage 5 (post+transition success marker)
-├── kb-candidates/<TICKET>.yaml # Stage 5 (P0/P1 only)
+├── kb-candidates/<TICKET-ID>.yaml # Stage 5 (P0/P1 only)
 ├── unresolved.md               # FAILED tickets
 └── retro.md                    # Retro
 ```
+
+## Task Subject Naming
+
+기존 `phase-build.md` 컨벤션과 정합. Sprint Lead가 각 Stage의 subagent 태스크를 디스패치할 때 사용:
+
+| Stage | Subject 패턴 | Owner |
+|-------|-------------|-------|
+| Stage 1 Triage | `qa-triage/<sprint-id>` | Sprint Lead (self) |
+| Stage 3 Contract | `qa-contract/<sprint-id>/group-<N>` | Sprint Lead → Evaluator review |
+| Stage 4 Implement | `qa-fix/backend/<sprint-id>/group-<N>` | BE Engineer |
+| Stage 4 Implement | `qa-fix/app/<sprint-id>/group-<N>` | FE Engineer |
+| Stage 4 Evaluate | `qa-eval/<sprint-id>/group-<N>` | Evaluator |
+| Stage 5 Close | `qa-close/<sprint-id>/<TICKET-ID>` | Sprint Lead (self) |
 
 ## 5-Stage Core Loop
 
@@ -45,7 +58,7 @@ sprints/<sprint-id>/qa-fix/
 
 2. **Idempotency check**: 결과 ticket 중 `qa-fix/jira-comments/<key>.posted` marker 존재 = 이미 close됨. 자동 제외.
 
-3. `qa-fix/jira-snapshot.yaml` 작성 (템플릿: `templates/qa-fix-jira-snapshot-template.yaml`).
+3. `qa-fix/jira-snapshot.yaml` 작성 (템플릿: `sprint-orchestrator/templates/qa-fix-jira-snapshot-template.yaml`).
 
    **Ticket `type` enum mapping:** The snapshot's `type` field uses a normalized enum (`Bug | UX | Perf | Copy | Other`) — not the raw Jira `issuetype.name`. Map as follows: Bug → `Bug`; Story/Task containing UI/visual concerns → `UX`; performance/load issues → `Perf`; copy/text/typo → `Copy`; everything else → `Other`. The triage and group templates use this same normalized enum.
 
@@ -57,7 +70,7 @@ sprints/<sprint-id>/qa-fix/
 
    **분류 휴리스틱**은 결정적이지 않다 — Sprint Lead의 판단을 명시적으로 적시. 사용자가 triage.md에서 promote/demote 가능.
 
-5. `qa-fix/triage.md` 작성 (템플릿: `templates/qa-fix-triage-template.md`).
+5. `qa-fix/triage.md` 작성 (템플릿: `sprint-orchestrator/templates/qa-fix-triage-template.md`).
 
 6. **needs-info 티켓 처리** (dry-run이 아닐 때):
    ```
@@ -75,7 +88,7 @@ sprints/<sprint-id>/qa-fix/
      mcp__wrtn-mcp__jira_transition_issue: <to "Closed" with resolution=Duplicate>
    ```
 
-8. **사용자 승인 게이트**: triage.md를 사용자에게 제시. `[x] Approved` 마커 + 타임스탬프가 채워질 때까지 대기. 사용자가 in-scope 리스트를 수정 가능 (promote/demote).
+8. **사용자 승인 게이트**: triage.md를 사용자에게 제시. `[x] **Approved by user** — proceed to Stage 2 (Grouping)` 마커 + 타임스탬프가 채워질 때까지 대기. 사용자가 in-scope 리스트를 수정 가능 (promote/demote).
 
    **Approval marker semantics:** Sprint Lead detects approval by grep-ing for `[x] **Approved by user**` in `triage.md`. Once detected, the Sprint Lead fills `Approved at:` with current ISO 8601 timestamp before proceeding to Stage 2 (the user marks the checkbox; the Sprint Lead stamps the time). If the user wants to promote/demote tickets, they edit the lists directly in `triage.md` before checking the box.
 
@@ -90,7 +103,7 @@ sprints/<sprint-id>/qa-fix/
 
 각 그룹: 1~5개 티켓. 그룹 수가 너무 많으면(>5) 사용자에게 우선순위 그룹 N개만 진행 제안.
 
-각 그룹마다 `qa-fix/groups/group-<N>.yaml` 작성 (템플릿: `templates/qa-fix-group-template.yaml`).
+각 그룹마다 `qa-fix/groups/group-<N>.yaml` 작성 (템플릿: `sprint-orchestrator/templates/qa-fix-group-template.yaml`).
 
 **Gate**: 모든 in-scope 티켓이 정확히 한 그룹에 할당되어야 함. 미할당 티켓은 deferred로 이동.
 
@@ -103,7 +116,7 @@ sprints/<sprint-id>/qa-fix/
 - Verification Method에 각 티켓의 원본 repro steps를 명시
 - KB 패턴 자동 주입은 동일하게 적용
 
-저장: `qa-fix/contracts/group-<N>.md` (Phase 4.1 템플릿 그대로 사용 — `templates/sprint-contract-template.md`).
+저장: `qa-fix/contracts/group-<N>.md` (Phase 4.1 템플릿 그대로 사용 — `sprint-orchestrator/templates/sprint-contract-template.md`).
 
 ### Stage 4: Implement + Evaluate (그룹 단위)
 
@@ -126,7 +139,7 @@ PASS된 각 티켓에 대해 **순서대로**:
 
 2. **코멘트 본문 로컬 작성** (SSOT):
    - 파일: `qa-fix/jira-comments/<TICKET-ID>.md`
-   - 템플릿: `templates/qa-fix-comment-template.md`
+   - 템플릿: `sprint-orchestrator/templates/qa-fix-comment-template.md`
    - **Field rules**:
      - Root Cause: 1문단, "Unknown" 금지
      - Fix Summary: 1문단, diff 그대로 붙여넣기 금지
@@ -136,7 +149,7 @@ PASS된 각 티켓에 대해 **순서대로**:
 
 3. **KB 후보 추출** (priority ∈ {P0, P1}만):
    - 파일: `qa-fix/kb-candidates/<TICKET-ID>.yaml`
-   - 템플릿: `templates/qa-fix-kb-candidate-template.yaml`
+   - 템플릿: `sprint-orchestrator/templates/qa-fix-kb-candidate-template.yaml`
    - candidate_type 분류:
      - `pattern_gap`: 기존 KB에 없는 영역
      - `pattern_violation`: 기존 패턴이 있는데 위반
@@ -175,7 +188,7 @@ PASS된 각 티켓에 대해 **순서대로**:
 | Reporter가 needs-info에 응답 없음 | `triage.md`에 timeout 표시, 다음 라운드까지 대기. 자동 close 금지. |
 | JQL 결과 0건 | 즉시 종료, "처리할 이슈 없음" 리포트. retro.md 생성 안 함. |
 | Jira 코멘트 게시 실패 | 2회 재시도 → 그래도 실패 시 사용자 보고, transition 차단, marker 미생성. |
-| Jira transition 실패 (코멘트는 성공) | `<TICKET>.md` 보존, marker 미생성. 사용자 보고 + 다음 실행 시 자동 재시도. |
+| Jira transition 실패 (코멘트는 성공) | `<TICKET-ID>.md` 보존, marker 미생성. 사용자 보고 + 다음 실행 시 자동 재시도. |
 
 ## Budget Pressure
 
@@ -188,7 +201,7 @@ PASS된 각 티켓에 대해 **순서대로**:
 
 모든 그룹 close 후:
 
-1. `qa-fix/retro.md` 작성 (템플릿: `templates/qa-fix-retro-template.md`).
+1. `qa-fix/retro.md` 작성 (템플릿: `sprint-orchestrator/templates/qa-fix-retro-template.md`).
 
 2. **Pattern Digest 자동 산출**: 처리한 모든 fix(P2/P3 포함)의 category 분포. 같은 패턴이 3회+ violated되면 "Reinforcement needed" 알림 자동 추가.
 
@@ -212,7 +225,7 @@ PASS된 각 티켓에 대해 **순서대로**:
 - [ ] `triage.md`에 사용자 승인 마커 존재
 - [ ] 모든 in-scope 티켓이 closed(`.posted` 존재) 또는 unresolved 중 하나로 분류됨
 - [ ] `retro.md` 생성 완료, KB 후보 사용자 결정 기록됨
-- [ ] (dry-run이 아닐 때) 모든 closed 티켓에 대해 `<TICKET>.md` + `<TICKET>.posted` 둘 다 존재
+- [ ] (dry-run이 아닐 때) 모든 closed 티켓에 대해 `<TICKET-ID>.md` + `<TICKET-ID>.posted` 둘 다 존재
 
 Gate 통과 시 종료. Sprint Status 출력.
 
