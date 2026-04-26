@@ -73,6 +73,8 @@ Gate 통과 시:
 1. **Sprint Status 출력** — `--status` 대시보드를 출력하여 현재 진행 상태를 표시한다.
 2. 다음 Phase 진입.
 
+**type=standard**:
+
 ```
 Sprint initialized: {sprint-id}
   Directory: sprint-orchestrator/sprints/{sprint-id}/
@@ -85,4 +87,19 @@ Sprint initialized: {sprint-id}
 [Sprint Status Dashboard]
 
 → Proceeding to Phase 2: Spec
+```
+
+**type=qa-fix**:
+
+```
+Sprint initialized: {sprint-id} (type=qa-fix)
+  Directory: sprint-orchestrator/sprints/{sprint-id}/
+  JQL: {qa_fix.jql}
+  Repositories: (role → branch)
+    backend → {branch_prefix}/{sprint-id} (base: {base})
+    app     → {branch_prefix}/{sprint-id} (base: {base})
+
+[Sprint Status Dashboard]
+
+→ Proceeding to Phase QA-Fix
 ```
