@@ -1,0 +1,32 @@
+sprint_id: "qa-fix-fixture"
+type: "qa-fix"
+branch_prefix: "sprint"
+
+repositories:
+  app:
+    source: ~/dev/work/app-core-packages
+    base: "epic/ugc-platform-final"
+    mode: worktree
+
+defaults:
+  base: "main"
+
+team:
+  teammates:
+    - be-engineer
+    - fe-engineer
+    - evaluator
+  settings:
+    eval_retry_limit: 2
+    max_parallel_tasks: 2
+
+qa_fix:
+  jql: "project=FIXTURE AND status=Open"
+  jira_base_url: "https://example.atlassian.net/browse/"
+  ready_for_qa_transition: "Ready for QA"
+
+display:
+  title: "QA-Fix Workflow Fixture (dry-run only)"
+  status: "archived"
+  tags: ["fixture", "qa-fix"]
+  summary: "Sample sprint dir + jira snapshot for testing the QA-Fix dry-run path. Not a real sprint."
