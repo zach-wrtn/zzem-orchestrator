@@ -196,7 +196,7 @@ App PR은 `/meme-pr-create` 스킬 사용 권장 (과일환경 추출 + CodePush
 여러 sprint를 가로지르는 통합 QA용. 신규 sprint를 init하되 Phase 1~3 스킵.
 
 ```bash
-/sprint qa-2026-04-26 --type=qa-fix --jql="project=ZZEM AND status='Ready for Verification'"
+/sprint qa-2026-04-26 --type=qa-fix --jql="project=ZZEM AND status='Ready for Verification'" --base-branches=apple,epic/ugc-platform-final
 ```
 
 `sprint-config.yaml`의 `type: qa-fix`, `qa_fix.jql`, `qa_fix.jira_base_url`, (옵션) `qa_fix.ready_for_qa_transition` 자동 생성.
@@ -225,7 +225,7 @@ App PR은 `/meme-pr-create` 스킬 사용 권장 (과일환경 추출 + CodePush
 
 #### Jira 코멘트 표준 포맷
 
-`templates/qa-fix-comment-template.md` 참조. 필수 필드: Root Cause / Fix Summary / Verification Steps / Evidence (PR 항상 필수) / Related.
+`sprint-orchestrator/templates/qa-fix-comment-template.md` 참조. 필수 필드: Root Cause / Fix Summary / Verification Steps / Evidence (PR 항상 필수) / Related.
 Evidence 일부 미충족 시 헤더에 ⚠️ 마커 추가 + 사유 명시.
 
 #### KB 피드백
