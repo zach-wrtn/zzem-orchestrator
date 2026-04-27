@@ -1,0 +1,24 @@
+group_id: "group-4"
+created_at: "2026-04-27T15:42:52+09:00"
+
+grouping_basis:
+  primary: "shared_module"
+  secondary: null
+  rationale: |
+    Single-ticket group — 추천 탭의 웹툰 툴팁 ↔ 필터칩 z-order/레이아웃 충돌.
+    순수 frontend 레이아웃 결함 (BE 무관) 이고 다른 4 티켓과 모듈/원인 공유
+    없음. 사전조건이 "웹툰 툴팁 노출 상태" 이므로 ToolTip 컴포넌트의 z-index
+    또는 sticky/absolute positioning 과 FilterChip 컨테이너의 stack context
+    가 겹치는 문제로 추정. 단일 컴포넌트 fix 가능.
+
+tickets:
+  - key: "IS-1366"
+    priority: "P2"
+    summary: "[ZZEM] 추천 탭 스크롤 시 웹툰 툴팁 문구와 필터칩 영역 겹침"
+
+expected_scope:
+  app:
+    - "apps/MemeApp/src/screens/recommend-tab/**"
+    - "apps/MemeApp/src/components/tooltip/**"
+    - "apps/MemeApp/src/components/filter-chip/**"
+  backend: []  # 순수 레이아웃 — BE 무관

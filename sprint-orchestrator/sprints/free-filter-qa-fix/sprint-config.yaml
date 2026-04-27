@@ -1,0 +1,37 @@
+sprint_id: "free-filter-qa-fix"
+type: "qa-fix"
+branch_prefix: "sprint"
+
+repositories:
+  backend:
+    source: ~/dev/work/wrtn-backend
+    base: "develop"
+    mode: worktree
+  app:
+    source: ~/dev/work/app-core-packages
+    base: "zzem/sprint-002"
+    mode: worktree
+
+defaults:
+  base: "main"
+
+team:
+  teammates:
+    - be-engineer
+    - fe-engineer
+    - evaluator
+  settings:
+    eval_retry_limit: 2
+    max_parallel_tasks: 3
+
+qa_fix:
+  jql: 'project = IS AND status = Open AND (summary ~ "무료" OR summary ~ "필터" OR summary ~ "필터칩") AND created >= "2026-04-13"'
+  jira_base_url: "https://wrtn.atlassian.net/browse/"
+  ready_for_qa_transition: "Ready for QA"
+
+display:
+  title: "Free Filter QA-Fix"
+  startDate: "2026-04-27"
+  status: "in-progress"
+  tags: ["qa-fix", "free-filter", "ugc"]
+  summary: "Post-launch QA-Fix sprint for the free-filter diversification feature (parent: QA-542). Fetches open IS bugs filed against the free-filter UX since 2026-04-13."

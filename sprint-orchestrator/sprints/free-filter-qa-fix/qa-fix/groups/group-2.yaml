@@ -1,0 +1,25 @@
+group_id: "group-2"
+created_at: "2026-04-27T15:42:52+09:00"
+
+grouping_basis:
+  primary: "shared_module"
+  secondary: null
+  rationale: |
+    Single-ticket group — webtoon generation failure state hygiene.
+    "크레딧 환불은 정상" 이라는 reporter 단서가 결정적: BE 환불 워크플로우는 정상,
+    문제는 FE 가 실패 응답을 받았는데도 (a) "내 웹툰" 컬렉션에 임시 entry 를 남기고
+    (b) 미생성 회차의 필터칩을 그대로 노출한다는 점. 따라서 fix 는 단일 화면 모듈
+    (내 웹툰 + 회차 필터칩 렌더) 의 상태 정리 로직. 다른 티켓과 root cause/모듈을
+    공유하지 않으므로 단독 그룹.
+
+tickets:
+  - key: "IS-1368"
+    priority: "P1"
+    summary: "[ZZEM] 웹툰 생성 실패 시 내 웹툰 목록 및 미생성 회차 필터칩 노출"
+
+expected_scope:
+  app:
+    - "apps/MemeApp/src/screens/my-webtoon/**"
+    - "apps/MemeApp/src/components/episode-filter-chip/**"
+    - "apps/MemeApp/src/hooks/useWebtoonGeneration*"
+  backend: []  # 결제 롤백 정상이라 BE 변경 미예상 — Contract 에서 재확인

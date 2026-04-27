@@ -1,0 +1,25 @@
+group_id: "group-3"
+created_at: "2026-04-27T15:42:52+09:00"
+
+grouping_basis:
+  primary: "shared_module"
+  secondary: null
+  rationale: |
+    Single-ticket group — 좋아요 토글 회귀. IS-1345 (Verified, fixed in
+    free-tab-diversification 직전 작업) 와 동일한 좋아요 모듈에서 새 회귀.
+    빌드 1.3.0 (6821) 은 다른 4 티켓 (6817) 보다 신규 빌드 — 사이에 추가된
+    변경이 좋아요 상태 전파를 다시 깨뜨렸을 가능성. 단독 처리하여 IS-1345
+    fix diff (커밋 메시지 / PR) 와 비교한 후 root cause 파악 우선.
+
+tickets:
+  - key: "IS-1375"
+    priority: "P2"
+    summary: "[ZZEM] 필터 좋아요 버튼 탭 시 좋아요 상태 즉시 취소 및 좋아요 수 미반영"
+
+expected_scope:
+  app:
+    - "apps/MemeApp/src/components/like-button/**"
+    - "apps/MemeApp/src/hooks/useLike*"
+    - "apps/MemeApp/src/screens/free-tab/**"   # 필터 화면 진입점
+  backend:
+    - "src/api/like/**"  # 카운트 미반영 → BE 응답 확인 필요할 수 있음

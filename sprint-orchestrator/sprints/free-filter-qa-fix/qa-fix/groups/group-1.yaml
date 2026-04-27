@@ -1,0 +1,35 @@
+group_id: "group-1"
+created_at: "2026-04-27T15:42:52+09:00"
+
+grouping_basis:
+  primary: "shared_module"
+  secondary: "shared_root_cause"
+  rationale: |
+    Both tickets are functional defects in the **무료 필터 사용 플로우** that
+    free-tab-diversification (2026-04-09~14) shipped. They sit on the same
+    screen module (FreeTabScreen + 무료 필터 피드 + 생성 액션) and likely
+    share the same source: incorrect 무료 quota / availability state being
+    threaded into the CTA + preview branches. Fixing IS-1367 (생성 동작이
+    quota 를 잘못 본다) may make IS-1365's 프리뷰 분기 (also quota-aware via
+    "유료에선 정상, 무료에서만 발생") fall out for free, or at minimum should
+    be implemented in lockstep to avoid contract drift on `freeUsedToday` /
+    `requiredCredit=0` 분기 (cf. free-tab-diversification REPORT.md Major #2).
+
+tickets:
+  - key: "IS-1365"
+    priority: "P1"
+    summary: "[ZZEM] 무료 필터 피드에서 프리뷰 버튼 선택 시 에러 화면 노출"
+  - key: "IS-1367"
+    priority: "P1"
+    summary: "[ZZEM] 무료 필터 미사용 상태에서 무료 필터 생성 불가"
+
+expected_scope:
+  app:
+    - "apps/MemeApp/src/screens/free-tab/**"
+    - "apps/MemeApp/src/components/swipe-feed/**"
+    - "apps/MemeApp/src/hooks/useFreeFilter*"
+    - "apps/MemeApp/src/contexts/RosterContext*"
+  backend:
+    - "src/domain/free-filter-slot/**"
+    - "src/domain/user-free-quota/**"
+    - "src/api/free-tab/**"
