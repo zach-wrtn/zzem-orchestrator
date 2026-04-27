@@ -28,14 +28,12 @@
 - **Repo:** `wrtn-backend`
 - **Branch:** `sprint/free-filter-qa-fix` (tracking `origin/kiwi`)
 - **Base:** `kiwi` (변경됨 — 기존 `develop`)
-- **HEAD:** `6961d798` — `fix(filter): align findOneActive activatedAt query with findActiveByIds`
-- **Commits ahead of `origin/kiwi`** (3개):
-  1. `b70a1064` Revert "fix: webtoon-app.service.ts 중복 FILE_EXTENSION import 제거" (`4b823198` revert)
-  2. `cd506359` Revert "fix(filter): findOneActive에서 activatedAt 미설정 필터 조회 허용 (IS-1367)" (`e3efb018` revert)
-  3. `6961d798` G1 fix (위)
-- **Diff:** 2 files
+- **HEAD:** `5a5ba0c2` — `fix(filter): align findOneActive activatedAt query with findActiveByIds`
+- **Commits ahead of `origin/kiwi`** (2개):
+  1. `aa042b18` Revert "fix(filter): findOneActive에서 activatedAt 미설정 필터 조회 허용 (IS-1367)" (`e3efb018` revert)
+  2. `5a5ba0c2` G1 fix (위)
+- **Diff vs `origin/kiwi`:** 1 file
   - `apps/meme-api/src/persistence/filter/filter.repository.ts` (+5/-1) — 우리 fix
-  - `apps/meme-api/src/application/webtoon/webtoon-app.service.ts` (+1) — `4b82` revert 의 결과 (중복 `FILE_EXTENSION` import 복원, **TS 컴파일 에러 가능성**)
 - **Action:**
   ```bash
   cd ~/dev/work/wrtn-backend && git checkout sprint/free-filter-qa-fix
@@ -212,7 +210,7 @@ QA 완료 후 본 파일 하단 "Manual QA Result" 채워서 알려주시면 Spr
 
 | Group | Repo | Commit | Files | Lines |
 |---|---|---|---|---|
-| G1 (IS-1365 + IS-1367) | `wrtn-backend` | `6961d798` (was `779cadee` on develop base; rebased onto kiwi with revert of `4b823198` + `e3efb018`) | 1 | +5/-1 |
+| G1 (IS-1365 + IS-1367) | `wrtn-backend` | `5a5ba0c2` (was `779cadee` on develop base; rebased onto kiwi with revert of `e3efb018` only — `4b823198` left intact) | 1 | +5/-1 |
 | G2 (IS-1368) | `app-core-packages` | `b9f810f72` (혼합) | 2 | +22 |
 | G3 (IS-1375) | `app-core-packages` | `b9f810f72` (혼합) | 1 | +22 |
 | G4 (IS-1366) | `app-core-packages` | `b9f810f72` (혼합) | 1 | +5/-1 |
