@@ -9,6 +9,19 @@
 
 ---
 
+## E2E 결정
+
+본 sprint 는 **Maestro e2e flow 추가/실행을 skip** 하고 manual QA 만으로 진행한다.
+
+**근거:**
+- Fabric + RNGH + Maestro 의 알려진 결함으로 버튼 `tapOn` 의 `onPress` 가 발화 안 됨 → 5 티켓 중 4 (IS-1367/1368/1375/1366) 는 본질적 자동화 불가
+- IS-1365 만 deeplink 로 부분 자동화 가능했으나 (시드 fetcher + flow 추가) 인프라 의존성 (auth 토큰 + dev API + simulator) 대비 1회용 가치 낮다고 판단
+- free-tab-diversification REPORT.md 에서 이미 minor deferred 로 "E2E env prerequisites fragile" 기록
+
+**대안:** Stage 5 회귀 evidence 항목에 "N/A — Maestro 인프라 한계 + 본 fix 의 즉시 검증은 manual QA 로 충분" 명시. Retro 에 "IS-1365 자동 회귀 가드 추가" 를 follow-up 후보로 기록.
+
+---
+
 ## 0. 배포 준비 (선결 조건)
 
 ### Backend
