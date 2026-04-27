@@ -175,6 +175,71 @@ App PR은 `/meme-pr-create` 스킬 사용 권장 (과일환경 추출 + CodePush
 | **KB Write** | Knowledge Base 자동 갱신 (기존 패턴 frequency 증가 + 신규 패턴 등록) |
 | `REPORT.md` | 통합 스프린트 리포트 |
 
+### Phase QA-Fix (Optional)
+
+스프린트 종료 후 기능 QA에서 발견된 Jira 이슈 티켓을 처리하는 워크플로우.
+기존 6-Phase와 별개로, 두 가지 진입점을 가진다.
+
+#### Path A — Per-sprint QA-Fix
+
+기존 sprint의 컨텍스트(태스크/계약/패턴)를 그대로 재사용한다.
+
+```bash
+/sprint ugc-platform-001 --phase=qa-fix --jql="project=ZZEM AND fixVersion=ugc-platform-001"
+```
+
+산출물 위치: `sprints/ugc-platform-001/qa-fix/`.
+기존 sprint 브랜치에 fix 커밋이 추가된다 (PR 머지 후 재실행 시 새 PR이 필요할 수 있음 — 사용자 판단).
+
+#### Path B — Integration QA-Fix Sprint
+
+여러 sprint를 가로지르는 통합 QA용. 신규 sprint를 init하되 Phase 1~3 스킵.
+
+```bash
+/sprint qa-2026-04-26 --type=qa-fix --jql="project=ZZEM AND status='Ready for Verification'" --base-branches=apple,epic/ugc-platform-final
+```
+
+`sprint-config.yaml`의 `type: qa-fix`, `qa_fix.jql`, `qa_fix.jira_base_url`, (옵션) `qa_fix.ready_for_qa_transition` 자동 생성.
+
+#### Common Flags
+
+| Flag | 의미 |
+|------|------|
+| `--jql="..."` | Jira JQL. 미지정 시 sprint-config.qa_fix.jql 사용 |
+| `--dry-run` | 모든 Jira write 호출 차단 (코멘트 게시, transition, update). 산출물만 생성. 첫 도입 시 권장. |
+
+#### 5-Stage 워크플로우
+
+| Stage | 산출물 | 핵심 |
+|-------|--------|------|
+| 1. Fetch & Triage | `qa-fix/jira-snapshot.yaml`, `qa-fix/triage.md` | Sprint Lead 자동 분류 (in-scope/deferred/needs-info/duplicate) → 사용자 승인 게이트 |
+| 2. Grouping | `qa-fix/groups/group-N.yaml` | in-scope 티켓을 fix unit으로 묶기 (root cause/endpoint/module 기준) |
+| 3. Contract | `qa-fix/contracts/group-N.md` | Build Loop 4.1 재사용 + ticket repro steps 인라인 |
+| 4. Implement+Evaluate | `qa-fix/evaluations/group-N.md` | Build Loop 4.2~4.5 재사용 |
+| 5. Close (per ticket) | `qa-fix/jira-comments/<TICKET>.md` (SSOT) + `.posted` marker, `qa-fix/kb-candidates/<TICKET>.yaml` | local-first → Jira 코멘트 게시 → transition → P0/P1 KB 후보 추출 |
+
+#### Idempotency
+
+같은 JQL로 재실행 시 `qa-fix/jira-comments/<TICKET-ID>.posted` marker 존재 = 자동 스킵.
+`<TICKET>.md`는 있는데 `.posted`가 없으면 게시 재시도 (이전 실패 회복).
+
+#### Jira 코멘트 표준 포맷
+
+`sprint-orchestrator/templates/qa-fix-comment-template.md` 참조. 필수 필드: Root Cause / Fix Summary / Verification Steps / Evidence (PR 항상 필수) / Related.
+Evidence 일부 미충족 시 헤더에 ⚠️ 마커 추가 + 사유 명시.
+
+#### KB 피드백
+
+P0/P1 fix만 KB 후보로 추출 (`qa-fix/kb-candidates/<TICKET>.yaml`). Retro 단계에서 사용자 승인 후 `zzem-kb:write-pattern`으로 자동 머지.
+P2/P3는 후보 추출 스킵 (Pattern Digest 통계에만 포함).
+
+#### 사용자 개입이 필요한 상황
+
+- Stage 1 triage 사용자 승인
+- needs-info 티켓에 Reporter 응답 timeout
+- Fix loop 2회 후 FAIL → `unresolved.md`로 이동, 인간 개입 필요
+- Retro KB 후보 승인 (>5개면 top-N 선택)
+
 ---
 
 ## 3. 후속 스프린트

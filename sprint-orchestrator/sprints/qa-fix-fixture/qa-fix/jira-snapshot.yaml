@@ -1,0 +1,64 @@
+snapshot_at: "2026-04-26T12:00:00+09:00"
+sprint_id: "qa-fix-fixture"
+entry_path: "integration"
+
+jira:
+  jql: |
+    project=FIXTURE AND status=Open
+  base_url: "https://example.atlassian.net/browse/"
+  fetched_count: 3
+
+tickets:
+  - key: "FIXTURE-1"
+    summary: "Profile screen crashes on null avatar URL"
+    priority: "P0"
+    type: "Bug"
+    status: "Open"
+    reporter: "qa-tester"
+    assignee: null
+    labels: ["mobile", "crash"]
+    components: ["profile"]
+    fix_versions: []
+    created: "2026-04-25T09:00:00+09:00"
+    description_excerpt: |
+      When opening a profile that has a null avatarUrl, the app crashes.
+      Reproducible 100% on a fresh install.
+    repro_steps: |
+      1. Open the app
+      2. Navigate to a profile with no avatar
+      3. Crash
+
+  - key: "FIXTURE-2"
+    summary: "Follow button shows wrong state after unfollow"
+    priority: "P1"
+    type: "Bug"
+    status: "Open"
+    reporter: "qa-tester"
+    assignee: null
+    labels: ["mobile"]
+    components: ["follow"]
+    fix_versions: []
+    created: "2026-04-25T10:00:00+09:00"
+    description_excerpt: |
+      After tapping unfollow, the button still shows "Following" until pull-to-refresh.
+    repro_steps: |
+      1. Follow user A
+      2. Tap unfollow
+      3. Observe button state — still "Following"
+
+  - key: "FIXTURE-3"
+    summary: "Typo in onboarding copy"
+    priority: "P3"
+    type: "Copy"
+    status: "Open"
+    reporter: "qa-tester"
+    assignee: null
+    labels: []
+    components: ["onboarding"]
+    fix_versions: []
+    created: "2026-04-25T11:00:00+09:00"
+    description_excerpt: |
+      Onboarding step 2 says "Welocme" instead of "Welcome".
+    repro_steps: |
+      1. Fresh install
+      2. Reach onboarding step 2

@@ -41,16 +41,40 @@ Phase 5: PR          Sprint 브랜치 → base branch PR 생성
 Phase 6: Retro       Gap Analysis + Pattern Digest + Deferred Index → REPORT.md
 ```
 
+### Phase QA-Fix (Optional Extension)
+
+스프린트 종료 후 기능 QA에서 발견된 Jira 이슈를 처리한다. 두 가지 진입 경로:
+
+```
+Path A — Per-sprint (기존 sprint 안에 qa-fix/ 추가):
+  /sprint <sprint-id> --phase=qa-fix --jql="..."
+
+Path B — Integration (새 sprint, Phase 1~3 스킵):
+  /sprint <new-id> --type=qa-fix --jql="..."
+
+  ↓ (둘 다 동일한 5-stage 코어 루프)
+
+Stage 1: Fetch & Triage  Sprint Lead가 Jira fetch → 분류 → 사용자 승인
+Stage 2: Grouping        in-scope 티켓을 fix-unit 그룹으로 묶기
+Stage 3: Contract         Build Loop 4.1 재사용
+Stage 4: Implement+Eval   Build Loop 4.2~4.5 재사용
+Stage 5: Close            Local-first comment → Jira post → transition → KB candidate
+  ↓
+Retro                    Health + Pattern Digest + KB merge (zzem-kb:write-pattern)
+```
+
 ### Phase Gates
 
 각 Phase 전환 시 Gate 조건을 검증한다. 미충족 시 진행 차단 (`--force`로 오버라이드 가능).
 
 | Gate | 핵심 조건 |
 |------|----------|
-| Init → Spec | 디렉토리 구조 완전, PRD.md 존재, base branch 설정 |
+| Init → Spec | (type=standard) 디렉토리 구조 완전, PRD.md 존재, base branch 설정 |
+| Init → QA-Fix | (type=qa-fix) qa-fix/ 디렉토리 구조, sprint-config.yaml.qa_fix.jql 존재 |
 | Spec → Prototype | API Contract 유효, 태스크 필수 섹션 존재, AC testable |
 | Prototype → Build | 모든 화면 판정 완료 (pending 0), amendment 판정 완료 |
 | Build → PR | 모든 그룹 PASS, worktree 정리 완료, checkpoint 생성 완료 |
+| QA-Fix → Done | triage 사용자 승인, 모든 in-scope ticket 분류됨(closed or unresolved), retro.md + KB 결정 완료 |
 
 ---
 

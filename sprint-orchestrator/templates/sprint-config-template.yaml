@@ -3,6 +3,17 @@
 
 sprint_id: "{sprint-id}"
 
+# Sprint type. Optional (default: "standard").
+#   standard — 6-Phase pipeline (Init → Spec → Prototype → Build → PR → Retro)
+#   qa-fix   — Integration QA-Fix sprint. Phase 1~3 skipped, Phase QA-Fix runs directly.
+type: "standard"
+
+# QA-Fix configuration. Required when type=qa-fix; optional otherwise (used by --phase=qa-fix on a standard sprint).
+qa_fix:
+  jql: ""                      # default JQL when --jql is omitted on the CLI
+  jira_base_url: ""            # e.g. "https://wrtn.atlassian.net/browse/" — used in jira-snapshot.yaml ticket URLs
+  ready_for_qa_transition: "Ready for QA"  # exact Jira transition name targeted in Stage 5
+
 # Branch prefix for sprint work branches. Optional (default: "sprint").
 # 예: branch_prefix="sprint" + sprint_id="ai-webtoon" → 브랜치명 "sprint/ai-webtoon"
 branch_prefix: "sprint"
