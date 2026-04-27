@@ -72,7 +72,7 @@ git worktree add -b {branch_prefix}/{sprint-id}/{task-id} \
 새 API 엔드포인트 연동 시 **`/meme-api-gen` 스킬**을 사용한다. 태스크의 API contract 정보를 입력하면 Clean Architecture 전체 레이어(DTO, Entity, Mapper, Repository, QueryKey, UseCase, Cache Invalidation)를 자동 생성한다.
 
 #### Design System Tokens
-- **DESIGN.md**: `docs/designs/DESIGN.md` — Visual Atmosphere, Component Stylings, Do's/Don'ts 참조
+- **DESIGN.md** (존재 시): `docs/designs/DESIGN.md` — Visual Atmosphere, Component Stylings, Do's/Don'ts 참조. 부재 시 `docs/designs/foundations/*.mdx` + `docs/designs/components/*.mdx` 가 1차 소스
 - Font: Pretendard
 - Background: #FFFFFF (light), #1E1E1E (dark)
 - Text: #262626 (primary), #8E8E8E (secondary)

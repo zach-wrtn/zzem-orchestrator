@@ -12,16 +12,16 @@
 # Agent Teams 활성화 (필수)
 export CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1
 
-# 레포지토리 연결 (심볼릭 링크)
-./scripts/setup.sh
+# 스프린트 worktree/symlink 생성 (sprint-config.yaml 의 repositories 블록 기반)
+./scripts/setup-sprint.sh --config sprint-orchestrator/sprints/{sprint-id}/sprint-config.yaml
 ```
 
 ### 1.2 PRD 준비
 
-`docs/prds/` 디렉토리에 PRD를 작성한다.
+PRD 의 SSOT 는 KB (`zach-wrtn/knowledge-base` 의 `products/active-prds/` 미러). 진행 중인 스프린트 작업본을 로컬에 두고 싶을 때만 `docs/prds/` 에 둔다 (`docs/prds/README.md` 참조).
 
 - **템플릿**: `sprint-orchestrator/templates/prd-template.md`
-- **네이밍**: `PRD-{project}-{번호}-{slug}.md` (예: `PRD-ugc-platform-1-profile-navigation.md`)
+- **네이밍**: `{sprint-id}.md` (예: `ugc-platform-integration-qa-2.md`) — 스프린트 디렉토리명과 1:1
 
 PRD 필수 섹션:
 ```yaml
@@ -97,7 +97,7 @@ Sprint Lead(Planner)가 수행하는 작업:
 - 모든 app 태스크에 `Screens / Components` 섹션 없음
 - `sprint-config.yaml`에 `prototype: skip`
 
-**Frozen Snapshot 조립**: Sprint Lead가 첫 Design Engineer 태스크 생성 전에 DESIGN.md + docs/designs/README.md (+ components/*.mdx) + KB 디자인 패턴을 1회 읽고 snapshot을 조립한다. 이 snapshot은 모든 Design Engineer 태스크의 Description에 `--- FROZEN SNAPSHOT ---` 블록으로 인라인 제공된다.
+**Frozen Snapshot 조립**: Sprint Lead가 첫 Design Engineer 태스크 생성 전에 `docs/designs/DESIGN.md` (존재 시) + `docs/designs/README.md` (+ `foundations/*.mdx` + `components/*.mdx`) + KB 디자인 패턴을 1회 읽고 snapshot을 조립한다. DESIGN.md 부재 시 foundations/components MDX 가 1차 design system 소스로 작동한다. 이 snapshot은 모든 Design Engineer 태스크의 Description에 `--- FROZEN SNAPSHOT ---` 블록으로 인라인 제공된다.
 
 **PTC 2-Phase HTML 생성**: Design Engineer는 6-pass 대신 2-phase로 HTML을 생성한다:
 - Phase α: Screen Spec → prototype-alpha.html (구조 + 컴포넌트)

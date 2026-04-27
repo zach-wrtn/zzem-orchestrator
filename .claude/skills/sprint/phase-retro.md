@@ -197,12 +197,15 @@ gap-analysis 결과에 따라 분기:
 | root_cause가 spec_ambiguity 다수 | "PRD/태스크 spec 재작성 후 후속 스프린트 권장" |
 | systemic_fix 존재 | "시스템 개선 선행 후 후속 스프린트 권장" |
 
-### 6.6 DESIGN.md 갱신 검토
+### 6.6 Design System 갱신 검토
 
-스프린트에서 새로운 컴포넌트·화면·인터랙션 패턴이 추가된 경우, `docs/designs/DESIGN.md`의 갱신 필요 여부를 검토한다.
+스프린트에서 새로운 컴포넌트·화면·인터랙션 패턴이 추가된 경우, design system 문서의 갱신 필요 여부를 검토한다.
 
-- **갱신 트리거**: 새 컴포넌트 토큰 추가, 기존 Do's/Don'ts에 반하는 패턴 도입, 디자인 시스템 변경
-- **갱신 방법**: `/extract-design --update` 실행 → 기존 DESIGN.md와 diff 출력 → 사용자 확인 후 반영
+- **갱신 트리거**: 새 컴포넌트 토큰 추가, 기존 Do's/Don'ts 에 반하는 패턴 도입, 디자인 시스템 변경
+- **갱신 방법** (존재 / 부재에 따라 분기):
+  - `docs/designs/DESIGN.md` 존재 시: `/extract-design --update` 실행 → 기존 DESIGN.md 와 diff → 사용자 확인 후 반영
+  - 부재 시: `docs/designs/foundations/*.mdx` 또는 `components/*.mdx` 에 직접 추가 / 갱신 (Zod frontmatter — 빌드가 검증). 신규 컴포넌트는 `<key>.mdx` + `<key>.demo.html` 한 쌍.
+  - 추후 DESIGN.md 가 필요해지면 `/extract-design` 으로 신규 생성 가능.
 - **스킵 조건**: 기존 컴포넌트만 사용하고 디자인 시스템 변경이 없으면 스킵
 
 ### 6.7 Knowledge Base Write (3종 승격 의식)

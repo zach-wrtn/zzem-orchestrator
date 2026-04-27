@@ -118,9 +118,9 @@ TaskCreate:
     Context Engine 템플릿: sprint-orchestrator/templates/context-engine-template.yaml
     Archetype hint (선택): Sprint Lead 가 PRD 분석에서 archetype 추론했다면 명시 — 예 archetype: feed
       → 미명시 시 DE 가 B.1.1 에서 분류 후 persona 파일 직접 read
-      → 6 enum: feed | detail | onboarding | form | modal | empty_state
+      → 7 enum: feed | detail | onboarding | form | modal | empty_state | nav_list
       → persona 디렉토리: .claude/teammates/design-engineer-archetypes/
-    디자인 토큰: design-tokens/
+    디자인 토큰: tokens/  (symlink → wds-tokens 외부 repo)
     Context 출력: sprints/{sprint-id}/prototypes/context/
     프로토타입 출력: sprints/{sprint-id}/prototypes/app/{task-id}/
   Owner: Design Engineer

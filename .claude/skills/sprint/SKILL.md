@@ -125,8 +125,9 @@ Sprint Lead가 Engineer/Evaluator에게 태스크를 할당할 때,
 
 | 대상 | 파일 | 소비자 |
 |------|------|--------|
-| Design System | `docs/designs/DESIGN.md` | Design Engineer |
-| Component Patterns | `docs/designs/README.md` (+ `docs/designs/components/*.mdx`) | Design Engineer |
+| Design System (DESIGN.md) | `docs/designs/DESIGN.md` (존재 시) | Design Engineer |
+| Foundations + Components | `docs/designs/foundations/*.mdx` + `docs/designs/components/*.mdx` (Zod frontmatter SSOT) | Design Engineer |
+| Component Patterns Index | `docs/designs/README.md` | Design Engineer |
 | Design KB | `zzem-kb:read type=pattern category=design_proto` (+ `design_spec`) 결과 | Design Engineer |
 | Code KB | `zzem-kb:read type=pattern category=<관련>` 결과 | Evaluator, Engineers |
 | API Contract (그룹 범위) | `contracts/api-contract.yaml` (현재 그룹 endpoints) | Engineers, Evaluator |
@@ -141,8 +142,8 @@ TaskCreate:
   Subject: proto/app/{task-id}/{ScreenName}
   Description: |
     --- FROZEN SNAPSHOT ---
-    {DESIGN.md 핵심 섹션 발췌}
-    {docs/designs/README.md 관련 패턴}
+    {DESIGN.md 핵심 섹션 발췌 — 존재 시}
+    {foundations/*.mdx + components/*.mdx 관련 frontmatter}
     {KB design 패턴 중 관련 항목}
     --- END SNAPSHOT ---
 
