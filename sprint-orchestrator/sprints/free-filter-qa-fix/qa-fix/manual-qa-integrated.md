@@ -208,11 +208,20 @@ QA 완료 후 본 파일 하단 "Manual QA Result" 채워서 알려주시면 Spr
 
 ## Appendix: Fix commit 요약
 
-| Group | Repo | Commit | Files | Lines |
-|---|---|---|---|---|
-| G1 (IS-1365 + IS-1367) | `wrtn-backend` | `5a5ba0c2` (was `779cadee` on develop base; rebased onto kiwi with revert of `e3efb018` only — `4b823198` left intact) | 1 | +5/-1 |
-| G2 (IS-1368) | `app-core-packages` | `b9f810f72` (혼합) | 2 | +22 |
-| G3 (IS-1375) | `app-core-packages` | `b9f810f72` (혼합) | 1 | +22 |
-| G4 (IS-1366) | `app-core-packages` | `b9f810f72` (혼합) | 1 | +5/-1 |
+| Group | Repo | PR | Merge SHA | Files | Lines |
+|---|---|---|---|---|---|
+| G1 (IS-1365 + IS-1367) | `wrtn-backend` | [#862](https://github.wrtn.club/wrtn-tech/wrtn-backend/pull/862) → kiwi → squash `c0c634ad` | (also merged via PR #863 → develop `4973d3c6`) | 1 | +5/-1 |
+| G2 (IS-1368) | `app-core-packages` | [#595](https://github.com/wrtn-tech/app-core-packages/pull/595) → zzem/sprint-002 → `b9f810f72` | (혼합) | 2 | +22 |
+| G3 (IS-1375) | `app-core-packages` | [#595](https://github.com/wrtn-tech/app-core-packages/pull/595) | `b9f810f72` (혼합) | 1 | +22 |
+| G4 (IS-1366) | `app-core-packages` | [#595](https://github.com/wrtn-tech/app-core-packages/pull/595) | `b9f810f72` (혼합) | 1 | +5/-1 |
+| G5 (IS-1423) | `wrtn-backend` | [#866](https://github.wrtn.club/wrtn-tech/wrtn-backend/pull/866) → develop → squash `9e0c836b` | 2 | +31/-8 |
 
 > App 의 G2/G3/G4 는 단일 commit `b9f810f72` 안에 통합. 필요 시 그룹별 cherry-pick 은 file 경로로 분리 가능.
+>
+> ## G5 추가 verification step
+>
+> G5 (IS-1423) 의 manual QA 는 본 문서의 G1~G4 step 외에 `qa-fix/contracts/group-5.md` § Verification Method 의 DC-1423-A~E 5 step 을 추가 실행:
+> - DC-1423-A: 무료 quota 미소진 + 무료 슬롯 필터 X — 추천 탭에서 X 의 무료 CTA 표시 확인
+> - DC-1423-B: 무료 1회 사용 후 추천 탭에서 X 의 유료 CTA 표시 (BR-1 보존)
+> - DC-1423-C: Root cause 명시 (jira IS-1423 코멘트 참조)
+> - DC-1423-D/E: 회귀 — 무료 탭/일반 탭/구앱 응답 schema 변경 없음

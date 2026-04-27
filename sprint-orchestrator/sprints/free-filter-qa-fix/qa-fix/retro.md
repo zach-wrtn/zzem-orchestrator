@@ -4,14 +4,13 @@
 **Round entry path:** integration
 **Triage approved at:** 2026-04-27T15:32:00+09:00
 
-> **Status:** KB review COMPLETED (2026-04-27). G5 manual QA + Jira close 만 남음.
+> **Status:** Stage 5 close COMPLETED — all 6 tickets transitioned to Ready for QA + KB review COMPLETED. Manual QA 만 남음 (사용자 검증 후 sprint 완전 종료).
 
 ## Health Score
 
 | Outcome | Count |
 |---------|-------|
-| PASS (closed in Jira — Ready for QA) | 5 (G1~G4: IS-1365, IS-1366, IS-1367, IS-1368, IS-1375) |
-| PASS (pending — G5 manual QA + Jira post) | 1 (IS-1423) |
+| PASS (closed in Jira — Ready for QA) | 6 (G1~G5: IS-1365, IS-1366, IS-1367, IS-1368, IS-1375, IS-1423) |
 | FAILED (in unresolved.md) | 0 |
 | DEFERRED (from triage) | 1 (IS-1325 — Opus 제품 out-of-scope) |
 | NEEDS-INFO | 0 |
