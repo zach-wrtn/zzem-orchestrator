@@ -2,7 +2,7 @@ ticket: "IS-1367"
 priority: "P1"
 
 candidate_type: "pattern_violation"
-related_existing_pattern: "IS-1365"  # 같은 fix 로 해소 — Retro 에서 dedupe 후보
+related_existing_pattern: "correctness-006"  # IS-1365 candidate 가 KB correctness-006 로 promotion. 본 candidate 는 그 일부로 흡수.
 
 proposed_pattern:
   category: "correctness"
@@ -46,5 +46,5 @@ hypothesis: |
   callsite 전수 enumerate 의무" 라는 별개 inference.
 fix_pr: "https://github.wrtn.club/wrtn-tech/wrtn-backend/pull/862"
 
-status: "pending"
-review_notes: "Retro 에서 IS-1365 candidate 와 merge 검토 — 또는 callsite enumeration 측면을 별개 minor pattern 으로 promotion."
+status: "duplicate"
+review_notes: "Merged into correctness-006 (IS-1365 의 promotion 결과). callsite enumeration 측면이 correctness-006 의 description + contract_clause 에 흡수됨 (공유 단건 helper 의 callsite 변경 시 모든 사용 path 회귀 검증 의무)."

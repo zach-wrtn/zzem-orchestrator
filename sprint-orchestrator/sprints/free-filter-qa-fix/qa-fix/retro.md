@@ -4,7 +4,7 @@
 **Round entry path:** integration
 **Triage approved at:** 2026-04-27T15:32:00+09:00
 
-> **Status:** DRAFT — G5 manual QA + Stage 5 close 후 최종 확정. KB Candidate Review 가 사용자 승인 게이트.
+> **Status:** KB review COMPLETED (2026-04-27). G5 manual QA + Jira close 만 남음.
 
 ## Health Score
 
@@ -42,22 +42,19 @@
 
 ## KB Candidates Review
 
-> **User action required:** P0/P1 후보 4건. 각각 approve / reject / merge-into:<existing-id> 중 하나 선택. 결정 후 Sprint Lead 가 `zzem-kb:write-pattern` 호출.
+**User decision (2026-04-27): all approved per Sprint Lead 추천.** KB push 성공 (HEAD 84237ce):
 
-| Candidate File | Ticket | Pri | Title | Type | Decision |
-|----------------|--------|-----|-------|------|----------|
-| `kb-candidates/IS-1365.yaml` | IS-1365 | P1 | 단건/목록 쿼리의 활성 판정 조건 비대칭 | pattern_violation | [ ] approve / [ ] reject / [ ] merge-into:_____ |
-| `kb-candidates/IS-1367.yaml` | IS-1367 | P1 | 공유 단건 helper 의 callsite 전수 명시 | pattern_violation | [ ] approve (IS-1365 의 callsite enumeration 측면) / [ ] reject / [x] merge-into:**IS-1365 candidate** ← 추천 |
-| `kb-candidates/IS-1368.yaml` | IS-1368 | P1 | Mutation onSuccess-only cache invalidation gap | pattern_gap | [ ] approve / [ ] reject / [ ] merge-into:_____ |
-| `kb-candidates/IS-1423.yaml` | IS-1423 | P1 | Cross-tab parity — 새 enrichment 의 모든 endpoint 적용 | pattern_gap | [ ] approve / [ ] reject / [ ] merge-into:**completeness-010** ← 검토 대상 |
+| Candidate File | Ticket | Pri | Decision | KB ID | Notes |
+|----------------|--------|-----|----------|-------|-------|
+| `kb-candidates/IS-1365.yaml` | IS-1365 | P1 | **approved** | `correctness-006` | 단건/목록 쿼리 비대칭 + callsite enumeration |
+| `kb-candidates/IS-1367.yaml` | IS-1367 | P1 | **duplicate** (merge-into correctness-006) | — | callsite 측면이 correctness-006 description 에 흡수 |
+| `kb-candidates/IS-1368.yaml` | IS-1368 | P1 | **approved** | `completeness-013` | Mutation onSuccess-only cache stale |
+| `kb-candidates/IS-1423.yaml` | IS-1423 | P1 | **approved** (as new) | `completeness-014` | Cross-tab parity — completeness-010 와 다른 scope (enrichment 분산 helper) |
 
-**Volume gate**: 승인 4건이면 OK. 5건 초과 시 top-N 게이트 발동.
-
-**제 추천 (사용자 결정 보조):**
-- IS-1365 → **approve** (correctness category, 새로운 패턴, 명확한 contract_clause)
-- IS-1367 → **merge-into IS-1365 candidate** (같은 root cause, 별도 promotion 시 KB 중복)
-- IS-1368 → **approve** (completeness, freq 1 이지만 React Query 의 흔한 함정 — pre-emptive)
-- IS-1423 → **merge-into completeness-010** 또는 **approve as new** (judgment call — completeness-010 은 entity/DTO 확장 pattern, 본 케이스는 cross-cutting enrichment 라 약간 다른 scope)
+**KB merged**: 3 new patterns at `zach-wrtn/knowledge-base@84237ce`:
+- `learning/patterns/correctness-006.yaml`
+- `learning/patterns/completeness-013.yaml`
+- `learning/patterns/completeness-014.yaml`
 
 ## Deferred Index
 

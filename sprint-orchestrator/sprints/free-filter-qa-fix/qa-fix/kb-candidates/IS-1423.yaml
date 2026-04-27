@@ -66,5 +66,5 @@ hypothesis: |
   또는 completeness-010 의 확장).
 fix_pr: "https://github.wrtn.club/wrtn-tech/wrtn-backend/pull/866"
 
-status: "pending"
-review_notes: "Retro 에서 completeness-010 와 merge 검토 또는 별개 promotion."
+status: "approved"
+review_notes: "Approved 2026-04-27. Merged into KB as completeness-014 (KB HEAD 84237ce). completeness-010 (entity/DTO 확장 path 전수) 와 별개 — 본 패턴은 cross-cutting enrichment scope. completeness-014 description 에 그 차이 명시."

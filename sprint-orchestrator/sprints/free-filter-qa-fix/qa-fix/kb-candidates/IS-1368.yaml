@@ -64,5 +64,5 @@ hypothesis: |
   rule 또는 codemod 로 onSettled 강제 가능.
 fix_pr: "https://github.com/wrtn-tech/app-core-packages/pull/595"
 
-status: "pending"
-review_notes: ""
+status: "approved"
+review_notes: "Approved 2026-04-27. Merged into KB as completeness-013 (KB HEAD 84237ce)."
