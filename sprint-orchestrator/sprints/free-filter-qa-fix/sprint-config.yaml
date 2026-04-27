@@ -5,7 +5,7 @@ branch_prefix: "sprint"
 repositories:
   backend:
     source: ~/dev/work/wrtn-backend
-    base: "develop"
+    base: "kiwi"
     mode: worktree
   app:
     source: ~/dev/work/app-core-packages
