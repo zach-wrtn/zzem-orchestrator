@@ -1,0 +1,68 @@
+ticket: "IS-1368"
+priority: "P1"
+
+candidate_type: "pattern_gap"
+related_existing_pattern: "none"
+
+proposed_pattern:
+  category: "completeness"
+  severity: "major"
+  title: "Mutation 의 onSuccess 만 cache invalidate 하면 실패 경로의 backend rollback 과 FE 캐시 정합성 깨짐"
+  source_sprint: "free-filter-qa-fix"
+  source_group: "group-2"
+  description: |
+    React Query useMutation 이 onSuccess 에만 invalidate / setQueriesData 를 두면
+    mutation 실패 (network/validation/비즈니스 fail) 시 backend 가 transaction rollback
+    하거나 entity 를 softDelete 해도 FE cache 는 stale. 사용자에게 "이미 등록된 것처럼
+    보이는" UI 잔존 (orphan series, 미생성 회차 chip 등) 으로 노출됨. 결제/환불은 BE
+    트랜잭션이 보장하지만 UI 정합성은 별개.
+  detection: |
+    - grep: useMutation 정의 중 onSuccess 만 있고 onError/onSettled 없는 케이스
+    - 특히 mutation 이 "create/start something" 인데 backend 가 비동기 후처리에서 실패
+      가능한 경우 (예: webtoon 생성 orchestrate, 결제 후처리, 비동기 image 처리)
+    - "성공 가정 optimistic update" 또는 "성공 후 navigation reset" 패턴 옆에 onError
+      가 없으면 회귀 후보
+  prevention: |
+    Mutation 이 cache 변경/invalidate 를 발생시킬 때:
+    1. 성공/실패 모두 동일 cache 정합성이 필요한 경우 → onSettled 사용 (또는 onSuccess
+       + onError 양쪽)
+    2. 성공/실패 path 의 cache 정합성이 다르면 → 명시적으로 onSuccess + onError 분리
+       기재
+    3. ESLint/lint rule: onSuccess 만 있는 useMutation 에 경고
+    4. Contract Done Criteria: "mutation 의 실패 경로에서 stale cache 가 남지 않도록
+       검증"
+  contract_clause: |
+    Mutation hook 정의 시 cache 정합성을 위한 핸들러는 성공/실패 양쪽에 적용해야 한다.
+    onSuccess 만 invalidate 하면 실패 경로에서 backend rollback 과 FE cache 가 분리됨.
+    Generation/create-flow 등 backend 비동기 후처리가 있는 mutation 은 onSettled 또는
+    onSuccess+onError 양쪽 명시.
+  example:
+    bad: |
+      // ❌ 실패 시 cache stale
+      useMutation({
+        mutationFn: createEpisode,
+        onSuccess: () => {
+          invalidateMySeries();
+          invalidateActiveGenerations();
+        },
+        // onError 없음 → backend 가 series 를 softDelete 해도 목록에 남음
+      });
+    good: |
+      // ✓ 성공/실패 모두 정합성 보장
+      useMutation({
+        mutationFn: createEpisode,
+        onSettled: () => {
+          invalidateMySeries();
+          invalidateActiveGenerations();
+        },
+      });
+
+hypothesis: |
+  React Query 의 onSuccess 만 사용하는 패턴은 "성공시에만 cache 를 갱신" 이라는 자연스러운
+  멘탈 모델에서 비롯됨. backend 가 동기 fail 만 처리하던 시절엔 충분했지만, generation
+  orchestrate 같은 비동기 후처리가 도입되면서 실패 경로의 cache 정합성이 break. ESLint
+  rule 또는 codemod 로 onSettled 강제 가능.
+fix_pr: "https://github.com/wrtn-tech/app-core-packages/pull/595"
+
+status: "pending"
+review_notes: ""

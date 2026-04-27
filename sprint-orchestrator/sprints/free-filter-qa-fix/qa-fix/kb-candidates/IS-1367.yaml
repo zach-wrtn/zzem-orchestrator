@@ -1,0 +1,50 @@
+ticket: "IS-1367"
+priority: "P1"
+
+candidate_type: "pattern_violation"
+related_existing_pattern: "IS-1365"  # 같은 fix 로 해소 — Retro 에서 dedupe 후보
+
+proposed_pattern:
+  category: "correctness"
+  severity: "major"
+  title: "단건 조회와 목록 조회의 활성 판정 조건이 비대칭이면 단건만 404 발생 (생성 path 영향)"
+  source_sprint: "free-filter-qa-fix"
+  source_group: "group-1"
+  description: |
+    IS-1365 와 동일한 비대칭 버그. 차이는 사용자 영향 path — 프리뷰 화면이 아닌 생성
+    plot. createMeme 가 readOne 을 거치면서 같은 findOneActive 404 에 막혀 BR-1 (1일
+    1회 무료 생성) 위반. 한 root cause 가 여러 user-visible 증상으로 분기되는 사례.
+  detection: |
+    - 단건 조회 helper (예: filterDomainService.readOne) 의 모든 호출처 enumerate
+    - 동일 helper 가 "사용자가 보는" path 와 "사용자가 액션하는" path 양쪽에 사용되면
+      한쪽 회귀가 양쪽 증상으로 노출됨
+    - QA 가 두 증상을 별도 ticket 으로 file 하면 같은 fix 임을 Triage Stage 1 에서 식별
+  prevention: |
+    공유 단건 helper 의 가드 조건이 변경되면 모든 호출처의 사용자 시나리오 (조회 +
+    생성 + 관리) 회귀 검증 의무. Contract Cross-task Integration 섹션에 "단건 helper
+    호출처 전수 나열" 의무.
+  contract_clause: |
+    공유 단건 조회 helper (filterDomainService.readOne 등) 의 가드 조건 변경 시 모든
+    callsite (preview / create / admin / 외부 진입점) 의 사용자 시나리오에 대해 회귀
+    검증. Contract 에 callsite 목록 명시.
+  example:
+    bad: |
+      // ❌ helper 만 보고 영향 범위 추정
+      // findOneActive 비대칭 → preview 만 깨질 거라 가정 → 생성 path 회귀 누락
+    good: |
+      // ✓ Contract 에 callsite 명시
+      // findOneActive 호출처:
+      // 1. FilterQueryAppService.readOne (preview/단건 조회)
+      // 2. FilterCreationAppService.createMeme (생성 — quota check)
+      // 3. PreviewAppService (parentFilter)
+      // 4. admin/filter (관리자)
+      // 모든 callsite 의 사용자 시나리오를 verification step 에 포함
+
+hypothesis: |
+  IS-1365 와 같은 fix. 별도 ticket 으로 file 됐지만 같은 root cause 의 두 증상.
+  KB pattern 으로는 IS-1365 의 일반화에 포함되되, 본 ticket 의 교훈은 "공유 helper 의
+  callsite 전수 enumerate 의무" 라는 별개 inference.
+fix_pr: "https://github.wrtn.club/wrtn-tech/wrtn-backend/pull/862"
+
+status: "pending"
+review_notes: "Retro 에서 IS-1365 candidate 와 merge 검토 — 또는 callsite enumeration 측면을 별개 minor pattern 으로 promotion."

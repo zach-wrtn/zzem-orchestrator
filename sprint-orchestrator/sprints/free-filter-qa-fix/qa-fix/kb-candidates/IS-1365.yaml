@@ -1,0 +1,63 @@
+ticket: "IS-1365"
+priority: "P1"
+
+candidate_type: "pattern_violation"
+related_existing_pattern: "none"
+
+proposed_pattern:
+  category: "correctness"
+  severity: "major"
+  title: "단건 조회와 목록 조회의 활성 판정 조건이 비대칭이면 단건만 404 발생"
+  source_sprint: "free-filter-qa-fix"
+  source_group: "group-1"
+  description: |
+    같은 도메인의 list 쿼리와 single-document 쿼리가 활성 판정 (deleted/active/published)
+    조건을 다르게 표현하면 무료 슬롯/임시 도큐먼트처럼 timestamp 필드가 일부만
+    채워진 케이스에서 list 는 통과하나 single 만 매치 실패 → 404. UI 가 단건 조회를
+    useSuspenseQuery 로 호출하면 throw 가 ErrorBoundary 로 노출됨.
+  detection: |
+    - 같은 컬렉션을 조회하는 두 쿼리 (예: findActiveByIds + findOneActive) 의 매칭 조건이
+      구조적으로 동일한지 grep / code review
+    - "$or: [{$lte}, {$exists: false}]" 같은 누락 가능 timestamp 가드를 한쪽만 가지고
+      있으면 비대칭 의심
+    - 단건 404 가 list 200 과 모순될 때 (목록엔 노출되는데 단건 조회 안 됨) 즉시 trace
+  prevention: |
+    Repository 의 활성 판정 조건을 단일 helper / shared filter object 로 추출하여
+    list/single 양쪽이 같은 조건을 사용. Contract 의 Done Criteria 에 "activation
+    조건은 list/single 쿼리에서 동일 표현 사용" 명시.
+  contract_clause: |
+    동일 컬렉션의 활성 판정 조건은 list (findActiveByIds 등) 와 single
+    (findOneActive 등) 쿼리 사이에서 구조적으로 동일해야 한다 — 누락 가능 timestamp
+    필드 ($exists: false) 보강 등 모든 가드가 양쪽에 일관 적용.
+  example:
+    bad: |
+      // ❌ 비대칭
+      async findActiveByIds(ids) {
+        return repo.findAll({
+          _id: { $in: ids },
+          $or: [{ activatedAt: { $lte: now } }, { activatedAt: { $exists: false } }],
+        });
+      }
+      async findOneActive(id) {
+        return repo.findOneByOptions({
+          _id: id,
+          activatedAt: { $lte: now },  // ← $exists 가드 누락 — 단건만 404
+        });
+      }
+    good: |
+      // ✓ 동일 조건
+      const activeFilter = (id?) => ({
+        ...(id && { _id: id }),
+        deletedAt: { $exists: false },
+        isActive: { $ne: false },
+        $or: [{ activatedAt: { $lte: new Date() } }, { activatedAt: { $exists: false } }],
+      });
+
+hypothesis: |
+  free-tab-diversification 스프린트가 무료 슬롯 매칭을 위해 findActiveByIds 의 활성
+  조건을 보강했지만 findOneActive 는 그대로 두어 비대칭 발생. Contract 에 "list/single
+  활성 조건 정합성" 항목이 없어서 group-002 review 시점에 catch 되지 않음.
+fix_pr: "https://github.wrtn.club/wrtn-tech/wrtn-backend/pull/862"
+
+status: "pending"
+review_notes: ""
