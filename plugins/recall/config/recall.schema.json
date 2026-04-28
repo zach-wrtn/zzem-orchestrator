@@ -27,7 +27,7 @@
           "type": "object",
           "properties": {
             "path":        { "type": "string" },
-            "layout":      { "type": "string", "enum": ["zzem-kb", "none"] },
+            "layout":      { "type": "string" },
             "domain_enum": { "type": "array", "items": { "type": "string" } }
           }
         }

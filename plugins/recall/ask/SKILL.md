@@ -25,7 +25,7 @@ Interactive recall over sprint artifacts + KB. Enters a stateful interview mode 
 ## Preconditions
 
 - A `.recall.yaml` config file is resolvable (env > CWD > home > defaults). For ZZEM, the repo-root `.recall.yaml` is auto-picked up when invoked from the orchestrator repo.
-- Helper scripts at `<plugin>/scripts/session.sh` and `<plugin>/scripts/load-config.sh` are sourceable.
+- Helper scripts at `~/.claude/skills/recall/scripts/session.sh` and `~/.claude/skills/recall/scripts/load-config.sh` are sourceable.
 
 ## Entry Flow
 
@@ -35,7 +35,7 @@ When `/recall:ask` is invoked, follow exactly this sequence:
 
    Run via Bash:
    ```
-   source <plugin>/scripts/load-config.sh && load_config_path
+   source ~/.claude/skills/recall/scripts/load-config.sh && load_config_path
    ```
    If output is empty, use built-in defaults: `sources.sprints.path = ./sprints`, no KB, `session.state_file = ~/.recall/session.yaml`. Otherwise Read the resolved YAML path and parse.
 
@@ -43,7 +43,7 @@ When `/recall:ask` is invoked, follow exactly this sequence:
 
    Run via Bash:
    ```
-   source <plugin>/scripts/session.sh && session_active && echo ACTIVE || echo INACTIVE
+   source ~/.claude/skills/recall/scripts/session.sh && session_active && echo ACTIVE || echo INACTIVE
    ```
 
 3. **Branch on flags**
@@ -168,7 +168,7 @@ After Reads, synthesize the answer.
 After replying with an answer, immediately update the state file via Bash:
 
 ```bash
-source <plugin>/scripts/session.sh
+source ~/.claude/skills/recall/scripts/session.sh
 session_write "$(cat <<EOF
 active: true
 started_at: <existing-or-now>
@@ -195,6 +195,8 @@ EOF
 | KB path missing or `layout: none` | Skip Track B silently. |
 | sprint-config.yaml missing | Use dir name + retrospective only for that candidate. |
 | `--status` with no active session | Reply: `활성 세션 없음.` |
+| Session stale (> 7 days) | session_active returns INACTIVE; Entry Flow starts a fresh session silently. |
+| Legacy KB layout (e.g., `events.yaml`) | Print a one-line deprecation note and continue (`zzem-kb:read` pattern). |
 
 ## Out of Scope (v1)
 

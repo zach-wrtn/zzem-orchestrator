@@ -9,7 +9,7 @@ mkdir -p "$HOME/.claude/skills"
 
 if [[ -L "$TARGET_DIR" ]]; then
   current=$(readlink "$TARGET_DIR")
-  if [[ "$current" == "$PLUGIN_DIR/skills" ]]; then
+  if [[ "$current" == "$PLUGIN_DIR" ]]; then
     echo "already linked: $TARGET_DIR -> $current"
     exit 0
   fi
@@ -20,6 +20,6 @@ elif [[ -e "$TARGET_DIR" ]]; then
   exit 1
 fi
 
-ln -s "$PLUGIN_DIR/skills" "$TARGET_DIR"
-echo "linked: $TARGET_DIR -> $PLUGIN_DIR/skills"
+ln -s "$PLUGIN_DIR" "$TARGET_DIR"
+echo "linked: $TARGET_DIR -> $PLUGIN_DIR"
 echo "Restart Claude Code session to pick up the new skill."
