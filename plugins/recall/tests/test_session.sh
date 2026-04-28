@@ -68,4 +68,21 @@ rm -f "$RECALL_STATE_DIR/session.yaml"
 if session_active; then fail "session_active should be false when no file"; fi
 pass "session_active false when no file"
 
+# Test 7: session_reset removes file
+session_write "active: true"
+session_reset
+[[ ! -f "$RECALL_STATE_DIR/session.yaml" ]] || fail "session_reset should delete file"
+pass "session_reset deletes state file"
+
+# Test 8: session_reset on missing file is no-op (no error)
+session_reset && pass "session_reset on missing file is silent" || fail "session_reset should not error when no file"
+
+# Test 9: session_backup_corrupt moves to .corrupt-<ts>
+session_write "this is not valid yaml: : :"
+session_backup_corrupt
+[[ ! -f "$RECALL_STATE_DIR/session.yaml" ]] || fail "session_backup_corrupt should move out of session.yaml"
+backup=$(ls "$RECALL_STATE_DIR"/session.yaml.corrupt-* 2>/dev/null | head -1)
+[[ -n "$backup" ]] || fail "session_backup_corrupt should create .corrupt-<ts> file"
+pass "session_backup_corrupt moves to timestamped backup"
+
 echo "All session tests passed"

@@ -6,8 +6,8 @@
 #   session_write <yaml>      → writes <yaml> to state file
 #   session_path              → echoes resolved state file path
 #   session_active            → exits 0 if active+fresh, 1 otherwise
-#   session_reset             → (Task 4 — not yet implemented) deletes state file
-#   session_backup_corrupt    → (Task 4 — not yet implemented) moves state file to .corrupt-<ts> backup
+#   session_reset             → deletes state file
+#   session_backup_corrupt    → moves state file to .corrupt-<ts> backup
 #
 # Env:
 #   RECALL_STATE_DIR  — override state dir (default: ~/.recall)
@@ -55,4 +55,19 @@ if delta > datetime.timedelta(days=stale_days): sys.exit(1)
 if delta > datetime.timedelta(minutes=idle_min): sys.exit(1)
 sys.exit(0)
 PY
+}
+
+session_reset() {
+  local f
+  f=$(session_path)
+  rm -f "$f"
+  return 0
+}
+
+session_backup_corrupt() {
+  local f ts
+  f=$(session_path)
+  [[ -f "$f" ]] || return 0
+  ts=$(date -u +%Y%m%dT%H%M%SZ)
+  mv "$f" "${f}.corrupt-${ts}"
 }
