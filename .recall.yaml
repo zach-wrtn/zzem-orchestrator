@@ -1,0 +1,20 @@
+# ZZEM orchestrator — recall:ask config
+# Auto-resolved when CWD is the orchestrator repo root.
+
+sources:
+  sprints:
+    path: ./sprint-orchestrator/sprints
+    artifact_layout:
+      always_read: [PRD.md, retrospective]
+      conditional_read: [evaluations, contracts, tasks]
+      skip_by_default: [prototypes, logs, checkpoints]
+
+  kb:
+    path: ~/.zzem/kb
+    layout: zzem-kb
+    domain_enum: [ai-webtoon, free-tab, ugc-platform, infra]
+
+session:
+  state_file: ~/.recall/session.yaml
+  idle_timeout_minutes: 30
+  stale_days: 7
