@@ -13,8 +13,7 @@ pass() { echo "PASS: $1"; }
 # Test 1: $RECALL_CONFIG explicit wins
 echo "sources: {sprints: {path: /env/sprints}}" > "$TEST_TMPDIR/explicit.yaml"
 echo "sources: {sprints: {path: /cwd/sprints}}" > "$TEST_TMPDIR/.recall.yaml"
-RECALL_CONFIG="$TEST_TMPDIR/explicit.yaml" HOME="$TEST_TMPDIR/home" \
-  out=$(cd "$TEST_TMPDIR" && load_config_path)
+out=$(cd "$TEST_TMPDIR" && RECALL_CONFIG="$TEST_TMPDIR/explicit.yaml" HOME="$TEST_TMPDIR/home" load_config_path)
 [[ "$out" == "$TEST_TMPDIR/explicit.yaml" ]] || fail "explicit RECALL_CONFIG should win, got: $out"
 pass "explicit RECALL_CONFIG wins"
 
