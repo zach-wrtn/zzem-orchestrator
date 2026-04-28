@@ -34,3 +34,25 @@ session_write() {
   mkdir -p "$dir"
   printf '%s\n' "$yaml" > "$f"
 }
+
+# Returns 0 if state file exists AND last_turn_at is within idle window AND not stale.
+session_active() {
+  local f yaml last
+  f=$(session_path)
+  [[ -f "$f" ]] || return 1
+  yaml=$(cat "$f")
+  last=$(printf '%s\n' "$yaml" | sed -n 's/^last_turn_at:[[:space:]]*//p' | head -1 | tr -d '"')
+  [[ -n "$last" ]] || return 1
+  local idle_min="${RECALL_IDLE_MIN:-30}"
+  local stale_days="${RECALL_STALE_DAYS:-7}"
+  python3 - "$last" "$idle_min" "$stale_days" <<'PY' || return 1
+import datetime, sys
+last_str, idle_min, stale_days = sys.argv[1], int(sys.argv[2]), int(sys.argv[3])
+last = datetime.datetime.strptime(last_str, "%Y-%m-%dT%H:%M:%SZ")
+now = datetime.datetime.utcnow()
+delta = now - last
+if delta > datetime.timedelta(days=stale_days): sys.exit(1)
+if delta > datetime.timedelta(minutes=idle_min): sys.exit(1)
+sys.exit(0)
+PY
+}
