@@ -124,3 +124,24 @@ If `sources.kb.path` is set:
 4. Pick top **K=3** of each. Stage 2 will full-read them.
 
 Track B never blocks Track A's clarification — KB matches accompany the answer, they don't decide sprint focus.
+
+## Stage 2 — Targeted retrieval (full)
+
+For the confirmed `sprint_focus`, full-Read these paths under `${sprint_focus}/`:
+
+| Path | When to Read |
+|---|---|
+| `PRD.md` | Always (if exists) |
+| `retrospective/*.md` | Always |
+| `evaluations/*.md` | If question topic keyword appears in any filename or first 50 lines |
+| `contracts/*.md` | If question touches API / data shape (keywords: API, contract, schema, type, response, payload) |
+| `tasks/*.md` | If question is task-shaped ("어떤 task", "what was done about X") |
+| `prototypes/*` | Skip by default (large). Only if user explicitly asks for prototypes. |
+| `logs/*` | Skip by default. Only on explicit ask. |
+| `checkpoints/*` | Skip by default. Only on explicit ask. |
+
+For KB Track B candidates from Stage 1: full-Read them (they were already filtered to top K).
+
+After Reads, synthesize the answer.
+
+**Important:** track every absolute file path you Read this turn — they go into `last_sources` and the user-facing **Sources** block.
