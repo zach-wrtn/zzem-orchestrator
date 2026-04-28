@@ -145,3 +145,61 @@ For KB Track B candidates from Stage 1: full-Read them (they were already filter
 After Reads, synthesize the answer.
 
 **Important:** track every absolute file path you Read this turn — they go into `last_sources` and the user-facing **Sources** block.
+
+## Output Format (per answer turn)
+
+```
+<답변 본문 — 자연어, 짧고 직접적. 파일 인용 시 file_path:line>
+
+---
+**Sources**
+- <abs-path-1>
+- <abs-path-2>
+
+**관련 follow-up 제안** (1-3개, optional)
+- "..."
+```
+
+- `Sources` is **always** shown — verification + hallucination guard.
+- `follow-up` only when there's a natural next question.
+
+## End-of-Turn
+
+After replying with an answer, immediately update the state file via Bash:
+
+```bash
+source <plugin>/scripts/session.sh
+session_write "$(cat <<EOF
+active: true
+started_at: <existing-or-now>
+last_turn_at: <now>
+turn_count: <prev+1>
+sprint_focus: <id-or-null>
+topic_focus: <topic>
+last_sources:
+  - <path-1>
+  - <path-2>
+recent_candidates:
+  - <id-or-empty>
+EOF
+)"
+```
+
+## Failure Modes
+
+| Situation | Action |
+|---|---|
+| 0 sprint candidates after Track A | Reply: `찾지 못했습니다. 전체 sprint 목록 보여드릴까요?` Show top-level dir list. |
+| State file parse error | Run `session_backup_corrupt`, start fresh session silently. |
+| Individual file Read fails (Stage 1 or 2) | Skip + log a one-liner; never abort. |
+| KB path missing or `layout: none` | Skip Track B silently. |
+| sprint-config.yaml missing | Use dir name + retrospective only for that candidate. |
+| `--status` with no active session | Reply: `활성 세션 없음.` |
+
+## Out of Scope (v1)
+
+- App repo code grep
+- Jira ticket lookup
+- Git commit history search
+- Semantic search (v1 is lexical/substring)
+- Multi-sprint comparison answers
