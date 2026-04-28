@@ -74,3 +74,53 @@ The state file at `~/.recall/session.yaml` is written **at the end of every turn
 - `recent_candidates` → from Stage 1 if multiple candidates were shown
 
 If the existing state file fails to parse (yaml error), call `session_backup_corrupt` and start a new session silently.
+
+## Stage 1 — Discovery (cheap)
+
+Run **two tracks in parallel** (separate Bash/Read calls in one assistant message). Track A may short-circuit; Track B always runs.
+
+### Track A — Sprint focus
+
+1. **Explicit sprint-id in question?**
+
+   Glob sprint dir names from `${sources.sprints.path}` and check whether the question text contains any of them as substring.
+   - Yes → set `sprint_focus = <matched id>`, skip to Stage 2.
+
+2. **Existing sprint_focus in state?**
+
+   - Yes, AND user did not say "다른 sprint" / "another sprint" → keep, proceed to Stage 2.
+
+3. **Otherwise — derive candidates**
+
+   For each `<sprint-id>` under `${sources.sprints.path}`:
+   - Read `<sprint>/sprint-config.yaml` if present (full file, small).
+   - Read `<sprint>/retrospective/*.md` first 30 lines only (use `Read` with `limit: 30`).
+   - Score by lexical/substring match between question keywords and (a) sprint-id, (b) sprint-config name/title, (c) retrospective heading text.
+
+   Produce **top 3-5** candidates ranked by score.
+
+4. **Multiple candidates?**
+
+   If top score is not clearly higher than next, ask the user to confirm:
+
+   ```
+   다음 후보 중 어디부터 볼까요?
+   1) <sprint-id-A> — <one-line reason>
+   2) <sprint-id-B> — <one-line reason>
+   3) <sprint-id-C> — <one-line reason>
+   ```
+
+   Persist `recent_candidates` to state. **Stop** — wait for the user's next `/recall:ask` turn.
+
+5. **Single confident match** → set `sprint_focus`, proceed to Stage 2.
+
+### Track B — KB matching (always runs)
+
+If `sources.kb.path` is set:
+
+1. Glob `${kb.path}/learning/reflections/*.md`.
+2. Read frontmatter + first 20 lines of each. Match `domain` against `domain_enum` if topic implies one; otherwise lexical-match against question keywords.
+3. Glob `${kb.path}/learning/patterns/*.yaml`. Match against `name` / `tags` / `category`.
+4. Pick top **K=3** of each. Stage 2 will full-read them.
+
+Track B never blocks Track A's clarification — KB matches accompany the answer, they don't decide sprint focus.
