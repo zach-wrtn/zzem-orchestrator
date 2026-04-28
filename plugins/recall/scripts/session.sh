@@ -27,7 +27,7 @@ session_read() {
 }
 
 session_write() {
-  local yaml="$1"
+  local yaml="${1:-}"
   local f dir
   f=$(session_path)
   dir=$(dirname "$f")
