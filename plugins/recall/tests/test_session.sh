@@ -40,7 +40,7 @@ turn_count: 1"
 session_active && pass "session_active true when fresh" || fail "session_active should be true for fresh session"
 
 # Test 4: session_active false when idle (>30min)
-old=$(python3 -c 'import datetime; print((datetime.datetime.utcnow()-datetime.timedelta(minutes=45)).strftime("%Y-%m-%dT%H:%M:%SZ"))')
+old=$(python3 -c 'import datetime; print((datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)-datetime.timedelta(minutes=45)).strftime("%Y-%m-%dT%H:%M:%SZ"))')
 session_write "active: true
 last_turn_at: $old
 turn_count: 1"
@@ -48,12 +48,20 @@ if session_active; then fail "session_active should be false when idle 45min"; f
 pass "session_active false when idle"
 
 # Test 5: session_active false when stale (>7 days)
-stale=$(python3 -c 'import datetime; print((datetime.datetime.utcnow()-datetime.timedelta(days=8)).strftime("%Y-%m-%dT%H:%M:%SZ"))')
+stale=$(python3 -c 'import datetime; print((datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)-datetime.timedelta(days=8)).strftime("%Y-%m-%dT%H:%M:%SZ"))')
 session_write "active: true
 last_turn_at: $stale
 turn_count: 1"
 if session_active; then fail "session_active should be false when stale 8d"; fi
 pass "session_active false when stale"
+
+# Test 5b: RECALL_STALE_DAYS override makes shorter sessions stale
+recent=$(python3 -c 'import datetime; print((datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)-datetime.timedelta(days=2)).strftime("%Y-%m-%dT%H:%M:%SZ"))')
+session_write "active: true
+last_turn_at: $recent
+turn_count: 1"
+if RECALL_STALE_DAYS=1 session_active 2>/dev/null; then fail "session_active should be stale with RECALL_STALE_DAYS=1"; fi
+pass "session_active respects RECALL_STALE_DAYS override"
 
 # Test 6: session_active false when no file
 rm -f "$RECALL_STATE_DIR/session.yaml"

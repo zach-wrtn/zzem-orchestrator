@@ -6,8 +6,8 @@
 #   session_write <yaml>      → writes <yaml> to state file
 #   session_path              → echoes resolved state file path
 #   session_active            → exits 0 if active+fresh, 1 otherwise
-#   session_reset             → deletes state file
-#   session_backup_corrupt    → moves state file to .corrupt-<ts> backup
+#   session_reset             → (Task 4 — not yet implemented) deletes state file
+#   session_backup_corrupt    → (Task 4 — not yet implemented) moves state file to .corrupt-<ts> backup
 #
 # Env:
 #   RECALL_STATE_DIR  — override state dir (default: ~/.recall)
@@ -49,7 +49,7 @@ session_active() {
 import datetime, sys
 last_str, idle_min, stale_days = sys.argv[1], int(sys.argv[2]), int(sys.argv[3])
 last = datetime.datetime.strptime(last_str, "%Y-%m-%dT%H:%M:%SZ")
-now = datetime.datetime.utcnow()
+now = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
 delta = now - last
 if delta > datetime.timedelta(days=stale_days): sys.exit(1)
 if delta > datetime.timedelta(minutes=idle_min): sys.exit(1)
