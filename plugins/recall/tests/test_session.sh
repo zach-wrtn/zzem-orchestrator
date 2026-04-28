@@ -83,6 +83,7 @@ session_backup_corrupt
 [[ ! -f "$RECALL_STATE_DIR/session.yaml" ]] || fail "session_backup_corrupt should move out of session.yaml"
 backup=$(ls "$RECALL_STATE_DIR"/session.yaml.corrupt-* 2>/dev/null | head -1)
 [[ -n "$backup" ]] || fail "session_backup_corrupt should create .corrupt-<ts> file"
+[[ "$backup" =~ session\.yaml\.corrupt-[0-9]{8}T[0-9]{6}Z$ ]] || fail "backup filename does not match .corrupt-<YYYYmmddTHHMMSSZ> format"
 pass "session_backup_corrupt moves to timestamped backup"
 
 echo "All session tests passed"
