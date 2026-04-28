@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "recall.yaml",
+  "type": "object",
+  "required": ["sources"],
+  "properties": {
+    "sources": {
+      "type": "object",
+      "required": ["sprints"],
+      "properties": {
+        "sprints": {
+          "type": "object",
+          "required": ["path"],
+          "properties": {
+            "path": { "type": "string" },
+            "artifact_layout": {
+              "type": "object",
+              "properties": {
+                "always_read":      { "type": "array", "items": { "type": "string" } },
+                "conditional_read": { "type": "array", "items": { "type": "string" } },
+                "skip_by_default":  { "type": "array", "items": { "type": "string" } }
+              }
+            }
+          }
+        },
+        "kb": {
+          "type": "object",
+          "properties": {
+            "path":        { "type": "string" },
+            "layout":      { "type": "string", "enum": ["zzem-kb", "none"] },
+            "domain_enum": { "type": "array", "items": { "type": "string" } }
+          }
+        }
+      }
+    },
+    "session": {
+      "type": "object",
+      "properties": {
+        "state_file":           { "type": "string" },
+        "idle_timeout_minutes": { "type": "integer", "minimum": 1 },
+        "stale_days":           { "type": "integer", "minimum": 1 }
+      }
+    }
+  }
+}

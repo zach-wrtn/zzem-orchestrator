@@ -1,0 +1,22 @@
+# .recall.yaml — config for the `recall:ask` skill.
+# Place at: $RECALL_CONFIG (env), ./.recall.yaml (CWD), or ~/.recall.yaml (home).
+# Priority: env > CWD > home > built-in defaults.
+
+sources:
+  sprints:
+    path: ./sprints                  # path to your sprint artifacts root
+    artifact_layout:
+      always_read: [PRD.md, retrospective]      # always full-read on Stage 2
+      conditional_read: [evaluations, contracts, tasks]   # read if topic-relevant
+      skip_by_default: [prototypes, logs, checkpoints]    # skip unless user asks
+
+  kb:
+    path: ~/recall-kb                # your knowledge-base root (optional)
+    layout: zzem-kb                  # adapter: zzem-kb | none | <custom>
+    domain_enum: []                  # KB reflections' `domain` field values, e.g.
+                                     # [product-a, product-b, infra]
+
+session:
+  state_file: ~/.recall/session.yaml
+  idle_timeout_minutes: 30
+  stale_days: 7
